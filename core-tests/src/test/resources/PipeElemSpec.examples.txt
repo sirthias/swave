@@ -1,0 +1,94 @@
+Example 1:
+ o Stream.fromIterable(List(1, 2, 3))
+ |
+ |
+ o Drain.head(List())
+
+Example 2:
+ o Stream.fromIterable(List(1, 2, 3))
+ |
+ |
+ o map(<function1>)
+ |
+ |
+ o Drain.foreach(<function1>, List())
+
+Example 3:
+ o Stream.fromIterable(List(1, 2, 3))
+ |
+ |
+ o-----+ fanInConcat()
+ |     |
+ |     ^
+ o--+  ^ fanOutBroadcast(false)
+ |  |  ^
+ |  |  ^
+ o  |  ^ Drain.head(List())
+    |  ^
+    |  ^
+ o--+  ^ first
+ |     ^
+ |     ^
+ o  >>>^ bufferBackpressure(1)
+ |  ^
+ |  ^
+ o  ^ map(<function1>)
+ |  ^
+ |  |
+ o--+ Coupling()
+
+Example 4:
+ o Stream.fromIterable(List(1, 2, 3))
+ |
+ |
+ |  o Stream.fromIterable(List(x, y, z))
+ |  |
+ |  |
+ o--+--+ foo
+ |  |  |
+ |  |  |
+ o--+--+ fanInConcat()
+ |
+ |
+ o map(<function1>)
+ |
+ |
+ o Drain.first
+
+Example 5:
+ o Stream.fromIterable(List(1, 2, 3))
+ |
+ |
+ o--+ fanOutBroadcast(false)
+ |  |
+ |  |
+ o--+ fanInConcat()
+ |
+ |
+ o Drain.head(List())
+
+Example 6:
+ o Stream.fromIterable(List(1, 2, 3))
+ |
+ |
+ |  o Stream.fromIterable(List(4, 5, 6))
+ |  |
+ |  |
+ o--+ zip
+ |
+ |
+ o Drain.head(List())
+
+Example 7:
+ o Stream.fromIterable(List(1, 2, 3))
+ |
+ |
+ o--+ tee
+ |  |
+ |  |
+ o  | Drain.head(List())
+    |
+    |
+    o Drain.ignore
+
+-- last line -- do not remove --
