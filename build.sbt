@@ -3,8 +3,8 @@ import com.typesafe.sbt.SbtScalariform._
 
 val commonSettings = Seq(
   version := "0.1-SNAPSHOT",
-  scalaVersion := "2.11.8",
   organization := "io.swave",
+  scalaVersion := "2.11.8",
   homepage := Some(new URL("http://swave.io")),
   description := "A Reactive Streams implementation in Scala",
   startYear := Some(2016),
@@ -91,6 +91,7 @@ val logback                = "ch.qos.logback"             %   "logback-classic" 
 
 lazy val swave = project.in(file("."))
   .aggregate(benchmarks, examples, core, `core-tests`, testkit)
+  .settings(commonSettings: _*)
   .settings(noPublishingSettings: _*)
 
 lazy val benchmarks = project
