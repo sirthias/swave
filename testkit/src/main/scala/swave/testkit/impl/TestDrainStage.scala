@@ -65,8 +65,8 @@ private[testkit] final class TestDrainStage(
         ctx.trace("⇠ START")
         in.start(startCtx)
 
-        awaitStart2 { runCtx =>
-          runCtx.registerForPostStartExtra(this)
+        awaitRunCtx { runCtx =>
+          runCtx.registerForPostRunExtra(this)
           if (requests.hasNext) {
             val n = requests.next()
             ctx.run("⇠ REQUEST " + n)(in.request(n))
@@ -110,7 +110,7 @@ private[testkit] final class TestDrainStage(
         else illegalState(s"Received ERROR [$e] from unexpected inport '$from' instead of inport '$in' in $this")
       },
 
-      extra = handlePostStart(runCtx))
+      extra = handlePostRun(runCtx))
 
   private def cancel(runCtx: RunContext, in: Inport, pending: Long) = {
     ctx.run("⇠ CANCEL")(in.cancel())
@@ -141,7 +141,7 @@ private[testkit] final class TestDrainStage(
         else illegalState(s"Received ERROR [$e] from unexpected inport '$from' instead of inport '$in in $this")
       },
 
-      extra = handlePostStart(runCtx))
+      extra = handlePostRun(runCtx))
 
   private def completed(runCtx: RunContext, in: Inport): State =
     state(name = "completed",
@@ -164,7 +164,7 @@ private[testkit] final class TestDrainStage(
         else illegalState(s"Received ERROR [$e] from unexpected inport '$from' instead of inport '$in' in $this")
       },
 
-      extra = handlePostStart(runCtx))
+      extra = handlePostRun(runCtx))
 
   private def errored(runCtx: RunContext, in: Inport): State =
     state(name = "errored",
@@ -187,13 +187,13 @@ private[testkit] final class TestDrainStage(
         else illegalState(s"Received ERROR [$e] from unexpected inport '$from' instead of inport '$in' in $this")
       },
 
-      extra = handlePostStart(runCtx))
+      extra = handlePostRun(runCtx))
 
-  private def handlePostStart(runCtx: RunContext): Stage.Extra = {
-    case Stage.PostStart if ctx.hasSchedulings =>
+  private def handlePostRun(runCtx: RunContext): Stage.Extra = {
+    case Stage.PostRun if ctx.hasSchedulings =>
       ctx.trace(s"Running schedulings...")
       ctx.processSchedulings()
-      runCtx.registerForPostStartExtra(this)
+      runCtx.registerForPostRunExtra(this)
   }
 
   def pipeElemType: String = "Drain.test"

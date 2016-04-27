@@ -21,73 +21,92 @@ import swave.core.StreamEnv
 import swave.core.impl.stages.Stage
 import swave.core.util._
 
-private[swave] abstract class StreamEnvProvider {
-  def env: StreamEnv
-}
+/**
+ * A `StartContext` instance keeps all the contextual information required for the start of a *single* connected stream
+ * network. This does not include embedded or enclosing sub-streams (streams of streams).
+ */
+private[swave] final class StartContext private (val env: StreamEnv, _rc: RunContext) {
+  private var needRunCtx: StageList = StageList.empty
+  private var runContext: RunContext = _rc
 
-private[swave] final class StartContext(val env: StreamEnv) extends StreamEnvProvider {
-  private[this] var needStart2: StageList = StageList.empty
-  private[this] var runContext: RunContext = _
-
-  private[impl] def registerForStart2(stage: Stage): Unit =
-    needStart2 = stage +: needStart2
+  private[impl] def registerForRunCtx(stage: Stage): Unit =
+    needRunCtx = stage +: needRunCtx
 
   private[impl] def setRunContext(rc: RunContext): Unit =
     if (runContext eq null) runContext = rc
     else requireState(runContext eq rc)
+}
 
-  def startStream(port: Port): Unit = {
-    port.start(this)
-    if (needStart2.nonEmpty) {
-      if (runContext eq null) {
-        // we are the main StartContext
-        val rc = new RunContext(env)
-        dispatchStart2(rc)
-        rc.postStart()
+private[swave] object StartContext {
+
+  def start(port: Port, env: StreamEnv): Unit = start(port, new StartContext(env, null))
+
+  def start(port: Port, rc: RunContext): Unit = start(port, new StartContext(rc.env, rc))
+
+  private def start(port: Port, ctx: StartContext): Unit = {
+    def dispatchRunCtx(rc: RunContext): Unit = {
+      @tailrec def rec(remaining: StageList): Unit =
+        if (remaining.nonEmpty) {
+          remaining.stage.onRunCtx(rc)
+          rec(remaining.tail)
+        }
+      val list = ctx.needRunCtx
+      ctx.needRunCtx = StageList.empty
+      rec(list)
+    }
+
+    port.start(ctx)
+    if (ctx.needRunCtx.nonEmpty) {
+      if (ctx.runContext eq null) {
+        // this is a main start
+        val rc = new RunContext(ctx.env)
+        dispatchRunCtx(rc)
+        rc.onRunCompleted()
       } else {
-        // we are a sub StartContext
-        dispatchStart2(runContext)
+        // this is a sub start
+        dispatchRunCtx(ctx.runContext)
       }
     }
   }
-
-  private def dispatchStart2(rc: RunContext): Unit = {
-    @tailrec def rec(remaining: StageList): Unit =
-      if (remaining.nonEmpty) {
-        remaining.stage.start2(rc)
-        rec(remaining.tail)
-      }
-    val list = needStart2
-    needStart2 = StageList.empty
-    rec(list)
-  }
-
 }
 
-private[swave] final class RunContext(val env: StreamEnv) extends StreamEnvProvider {
-  private[this] var requestedPostStart = StageList.empty
+/**
+ * A `RunContext` instance keeps all the contextual information required for a complete run,
+ * including embedded or enclosing sub-streams (streams of streams).
+ */
+private[swave] final class RunContext(val env: StreamEnv) {
+  private[this] var requestedPostRun = StageList.empty
   private[this] var requestedCleanup = StageList.empty
 
-  def registerForPostStartExtra(stage: Stage): Unit = requestedPostStart = stage +: requestedPostStart
+  /**
+   * Registers the state for receiving `Stage.PostRun` events after the initial (sync) run has completed.
+   * This method is also available from within the PostRun event handler, which can re-register its stage
+   * to receive this event once more.
+   */
+  def registerForPostRunExtra(stage: Stage): Unit = requestedPostRun = stage +: requestedPostRun
+
+  /**
+   * Registers the state for receiving `Stage.Cleanup` events after the initial (sync) run and all PostRun
+   * handlers have completed.
+   */
   def registerForCleanupExtra(stage: Stage): Unit = requestedCleanup = stage +: requestedCleanup
 
-  private[impl] def postStart(): Unit = {
+  private[impl] def onRunCompleted(): Unit = {
     @tailrec def dispatch(remaining: StageList, arg: AnyRef): Unit =
       if (remaining.nonEmpty) {
         remaining.stage.extra(arg)
         dispatch(remaining.tail, arg)
       }
 
-    @tailrec def dispatchPostStart(): Unit =
-      if (requestedPostStart.nonEmpty) {
-        val registered = requestedPostStart
-        requestedPostStart = StageList.empty // allow for re-registration in PostStart handler
-        dispatch(registered, Stage.PostStart)
-        dispatchPostStart()
+    @tailrec def dispatchPostRun(): Unit =
+      if (requestedPostRun.nonEmpty) {
+        val registered = requestedPostRun
+        requestedPostRun = StageList.empty // allow for re-registration in PostRun handler
+        dispatch(registered, Stage.PostRun)
+        dispatchPostRun()
       }
 
-    dispatchPostStart()
-
+    dispatchPostRun()
     dispatch(requestedCleanup, Stage.Cleanup)
     requestedCleanup = StageList.empty
   }

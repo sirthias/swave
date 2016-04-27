@@ -48,6 +48,7 @@ private[core] final class SubSourceStage(runContext: RunContext, in: Inport) ext
 
       start = ctx ⇒ {
         configureFrom(ctx)
+        out.start(ctx)
         ctx.setRunContext(runContext)
         termination match {
           case Termination.None => running(out)

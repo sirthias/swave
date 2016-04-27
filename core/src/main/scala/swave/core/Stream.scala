@@ -41,7 +41,7 @@ final class Stream[+A](private[core] val inport: Inport) extends AnyVal with Str
   def identity: Stream[A] = this.asInstanceOf[Stream[A]]
 
   def to[R](drain: Drain[A, R]): RunnablePiping[R] =
-    new RunnablePiping(drain.outport, drain.consume(this))
+    new RunnablePiping(inport, drain.consume(this))
 
   def via[B](pipe: A =>> B): Stream[B] = pipe.transform(this)
 

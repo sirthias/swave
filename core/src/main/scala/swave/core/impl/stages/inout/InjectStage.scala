@@ -34,7 +34,7 @@ private[core] final class InjectStage extends InOutStage with PipeElem.InOut.Inj
   connectInOutAndStartWith { (startCtx, in, out) ⇒
     buffer = new RingBuffer[AnyRef](roundUpToNextPowerOf2(startCtx.env.settings.maxBatchSize))
     in.request(buffer.capacity.toLong)
-    awaitStart2 { runCtx =>
+    awaitRunCtx { runCtx =>
       runCtx.registerForCleanupExtra(this)
       running(runCtx, in, out)
     }
@@ -331,7 +331,7 @@ private[core] final class InjectStage extends InOutStage with PipeElem.InOut.Inj
 
     def cleanup(sub: SubSourceStage): Stage.Extra = {
       case Stage.Cleanup =>
-        // in a synchronous run: if we are still in this state after the stream has run in its entirety in `start()`
+        // in a synchronous run: if we are still in this state after the stream has run in its entirety
         // the sub we are awaiting demand from was dropped
         sub.assertNotRunning()
         cancel()(from = sub)

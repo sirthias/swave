@@ -41,7 +41,7 @@ private[swave] abstract class Stage extends Stage0 { this: PipeElem.Basic ⇒
 
   protected final def initialState(s: State): Unit = _state = s
 
-  protected final def configureFrom(ctx: StreamEnvProvider): Unit =
+  protected final def configureFrom(ctx: StartContext): Unit =
     _mbs = ctx.env.settings.maxBatchSize
 
   final def start(ctx: StartContext): Unit =
@@ -49,13 +49,13 @@ private[swave] abstract class Stage extends Stage0 { this: PipeElem.Basic ⇒
       case CONNECTING | CONNECTING_I ⇒
         _phase = RUNNING_I
         _state = _state.start(ctx)
-        if (_state.start2 eq null) handleInterceptions()
-        else ctx.registerForStart2(this)
+        if (_state.onRunCtx eq null) handleInterceptions()
+        else ctx.registerForRunCtx(this)
       case _ ⇒ // trying to start again is ok
     }
 
-  final def start2(ctx: RunContext): Unit = {
-    _state = _state.start2(ctx)
+  final def onRunCtx(ctx: RunContext): Unit = {
+    _state = _state.onRunCtx(ctx)
     handleInterceptions()
   }
 
@@ -305,7 +305,7 @@ private[swave] abstract class Stage extends Stage0 { this: PipeElem.Basic ⇒
   protected final def fullState(
     name: String,
     start: StartContext ⇒ State = unexpectedStart,
-    start2: RunContext ⇒ State = null,
+    onRunCtx: RunContext ⇒ State = null,
     subscribe: Outport ⇒ State = unexpectedSubscribe,
     request: (Int, Outport) ⇒ State = unexpectedRequestInt,
     cancel: Outport ⇒ State = unexpectedCancel,
@@ -314,10 +314,10 @@ private[swave] abstract class Stage extends Stage0 { this: PipeElem.Basic ⇒
     onComplete: Inport ⇒ State = unexpectedOnComplete,
     onError: (Throwable, Inport) ⇒ State = unexpectedOnError,
     extra: Stage.Extra = unexpectedExtra) =
-    new State(name, start, start2, subscribe, request, cancel, onSubscribe, onNext, onComplete, onError, extra)
+    new State(name, start, onRunCtx, subscribe, request, cancel, onSubscribe, onNext, onComplete, onError, extra)
 
-  protected final def awaitStart2(start2: RunContext ⇒ State): State =
-    fullState(name = "awaitStart2", start2 = start2)
+  protected final def awaitRunCtx(onRunCtx: RunContext ⇒ State): State =
+    fullState(name = "awaitRunCtx", onRunCtx = onRunCtx)
 
   protected final def stateName: String = _state.name
 
@@ -335,7 +335,7 @@ private[swave] object Stage {
   private[stages] final class State private[Stage] (
     val name: String,
     val start: StartContext ⇒ State,
-    val start2: RunContext ⇒ State,
+    val onRunCtx: RunContext ⇒ State,
     val subscribe: Outport ⇒ State,
     val request: (Int, Outport) ⇒ State,
     val cancel: Outport ⇒ State,
@@ -354,6 +354,6 @@ private[swave] object Stage {
     var remaining: Long) // requested by this `out` but not yet delivered, i.e. unfulfilled demand
       extends AbstractOutportList[OutportStates](out, tail)
 
-  case object PostStart // event for `extra` signal
+  case object PostRun // event for `extra` signal
   case object Cleanup // event for `extra` signal
 }

@@ -29,8 +29,7 @@ final class RunnablePiping[T](port: Port, val result: T) {
 
   def start()(implicit env: StreamEnv): Option[Throwable] =
     try {
-      val ctx = new StartContext(env)
-      ctx.startStream(port)
+      StartContext.start(port, env)
       None
     } catch {
       case NonFatal(e) ⇒ Some(e)

@@ -16,7 +16,7 @@
 
 package swave.core.impl.stages.inout
 
-import swave.core.impl.{ InportList, Outport, Inport, StartContext }
+import swave.core.impl._
 import swave.core.{ PipeElem, Streamable }
 import swave.core.util._
 
@@ -30,13 +30,13 @@ private[core] final class FlattenConcatStage(streamable: Streamable.Aux[AnyRef, 
 
   connectInOutAndStartWith { (ctx, in, out) ⇒
     in.request(1)
-    running(ctx, in, out)
+    awaitRunCtx(running(_, in, out))
   }
 
   // TODO: switch to fully parallel subscribe of all subs at once
   // implementation idea: we need a third list containing the already subscribed but not yet "current" subs
 
-  def running(ctx: StartContext, in: Inport, out: Outport) = {
+  def running(ctx: RunContext, in: Inport, out: Outport) = {
 
     /**
      * No subs currently subscribing or subscribed.
@@ -68,7 +68,7 @@ private[core] final class FlattenConcatStage(streamable: Streamable.Aux[AnyRef, 
 
         onSubscribe = sub ⇒ {
           requireState(sub eq subscribing)
-          ctx.startStream(sub)
+          StartContext.start(sub, ctx)
           if (remaining > 0) sub.request(remaining)
           if (parallelism > 1) in.request(1)
           active(1, null, InportList(sub), remaining, remaining)
@@ -102,7 +102,7 @@ private[core] final class FlattenConcatStage(streamable: Streamable.Aux[AnyRef, 
 
         onSubscribe = sub ⇒ {
           requireState(sub eq subscribing)
-          sub.start(ctx)
+          StartContext.start(sub, ctx)
           if (subCount < parallelism) in.request(1)
           active(subCount, null, subscribed :+ sub, pending, remaining)
         },
@@ -174,11 +174,11 @@ private[core] final class FlattenConcatStage(streamable: Streamable.Aux[AnyRef, 
    * @param subscribing sub from which we are awaiting an onSubscribe
    * @param remaining   number of elements already requested by downstream but not yet delivered, >= 0
    */
-  def drainingWaitingForOnSubscribe(ctx: StartContext, out: Outport, subscribing: Inport, remaining: Long): State =
+  def drainingWaitingForOnSubscribe(ctx: RunContext, out: Outport, subscribing: Inport, remaining: Long): State =
     state(name = "drainingWaitingForOnSubscribe",
 
       onSubscribe = sub ⇒ {
-        sub.start(ctx)
+        StartContext.start(sub, ctx)
         if (remaining > 0) sub.request(remaining)
         draining(ctx, out, null, InportList(sub), remaining, remaining)
       },
@@ -195,13 +195,13 @@ private[core] final class FlattenConcatStage(streamable: Streamable.Aux[AnyRef, 
    * @param pending     number of elements already requested from the head subscribed sub but not yet received, >= 0
    * @param remaining   number of elements already requested by downstream but not yet delivered, >= 0
    */
-  def draining(ctx: StartContext, out: Outport, subscribing: Inport, subscribed: InportList, pending: Long,
+  def draining(ctx: RunContext, out: Outport, subscribing: Inport, subscribed: InportList, pending: Long,
                remaining: Long): State =
     state(name = "draining",
 
       onSubscribe = sub ⇒ {
         requireState(sub eq subscribing)
-        sub.start(ctx)
+        StartContext.start(sub, ctx)
         draining(ctx, out, null, subscribed :+ sub, pending, remaining)
       },
 
@@ -253,10 +253,10 @@ private[core] final class FlattenConcatStage(streamable: Streamable.Aux[AnyRef, 
    *
    * @param subscribing the Inport we need to immediately cancel upon onSubscribe
    */
-  def cancelling(ctx: StartContext, subscribing: Inport): State =
+  def cancelling(ctx: RunContext, subscribing: Inport): State =
     state(name = "cancelling",
       onSubscribe = sub => {
-        sub.start(ctx)
+        StartContext.start(sub, ctx)
         stopCancel(sub)
       })
 }
