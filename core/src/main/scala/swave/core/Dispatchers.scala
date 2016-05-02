@@ -16,31 +16,32 @@
 
 package swave.core
 
-import scala.concurrent.ExecutionContext
 import com.typesafe.config.Config
-import swave.core.impl.DispatcherSetupImpl
-import swave.core.util.SettingsCompanion
 import scala.collection.JavaConverters._
+import swave.core.util.SettingsCompanion
 
-abstract class DispatcherSetup private[swave] {
+abstract class Dispatchers private[core] {
 
-  def defaultDispatcher: ExecutionContext
+  def settings: Dispatchers.Settings
 
-  def apply(id: Symbol): ExecutionContext
+  def defaultDispatcher: Dispatcher
+
+  def apply(id: Symbol): Dispatcher
 }
 
-object DispatcherSetup {
+object Dispatchers {
 
-  case class Settings(defined: Map[Symbol, Dispatcher.Settings])
+  final case class Settings(dispatcherDefs: Map[Symbol, Dispatcher.Settings])
 
   object Settings extends SettingsCompanion[Settings]("swave.core.dispatcher") {
     def fromSubConfig(c: Config): Settings = {
       val defConf = c getConfig "default-config"
       val definition = c getConfig "definition"
-      val defined = definition.root().keySet().asScala.map(n ⇒ Dispatcher.Settings(n, definition getConfig n, defConf))
-      Settings(defined.map(s ⇒ Symbol(s.name) → s).toMap)
+      Settings {
+        definition.root().keySet().iterator().asScala.foldLeft(Map.empty[Symbol, Dispatcher.Settings]) { (map, name) ⇒
+          map.updated(Symbol(name), Dispatcher.Settings(name, definition getConfig name, defConf))
+        }
+      }
     }
   }
-
-  def apply(settings: Settings): DispatcherSetup = new DispatcherSetupImpl(settings)
 }

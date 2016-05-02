@@ -14,16 +14,27 @@
  * limitations under the License.
  */
 
-package swave.core.impl
+package swave.examples.timertest
 
-import scala.concurrent.{ Future, ExecutionContext }
+import com.typesafe.config.ConfigFactory
+import scala.concurrent.duration._
+import swave.core.util._
 import swave.core._
 
-private[core] final class DispatcherSetupImpl(settings: DispatcherSetup.Settings) extends DispatcherSetup {
+object TimerTest extends App {
 
-  val defaultDispatcher: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+  implicit val env = StreamEnv(config = Some(ConfigFactory parseString "swave.core.scheduler.tick-duration = 100ms"))
+  import env.defaultDispatcher
 
-  def apply(id: Symbol): ExecutionContext = sys.error(s"Dispatcher '$id is not defined")
+  val job = env.scheduler.schedule(1.seconds)(println("COOL!"))
 
-  def shutdownAll(): Future[Unit] = Future.successful(())
+  System.console().readLine()
+  println("cancelling")
+  requireState(job.cancel())
+
+  System.console().readLine()
+  println("shutting down")
+  env.shutdown().awaitTermination(2.seconds)
+
+  println("done")
 }

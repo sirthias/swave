@@ -16,13 +16,13 @@
 
 package swave.core
 
-import scala.concurrent.{ ExecutionContext, Future }
 import com.typesafe.config.{ Config, ConfigFactory }
+import scala.concurrent.duration._
 import com.typesafe.scalalogging.Logger
 import swave.core.impl.StreamEnvImpl
 import swave.core.util._
 
-abstract class StreamEnv private[swave] {
+abstract class StreamEnv private[core] {
 
   def name: String
 
@@ -38,19 +38,20 @@ abstract class StreamEnv private[swave] {
 
   def scheduler: Scheduler
 
-  def dispatchers: DispatcherSetup
+  def dispatchers: Dispatchers
 
-  implicit def defaultDispatcher: ExecutionContext
+  implicit def defaultDispatcher: Dispatcher
 
-  def shutdown(): Future[Unit]
+  def shutdown(): StreamEnv.Termination
 }
 
 object StreamEnv {
 
-  case class Settings(
+  final case class Settings(
       throughput: Int,
       maxBatchSize: Int,
-      dispatcherSettings: DispatcherSetup.Settings,
+      logConfigOnStart: Boolean,
+      dispatcherSettings: Dispatchers.Settings,
       schedulerSettings: Scheduler.Settings) {
 
     require(throughput > 0)
@@ -61,7 +62,8 @@ object StreamEnv {
       Settings(
         throughput = c getInt "throughput",
         maxBatchSize = c getInt "max-batch-size",
-        dispatcherSettings = DispatcherSetup.Settings fromSubConfig c.getConfig("dispatcher"),
+        logConfigOnStart = c getBoolean "log-config-on-start",
+        dispatcherSettings = Dispatchers.Settings fromSubConfig c.getConfig("dispatcher"),
         schedulerSettings = Scheduler.Settings fromSubConfig c.getConfig("scheduler"))
   }
 
@@ -71,8 +73,16 @@ object StreamEnv {
     settings: Option[Settings] = None,
     classLoader: Option[ClassLoader] = None): StreamEnv = {
     val cl = classLoader getOrElse getClass.getClassLoader
-    val conf = config getOrElse ConfigFactory.load(cl)
+    val conf = config getOrElse ConfigFactory.empty withFallback ConfigFactory.load(cl)
     val sets = settings getOrElse Settings(conf)
     new StreamEnvImpl(name, conf, sets, cl)
+  }
+
+  abstract class Termination private[core] {
+    def isTerminated: Boolean
+
+    def unterminatedDispatchers: List[Symbol]
+
+    def awaitTermination(timeout: FiniteDuration): Unit
   }
 }

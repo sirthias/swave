@@ -17,5 +17,16 @@
 package swave.core
 
 trait Cancellable {
+
+  /**
+   * Cancels this instance and returns true if that was successful,
+   * i.e. if the instance was not already expired or cancelled.
+   */
   def cancel(): Boolean
+
+  /**
+   * Returns true if this instance is not active (anymore).
+   */
+  def isCancelled: Boolean
+
 }

@@ -26,7 +26,8 @@ abstract class SwaveSpec extends FreeSpec with Matchers with Inside with BeforeA
   implicit val env: StreamEnv
   override val invokeBeforeAllAndAfterAllEvenIfNoTestsAreExpected = true
 
-  override protected def afterAll(): Unit = env.shutdown().await(2.seconds)
+  override protected def afterAll(): Unit =
+    env.shutdown().awaitTermination(2.seconds)
 
   def produce[T](expected: T*): Matcher[Stream[T]] = produceSeq(expected)
   def produceSeq[T](expected: Seq[T]): Matcher[Stream[T]] =

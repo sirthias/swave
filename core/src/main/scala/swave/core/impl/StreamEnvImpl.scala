@@ -16,13 +16,15 @@
 
 package swave.core.impl
 
-import scala.concurrent.{ Future, ExecutionContext }
+import java.util.concurrent.TimeoutException
+import scala.annotation.tailrec
+import scala.concurrent.duration._
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.Logger
 import org.slf4j.LoggerFactory
 import swave.core._
 
-private[core] class StreamEnvImpl(
+private[core] final class StreamEnvImpl(
     val name: String,
     val config: Config,
     val settings: StreamEnv.Settings,
@@ -32,15 +34,44 @@ private[core] class StreamEnvImpl(
 
   val log = Logger(LoggerFactory.getLogger(name))
 
-  val dispatchers = new DispatcherSetupImpl(settings.dispatcherSettings)
+  val dispatchers = DispatchersImpl(settings.dispatcherSettings)
 
-  val scheduler = new SchedulerImpl(settings.schedulerSettings)
+  val scheduler = SchedulerImpl(settings.schedulerSettings)
 
-  implicit val defaultDispatcher: ExecutionContext = dispatchers.defaultDispatcher
+  if (settings.logConfigOnStart) log.info(pprint.tokenize(settings).mkString)
 
-  def shutdown(): Future[Unit] = {
-    import swave.core.util._
-    FastFuture.sequence(scheduler.shutdown() :: dispatchers.shutdownAll() :: Nil).fast.map(_ ⇒ ())
-  }
+  def defaultDispatcher = dispatchers.defaultDispatcher
+
+  def shutdown(): StreamEnv.Termination =
+    new StreamEnv.Termination {
+      val schedulerTermination = scheduler.shutdown()
+      val dispatchersTermination = dispatchers.shutdownAll()
+
+      def isTerminated: Boolean = schedulerTermination.isCompleted && unterminatedDispatchers.isEmpty
+
+      def unterminatedDispatchers: List[Symbol] = dispatchersTermination()
+
+      def awaitTermination(timeout: FiniteDuration): Unit = {
+        require(timeout >= Duration.Zero)
+        var deadline = System.nanoTime() + timeout.toNanos
+        if (deadline < 0) deadline = Long.MaxValue // overflow protection
+
+        @tailrec def await(): Unit =
+          if (!isTerminated) {
+            if (System.nanoTime() < deadline) {
+              Thread.sleep(1L)
+              await()
+            } else {
+              val unterminated =
+                if (schedulerTermination.isCompleted) unterminatedDispatchers
+                else 'scheduler :: unterminatedDispatchers
+              throw new TimeoutException(s"StreamEnv did not shut down within specified timeout of $timeout.\n" +
+                s"Unterminated dispatchers: [${unterminated.mkString(", ")}]")
+            }
+          }
+
+        await()
+      }
+    }
 
 }

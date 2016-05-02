@@ -29,7 +29,7 @@ final class RichConfig(val underlying: Config) extends AnyVal {
     }
 
   def getFiniteDuration(path: String): FiniteDuration =
-    Duration(underlying.getString(path)) match {
+    Duration(underlying getString path) match {
       case x: FiniteDuration ⇒ x
       case _                 ⇒ throw new ConfigurationException(s"Config setting '$path' must be a finite duration")
     }

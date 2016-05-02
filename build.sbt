@@ -80,8 +80,9 @@ val `reactive-streams`     = "org.reactivestreams"        %   "reactive-streams"
 val `jctools-core`         = "org.jctools"                %   "jctools-core"          % "1.2"
 val `typesafe-config`      = "com.typesafe"               %   "config"                % "1.3.0"
 val shapeless              = "com.chuusai"                %%  "shapeless"             % "2.3.0"
-val `scala-logging`        = "com.typesafe.scala-logging" %%  "scala-logging"         % "3.1.0"
-val scalactic              = "org.scalactic"              %%  "scalactic"             % "2.2.6"
+val `scala-logging`        = "com.typesafe.scala-logging" %%  "scala-logging"         % "3.4.0"
+val scalactic              = "org.scalactic"              %%  "scalactic"             % "2.2.6"  // TODO: internalize
+val pprint                 = "com.lihaoyi"                %%  "pprint"                % "0.4.0"  // TODO: internalize
 val scalatest              = "org.scalatest"              %%  "scalatest"             % "2.2.6"
 val scalacheck             = "org.scalacheck"             %%  "scalacheck"            % "1.12.5"
 val `reactive-streams-tck` = "org.reactivestreams"        %   "reactive-streams-tck"  % "1.0.0"
@@ -115,7 +116,7 @@ lazy val core = project
   .settings(publishingSettings: _*)
   .settings(
     libraryDependencies ++= Seq(`reactive-streams`, `jctools-core`, `typesafe-config`, shapeless, `scala-logging`,
-      scalactic, `reactive-streams-tck` % "test", scalatest % "test", scalacheck % "test"))
+      scalactic, pprint, `reactive-streams-tck` % "test", scalatest % "test", scalacheck % "test"))
 
 lazy val `core-tests` = project
   .dependsOn(core, testkit)

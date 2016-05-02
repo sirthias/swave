@@ -16,61 +16,69 @@
 
 package swave.core
 
-import scala.concurrent.ExecutionContext
-import scala.concurrent.duration.Duration
+import scala.concurrent.ExecutionContextExecutor
+import scala.concurrent.duration.{ FiniteDuration, Duration }
 import com.typesafe.config.Config
 import swave.core.impl.DispatcherImpl
 import swave.core.util._
 
-abstract class Dispatcher private[swave] {
+abstract class Dispatcher private[core] extends ExecutionContextExecutor {
 
   def name: String
 
-  def executionContext: ExecutionContext
-
+  def settings: Dispatcher.Settings
 }
 
 object Dispatcher {
 
-  case class Settings(name: String, threadPoolConfig: ThreadPoolConfig)
+  final case class Settings(name: String, threadPoolConfig: ThreadPoolConfig) {
+    require(name.nonEmpty)
+  }
   object Settings {
     def apply(name: String, config: Config, defaultThreadPoolConfig: Config): Settings =
       Settings(name = name, threadPoolConfig = ThreadPoolConfig(config, defaultThreadPoolConfig))
   }
 
-  sealed trait ThreadPoolConfig
+  sealed abstract class ThreadPoolConfig
   object ThreadPoolConfig {
     def apply(c: Config, defaultThreadPoolConfig: Config): ThreadPoolConfig =
       c.getOptionalConfig("fork-join") → c.getOptionalConfig("thread-pool") match {
-        case (Some(x), None)    ⇒ ForkJoin(x withFallback defaultThreadPoolConfig.getConfig("fork-join"))
-        case (None, Some(x))    ⇒ ThreadPool(x withFallback defaultThreadPoolConfig.getConfig("thread-pool"))
+        case (Some(x), None)    ⇒ ForkJoin(x withFallback (defaultThreadPoolConfig getConfig "fork-join"))
+        case (None, Some(x))    ⇒ ThreadPool(x withFallback (defaultThreadPoolConfig getConfig "thread-pool"))
         case (None, None)       ⇒ sys.error(s"Config section '$c' is missing a mandatory 'fork-join' or 'thread-pool' section!")
         case (Some(_), Some(_)) ⇒ sys.error(s"Config section '$c' must only define either a 'fork-join' or a 'thread-pool' section, not both!")
       }
 
-    case class Size(factor: Double, min: Int, max: Int) {
+    final case class Size(factor: Double, min: Int, max: Int) {
       require(factor >= 0.0)
       require(min >= 0)
       require(max >= min)
     }
     object Size {
-      def apply(c: Config): Size =
-        Size(c getDouble "factor", c getInt "min", c getInt "max")
+      def apply(c: Config): Size = Size(c getDouble "factor", c getInt "min", c getInt "max")
     }
 
-    case class ForkJoin(parallelism: Size) extends ThreadPoolConfig
+    final case class ForkJoin(parallelism: Size, asyncMode: Boolean) extends ThreadPoolConfig
     object ForkJoin {
-      def apply(c: Config): ForkJoin = ForkJoin(Size(c.getConfig("parallelism")))
+      def apply(c: Config): ForkJoin = ForkJoin(
+        Size(c getConfig "parallelism"),
+        c getString "task-peeking-mode" match {
+          case "FIFO" ⇒ true
+          case "LIFO" ⇒ false
+          case x      ⇒ throw new IllegalArgumentException(s"Illegal task-peeking-mode `$x`. Must be `FIFO` or `LIFO`.")
+        })
     }
 
-    case class ThreadPool(
-        poolSize: Size,
-        idleTimeout: Duration,
+    final case class ThreadPool(
+        corePoolSize: Size,
+        maxPoolSize: Size,
+        keepAliveTime: FiniteDuration,
+        allowCoreTimeout: Boolean,
         prestart: ThreadPool.Prestart) extends ThreadPoolConfig {
-      require(idleTimeout > Duration.Zero)
+      require(keepAliveTime > Duration.Zero)
     }
     object ThreadPool {
-      sealed trait Prestart
+      sealed abstract class Prestart
       object Prestart {
         case object Off extends Prestart
         case object First extends Prestart
@@ -79,15 +87,25 @@ object Dispatcher {
 
       def apply(c: Config): ThreadPool =
         ThreadPool(
-          poolSize = Size(c.getConfig("parallelism")),
-          idleTimeout = c getScalaDuration "idle-timeout",
+          corePoolSize = size(c, "core-pool-size"),
+          maxPoolSize = size(c, "max-pool-size"),
+          keepAliveTime = c getFiniteDuration "idle-timeout",
+          allowCoreTimeout = c getBoolean "allow-core-timeout",
           prestart = c.getString("prestart").toLowerCase match {
             case "off"   ⇒ Prestart.Off
             case "first" ⇒ Prestart.First
             case "All"   ⇒ Prestart.All
           })
+
+      private def size(c: Config, section: String): Size =
+        c getString "fixed-pool-size" match {
+          case "off" ⇒ Size(c getConfig section)
+          case _ ⇒
+            val n = c getInt "fixed-pool-size"
+            Size(1.0, n, n)
+        }
     }
   }
 
-  def apply(settings: Settings): Dispatcher = new DispatcherImpl(settings)
+  def apply(settings: Settings): Dispatcher = DispatcherImpl(settings)
 }
