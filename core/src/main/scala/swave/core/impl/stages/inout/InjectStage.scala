@@ -20,7 +20,7 @@ import scala.annotation.tailrec
 import swave.core.{ PipeElem, Stream }
 import swave.core.impl.stages.Stage
 import swave.core.impl.stages.source.SubSourceStage
-import swave.core.impl.{ Outport, Inport, RunContext }
+import swave.core.impl.{ StartContext, Outport, Inport }
 import swave.core.util._
 
 // format: OFF
@@ -31,16 +31,14 @@ private[core] final class InjectStage extends InOutStage with PipeElem.InOut.Inj
 
   private[this] var buffer: RingBuffer[AnyRef] = _
 
-  connectInOutAndStartWith { (startCtx, in, out) ⇒
-    buffer = new RingBuffer[AnyRef](roundUpToNextPowerOf2(startCtx.env.settings.maxBatchSize))
+  connectInOutAndStartWith { (ctx, in, out) ⇒
+    buffer = new RingBuffer[AnyRef](roundUpToNextPowerOf2(ctx.env.settings.maxBatchSize))
     in.request(buffer.capacity.toLong)
-    awaitRunCtx { runCtx =>
-      runCtx.registerForCleanupExtra(this)
-      running(runCtx, in, out)
-    }
+    ctx.registerForCleanupExtra(this)
+    running(ctx, in, out)
   }
 
-  def running(ctx: RunContext, in: Inport, out: Outport) = {
+  def running(ctx: StartContext, in: Inport, out: Outport) = {
 
     /**
      * Buffer non-empty, no sub-stream open.
@@ -329,7 +327,7 @@ private[core] final class InjectStage extends InOutStage with PipeElem.InOut.Inj
       stopError(e, out)
     }
 
-    def cleanup(sub: SubSourceStage): Stage.Extra = {
+    def cleanup(sub: SubSourceStage): Stage.ExtraSignalHandler = {
       case Stage.Cleanup =>
         // in a synchronous run: if we are still in this state after the stream has run in its entirety
         // the sub we are awaiting demand from was dropped
@@ -337,7 +335,7 @@ private[core] final class InjectStage extends InOutStage with PipeElem.InOut.Inj
         cancel()(from = sub)
     }
 
-    def ignoreCleanup: Stage.Extra = PartialFunction.empty
+    def ignoreCleanup: Stage.ExtraSignalHandler = PartialFunction.empty
 
     noSubAwaitingElem(buffer.capacity, mainRemaining = 0)
   }

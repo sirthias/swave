@@ -56,7 +56,7 @@ private[inout] abstract class InOutStage extends PipeStage { this: PipeElem.InOu
         onSubscribe = doubleOnSubscribe,
 
         start = ctx ⇒ {
-          configureFrom(ctx)
+          configureFrom(ctx.env)
           in.start(ctx)
           out.start(ctx)
           f(ctx, in, out)

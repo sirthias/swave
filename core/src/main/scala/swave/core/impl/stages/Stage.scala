@@ -17,7 +17,7 @@
 package swave.core.impl.stages
 
 import scala.annotation.{ switch, tailrec }
-import swave.core.PipeElem
+import swave.core.{ StreamEnv, PipeElem }
 import swave.core.util._
 import swave.core.impl._
 
@@ -41,23 +41,17 @@ private[swave] abstract class Stage extends Stage0 { this: PipeElem.Basic ⇒
 
   protected final def initialState(s: State): Unit = _state = s
 
-  protected final def configureFrom(ctx: StartContext): Unit =
-    _mbs = ctx.env.settings.maxBatchSize
+  protected final def configureFrom(env: StreamEnv): Unit =
+    _mbs = env.settings.maxBatchSize
 
   final def start(ctx: StartContext): Unit =
     (_phase: @switch) match {
       case CONNECTING | CONNECTING_I ⇒
         _phase = RUNNING_I
         _state = _state.start(ctx)
-        if (_state.onRunCtx eq null) handleInterceptions()
-        else ctx.registerForRunCtx(this)
+        handleInterceptions()
       case _ ⇒ // trying to start again is ok
     }
-
-  final def onRunCtx(ctx: RunContext): Unit = {
-    _state = _state.onRunCtx(ctx)
-    handleInterceptions()
-  }
 
   final def subscribe()(implicit from: Outport) =
     (_phase: @switch) match {
@@ -183,17 +177,17 @@ private[swave] abstract class Stage extends Stage0 { this: PipeElem.Basic ⇒
     _state = _state.onError(error, from)
   }
 
-  final def extra(ev: AnyRef) =
+  final def onExtraSignal(ev: AnyRef) =
     (_phase: @switch) match {
       case STOPPED ⇒ // ignore
       case CONNECTING | RUNNING ⇒
         _phase = _phase | 1
-        _extra(ev)
+        _onExtraSignal(ev)
         handleInterceptions()
       case CONNECTING_I | RUNNING_I ⇒ storeInterception(StageStatics.LONGS(7), ev)
     }
 
-  private def _extra(ev: AnyRef): Unit = _state.extra.applyOrElse(ev, swave.core.util.dropFunc)
+  private def _onExtraSignal(ev: AnyRef): Unit = _state.onExtraSignal.applyOrElse(ev, swave.core.util.dropFunc)
 
   protected final implicit def self: this.type = this
 
@@ -284,7 +278,7 @@ private[swave] abstract class Stage extends Stage0 { this: PipeElem.Basic ⇒
         case 4 ⇒ _onNext(read(), read().asInstanceOf[Stage])
         case 5 ⇒ _onComplete(read().asInstanceOf[Stage])
         case 6 ⇒ _onError(read().asInstanceOf[Throwable], read().asInstanceOf[Stage])
-        case 7 ⇒ _extra(read())
+        case 7 ⇒ _onExtraSignal(read())
       }
       handleInterceptions()
     } else _phase = _phase & ~1
@@ -305,7 +299,6 @@ private[swave] abstract class Stage extends Stage0 { this: PipeElem.Basic ⇒
   protected final def fullState(
     name: String,
     start: StartContext ⇒ State = unexpectedStart,
-    onRunCtx: RunContext ⇒ State = null,
     subscribe: Outport ⇒ State = unexpectedSubscribe,
     request: (Int, Outport) ⇒ State = unexpectedRequestInt,
     cancel: Outport ⇒ State = unexpectedCancel,
@@ -313,11 +306,8 @@ private[swave] abstract class Stage extends Stage0 { this: PipeElem.Basic ⇒
     onNext: (AnyRef, Inport) ⇒ State = unexpectedOnNext,
     onComplete: Inport ⇒ State = unexpectedOnComplete,
     onError: (Throwable, Inport) ⇒ State = unexpectedOnError,
-    extra: Stage.Extra = unexpectedExtra) =
-    new State(name, start, onRunCtx, subscribe, request, cancel, onSubscribe, onNext, onComplete, onError, extra)
-
-  protected final def awaitRunCtx(onRunCtx: RunContext ⇒ State): State =
-    fullState(name = "awaitRunCtx", onRunCtx = onRunCtx)
+    onExtraSignal: Stage.ExtraSignalHandler = unexpectedExtra) =
+    new State(name, start, subscribe, request, cancel, onSubscribe, onNext, onComplete, onError, onExtraSignal)
 
   protected final def stateName: String = _state.name
 
@@ -330,12 +320,11 @@ private[swave] abstract class Stage extends Stage0 { this: PipeElem.Basic ⇒
 
 private[swave] object Stage {
 
-  type Extra = PartialFunction[AnyRef, Unit]
+  type ExtraSignalHandler = PartialFunction[AnyRef, Unit]
 
   private[stages] final class State private[Stage] (
     val name: String,
     val start: StartContext ⇒ State,
-    val onRunCtx: RunContext ⇒ State,
     val subscribe: Outport ⇒ State,
     val request: (Int, Outport) ⇒ State,
     val cancel: Outport ⇒ State,
@@ -343,7 +332,7 @@ private[swave] object Stage {
     val onNext: (AnyRef, Inport) ⇒ State,
     val onComplete: Inport ⇒ State,
     val onError: (Throwable, Inport) ⇒ State,
-    val extra: Extra)
+    val onExtraSignal: ExtraSignalHandler)
 
   private class InportStates(in: Inport, tail: InportStates,
     var pending: Int, // already requested from `in` but not yet received
@@ -354,6 +343,7 @@ private[swave] object Stage {
     var remaining: Long) // requested by this `out` but not yet delivered, i.e. unfulfilled demand
       extends AbstractOutportList[OutportStates](out, tail)
 
-  case object PostRun // event for `extra` signal
-  case object Cleanup // event for `extra` signal
+  // extra signals
+  case object PostRun
+  case object Cleanup
 }

@@ -46,8 +46,8 @@ private[stages] abstract class Stage0 extends PipeElemImpl { this: PipeElem.Basi
   protected final def unexpectedOnError(error: Throwable, in: Inport): Nothing =
     illegalState(s"Unexpected onError($error) from in '$in' in $this")
 
-  protected final def unexpectedExtra: Stage.Extra = {
-    case ev ⇒ illegalState(s"Unexpected extra($ev) in $this")
+  protected final def unexpectedExtra: Stage.ExtraSignalHandler = {
+    case ev ⇒ illegalState(s"Unexpected extra signal `$ev` in $this")
   }
 
   protected final def doubleSubscribe(out: Outport): Nothing =

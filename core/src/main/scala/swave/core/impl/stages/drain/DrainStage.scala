@@ -36,7 +36,7 @@ private[swave] abstract class DrainStage extends Stage { this: PipeElem.Drain =>
         onSubscribe = doubleOnSubscribe,
 
         start = ctx ⇒ {
-          configureFrom(ctx)
+          configureFrom(ctx.env)
           in.start(ctx)
           f(ctx, in)
         })
@@ -57,7 +57,7 @@ private[swave] abstract class DrainStage extends Stage { this: PipeElem.Drain =>
     onNext: (AnyRef, Inport) ⇒ State = unexpectedOnNext,
     onComplete: Inport ⇒ State = unexpectedOnComplete,
     onError: (Throwable, Inport) ⇒ State = unexpectedOnError,
-    extra: Stage.Extra = unexpectedExtra) =
+    extra: Stage.ExtraSignalHandler = unexpectedExtra) =
 
-    fullState(name, onSubscribe = onSubscribe, onNext = onNext, onComplete = onComplete, onError = onError, extra = extra)
+    fullState(name, onSubscribe = onSubscribe, onNext = onNext, onComplete = onComplete, onError = onError, onExtraSignal = extra)
 }

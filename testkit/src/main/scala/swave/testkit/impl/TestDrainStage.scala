@@ -19,7 +19,7 @@ package swave.testkit.impl
 import swave.core.PipeElem
 import swave.core.impl.stages.Stage
 import swave.core.impl.stages.drain.DrainStage
-import swave.core.impl.{ RunContext, Inport }
+import swave.core.impl.{ StartContext, Inport }
 import swave.core.util._
 import swave.testkit.TestFixture
 
@@ -27,7 +27,7 @@ private[testkit] final class TestDrainStage(
     val id: Int,
     val requestsIterable: Iterable[Long],
     val cancelAfter: Option[Int],
-    ctx: TestContext) extends DrainStage with TestStage with PipeElem.Drain.Test {
+    testCtx: TestContext) extends DrainStage with TestStage with PipeElem.Drain.Test {
 
   private[this] val requests: Iterator[Long] = requestsIterable.iterator
 
@@ -48,7 +48,7 @@ private[testkit] final class TestDrainStage(
     state(name = "initialState",
 
       onSubscribe = in ⇒ {
-        ctx.trace(s"Received ONSUBSCRIBE from $in in 'initialState'")
+        testCtx.trace(s"Received ONSUBSCRIBE from $in in 'initialState'")
         setInputElem(in.pipeElem)
         ready(in)
       })
@@ -59,141 +59,139 @@ private[testkit] final class TestDrainStage(
 
       onSubscribe = doubleOnSubscribe,
 
-      start = startCtx ⇒ {
-        ctx.trace("Received START in 'ready'")
-        configureFrom(startCtx)
-        ctx.trace("⇠ START")
-        in.start(startCtx)
+      start = ctx ⇒ {
+        testCtx.trace("Received START in 'ready'")
+        configureFrom(ctx.env)
+        testCtx.trace("⇠ START")
+        in.start(ctx)
 
-        awaitRunCtx { runCtx =>
-          runCtx.registerForPostRunExtra(this)
-          if (requests.hasNext) {
-            val n = requests.next()
-            ctx.run("⇠ REQUEST " + n)(in.request(n))
-            if (cancelAfter.isEmpty || cancelAfter.get > 0) {
-              fixtureState = TestFixture.State.Running
-              receiving(runCtx, in, n, cancelAfter getOrElse requestsIterable.sum.toInt)
-            } else cancel(runCtx, in, n)
-          } else cancel(runCtx, in, 0)
-        }
+        ctx.registerForPostRunExtra(this)
+        if (requests.hasNext) {
+          val n = requests.next()
+          testCtx.run("⇠ REQUEST " + n)(in.request(n))
+          if (cancelAfter.isEmpty || cancelAfter.get > 0) {
+            fixtureState = TestFixture.State.Running
+            receiving(ctx, in, n, cancelAfter getOrElse requestsIterable.sum.toInt)
+          } else cancel(ctx, in, n)
+        } else cancel(ctx, in, 0)
       })
 
-  private def receiving(runCtx: RunContext, in: Inport, pending: Long, cancelAfter: Int): State =
+  private def receiving(ctx: StartContext, in: Inport, pending: Long, cancelAfter: Int): State =
     state(name = "receiving",
 
       onNext = (elem, from) ⇒ {
-        ctx.trace(s"Received [$elem] from $from in state 'receiving'")
+        testCtx.trace(s"Received [$elem] from $from in state 'receiving'")
         if (from eq in) {
           recordElem(elem)
           if (pending == 1 || cancelAfter == 1) {
             if (cancelAfter > 1) {
               requireState(requests.hasNext)
               val n = requests.next()
-              ctx.run("⇠ REQUEST " + n)(in.request(n))
-              receiving(runCtx, in, n, cancelAfter - 1)
-            } else cancel(runCtx, in, pending - 1)
-          } else receiving(runCtx, in, pending - 1, cancelAfter - 1)
+              testCtx.run("⇠ REQUEST " + n)(in.request(n))
+              receiving(ctx, in, n, cancelAfter - 1)
+            } else cancel(ctx, in, pending - 1)
+          } else receiving(ctx, in, pending - 1, cancelAfter - 1)
         } else illegalState(s"Received ['$elem'] from unexpected inport '$from' instead of inport '$in' in $this")
       },
 
       onComplete = from ⇒ {
-        ctx.trace(s"Received COMPLETE from $from in state 'receiving'")
+        testCtx.trace(s"Received COMPLETE from $from in state 'receiving'")
         fixtureState = TestFixture.State.Completed
-        if (from eq in) completed(runCtx, in)
+        if (from eq in) completed(ctx, in)
         else illegalState(s"Received COMPLETE from unexpected inport '$from' instead of inport '$in' in $this")
       },
 
       onError = (e, from) ⇒ {
-        ctx.trace(s"Received ERROR [$e] from $from in state 'receiving'")
+        testCtx.trace(s"Received ERROR [$e] from $from in state 'receiving'")
         fixtureState = TestFixture.State.Error(e)
-        if (from eq in) errored(runCtx, in)
+        if (from eq in) errored(ctx, in)
         else illegalState(s"Received ERROR [$e] from unexpected inport '$from' instead of inport '$in' in $this")
       },
 
-      extra = handlePostRun(runCtx))
+      extra = handlePostRun(ctx))
 
-  private def cancel(runCtx: RunContext, in: Inport, pending: Long) = {
-    ctx.run("⇠ CANCEL")(in.cancel())
+  private def cancel(ctx: StartContext, in: Inport, pending: Long) = {
+    testCtx.run("⇠ CANCEL")(in.cancel())
     fixtureState = TestFixture.State.Cancelled
-    cancelled(runCtx, in, pending)
+    cancelled(ctx, in, pending)
   }
 
-  private def cancelled(runCtx: RunContext, in: Inport, pending: Long): State =
+  private def cancelled(ctx: StartContext, in: Inport, pending: Long): State =
     state(name = "cancelled",
 
       onNext = (elem, from) ⇒ {
-        ctx.trace(s"Received [$elem] from $from in state 'cancelled'")
+        testCtx.trace(s"Received [$elem] from $from in state 'cancelled'")
         if (from eq in) {
-          if (pending > 0) cancelled(runCtx, in, pending - 1)
+          if (pending > 0) cancelled(ctx, in, pending - 1)
           else illegalState(s"Received [$elem] from inport '$from' without prior demand in $this")
         } else illegalState(s"Received [$elem] from unexpected inport '$from' instead of inport '$in' in $this")
       },
 
       onComplete = from ⇒ {
-        ctx.trace(s"Received COMPLETE from $from in state 'cancelled'")
-        if (from eq in) completed(runCtx, in)
+        testCtx.trace(s"Received COMPLETE from $from in state 'cancelled'")
+        if (from eq in) completed(ctx, in)
         else illegalState(s"Received COMPLETE from unexpected inport '$from' instead of inport '$in' in $this")
       },
 
       onError = (e, from) ⇒ {
-        ctx.trace(s"Received ERROR [$e] from $from in state 'cancelled'")
-        if (from eq in) errored(runCtx, in)
+        testCtx.trace(s"Received ERROR [$e] from $from in state 'cancelled'")
+        if (from eq in) errored(ctx, in)
         else illegalState(s"Received ERROR [$e] from unexpected inport '$from' instead of inport '$in in $this")
       },
 
-      extra = handlePostRun(runCtx))
+      extra = handlePostRun(ctx))
 
-  private def completed(runCtx: RunContext, in: Inport): State =
+  private def completed(ctx: StartContext, in: Inport): State =
     state(name = "completed",
 
       onNext = (elem, from) ⇒ {
-        ctx.trace(s"Received [$elem] from $from in state 'completed'")
+        testCtx.trace(s"Received [$elem] from $from in state 'completed'")
         if (from eq in) illegalState(s"Received [$elem] from inport '$from' after completion in $this")
         else illegalState(s"Received [$elem] from unexpected inport '$from' instead of inport '$in' in $this")
       },
 
       onComplete = from ⇒ {
-        ctx.trace(s"Received COMPLETE from $from in state 'completed'")
+        testCtx.trace(s"Received COMPLETE from $from in state 'completed'")
         if (from eq in) illegalState(s"Received double COMPLETE from inport '$from' in $this")
         else illegalState(s"Received COMPLETE from unexpected inport '$from' instead of inport '$in' in $this")
       },
 
       onError = (e, from) ⇒ {
-        ctx.trace(s"Received ERROR [$e] from $from in state 'completed'")
+        testCtx.trace(s"Received ERROR [$e] from $from in state 'completed'")
         if (from eq in) illegalState(s"Received ERROR [$e] after COMPLETE from inport '$from' in $this")
         else illegalState(s"Received ERROR [$e] from unexpected inport '$from' instead of inport '$in' in $this")
       },
 
-      extra = handlePostRun(runCtx))
+      extra = handlePostRun(ctx))
 
-  private def errored(runCtx: RunContext, in: Inport): State =
+  private def errored(ctx: StartContext, in: Inport): State =
     state(name = "errored",
 
       onNext = (elem, from) ⇒ {
-        ctx.trace(s"Received [$elem] from $from in state 'errored'")
+        testCtx.trace(s"Received [$elem] from $from in state 'errored'")
         if (from eq in) illegalState(s"Received [$elem] after ERROR from inport '$from' in $this")
         else illegalState(s"Received [$elem] from unexpected inport '$from' instead of inport '$in' in $this")
       },
 
       onComplete = from ⇒ {
-        ctx.trace(s"Received COMPLETE from $from in state 'errored'")
+        testCtx.trace(s"Received COMPLETE from $from in state 'errored'")
         if (from eq in) illegalState(s"Received COMPLETE after ERROR from inport '$from' in $this")
         else illegalState(s"Received COMPLETE from unexpected inport '$from' instead of inport '$in' in $this")
       },
 
       onError = (e, from) ⇒ {
-        ctx.trace(s"Received ERROR [$e] from $from in state 'errored'")
+        testCtx.trace(s"Received ERROR [$e] from $from in state 'errored'")
         if (from eq in) illegalState(s"Received onError($e) after ERROR from inport '$from' in $this")
         else illegalState(s"Received ERROR [$e] from unexpected inport '$from' instead of inport '$in' in $this")
       },
 
-      extra = handlePostRun(runCtx))
+      extra = handlePostRun(ctx))
 
-  private def handlePostRun(runCtx: RunContext): Stage.Extra = {
-    case Stage.PostRun if ctx.hasSchedulings =>
-      ctx.trace(s"Running schedulings...")
-      ctx.processSchedulings()
-      runCtx.registerForPostRunExtra(this)
+  private def handlePostRun(ctx: StartContext): Stage.ExtraSignalHandler = {
+    case Stage.PostRun if testCtx.hasSchedulings =>
+      testCtx.trace(s"Running schedulings...")
+      testCtx.processSchedulings()
+      ctx.registerForPostRunExtra(this)
   }
 
   def pipeElemType: String = "Drain.test"

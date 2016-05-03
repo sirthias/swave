@@ -63,7 +63,7 @@ private[testkit] final class TestStreamStage(
 
       start = startContext ⇒ {
         ctx.trace("Received START in 'ready'")
-        configureFrom(startContext)
+        configureFrom(startContext.env)
         ctx.trace("⇢ START")
         out.start(startContext)
         if (elems.hasNext) {

@@ -68,7 +68,7 @@ private[fanout] abstract class FanOutStage extends PipeStage { this: PipeElem.Fa
         start = ctx ⇒ {
           if (in ne null) {
             if (outs.nonEmpty) {
-              configureFrom(ctx)
+              configureFrom(ctx.env)
               in.start(ctx)
               @tailrec def rec(current: OutportStates): Unit =
                 if (current ne null) { current.out.start(ctx); rec(current.tail) }

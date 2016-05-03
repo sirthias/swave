@@ -25,89 +25,68 @@ import swave.core.util._
  * A `StartContext` instance keeps all the contextual information required for the start of a *single* connected stream
  * network. This does not include embedded or enclosing sub-streams (streams of streams).
  */
-private[swave] final class StartContext private (val env: StreamEnv, _rc: RunContext) {
-  private var needRunCtx: StageList = StageList.empty
-  private var runContext: RunContext = _rc
+private[swave] final class StartContext private (private var data: StartContext.Data) {
 
-  private[impl] def registerForRunCtx(stage: Stage): Unit =
-    needRunCtx = stage +: needRunCtx
+  def env: StreamEnv = data.env
 
-  private[impl] def setRunContext(rc: RunContext): Unit =
-    if (runContext eq null) runContext = rc
-    else requireState(runContext eq rc)
+  /**
+   * Registers the stage for receiving `Stage.PostRun` events after the initial (sync) run has completed.
+   * This method is also available from within the PostRun event handler, which can re-register its stage
+   * to receive this event once more.
+   */
+  def registerForPostRunExtra(stage: Stage): Unit = data.needPostRunExtra = stage +: data.needPostRunExtra
+
+  /**
+   * Registers the stage for receiving `Stage.Cleanup` events after the initial (sync) run and all PostRun
+   * handlers have completed.
+   */
+  def registerForCleanupExtra(stage: Stage): Unit = data.needCleanUpExtra = stage +: data.needCleanUpExtra
+
+  def attach(other: StartContext): Unit =
+    if (other.data ne data) {
+      data.merge(other.data)
+      other.data = data
+    }
+
+  def start(port: Port): Unit = {
+    val initialDataInstance = data
+    port.start(this)
+
+    if (data eq initialDataInstance) {
+      @tailrec def dispatch(remaining: StageList, arg: AnyRef): Unit =
+        if (remaining.nonEmpty) {
+          remaining.stage.onExtraSignal(arg)
+          dispatch(remaining.tail, arg)
+        }
+
+      @tailrec def dispatchPostRun(): Unit =
+        if (data.needPostRunExtra.nonEmpty) {
+          val registered = data.needPostRunExtra
+          data.needPostRunExtra = StageList.empty // allow for re-registration in PostRun handler
+          dispatch(registered, Stage.PostRun)
+          dispatchPostRun()
+        }
+
+      dispatchPostRun()
+      dispatch(data.needCleanUpExtra, Stage.Cleanup)
+      data.needCleanUpExtra = StageList.empty
+    } // else we are not the outermost context
+  }
 }
 
 private[swave] object StartContext {
 
-  def start(port: Port, env: StreamEnv): Unit = start(port, new StartContext(env, null))
+  def start(port: Port, env: StreamEnv): Unit =
+    new StartContext(new Data(env)).start(port)
 
-  def start(port: Port, rc: RunContext): Unit = start(port, new StartContext(rc.env, rc))
+  private class Data(val env: StreamEnv) {
+    var needPostRunExtra: StageList = StageList.empty
+    var needCleanUpExtra: StageList = StageList.empty
 
-  private def start(port: Port, ctx: StartContext): Unit = {
-    def dispatchRunCtx(rc: RunContext): Unit = {
-      @tailrec def rec(remaining: StageList): Unit =
-        if (remaining.nonEmpty) {
-          remaining.stage.onRunCtx(rc)
-          rec(remaining.tail)
-        }
-      val list = ctx.needRunCtx
-      ctx.needRunCtx = StageList.empty
-      rec(list)
+    def merge(other: Data): Unit = {
+      require(other.env == env)
+      needPostRunExtra = needPostRunExtra.append(other.needPostRunExtra)
+      needCleanUpExtra = needCleanUpExtra.append(other.needCleanUpExtra)
     }
-
-    port.start(ctx)
-    if (ctx.needRunCtx.nonEmpty) {
-      if (ctx.runContext eq null) {
-        // this is a main start
-        val rc = new RunContext(ctx.env)
-        dispatchRunCtx(rc)
-        rc.onRunCompleted()
-      } else {
-        // this is a sub start
-        dispatchRunCtx(ctx.runContext)
-      }
-    }
-  }
-}
-
-/**
- * A `RunContext` instance keeps all the contextual information required for a complete run,
- * including embedded or enclosing sub-streams (streams of streams).
- */
-private[swave] final class RunContext(val env: StreamEnv) {
-  private[this] var requestedPostRun = StageList.empty
-  private[this] var requestedCleanup = StageList.empty
-
-  /**
-   * Registers the state for receiving `Stage.PostRun` events after the initial (sync) run has completed.
-   * This method is also available from within the PostRun event handler, which can re-register its stage
-   * to receive this event once more.
-   */
-  def registerForPostRunExtra(stage: Stage): Unit = requestedPostRun = stage +: requestedPostRun
-
-  /**
-   * Registers the state for receiving `Stage.Cleanup` events after the initial (sync) run and all PostRun
-   * handlers have completed.
-   */
-  def registerForCleanupExtra(stage: Stage): Unit = requestedCleanup = stage +: requestedCleanup
-
-  private[impl] def onRunCompleted(): Unit = {
-    @tailrec def dispatch(remaining: StageList, arg: AnyRef): Unit =
-      if (remaining.nonEmpty) {
-        remaining.stage.extra(arg)
-        dispatch(remaining.tail, arg)
-      }
-
-    @tailrec def dispatchPostRun(): Unit =
-      if (requestedPostRun.nonEmpty) {
-        val registered = requestedPostRun
-        requestedPostRun = StageList.empty // allow for re-registration in PostRun handler
-        dispatch(registered, Stage.PostRun)
-        dispatchPostRun()
-      }
-
-    dispatchPostRun()
-    dispatch(requestedCleanup, Stage.Cleanup)
-    requestedCleanup = StageList.empty
   }
 }

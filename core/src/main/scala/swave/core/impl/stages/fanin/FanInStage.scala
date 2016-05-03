@@ -62,7 +62,7 @@ private[fanin] abstract class FanInStage extends PipeStage  { this: PipeElem.Fan
         onSubscribe = doubleOnSubscribe,
 
         start = ctx ⇒ {
-          configureFrom(ctx)
+          configureFrom(ctx.env)
           out.start(ctx)
           subs.foreach(_.in.start(ctx)) // TODO: avoid function allocation
           f(ctx, out)

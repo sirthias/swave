@@ -34,9 +34,9 @@ private[swave] abstract class SourceStage extends Stage { this: PipeElem.Source 
     subscribe: Outport ⇒ State = unexpectedSubscribe,
     request: (Int, Outport) ⇒ State = unexpectedRequestInt,
     cancel: Outport ⇒ State = unexpectedCancel,
-    extra: Stage.Extra = unexpectedExtra) =
+    extra: Stage.ExtraSignalHandler = unexpectedExtra) =
 
-    fullState(name, subscribe = subscribe, request = request, cancel = cancel, extra = extra)
+    fullState(name, subscribe = subscribe, request = request, cancel = cancel, onExtraSignal = extra)
 
   protected final def connectOutAndStartWith(f: (StartContext, Outport) ⇒ State): Unit = {
     def ready(out: Outport) =
@@ -46,7 +46,7 @@ private[swave] abstract class SourceStage extends Stage { this: PipeElem.Source 
         subscribe = doubleSubscribe,
 
         start = ctx ⇒ {
-          configureFrom(ctx)
+          configureFrom(ctx.env)
           out.start(ctx)
           f(ctx, out)
         })

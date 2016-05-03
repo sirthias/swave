@@ -17,10 +17,10 @@
 package swave.core.impl.stages.source
 
 import swave.core.PipeElem
-import swave.core.impl.{ Inport, Outport, RunContext }
+import swave.core.impl.{ Inport, Outport, StartContext }
 
 // format: OFF
-private[core] final class SubSourceStage(runContext: RunContext, in: Inport) extends SourceStage
+private[core] final class SubSourceStage(ctx: StartContext, in: Inport) extends SourceStage
   with PipeElem.Source.Sub {
 
   import SubSourceStage._
@@ -46,10 +46,10 @@ private[core] final class SubSourceStage(runContext: RunContext, in: Inport) ext
   def ready(out: Outport, termination: Termination): State =
     fullState(name = "ready",
 
-      start = ctx ⇒ {
-        configureFrom(ctx)
+      start = subCtx ⇒ {
+        ctx.attach(subCtx)
+        configureFrom(ctx.env)
         out.start(ctx)
-        ctx.setRunContext(runContext)
         termination match {
           case Termination.None => running(out)
           case Termination.Completed => stopComplete(out)

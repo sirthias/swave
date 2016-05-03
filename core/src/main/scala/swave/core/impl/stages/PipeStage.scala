@@ -30,8 +30,8 @@ private[core] abstract class PipeStage extends Stage { this: PipeElem.Basic ⇒
     onNext: (AnyRef, Inport) ⇒ State = unexpectedOnNext,
     onComplete: Inport ⇒ State = unexpectedOnComplete,
     onError: (Throwable, Inport) ⇒ State = unexpectedOnError,
-    extra: Stage.Extra = unexpectedExtra) =
+    extra: Stage.ExtraSignalHandler = unexpectedExtra) =
 
     fullState(name = name, subscribe = subscribe, request = request, cancel = cancel, onSubscribe = onSubscribe,
-      onNext = onNext, onComplete = onComplete, onError = onError, extra = extra)
+      onNext = onNext, onComplete = onComplete, onError = onError, onExtraSignal = extra)
 }
