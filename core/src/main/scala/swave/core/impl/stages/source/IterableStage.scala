@@ -27,9 +27,14 @@ private[core] final class IterableStage(iterable: Iterable[AnyRef]) extends Sour
   def pipeElemParams: List[Any] = iterable :: Nil
 
   connectOutAndStartWith { (ctx, out) ⇒
-    if (iterable.nonEmpty) running(out, iterable.iterator)
-    else stopComplete(out)
+    if (iterable.isEmpty) {
+      ctx.registerForXStart(this)
+      awaitingXStart(out)
+    } else running(out, iterable.iterator)
   }
+
+  def awaitingXStart(out: Outport) =
+    state(name = "awaitingXStart", xStart = () => stopComplete(out))
 
   def running(out: Outport, iterator: Iterator[AnyRef]) =
     state(name = "running",

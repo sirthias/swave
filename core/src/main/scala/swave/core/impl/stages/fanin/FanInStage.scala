@@ -19,7 +19,7 @@ package swave.core.impl.stages.fanin
 import scala.collection.mutable.ListBuffer
 import swave.core.PipeElem
 import swave.core.impl.stages.PipeStage
-import swave.core.impl.{ InportList, Outport, StartContext }
+import swave.core.impl.{ InportList, Outport, RunContext }
 
 // format: OFF
 private[fanin] abstract class FanInStage extends PipeStage  { this: PipeElem.FanIn =>
@@ -37,9 +37,10 @@ private[fanin] abstract class FanInStage extends PipeStage  { this: PipeElem.Fan
     buf.result()
   }
 
-  protected final def connectFanInAndStartWith(subs: InportList)(f: (StartContext, Outport) ⇒ State): Unit = {
+  protected final def connectFanInAndStartWith(subs: InportList)(f: (RunContext, Outport) ⇒ State): Unit = {
     def connecting(out: Outport, pendingSubs: InportList): State =
       fullState(name = "connectFanInAndStartWith:connecting",
+        interceptWhileHandling = false,
 
         onSubscribe = sub ⇒ {
           val newPending = pendingSubs.remove_!(sub)
@@ -47,24 +48,22 @@ private[fanin] abstract class FanInStage extends PipeStage  { this: PipeElem.Fan
           else connecting(out, newPending)
         },
 
-        subscribe = outPort ⇒ {
+        subscribe = from ⇒ {
           if (out eq null) {
-            _outputPipeElem = outPort.pipeElem
-            outPort.onSubscribe()
-            if (pendingSubs.isEmpty) ready(outPort)
-            else connecting(outPort, pendingSubs)
-          } else doubleSubscribe(outPort)
+            _outputPipeElem = from.pipeElem
+            from.onSubscribe()
+            if (pendingSubs.isEmpty) ready(from)
+            else connecting(from, pendingSubs)
+          } else illegalState(s"Double subscribe($from) in $this")
         })
 
     def ready(out: Outport) =
       fullState(name = "connectFanInAndStartWith:ready",
-        subscribe = doubleSubscribe,
-        onSubscribe = doubleOnSubscribe,
 
-        start = ctx ⇒ {
+        xSeal = ctx ⇒ {
           configureFrom(ctx.env)
-          out.start(ctx)
-          subs.foreach(_.in.start(ctx)) // TODO: avoid function allocation
+          out.xSeal(ctx)
+          subs.foreach(_.in.xSeal(ctx)) // TODO: avoid function allocation
           f(ctx, out)
         })
 

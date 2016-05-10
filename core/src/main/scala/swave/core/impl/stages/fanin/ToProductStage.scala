@@ -47,9 +47,17 @@ private[core] final class ToProductStage(val pipeElemType: String,
     }
 
   connectFanInAndStartWith(subs) { (ctx, out) ⇒
-    requestNext()
-    collectingMembers(out, fullMask, 0, 0)
+    ctx.registerForXStart(this)
+    awaitingXStart(out)
   }
+
+  def awaitingXStart(out: Outport) =
+    state(name = "awaitingXStart",
+
+      xStart = () => {
+        requestNext()
+        collectingMembers(out, fullMask, 0, 0)
+      })
 
   /**
    * Awaiting one element from all upstreams to complete a product.

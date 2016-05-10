@@ -18,9 +18,8 @@ package swave.core.impl.stages.inout
 
 import scala.annotation.tailrec
 import swave.core.{ PipeElem, Stream }
-import swave.core.impl.stages.Stage
 import swave.core.impl.stages.source.SubSourceStage
-import swave.core.impl.{ StartContext, Outport, Inport }
+import swave.core.impl.{ RunContext, Outport, Inport }
 import swave.core.util._
 
 // format: OFF
@@ -32,13 +31,21 @@ private[core] final class InjectStage extends InOutStage with PipeElem.InOut.Inj
   private[this] var buffer: RingBuffer[AnyRef] = _
 
   connectInOutAndStartWith { (ctx, in, out) ⇒
-    buffer = new RingBuffer[AnyRef](roundUpToNextPowerOf2(ctx.env.settings.maxBatchSize))
-    in.request(buffer.capacity.toLong)
-    ctx.registerForCleanupExtra(this)
-    running(ctx, in, out)
+    ctx.registerForXCleanUp(this)
+    ctx.registerForXStart(this)
+    awaitingXStart(ctx, in, out)
   }
 
-  def running(ctx: StartContext, in: Inport, out: Outport) = {
+  def awaitingXStart(ctx: RunContext, in: Inport, out: Outport) =
+    state(name = "awaitingXStart",
+
+      xStart = () => {
+        buffer = new RingBuffer[AnyRef](roundUpToNextPowerOf2(ctx.env.settings.maxBatchSize))
+        in.request(buffer.capacity.toLong)
+        running(ctx, in, out)
+      })
+
+  def running(ctx: RunContext, in: Inport, out: Outport) = {
 
     /**
      * Buffer non-empty, no sub-stream open.
@@ -59,7 +66,7 @@ private[core] final class InjectStage extends InOutStage with PipeElem.InOut.Inj
 
         onComplete = _ => noSubAwaitingMainDemandUpstreamGone(),
         onError = stopErrorF(out),
-        extra = ignoreCleanup)
+        xCleanUp = () => stay())
 
     /**
      * Buffer non-empty, upstream already completed, no sub-stream open.
@@ -90,7 +97,7 @@ private[core] final class InjectStage extends InOutStage with PipeElem.InOut.Inj
 
         onComplete = stopCompleteF(out),
         onError = stopErrorF(out),
-        extra = ignoreCleanup)
+        xCleanUp = () => stay())
 
     /**
      * Buffer non-empty, sub-stream open.
@@ -133,7 +140,7 @@ private[core] final class InjectStage extends InOutStage with PipeElem.InOut.Inj
 
         onComplete = _ => awaitingSubDemandUpstreamGone(sub, mainRemaining),
         onError = stopErrorSubAndMainF(sub),
-        extra = ignoreCleanup)
+        xCleanUp = () => stay())
 
     /**
      * Buffer non-empty, sub-stream open, upstream already completed.
@@ -170,7 +177,7 @@ private[core] final class InjectStage extends InOutStage with PipeElem.InOut.Inj
           else stay()
         },
 
-        extra = ignoreCleanup)
+        xCleanUp = () => stay())
 
     /**
      * Buffer non-empty, sub-stream open, main downstream already cancelled.
@@ -204,7 +211,7 @@ private[core] final class InjectStage extends InOutStage with PipeElem.InOut.Inj
 
         onComplete = _ => awaitingSubDemandUpAndDownstreamGone(sub),
         onError = stopErrorF(sub),
-        extra = cleanup(sub))
+        xCleanUp = cleanup(sub))
 
     /**
      * Buffer non-empty, sub-stream open, upstream already completed, main downstream already cancelled.
@@ -228,7 +235,7 @@ private[core] final class InjectStage extends InOutStage with PipeElem.InOut.Inj
         },
 
         cancel = from => if (from eq sub) stopCancel(in) else stay(),
-        extra = cleanup(sub))
+        xCleanUp = cleanup(sub))
 
     /**
      * Buffer empty, sub-stream open, demand signalled to upstream.
@@ -266,7 +273,7 @@ private[core] final class InjectStage extends InOutStage with PipeElem.InOut.Inj
 
         onComplete = stopCompleteSubAndMainF(sub),
         onError = stopErrorSubAndMainF(sub),
-        extra = cleanup(sub))
+        xCleanUp = cleanup(sub))
 
     /**
      * Buffer empty, sub-stream open, main downstream cancelled, demand signalled to upstream.
@@ -293,7 +300,7 @@ private[core] final class InjectStage extends InOutStage with PipeElem.InOut.Inj
 
         onComplete = stopCompleteSubAndMainF(sub),
         onError = stopErrorSubAndMainF(sub),
-        extra = cleanup(sub))
+        xCleanUp = cleanup(sub))
 
     ///////////////////////// helpers //////////////////////////
 
@@ -327,15 +334,12 @@ private[core] final class InjectStage extends InOutStage with PipeElem.InOut.Inj
       stopError(e, out)
     }
 
-    def cleanup(sub: SubSourceStage): Stage.ExtraSignalHandler = {
-      case Stage.Cleanup =>
-        // in a synchronous run: if we are still in this state after the stream has run in its entirety
-        // the sub we are awaiting demand from was dropped
-        sub.assertNotRunning()
-        cancel()(from = sub)
+    def cleanup(sub: SubSourceStage): () => State = () => {
+      // in a synchronous run: if we are still in this state after the stream has run in its entirety
+      // the sub we are awaiting demand from was dropped
+      cancel()(from = sub)
+      stay()
     }
-
-    def ignoreCleanup: Stage.ExtraSignalHandler = PartialFunction.empty
 
     noSubAwaitingElem(buffer.capacity, mainRemaining = 0)
   }

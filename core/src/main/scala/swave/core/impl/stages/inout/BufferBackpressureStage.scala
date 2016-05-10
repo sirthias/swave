@@ -34,9 +34,17 @@ private[core] final class BufferBackpressureStage(size: Int) extends InOutStage
   private[this] val buffer = new RingBuffer[AnyRef](roundUpToNextPowerOf2(size))
 
   connectInOutAndStartWith { (ctx, in, out) ⇒
-    in.request(size.toLong)
-    running(in, out, size.toLong, 0)
+    ctx.registerForXStart(this)
+    awaitingXStart(in, out)
   }
+
+  def awaitingXStart(in: Inport, out: Outport) =
+    state(name = "awaitingXStart",
+
+      xStart = () => {
+        in.request(size.toLong)
+        running(in, out, size.toLong, 0)
+      })
 
   /**
    * Upstream and downstream active.

@@ -23,15 +23,18 @@ private[core] abstract class PipeStage extends Stage { this: PipeElem.Basic ⇒
 
   protected final def state(
     name: String,
-    subscribe: Outport ⇒ State = unexpectedSubscribe,
-    request: (Int, Outport) ⇒ State = unexpectedRequestInt,
-    cancel: Outport ⇒ State = unexpectedCancel,
-    onSubscribe: Inport ⇒ State = unexpectedOnSubscribe,
-    onNext: (AnyRef, Inport) ⇒ State = unexpectedOnNext,
-    onComplete: Inport ⇒ State = unexpectedOnComplete,
-    onError: (Throwable, Inport) ⇒ State = unexpectedOnError,
-    extra: Stage.ExtraSignalHandler = unexpectedExtra) =
+    interceptWhileHandling: Boolean = true,
+    subscribe: Outport ⇒ State = null,
+    request: (Int, Outport) ⇒ State = null,
+    cancel: Outport ⇒ State = null,
+    onSubscribe: Inport ⇒ State = null,
+    onNext: (AnyRef, Inport) ⇒ State = null,
+    onComplete: Inport ⇒ State = null,
+    onError: (Throwable, Inport) ⇒ State = null,
+    xStart: () ⇒ State = null,
+    xRun: () ⇒ State = null,
+    xCleanUp: () ⇒ State = null) =
 
     fullState(name = name, subscribe = subscribe, request = request, cancel = cancel, onSubscribe = onSubscribe,
-      onNext = onNext, onComplete = onComplete, onError = onError, onExtraSignal = extra)
+      onNext = onNext, onComplete = onComplete, onError = onError, xStart = xStart, xRun = xRun, xCleanUp = xCleanUp)
 }

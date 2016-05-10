@@ -21,7 +21,7 @@ import swave.core.PipeElem
 private[swave] sealed trait Port {
   def pipeElem: PipeElem.Basic
 
-  def start(ctx: StartContext): Unit
+  def xSeal(ctx: RunContext): Unit
 }
 
 private[swave] sealed trait Inport extends Port {

@@ -18,7 +18,7 @@ package swave.core.impl.stages.inout
 
 import swave.core.PipeElem
 import swave.core.impl.stages.PipeStage
-import swave.core.impl.{ Inport, Outport, StartContext }
+import swave.core.impl.{ Inport, Outport, RunContext }
 
 // format: OFF
 private[inout] abstract class InOutStage extends PipeStage { this: PipeElem.InOut =>
@@ -29,21 +29,35 @@ private[inout] abstract class InOutStage extends PipeStage { this: PipeElem.InOu
   def inputElem = _inputPipeElem
   def outputElem =  _outputPipeElem
 
-  protected final def connectInOutAndStartWith(f: (StartContext, Inport, Outport) ⇒ State): Unit = {
-    def waitingForSubscribe(in: Inport) =
-      fullState(name = "connectInOutAndStartWith:waitingForSubscribe",
+  protected final def connectInOutAndStartWith(f: (RunContext, Inport, Outport) ⇒ State): Unit = {
+    def awaitingSubscribeOrOnSubscribe =
+      fullState(name = "connectInOutAndStartWith:awaitingSubscribeOrOnSubscribe",
+        interceptWhileHandling = false,
+
+        onSubscribe = in ⇒ {
+          _inputPipeElem = in.pipeElem
+          awaitingSubscribe(in)
+        },
+
+        subscribe = out ⇒ {
+          _outputPipeElem = out.pipeElem
+          out.onSubscribe()
+          awaitingOnSubscribe(out)
+        })
+
+    def awaitingSubscribe(in: Inport) =
+      fullState(name = "connectInOutAndStartWith:awaitingSubscribe",
+        interceptWhileHandling = false,
 
         subscribe = out ⇒ {
           _outputPipeElem = out.pipeElem
           out.onSubscribe()
           ready(in, out)
-        },
+        })
 
-        onSubscribe = doubleOnSubscribe)
-
-    def waitingForOnSubscribe(out: Outport) =
-      fullState(name = "connectInOutAndStartWith:waitingForOnSubscribe",
-        subscribe = doubleSubscribe,
+    def awaitingOnSubscribe(out: Outport) =
+      fullState(name = "connectInOutAndStartWith:awaitingOnSubscribe",
+        interceptWhileHandling = false,
 
         onSubscribe = in ⇒ {
           _inputPipeElem = in.pipeElem
@@ -52,29 +66,14 @@ private[inout] abstract class InOutStage extends PipeStage { this: PipeElem.InOu
 
     def ready(in: Inport, out: Outport) =
       fullState(name = "connectInOutAndStartWith:ready",
-        subscribe = doubleSubscribe,
-        onSubscribe = doubleOnSubscribe,
 
-        start = ctx ⇒ {
+        xSeal = ctx ⇒ {
           configureFrom(ctx.env)
-          in.start(ctx)
-          out.start(ctx)
+          in.xSeal(ctx)
+          out.xSeal(ctx)
           f(ctx, in, out)
         })
 
-    initialState {
-      fullState(name = "connectInOutAndStartWith",
-
-        onSubscribe = in ⇒ {
-          _inputPipeElem = in.pipeElem
-          waitingForSubscribe(in)
-        },
-
-        subscribe = out ⇒ {
-          _outputPipeElem = out.pipeElem
-          out.onSubscribe()
-          waitingForOnSubscribe(out)
-        })
-    }
+    initialState(awaitingSubscribeOrOnSubscribe)
   }
 }

@@ -17,7 +17,7 @@
 package swave.core
 
 import scala.util.control.NonFatal
-import swave.core.impl.{ Port, TypeLogic, StartContext }
+import swave.core.impl.{ Port, TypeLogic, RunContext }
 
 /**
  * A [[RunnablePiping]] represents a system or network of connected pipes in which all inlet and outlets
@@ -29,7 +29,7 @@ final class RunnablePiping[T](port: Port, val result: T) {
 
   def start()(implicit env: StreamEnv): Option[Throwable] =
     try {
-      StartContext.start(port, env)
+      RunContext.start(port, env)
       None
     } catch {
       case NonFatal(e) ⇒ Some(e)

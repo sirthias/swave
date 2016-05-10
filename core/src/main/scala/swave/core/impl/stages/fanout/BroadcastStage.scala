@@ -66,7 +66,7 @@ private[core] final class BroadcastStage(eagerCancel: Boolean) extends FanOutSta
                 handleOnComplete(newOuts)
               } else handleDemand(0, null, newOuts, newOuts, Long.MaxValue)
             } else rec(current, current.tail)
-          } else unexpectedCancel(out)
+          } else illegalState(s"Unexpected cancel() from out '$out' in $this")
         rec(null, outs)
       },
 

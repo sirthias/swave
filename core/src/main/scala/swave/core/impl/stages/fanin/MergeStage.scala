@@ -33,15 +33,23 @@ private[core] final class MergeStage(subs: InportList, eagerComplete: Boolean)
   private[this] val buffer: RingBuffer[InportAnyRefList] = new RingBuffer(roundUpToNextPowerOf2(subs.size))
 
   connectFanInAndStartWith(subs) { (ctx, out) ⇒
-    @tailrec def rec(remaining: InportList, result: InportAnyRefList): InportAnyRefList =
-      if (remaining.nonEmpty) {
-        remaining.in.request(1)
-        rec(remaining.tail, result.prepend(remaining.in, null))
-      } else result
-
-    val ins = rec(subs, InportAnyRefList.empty)
-    running(out, ins, 0)
+    ctx.registerForXStart(this)
+    awaitingXStart(out)
   }
+
+  def awaitingXStart(out: Outport) =
+    state(name = "awaitingXStart",
+
+      xStart = () => {
+        @tailrec def rec(remaining: InportList, result: InportAnyRefList): InportAnyRefList =
+          if (remaining.nonEmpty) {
+            remaining.in.request(1)
+            rec(remaining.tail, result.prepend(remaining.in, null))
+          } else result
+
+        val ins = rec(subs, InportAnyRefList.empty)
+        running(out, ins, 0)
+      })
 
   /**
    * @param out       the active downstream

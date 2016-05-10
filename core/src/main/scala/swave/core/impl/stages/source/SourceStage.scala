@@ -17,7 +17,7 @@
 package swave.core.impl.stages.source
 
 import swave.core.PipeElem
-import swave.core.impl.{ StartContext, Outport }
+import swave.core.impl.{ RunContext, Outport }
 import swave.core.impl.stages.Stage
 
 // format: OFF
@@ -31,36 +31,36 @@ private[swave] abstract class SourceStage extends Stage { this: PipeElem.Source 
 
   protected final def state(
     name: String,
-    subscribe: Outport ⇒ State = unexpectedSubscribe,
-    request: (Int, Outport) ⇒ State = unexpectedRequestInt,
-    cancel: Outport ⇒ State = unexpectedCancel,
-    extra: Stage.ExtraSignalHandler = unexpectedExtra) =
+    subscribe: Outport ⇒ State = null,
+    request: (Int, Outport) ⇒ State = null,
+    cancel: Outport ⇒ State = null,
+    xSeal: RunContext => State = null,
+    xStart: () => State= null) =
+    fullState(name, subscribe = subscribe, request = request, cancel = cancel, xSeal = xSeal, xStart = xStart)
 
-    fullState(name, subscribe = subscribe, request = request, cancel = cancel, onExtraSignal = extra)
-
-  protected final def connectOutAndStartWith(f: (StartContext, Outport) ⇒ State): Unit = {
-    def ready(out: Outport) =
+  protected final def connectOutAndStartWith(f: (RunContext, Outport) ⇒ State): Unit = {
+    def awaitingSubscribe =
       fullState(
-        name = "connectOutAndStartWith:ready",
-
-        subscribe = doubleSubscribe,
-
-        start = ctx ⇒ {
-          configureFrom(ctx.env)
-          out.start(ctx)
-          f(ctx, out)
-        })
-
-    initialState {
-      fullState(
-        name = "connectOutAndStartWith",
+        name = "connectOutAndStartWith:awaitingSubscribe",
+        interceptWhileHandling = false,
 
         subscribe = out ⇒ {
           setOutputElem(out.pipeElem)
           out.onSubscribe()
           ready(out)
         })
-    }
+
+    def ready(out: Outport) =
+      fullState(
+        name = "connectOutAndStartWith:ready",
+
+        xSeal = ctx ⇒ {
+          configureFrom(ctx.env)
+          out.xSeal(ctx)
+          f(ctx, out)
+        })
+
+    initialState(awaitingSubscribe)
   }
 }
 

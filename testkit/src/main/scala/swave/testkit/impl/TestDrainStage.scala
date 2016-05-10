@@ -17,9 +17,8 @@
 package swave.testkit.impl
 
 import swave.core.PipeElem
-import swave.core.impl.stages.Stage
 import swave.core.impl.stages.drain.DrainStage
-import swave.core.impl.{ StartContext, Inport }
+import swave.core.impl.{ RunContext, Inport }
 import swave.core.util._
 import swave.testkit.TestFixture
 
@@ -44,28 +43,36 @@ private[testkit] final class TestDrainStage(
 
   // format: OFF
 
-  initialState {
-    state(name = "initialState",
+  initialState(awaitingOnSubscribe)
+
+  private def awaitingOnSubscribe =
+    state(name = "awaitingOnSubscribe",
 
       onSubscribe = in ⇒ {
         testCtx.trace(s"Received ONSUBSCRIBE from $in in 'initialState'")
         setInputElem(in.pipeElem)
         ready(in)
       })
-  }
 
   private def ready(in: Inport): State =
     fullState(name = "ready",
 
-      onSubscribe = doubleOnSubscribe,
-
-      start = ctx ⇒ {
-        testCtx.trace("Received START in 'ready'")
+      xSeal = ctx ⇒ {
+        testCtx.trace("Received XSEAL in 'ready'")
         configureFrom(ctx.env)
-        testCtx.trace("⇠ START")
-        in.start(ctx)
+        testCtx.trace("⇠ XSEAL")
+        in.xSeal(ctx)
 
-        ctx.registerForPostRunExtra(this)
+        ctx.registerForXStart(this)
+        ctx.registerForXRun(this)
+        awaitingXStart(ctx, in)
+      })
+
+  private def awaitingXStart(ctx: RunContext, in: Inport) =
+    state(name = "awaitingXStart",
+
+      xStart = () => {
+        testCtx.trace("Received XSTART in 'awaitingXStart'")
         if (requests.hasNext) {
           val n = requests.next()
           testCtx.run("⇠ REQUEST " + n)(in.request(n))
@@ -76,7 +83,7 @@ private[testkit] final class TestDrainStage(
         } else cancel(ctx, in, 0)
       })
 
-  private def receiving(ctx: StartContext, in: Inport, pending: Long, cancelAfter: Int): State =
+  private def receiving(ctx: RunContext, in: Inport, pending: Long, cancelAfter: Int): State =
     state(name = "receiving",
 
       onNext = (elem, from) ⇒ {
@@ -108,15 +115,15 @@ private[testkit] final class TestDrainStage(
         else illegalState(s"Received ERROR [$e] from unexpected inport '$from' instead of inport '$in' in $this")
       },
 
-      extra = handlePostRun(ctx))
+      xRun = () => handlePostRun(ctx))
 
-  private def cancel(ctx: StartContext, in: Inport, pending: Long) = {
+  private def cancel(ctx: RunContext, in: Inport, pending: Long) = {
     testCtx.run("⇠ CANCEL")(in.cancel())
     fixtureState = TestFixture.State.Cancelled
     cancelled(ctx, in, pending)
   }
 
-  private def cancelled(ctx: StartContext, in: Inport, pending: Long): State =
+  private def cancelled(ctx: RunContext, in: Inport, pending: Long): State =
     state(name = "cancelled",
 
       onNext = (elem, from) ⇒ {
@@ -139,9 +146,9 @@ private[testkit] final class TestDrainStage(
         else illegalState(s"Received ERROR [$e] from unexpected inport '$from' instead of inport '$in in $this")
       },
 
-      extra = handlePostRun(ctx))
+      xRun = () => handlePostRun(ctx))
 
-  private def completed(ctx: StartContext, in: Inport): State =
+  private def completed(ctx: RunContext, in: Inport): State =
     state(name = "completed",
 
       onNext = (elem, from) ⇒ {
@@ -162,9 +169,9 @@ private[testkit] final class TestDrainStage(
         else illegalState(s"Received ERROR [$e] from unexpected inport '$from' instead of inport '$in' in $this")
       },
 
-      extra = handlePostRun(ctx))
+      xRun = () => handlePostRun(ctx))
 
-  private def errored(ctx: StartContext, in: Inport): State =
+  private def errored(ctx: RunContext, in: Inport): State =
     state(name = "errored",
 
       onNext = (elem, from) ⇒ {
@@ -185,13 +192,15 @@ private[testkit] final class TestDrainStage(
         else illegalState(s"Received ERROR [$e] from unexpected inport '$from' instead of inport '$in' in $this")
       },
 
-      extra = handlePostRun(ctx))
+      xRun = () => handlePostRun(ctx))
 
-  private def handlePostRun(ctx: StartContext): Stage.ExtraSignalHandler = {
-    case Stage.PostRun if testCtx.hasSchedulings =>
+  private def handlePostRun(ctx: RunContext): State = {
+    if (testCtx.hasSchedulings) {
       testCtx.trace(s"Running schedulings...")
       testCtx.processSchedulings()
-      ctx.registerForPostRunExtra(this)
+      ctx.registerForXRun(this)
+    }
+    stay()
   }
 
   def pipeElemType: String = "Drain.test"

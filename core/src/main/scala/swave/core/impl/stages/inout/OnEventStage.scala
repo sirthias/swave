@@ -30,6 +30,7 @@ private[core] final class OnEventStage(callback: StreamEvent[Any] ⇒ Unit) exte
 
   def running(in: Inport, out: Outport) =
     state(name = "running",
+      interceptWhileHandling = false,
 
       request = (n, _) ⇒ {
         callback(StreamEvent.Request(n))

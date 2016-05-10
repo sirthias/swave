@@ -29,9 +29,17 @@ private[core] final class DropStage(count: Long) extends InOutStage with PipeEle
   def pipeElemParams: List[Any] = count :: Nil
 
   connectInOutAndStartWith { (ctx, in, out) ⇒
-    in.request(count)
-    running(in, out)
+    ctx.registerForXStart(this)
+    awaitingXStart(in, out)
   }
+
+  def awaitingXStart(in: Inport, out: Outport) =
+    state(name = "awaitingXStart",
+
+      xStart = () => {
+        in.request(count)
+        running(in, out)
+      })
 
   def running(in: Inport, out: Outport) = {
 

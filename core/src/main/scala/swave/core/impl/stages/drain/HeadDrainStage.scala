@@ -28,9 +28,17 @@ private[core] final class HeadDrainStage(headPromise: Promise[AnyRef]) extends D
   def pipeElemParams: List[Any] = headPromise :: Nil
 
   connectInAndStartWith { (ctx, in) ⇒
-    in.request(1)
-    receiveOne(in)
+    ctx.registerForXStart(this)
+    awaitingXStart(in)
   }
+
+  def awaitingXStart(in: Inport) =
+    state(name = "awaitingXStart",
+
+      xStart = () => {
+        in.request(1)
+        receiveOne(in)
+      })
 
   def receiveOne(in: Inport) =
     state(name = "receiveOne",

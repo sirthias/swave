@@ -30,10 +30,18 @@ private[core] final class TakeStage(count: Long) extends InOutStage with PipeEle
 
   connectInOutAndStartWith { (ctx, in, out) ⇒
     if (count == 0) {
-      in.cancel()
-      stopComplete(out)
+      ctx.registerForXStart(this)
+      awaitingXStart(in, out)
     } else running(in, out, count)
   }
+
+  def awaitingXStart(in: Inport, out: Outport) =
+    state(name = "awaitingXStart",
+
+      xStart = () => {
+        in.cancel()
+        stopComplete(out)
+      })
 
   /**
    * @param in        the active upstream

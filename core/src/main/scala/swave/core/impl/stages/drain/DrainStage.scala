@@ -17,7 +17,7 @@
 package swave.core.impl.stages.drain
 
 import swave.core.PipeElem
-import swave.core.impl.{ Inport, StartContext }
+import swave.core.impl.{ Inport, RunContext }
 import swave.core.impl.stages.Stage
 
 // format: OFF
@@ -29,35 +29,37 @@ private[swave] abstract class DrainStage extends Stage { this: PipeElem.Drain =>
   protected def setInputElem(elem: PipeElem.Basic): Unit =
     _inputPipeElem = elem
 
-  protected final def connectInAndStartWith(f: (StartContext, Inport) ⇒ State): Unit = {
-    def ready(in: Inport) =
-      fullState(name = "connectInAndStartWith:ready",
-
-        onSubscribe = doubleOnSubscribe,
-
-        start = ctx ⇒ {
-          configureFrom(ctx.env)
-          in.start(ctx)
-          f(ctx, in)
-        })
-
-    initialState {
-      fullState(name = "connectInAndStartWith",
+  protected final def connectInAndStartWith(f: (RunContext, Inport) ⇒ State): Unit = {
+    def awaitingOnSubscribe =
+      fullState(name = "connectInAndStartWith:awaitingOnSubscribe",
+        interceptWhileHandling = false,
 
         onSubscribe = in ⇒ {
           setInputElem(in.pipeElem)
           ready(in)
         })
-    }
+
+    def ready(in: Inport) =
+      fullState(name = "connectInAndStartWith:ready",
+
+        xSeal = ctx ⇒ {
+          configureFrom(ctx.env)
+          in.xSeal(ctx)
+          f(ctx, in)
+        })
+
+    initialState(awaitingOnSubscribe)
   }
 
   protected final def state(
-    name: String,
-    onSubscribe: Inport ⇒ State = unexpectedOnSubscribe,
-    onNext: (AnyRef, Inport) ⇒ State = unexpectedOnNext,
-    onComplete: Inport ⇒ State = unexpectedOnComplete,
-    onError: (Throwable, Inport) ⇒ State = unexpectedOnError,
-    extra: Stage.ExtraSignalHandler = unexpectedExtra) =
-
-    fullState(name, onSubscribe = onSubscribe, onNext = onNext, onComplete = onComplete, onError = onError, onExtraSignal = extra)
+                             name: String,
+                             onSubscribe: Inport ⇒ State = null,
+                             onNext: (AnyRef, Inport) ⇒ State = null,
+                             onComplete: Inport ⇒ State = null,
+                             onError: (Throwable, Inport) ⇒ State = null,
+                             xSeal: RunContext => State = null,
+                             xStart: () => State= null,
+                             xRun: () ⇒ State = null) =
+    fullState(name, onSubscribe = onSubscribe, onNext = onNext, onComplete = onComplete, onError = onError,
+      xSeal = xSeal, xStart = xStart, xRun = xRun)
 }

@@ -44,8 +44,10 @@ private[testkit] final class TestStreamStage(
 
   // format: OFF
 
-  initialState {
-    state(name = "initialState",
+  initialState(awaitingSubscribe)
+
+  private def awaitingSubscribe =
+    state(name = "awaitingSubscribe",
 
       subscribe = out ⇒ {
         ctx.trace(s"Received SUBSCRIBE from $out in 'initialState'")
@@ -54,22 +56,31 @@ private[testkit] final class TestStreamStage(
         out.onSubscribe()
         ready(out)
       })
-  }
 
   private def ready(out: Outport): State =
     fullState(name = "ready",
 
-      subscribe = doubleSubscribe,
-
-      start = startContext ⇒ {
-        ctx.trace("Received START in 'ready'")
-        configureFrom(startContext.env)
-        ctx.trace("⇢ START")
-        out.start(startContext)
+      xSeal = runCtx ⇒ {
+        ctx.trace("Received XSEAL in 'ready'")
+        configureFrom(runCtx.env)
+        ctx.trace("⇢ XSEAL")
+        out.xSeal(runCtx)
         if (elems.hasNext) {
           fixtureState = TestFixture.State.Running
           producing(out)
-        } else terminate(out)
+        } else {
+          ctx.trace("Registering for XSTART reception")
+          runCtx.registerForXStart(this)
+          awaitingXStart(out)
+        }
+      })
+
+  def awaitingXStart(out: Outport) =
+    state(name = "awaitingXStart",
+
+      xStart = () => {
+        ctx.trace("Received XSTART in 'ready'")
+        terminate(out)
       })
 
   private def terminate(out: Outport) =

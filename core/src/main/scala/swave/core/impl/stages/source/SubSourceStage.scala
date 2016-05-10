@@ -17,10 +17,10 @@
 package swave.core.impl.stages.source
 
 import swave.core.PipeElem
-import swave.core.impl.{ Inport, Outport, StartContext }
+import swave.core.impl.{ Inport, Outport, RunContext }
 
 // format: OFF
-private[core] final class SubSourceStage(ctx: StartContext, in: Inport) extends SourceStage
+private[core] final class SubSourceStage(ctx: RunContext, in: Inport) extends SourceStage
   with PipeElem.Source.Sub {
 
   import SubSourceStage._
@@ -32,6 +32,7 @@ private[core] final class SubSourceStage(ctx: StartContext, in: Inport) extends 
 
   def waitingForSubscribe(termination: Termination): State =
     fullState(name = "waitingForSubscribe",
+      interceptWhileHandling = false,
 
       subscribe = out ⇒ {
         setOutputElem(out.pipeElem)
@@ -42,24 +43,33 @@ private[core] final class SubSourceStage(ctx: StartContext, in: Inport) extends 
       onComplete = _ => waitingForSubscribe(Termination.Completed),
       onError = (e, _) => waitingForSubscribe(Termination.Error(e)))
 
-
   def ready(out: Outport, termination: Termination): State =
     fullState(name = "ready",
 
-      start = subCtx ⇒ {
+      xSeal = subCtx ⇒ {
         ctx.attach(subCtx)
         configureFrom(ctx.env)
-        out.start(ctx)
+        out.xSeal(ctx)
         termination match {
           case Termination.None => running(out)
-          case Termination.Completed => stopComplete(out)
-          case Termination.Error(e) => stopError(e, out)
+          case _ =>
+            ctx.registerForXStart(this)
+            awaitingXStart(out, termination)
         }
       },
 
       onComplete = _ => ready(out, Termination.Completed),
       onError = (e, _) => ready(out, Termination.Error(e)))
 
+  def awaitingXStart(out: Outport, termination: Termination) =
+    state(name = "awaitingXStart",
+
+      xStart = () => {
+        termination match {
+          case Termination.Error(e) => stopError(e, out)
+          case _ => stopComplete(out)
+        }
+      })
 
   def running(out: Outport) =
     fullState(name = "running",

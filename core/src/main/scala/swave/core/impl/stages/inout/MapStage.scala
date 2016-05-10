@@ -19,7 +19,6 @@ package swave.core.impl.stages.inout
 import swave.core.PipeElem
 import swave.core.impl.{ Outport, Inport }
 
-// TODO: eligible for a "CallThroughStage", i.e. one without interception support
 // format: OFF
 private[core] final class MapStage(f: AnyRef ⇒ AnyRef) extends InOutStage with PipeElem.InOut.Map {
 
@@ -30,6 +29,7 @@ private[core] final class MapStage(f: AnyRef ⇒ AnyRef) extends InOutStage with
 
   def running(in: Inport, out: Outport) =
     state(name = "running",
+      interceptWhileHandling = false,
 
       request = (n, _) ⇒ {
         in.request(n.toLong)

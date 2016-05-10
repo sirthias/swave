@@ -19,7 +19,7 @@ package swave.core.impl.stages.fanout
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 import swave.core.PipeElem
-import swave.core.impl.{ Inport, Outport, StartContext }
+import swave.core.impl.{ Inport, Outport, RunContext }
 import swave.core.impl.stages.PipeStage
 import swave.core.impl.stages.Stage.OutportStates
 
@@ -39,7 +39,7 @@ private[fanout] abstract class FanOutStage extends PipeStage { this: PipeElem.Fa
     buf.result()
   }
 
-  protected final def connectFanOutAndStartWith(f: (StartContext, Inport, OutportStates) ⇒ State): Unit = {
+  protected final def connectFanOutAndStartWith(f: (RunContext, Inport, OutportStates) ⇒ State): Unit = {
 
     def connecting(in: Inport, outs: OutportStates): State = {
       fullState(name = "connectFanOutAndStartWith:connecting",
@@ -48,34 +48,34 @@ private[fanout] abstract class FanOutStage extends PipeStage { this: PipeElem.Fa
           if (in eq null) {
             _inputPipeElem = from.pipeElem
             connecting(from, outs)
-          } else doubleOnSubscribe(from)
+          } else illegalState(s"Double onSubscribe($from) in $this")
         },
 
-        subscribe = outPort ⇒ {
+        subscribe = from ⇒ {
           @tailrec def rec(outPort: Outport, current: OutportStates): State =
             if (current.nonEmpty) {
               if (current.out ne outPort) rec(outPort, current.tail)
-              else doubleSubscribe(outPort)
+              else illegalState(s"Double subscribe($outPort) in $this")
             } else {
               val newOuts = new OutportStates(outPort, outs, 0)
               _outputElems = newOuts
               outPort.onSubscribe()
               connecting(in, newOuts)
             }
-          rec(outPort, outs)
+          rec(from, outs)
         },
 
-        start = ctx ⇒ {
+        xSeal = ctx ⇒ {
           if (in ne null) {
             if (outs.nonEmpty) {
               configureFrom(ctx.env)
-              in.start(ctx)
+              in.xSeal(ctx)
               @tailrec def rec(current: OutportStates): Unit =
-                if (current ne null) { current.out.start(ctx); rec(current.tail) }
+                if (current ne null) { current.out.xSeal(ctx); rec(current.tail) }
               rec(outs)
               f(ctx, in, outs)
-            } else illegalState(s"Cannot start without downstream in $this")
-          } else illegalState(s"Cannot start with unconnected upstream in $this")
+            } else illegalState(s"Unexpected xSeal(...) in $this (unconnected downstream)")
+          } else illegalState(s"Unexpected xSeal(...) in $this (unconnected upstream)")
         })
     }
 

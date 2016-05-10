@@ -29,9 +29,17 @@ private[core] final class ForeachDrainStage(
   def pipeElemParams: List[Any] = callback :: terminationPromise :: Nil
 
   connectInAndStartWith { (ctx, in) ⇒
-    in.request(Long.MaxValue)
-    running(in)
+    ctx.registerForXStart(this)
+    awaitingXStart(in)
   }
+
+  def awaitingXStart(in: Inport) =
+    state(name = "awaitingXStart",
+
+      xStart = () => {
+        in.request(Long.MaxValue)
+        running(in)
+      })
 
   def running(in: Inport) =
     state(name = "running",

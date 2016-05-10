@@ -41,6 +41,7 @@ object MonteCarloPi extends App {
     .take(10)
     .foreach(println)
 
+  println(f"Done. Total time: ${System.currentTimeMillis() - env.startTime}%,6d ms")
 
   //////////////// MODEL ///////////////
 
