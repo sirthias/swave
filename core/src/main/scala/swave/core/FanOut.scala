@@ -16,12 +16,11 @@
 
 package swave.core
 
-import swave.core.impl.stages.PipeStage
-import swave.core.impl.stages.fanout.{ RoundRobinStage, FirstAvailableStage, BroadcastStage }
+import swave.core.impl.stages.fanout._
 
 object FanOut {
 
-  final class Type private[core] (private[core] val newStage: Boolean ⇒ PipeStage)
+  final class Type private[core] (private[core] val newStage: Boolean ⇒ FanOutStage)
 
   val Broadcast: Type = new Type(new BroadcastStage(_))
 

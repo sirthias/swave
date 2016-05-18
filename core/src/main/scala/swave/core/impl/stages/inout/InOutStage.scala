@@ -16,64 +16,20 @@
 
 package swave.core.impl.stages.inout
 
+import scala.annotation.compileTimeOnly
+import swave.core.impl.{ Outport, Inport, RunContext }
 import swave.core.PipeElem
-import swave.core.impl.stages.PipeStage
-import swave.core.impl.{ Inport, Outport, RunContext }
+import swave.core.impl.stages.Stage
 
 // format: OFF
-private[inout] abstract class InOutStage extends PipeStage { this: PipeElem.InOut =>
+private[core] abstract class InOutStage extends Stage { this: PipeElem.InOut =>
 
-  private[this] var _inputPipeElem: PipeElem.Basic = PipeElem.Unconnected
-  private[this] var _outputPipeElem: PipeElem.Basic = PipeElem.Unconnected
+  protected var _inputPipeElem: PipeElem.Basic = PipeElem.Unconnected
+  protected var _outputPipeElem: PipeElem.Basic = PipeElem.Unconnected
 
   def inputElem = _inputPipeElem
   def outputElem =  _outputPipeElem
 
-  protected final def connectInOutAndStartWith(f: (RunContext, Inport, Outport) ⇒ State): Unit = {
-    def awaitingSubscribeOrOnSubscribe =
-      fullState(name = "connectInOutAndStartWith:awaitingSubscribeOrOnSubscribe",
-        interceptWhileHandling = false,
-
-        onSubscribe = in ⇒ {
-          _inputPipeElem = in.pipeElem
-          awaitingSubscribe(in)
-        },
-
-        subscribe = out ⇒ {
-          _outputPipeElem = out.pipeElem
-          out.onSubscribe()
-          awaitingOnSubscribe(out)
-        })
-
-    def awaitingSubscribe(in: Inport) =
-      fullState(name = "connectInOutAndStartWith:awaitingSubscribe",
-        interceptWhileHandling = false,
-
-        subscribe = out ⇒ {
-          _outputPipeElem = out.pipeElem
-          out.onSubscribe()
-          ready(in, out)
-        })
-
-    def awaitingOnSubscribe(out: Outport) =
-      fullState(name = "connectInOutAndStartWith:awaitingOnSubscribe",
-        interceptWhileHandling = false,
-
-        onSubscribe = in ⇒ {
-          _inputPipeElem = in.pipeElem
-          ready(in, out)
-        })
-
-    def ready(in: Inport, out: Outport) =
-      fullState(name = "connectInOutAndStartWith:ready",
-
-        xSeal = ctx ⇒ {
-          configureFrom(ctx.env)
-          in.xSeal(ctx)
-          out.xSeal(ctx)
-          f(ctx, in, out)
-        })
-
-    initialState(awaitingSubscribeOrOnSubscribe)
-  }
+  @compileTimeOnly("Unresolved `connectInOutAndSealWith` call")
+  protected final def connectInOutAndSealWith(f: (RunContext, Inport, Outport) ⇒ State): Unit = ()
 }

@@ -17,39 +17,39 @@
 package swave.core.impl.stages.source
 
 import scala.annotation.tailrec
+import swave.core.macros.StageImpl
 import swave.core.PipeElem
 import swave.core.impl.Outport
 
 // format: OFF
+@StageImpl
 private[core] final class IteratorStage(iterator: Iterator[AnyRef]) extends SourceStage with PipeElem.Source.Iterator {
 
   def pipeElemType: String = "Stream.fromIterator"
   def pipeElemParams: List[Any] = iterator :: Nil
 
-  connectOutAndStartWith { (ctx, out) ⇒
+  connectOutAndSealWith { (ctx, out) ⇒
     if (!iterator.hasNext) {
       ctx.registerForXStart(this)
       awaitingXStart(out)
     } else running(out)
   }
 
-  def awaitingXStart(out: Outport) =
-    state(name = "awaitingXStart", xStart = () => stopComplete(out))
+  def awaitingXStart(out: Outport) = state(
+    xStart = () => stopComplete(out))
 
-  def running(out: Outport) =
-    state(name = "running",
+  def running(out: Outport) = state(
+    request = (n, _) ⇒ {
+      @tailrec def rec(nn: Int): State = {
+        out.onNext(iterator.next())
+        if (iterator.hasNext) {
+          if (nn > 1) rec(nn - 1)
+          else stay()
+        } else stopComplete(out)
+      }
+      rec(n)
+    },
 
-      request = (n, _) ⇒ {
-        @tailrec def rec(n: Int): State = {
-          out.onNext(iterator.next())
-          if (iterator.hasNext) {
-            if (n > 1) rec(n - 1)
-            else stay()
-          } else stopComplete(out)
-        }
-        rec(n)
-      },
-
-      cancel = stopF)
+    cancel = stopF)
 }
 

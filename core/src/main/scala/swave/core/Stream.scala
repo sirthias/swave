@@ -22,8 +22,8 @@ import scala.collection.generic.CanBuildFrom
 import scala.concurrent.Future
 import scala.concurrent.duration.{ Duration, FiniteDuration }
 import shapeless._
-import swave.core.impl.stages.PipeStage
 import swave.core.impl.{ InportList, TypeLogic, Inport }
+import swave.core.impl.stages.Stage
 import swave.core.impl.stages.source._
 
 final class Stream[+A](private[core] val inport: Inport) extends AnyVal with StreamOps[A @uV] {
@@ -31,7 +31,7 @@ final class Stream[+A](private[core] val inport: Inport) extends AnyVal with Str
 
   protected def base: Inport = inport
   protected def wrap: Inport ⇒ Repr[_] = Stream.wrap
-  protected[core] def append[B](stage: PipeStage): Stream[B] = {
+  protected[core] def append[B](stage: Stage): Stream[B] = {
     inport.subscribe()(stage)
     new Stream(stage)
   }

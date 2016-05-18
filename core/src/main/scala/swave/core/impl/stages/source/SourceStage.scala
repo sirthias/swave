@@ -17,50 +17,16 @@
 package swave.core.impl.stages.source
 
 import swave.core.PipeElem
-import swave.core.impl.{ RunContext, Outport }
+import swave.core.impl.{ Outport, RunContext }
 import swave.core.impl.stages.Stage
 
 // format: OFF
 private[swave] abstract class SourceStage extends Stage { this: PipeElem.Source ⇒
 
-  private[this] var _outputPipeElem: PipeElem.Basic = PipeElem.Unconnected
-  def outputElem: PipeElem.Basic = _outputPipeElem
+  protected var _outputPipeElem: PipeElem.Basic = PipeElem.Unconnected
 
-  protected def setOutputElem(elem: PipeElem.Basic): Unit =
-    _outputPipeElem = elem
+  def outputElem = _outputPipeElem
 
-  protected final def state(
-    name: String,
-    subscribe: Outport ⇒ State = null,
-    request: (Int, Outport) ⇒ State = null,
-    cancel: Outport ⇒ State = null,
-    xSeal: RunContext => State = null,
-    xStart: () => State= null) =
-    fullState(name, subscribe = subscribe, request = request, cancel = cancel, xSeal = xSeal, xStart = xStart)
-
-  protected final def connectOutAndStartWith(f: (RunContext, Outport) ⇒ State): Unit = {
-    def awaitingSubscribe =
-      fullState(
-        name = "connectOutAndStartWith:awaitingSubscribe",
-        interceptWhileHandling = false,
-
-        subscribe = out ⇒ {
-          setOutputElem(out.pipeElem)
-          out.onSubscribe()
-          ready(out)
-        })
-
-    def ready(out: Outport) =
-      fullState(
-        name = "connectOutAndStartWith:ready",
-
-        xSeal = ctx ⇒ {
-          configureFrom(ctx.env)
-          out.xSeal(ctx)
-          f(ctx, out)
-        })
-
-    initialState(awaitingSubscribe)
-  }
+  protected final def connectOutAndSealWith(f: (RunContext, Outport) ⇒ State): Unit = ()
 }
 

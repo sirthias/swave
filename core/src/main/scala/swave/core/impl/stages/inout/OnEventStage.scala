@@ -17,46 +17,45 @@
 package swave.core.impl.stages.inout
 
 import swave.core.impl.{ Outport, Inport }
+import swave.core.macros.StageImpl
 import swave.core.{ PipeElem, StreamEvent }
 
 // format: OFF
+@StageImpl
 private[core] final class OnEventStage(callback: StreamEvent[Any] ⇒ Unit) extends InOutStage
   with PipeElem.InOut.OnEvent {
 
   def pipeElemType: String = "onEvent"
   def pipeElemParams: List[Any] = callback :: Nil
 
-  connectInOutAndStartWith { (ctx, in, out) ⇒ running(in, out) }
+  connectInOutAndSealWith { (ctx, in, out) ⇒ running(in, out) }
 
-  def running(in: Inport, out: Outport) =
-    state(name = "running",
-      interceptWhileHandling = false,
+  def running(in: Inport, out: Outport) = state(
+    request = (n, _) ⇒ {
+      callback(StreamEvent.Request(n))
+      in.request(n.toLong)
+      stay()
+    },
 
-      request = (n, _) ⇒ {
-        callback(StreamEvent.Request(n))
-        in.request(n.toLong)
-        stay()
-      },
+    cancel = _ ⇒ {
+      callback(StreamEvent.Cancel)
+      stopCancel(in)
+    },
 
-      cancel = _ ⇒ {
-        callback(StreamEvent.Cancel)
-        stopCancel(in)
-      },
+    onNext = (elem, _) ⇒ {
+      callback(StreamEvent.OnNext(elem))
+      out.onNext(elem)
+      stay()
+    },
 
-      onNext = (elem, _) ⇒ {
-        callback(StreamEvent.OnNext(elem))
-        out.onNext(elem)
-        stay()
-      },
+    onComplete = _ ⇒ {
+      callback(StreamEvent.OnComplete)
+      stopComplete(out)
+    },
 
-      onComplete = _ ⇒ {
-        callback(StreamEvent.OnComplete)
-        stopComplete(out)
-      },
-
-      onError = (e, _) ⇒ {
-        callback(StreamEvent.OnError(e))
-        stopError(e, out)
-      })
+    onError = (e, _) ⇒ {
+      callback(StreamEvent.OnError(e))
+      stopError(e, out)
+    })
 }
 

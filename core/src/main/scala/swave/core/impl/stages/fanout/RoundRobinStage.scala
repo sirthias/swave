@@ -22,5 +22,8 @@ private[core] final class RoundRobinStage(eagerCancel: Boolean) extends FanOutSt
 
   def pipeElemType: String = "fanOutRoundRobin"
   def pipeElemParams: List[Any] = eagerCancel :: Nil
+
+  val interceptingStates: Int = 0
+  override def stateName: String = ???
 }
 

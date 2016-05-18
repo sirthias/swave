@@ -25,7 +25,7 @@ import scala.util.Try
 import shapeless._
 import shapeless.ops.nat.ToInt
 import shapeless.ops.hlist.{ ToCoproduct, Tupler, Fill }
-import swave.core.impl.stages.PipeStage
+import swave.core.impl.stages.Stage
 import swave.core.impl.stages.fanin.{ MergeStage, ToProductStage, FirstNonEmptyStage, ConcatStage }
 import swave.core.impl.stages.fanout.SwitchStage
 import swave.core.impl.{ InportList, TypeLogic, Inport }
@@ -40,7 +40,7 @@ trait StreamOps[A] extends Any { self ⇒
 
   protected def base: Inport
   protected def wrap: Inport ⇒ Repr[_]
-  protected def append[T](stage: PipeStage): Repr[T]
+  protected def append[T](stage: Stage): Repr[T]
 
   final def async: Repr[A] = ???
 
@@ -445,7 +445,7 @@ object StreamOps {
 
     protected def base: Inport = stream.inport
     protected def wrap: Inport ⇒ Repr[_] = in ⇒ new SubStreamOps(fo, new Stream(in))
-    protected def append[B](stage: PipeStage): Repr[B] = new SubStreamOps(fo, stream.append(stage))
+    protected def append[B](stage: Stage): Repr[B] = new SubStreamOps(fo, stream.append(stage))
 
     def identity: Repr[A] = this
 

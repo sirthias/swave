@@ -17,19 +17,21 @@
 package swave.core.impl.stages.fanout
 
 import scala.annotation.tailrec
+import swave.core.macros.StageImpl
 import swave.core.PipeElem
 import swave.core.impl.stages.Stage
 import swave.core.impl.{ Inport, Outport }
 import swave.core.util._
 
 // format: OFF
+@StageImpl
 private[core] final class BroadcastStage(eagerCancel: Boolean) extends FanOutStage with PipeElem.FanOut.Broadcast {
   import Stage.OutportStates
 
   def pipeElemType: String = "fanOutBroadcast"
   def pipeElemParams: List[Any] = eagerCancel :: Nil
 
-  connectFanOutAndStartWith { (ctx, in, outs) ⇒ running(in, outs, pending = 0) }
+  connectFanOutAndSealWith { (ctx, in, outs) ⇒ running(in, outs, 0) }
 
   /**
    * @param in        the active upstream
@@ -37,14 +39,15 @@ private[core] final class BroadcastStage(eagerCancel: Boolean) extends FanOutSta
    * @param pending   number of elements already requested from upstream but not yet received, >= 0
    */
   def running(in: Inport, outs: OutportStates, pending: Long): State = {
-    @tailrec def handleDemand(n: Int, out: Outport, outs: OutportStates, current: OutportStates,
+
+    @tailrec def handleDemand(n: Int, out: Outport, os: OutportStates, current: OutportStates,
                               minRemaining: Long): State =
       if (current ne null) {
         if (current.out eq out) current.remaining = current.remaining ⊹ n
-        handleDemand(n, out, outs, current.tail, math.min(current.remaining, minRemaining))
+        handleDemand(n, out, os, current.tail, math.min(current.remaining, minRemaining))
       } else {
         if (minRemaining > pending) in.request(minRemaining - pending)
-        running(in, outs, minRemaining)
+        running(in, os, minRemaining)
       }
 
     @tailrec def handleOnComplete(current: OutportStates): State =
@@ -53,7 +56,7 @@ private[core] final class BroadcastStage(eagerCancel: Boolean) extends FanOutSta
         handleOnComplete(current.tail)
       } else stop()
 
-    state(name = "running",
+    state(
       request = (n, out) ⇒ handleDemand(n, out, outs, outs, Long.MaxValue),
 
       cancel = out ⇒ {

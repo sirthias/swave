@@ -16,50 +16,21 @@
 
 package swave.core.impl.stages.drain
 
+import scala.annotation.compileTimeOnly
 import swave.core.PipeElem
-import swave.core.impl.{ Inport, RunContext }
+import swave.core.impl.{ RunContext, Inport }
 import swave.core.impl.stages.Stage
 
 // format: OFF
 private[swave] abstract class DrainStage extends Stage { this: PipeElem.Drain =>
 
-  private[this] var _inputPipeElem: PipeElem.Basic = PipeElem.Unconnected
-  def inputElem: PipeElem.Basic = _inputPipeElem
+  protected var _inputPipeElem: PipeElem.Basic = PipeElem.Unconnected
+
+  def inputElem = _inputPipeElem
 
   protected def setInputElem(elem: PipeElem.Basic): Unit =
     _inputPipeElem = elem
 
-  protected final def connectInAndStartWith(f: (RunContext, Inport) ⇒ State): Unit = {
-    def awaitingOnSubscribe =
-      fullState(name = "connectInAndStartWith:awaitingOnSubscribe",
-        interceptWhileHandling = false,
-
-        onSubscribe = in ⇒ {
-          setInputElem(in.pipeElem)
-          ready(in)
-        })
-
-    def ready(in: Inport) =
-      fullState(name = "connectInAndStartWith:ready",
-
-        xSeal = ctx ⇒ {
-          configureFrom(ctx.env)
-          in.xSeal(ctx)
-          f(ctx, in)
-        })
-
-    initialState(awaitingOnSubscribe)
-  }
-
-  protected final def state(
-                             name: String,
-                             onSubscribe: Inport ⇒ State = null,
-                             onNext: (AnyRef, Inport) ⇒ State = null,
-                             onComplete: Inport ⇒ State = null,
-                             onError: (Throwable, Inport) ⇒ State = null,
-                             xSeal: RunContext => State = null,
-                             xStart: () => State= null,
-                             xRun: () ⇒ State = null) =
-    fullState(name, onSubscribe = onSubscribe, onNext = onNext, onComplete = onComplete, onError = onError,
-      xSeal = xSeal, xStart = xStart, xRun = xRun)
+  @compileTimeOnly("Unresolved `connectInAndSealWith` call")
+  protected final def connectInAndSealWith(f: (RunContext, Inport) ⇒ State): Unit = ()
 }

@@ -16,7 +16,7 @@
 
 package swave.core.impl.stages
 
-import scala.annotation.tailrec
+import scala.annotation.{ compileTimeOnly, tailrec }
 import swave.core.{ StreamEnv, PipeElem }
 import swave.core.util._
 import swave.core.impl._
@@ -84,54 +84,83 @@ import swave.core.impl._
  * STOPPED (single state)
  * - ignore all signals
  */
+
 private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem.Basic ⇒
   import Stage.InportStates
 
-  type State = Stage.State
+  type State = Int
 
   private[this] var _intercepting = false
   private[this] var _sealed = false
-  private[this] var _state: State = _
+  private[this] var _state: State = _ // current state; the STOPPED state is always encoded as zero
   private[this] var _mbs: Int = _
   private[this] var _inportState: InportStates = _
   private[this] var _buffer: ResizableRingBuffer[AnyRef] = _ // TODO: evaluate inlining vs. splitting into 3 more narrowly typed buffers
 
+  protected val interceptingStates: Int // bit mask containg a 1-bit for every state which requires interception support
+
+  protected final def configureFrom(env: StreamEnv): Unit = _mbs = env.settings.maxBatchSize
+
+  protected final implicit def self: this.type = this
+
   protected final def initialState(s: State): Unit = _state = s
 
-  protected final def configureFrom(env: StreamEnv): Unit =
-    _mbs = env.settings.maxBatchSize
+  protected final def stay(): State = _state
 
-  final def subscribe()(implicit from: Outport) =
+  protected final def illegalState(msg: String) = throw new IllegalStateException(msg + " in " + this)
+
+  protected final def setIntercepting(flag: Boolean): Unit = _intercepting = flag
+
+  override def toString = s"${getClass.getSimpleName}@${identityHash(this)}/$stateName"
+
+  def stateName: String = s"<unknown id ${_state}>"
+
+  /////////////////////////////////////// SUBSCRIBE ///////////////////////////////////////
+
+  final def subscribe()(implicit from: Outport): Unit =
     if (!_intercepting) {
-      _intercepting = _state.interceptWhileHandling
+      _intercepting = interceptionNeeded
       _subscribe(from)
       handleInterceptions()
     } else storeInterception(StageStatics.LONGS(0), from)
 
-  private def _subscribe(from: Outport): Unit =
-    if (_state.subscribe ne null) _state = _state.subscribe(from)
-    else illegalState(s"Unexpected subscribe() from out '$from' in $this")
+  private def _subscribe(from: Outport): Unit = _state = _subscribe0(from)
 
-  final def request(n: Long)(implicit from: Outport) =
+  protected def _subscribe0(from: Outport): State =
+    _state match {
+      case 0 ⇒ stay()
+      case _ ⇒ illegalState(s"Unexpected subscribe() from out '$from'")
+    }
+
+  /////////////////////////////////////// REQUEST ///////////////////////////////////////
+
+  final def request(n: Long)(implicit from: Outport): Unit =
     if (!_intercepting) {
-      _intercepting = _state.interceptWhileHandling
+      _intercepting = interceptionNeeded
       _request(n, from)
       handleInterceptions()
     } else storeInterception(StageStatics.LONGS(1), if (n < 16) StageStatics.LONGS(n.toInt) else new java.lang.Long(n), from)
 
-  private def _request(n: Long, from: Outport): Unit =
-    if (_state.request ne null) {
-      val count =
-        if (n > _mbs) {
-          from.asInstanceOf[Stage].updateInportState(this, n)
-          _mbs
-        } else n.toInt
-      _state = _state.request(count, from)
-    } else illegalState(s"Unexpected request($n) from out '$from' in $this")
+  private def _request(n: Long, from: Outport): Unit = {
+    val count =
+      if (n > _mbs) {
+        from.asInstanceOf[Stage].updateInportState(this, n)
+        _mbs
+      } else n.toInt
+    _state = _request0(count, from)
+  }
 
-  final def cancel()(implicit from: Outport) =
+  protected def _request0(n: Int, from: Outport): State =
+    _state match {
+      case 0 ⇒ stay()
+      case _ ⇒ illegalState(s"Unexpected request($n) from out '$from'")
+    }
+
+  /////////////////////////////////////// CANCEL ///////////////////////////////////////
+
+  final def cancel()(implicit from: Outport): Unit =
     if (!_intercepting) {
-      _intercepting = _state.interceptWhileHandling
+      _intercepting = interceptionNeeded
       from.asInstanceOf[Stage].clearInportState(this)
       _cancel(from)
       handleInterceptions()
@@ -140,114 +169,211 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem.Basic 
       storeInterception(StageStatics.LONGS(2), from)
     }
 
-  private def _cancel(from: Outport): Unit =
-    if (_state.cancel ne null) _state = _state.cancel(from)
-    else illegalState(s"Unexpected cancel() from out '$from' in $this")
+  private def _cancel(from: Outport): Unit = _state = _cancel0(from)
 
-  final def onSubscribe()(implicit from: Inport) =
+  protected def _cancel0(from: Outport): State =
+    _state match {
+      case 0 ⇒ stay()
+      case _ ⇒ illegalState(s"Unexpected cancel() from out '$from'")
+    }
+
+  /////////////////////////////////////// ONSUBSCRIBE ///////////////////////////////////////
+
+  final def onSubscribe()(implicit from: Inport): Unit =
     if (!_intercepting) {
-      _intercepting = _state.interceptWhileHandling
+      _intercepting = interceptionNeeded
       _onSubscribe(from)
       handleInterceptions()
     } else storeInterception(StageStatics.LONGS(3), from)
 
-  private def _onSubscribe(from: Inport): Unit = _state =
-    if (_state.onSubscribe ne null) _state.onSubscribe(from)
-    else illegalState(s"Unexpected onSubscribe() from in '$from' in $this")
+  private def _onSubscribe(from: Inport): Unit = _state = _onSubscribe0(from)
 
-  final def onNext(elem: AnyRef)(implicit from: Inport) =
+  protected def _onSubscribe0(from: Inport): State =
+    _state match {
+      case 0 ⇒ stay()
+      case _ ⇒ illegalState(s"Unexpected onSubscribe() from out '$from'")
+    }
+
+  /////////////////////////////////////// ONNEXT ///////////////////////////////////////
+
+  final def onNext(elem: AnyRef)(implicit from: Inport): Unit =
     if (!_intercepting) {
-      _intercepting = _state.interceptWhileHandling
+      _intercepting = interceptionNeeded
       _onNext(elem, from)
       handleInterceptions()
     } else storeInterception(StageStatics.LONGS(4), elem, from)
 
-  private def _onNext(elem: AnyRef, from: Inport): Unit = {
-    @tailrec def rec(last: InportStates, current: InportStates): State =
-      if (current ne null) {
-        if (current.in eq from) {
-          val next = _state.onNext(elem, from)
-          if (current.tail ne current) { // is `current` still valid, i.e. not cancelled? (tail eq self is special condition)
-            val newPending = current.pending - 1
-            if (newPending == 0) {
-              val newRemaining = current.remaining - _mbs
-              if (newRemaining > 0) {
-                current.pending = _mbs
-                current.remaining = newRemaining
-                from.request(_mbs.toLong)
-              } else {
-                if (last ne null) last.tail = current.tail else _inportState = current.tail
-                from.request(current.remaining)
-              }
-            } else current.pending = newPending
-          }
-          next
-        } else rec(current, current.tail)
-      } else _state.onNext(elem, from)
+  @tailrec
+  private def _onNext(elem: AnyRef, from: Inport, last: InportStates = null, current: InportStates = _inportState): Unit =
+    if (current ne null) {
+      if (current.in eq from) {
+        _state = _onNext0(elem, from)
+        if (current.tail ne current) { // is `current` still valid, i.e. not cancelled? (tail eq self is special condition)
+          val newPending = current.pending - 1
+          if (newPending == 0) {
+            val newRemaining = current.remaining - _mbs
+            if (newRemaining > 0) {
+              current.pending = _mbs
+              current.remaining = newRemaining
+              from.request(_mbs.toLong)
+            } else {
+              if (last ne null) last.tail = current.tail else _inportState = current.tail
+              from.request(current.remaining)
+            }
+          } else current.pending = newPending
+        }
+      } else _onNext(elem, from, current, current.tail)
+    } else _state = _onNext0(elem, from)
 
-    if (_state.onNext ne null) _state = rec(null, _inportState)
-    else illegalState(s"Unexpected onNext($elem) from in '$from' in $this")
-  }
+  protected def _onNext0(elem: AnyRef, from: Inport): State =
+    _state match {
+      case 0 ⇒ stay()
+      case _ ⇒ illegalState(s"Unexpected onNext($elem) from out '$from'")
+    }
 
-  final def onComplete()(implicit from: Inport) =
+  /////////////////////////////////////// ONCOMPLETE ///////////////////////////////////////
+
+  final def onComplete()(implicit from: Inport): Unit =
     if (!_intercepting) {
-      _intercepting = _state.interceptWhileHandling
+      _intercepting = interceptionNeeded
       _onComplete(from)
       handleInterceptions()
     } else storeInterception(StageStatics.LONGS(5), from)
 
-  private def _onComplete(from: Inport): Unit =
-    if (_state.onComplete ne null) {
-      clearInportState(from)
-      _state = _state.onComplete(from)
-    } else illegalState(s"Unexpected onComplete() from in '$from' in $this")
+  private def _onComplete(from: Inport): Unit = {
+    clearInportState(from)
+    _state = _onComplete0(from)
+  }
 
-  final def onError(error: Throwable)(implicit from: Inport) =
+  protected def _onComplete0(from: Inport): State =
+    _state match {
+      case 0 ⇒ stay()
+      case _ ⇒ illegalState(s"Unexpected onComplete() from out '$from'")
+    }
+
+  /////////////////////////////////////// ONERROR ///////////////////////////////////////
+
+  final def onError(error: Throwable)(implicit from: Inport): Unit =
     if (!_intercepting) {
-      _intercepting = _state.interceptWhileHandling
+      _intercepting = interceptionNeeded
       _onError(error, from)
       handleInterceptions()
     } else storeInterception(StageStatics.LONGS(6), error, from)
 
-  private def _onError(error: Throwable, from: Inport): Unit =
-    if (_state.onError ne null) {
-      clearInportState(from)
-      _state = _state.onError(error, from)
-    } else illegalState(s"Unexpected onError($error) from in '$from' in $this")
+  private def _onError(error: Throwable, from: Inport): Unit = {
+    clearInportState(from)
+    _state = _onError0(error, from)
+  }
+
+  protected def _onError0(error: Throwable, from: Inport): State =
+    _state match {
+      case 0 ⇒ stay()
+      case _ ⇒ illegalState(s"Unexpected onError($error) from out '$from'")
+    }
+
+  /////////////////////////////////////// XSEAL ///////////////////////////////////////
 
   final def xSeal(ctx: RunContext): Unit =
     if (!_sealed) {
-      if (_state.xSeal ne null) {
-        _sealed = true
-        _state = _state.xSeal(ctx)
-        if (_state.xStart ne null) _intercepting = true
-      } else illegalState(s"Unexpected xSeal(...) in $this")
+      _sealed = true
+      _state = _xSeal(ctx)
     }
 
-  final def xStart(): Unit =
-    if (_state.xStart ne null) {
-      _state = _state.xStart()
-      handleInterceptions()
-    } else illegalState(s"Unexpected xStart() in $this")
+  protected def _xSeal(ctx: RunContext): State =
+    _state match {
+      case 0 ⇒ stay()
+      case _ ⇒ illegalState(s"Unexpected xSeal(...)")
+    }
 
-  final def xRun() =
-    if (_state.xRun ne null) _state = _state.xRun()
-    else illegalState(s"Unexpected xRun() in $this")
+  /////////////////////////////////////// XSTART ///////////////////////////////////////
 
-  final def xCleanUp(): Unit =
-    if (_state.xCleanUp ne null) _state = _state.xCleanUp()
-    else illegalState(s"Unexpected xCleanUp() in $this")
+  final def xStart(): Unit = {
+    _state = _xStart()
+    handleInterceptions()
+  }
 
-  protected final implicit def self: this.type = this
+  protected def _xStart(): State =
+    _state match {
+      case 0 ⇒ stay()
+      case _ ⇒ illegalState(s"Unexpected xStart()")
+    }
 
-  protected final def stay(): State = _state
+  /////////////////////////////////////// XRUN ///////////////////////////////////////
+
+  final def xRun(): Unit = _state = _xRun()
+
+  protected def _xRun(): State =
+    _state match {
+      case 0 ⇒ stay()
+      case _ ⇒ illegalState(s"Unexpected xRun()")
+    }
+
+  /////////////////////////////////////// XCLEANUP ///////////////////////////////////////
+
+  final def xCleanUp(): Unit = _state = _xCleanUp()
+
+  protected def _xCleanUp(): State =
+    _state match {
+      case 0 ⇒ stay()
+      case _ ⇒ illegalState(s"Unexpected xCleanUp()")
+    }
+
+  /////////////////////////////////////// STATE DESIGNATOR ///////////////////////////////////////
+
+  @compileTimeOnly("`state(...) can only be used as the single implementation expression of a 'State Def'!")
+  protected final def state(
+    intercept: Boolean = true,
+    subscribe: Outport ⇒ State = null,
+    request: (Int, Outport) ⇒ State = null,
+    cancel: Outport ⇒ State = null,
+    onSubscribe: Inport ⇒ State = null,
+    onNext: (AnyRef, Inport) ⇒ State = null,
+    onComplete: Inport ⇒ State = null,
+    onError: (Throwable, Inport) ⇒ State = null,
+    xSeal: RunContext ⇒ State = null,
+    xStart: () ⇒ State = null,
+    xRun: () ⇒ State = null,
+    xCleanUp: () ⇒ State = null): State = 0
+
+  /////////////////////////////////////// STOPPERS ///////////////////////////////////////
 
   protected final def stop(): State = {
     _buffer = null // don't hang on to elements
-    stopped
+    0 // STOPPED state encoding
   }
 
   protected final def stopF(out: Outport): State = stop()
+
+  protected final def stopCancel(in: Inport): State = {
+    in.cancel()
+    stop()
+  }
+
+  protected final def stopCancelF(in: Inport)(out: Outport): State = stopCancel(in)
+
+  protected final def stopCancel[L >: Null <: AbstractInportList[L]](ins: L, except: Inport = null): State = {
+    cancelAll(ins, except)
+    stop()
+  }
+
+  protected final def stopCancelF[L >: Null <: AbstractInportList[L]](ins: L)(out: Outport): State = stopCancel(ins)
+
+  protected final def stopComplete(out: Outport): State = {
+    out.onComplete()
+    stop()
+  }
+
+  protected final def stopCompleteF(out: Outport)(in: Inport): State = stopComplete(out)
+
+  protected final def stopError(e: Throwable, out: Outport): State = {
+    out.onError(e)
+    stop()
+  }
+
+  protected final def stopErrorF(out: Outport)(e: Throwable, in: Inport): State =
+    stopError(e, out)
+
+  /////////////////////////////////////// CANCEL HELPERS ///////////////////////////////////////
 
   @tailrec protected final def cancelAll[L >: Null <: AbstractInportList[L]](ins: L, except: Inport = null): Unit =
     if (ins ne null) {
@@ -260,54 +386,27 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem.Basic 
     stopComplete(out)
   }
 
-  protected final def stopCancel(in: Inport): State = {
-    in.cancel()
-    stop()
-  }
-
-  protected final def stopCancel[L >: Null <: AbstractInportList[L]](ins: L, except: Inport = null): State = {
-    cancelAll(ins, except)
-    stop()
-  }
-
-  protected final def stopCancelF(in: Inport)(out: Outport): State = stopCancel(in)
-
-  protected final def stopCancelF[L >: Null <: AbstractInportList[L]](ins: L)(out: Outport): State = stopCancel(ins)
-
-  protected final def stopComplete(out: Outport): State = {
-    out.onComplete()
-    stop()
-  }
-
-  protected final def stopCompleteF(out: Outport)(in: Inport): State = stopComplete(out)
-
   protected final def cancelAllAndStopCompleteF[L >: Null <: AbstractInportList[L]](ins: L, out: Outport)(in: Inport): State = {
     cancelAll(ins, except = in)
     stopComplete(out)
   }
-
-  protected final def stopError(e: Throwable, out: Outport): State = {
-    out.onError(e)
-    stop()
-  }
-
-  protected final def stopErrorF(out: Outport)(e: Throwable, in: Inport): State =
-    stopError(e, out)
 
   protected final def cancelAllAndStopErrorF[L >: Null <: AbstractInportList[L]](ins: L, out: Outport)(e: Throwable, in: Inport): State = {
     cancelAll(ins, except = in)
     stopError(e, out)
   }
 
-  protected final def illegalState(msg: String) = throw new IllegalStateException(msg)
+  /////////////////////////////////////// PRIVATE ///////////////////////////////////////
+
+  private def interceptionNeeded: Boolean = ((interceptingStates >> _state) & 1) != 0
 
   private def storeInterception(signal: java.lang.Long, arg: AnyRef): Unit =
     if (!buffer.write(signal, arg))
-      illegalState(s"Interception buffer overflow on signal '$signal($arg)' in $this")
+      illegalState(s"Interception buffer overflow on signal '$signal($arg)'")
 
   private def storeInterception(signal: java.lang.Long, arg0: AnyRef, arg1: AnyRef): Unit =
     if (!buffer.write(signal, arg0, arg1))
-      illegalState(s"Interception buffer overflow on signal '$signal($arg0, $arg1)' in $this")
+      illegalState(s"Interception buffer overflow on signal '$signal($arg0, $arg1)'")
 
   private def buffer = {
     if (_buffer eq null) {
@@ -344,62 +443,9 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem.Basic 
 
   private def clearInportState(in: Inport): Unit =
     _inportState = _inportState.remove(in)
-
-  protected final def fullState(
-    name: String,
-    interceptWhileHandling: Boolean = true,
-    subscribe: Outport ⇒ State = null,
-    request: (Int, Outport) ⇒ State = null,
-    cancel: Outport ⇒ State = null,
-    onSubscribe: Inport ⇒ State = null,
-    onNext: (AnyRef, Inport) ⇒ State = null,
-    onComplete: Inport ⇒ State = null,
-    onError: (Throwable, Inport) ⇒ State = null,
-    xSeal: RunContext ⇒ State = null,
-    xStart: () ⇒ State = null,
-    xRun: () ⇒ State = null,
-    xCleanUp: () ⇒ State = null) =
-    new State(name, interceptWhileHandling, subscribe, request, cancel, onSubscribe, onNext, onComplete, onError,
-      xSeal, xStart, xRun, xCleanUp)
-
-  protected final def stateName: String = _state.name
-
-  override def toString = s"${getClass.getSimpleName}@${identityHash(this)}/$stateName"
-
-  final def stopped =
-    fullState(
-      name = "STOPPED",
-      interceptWhileHandling = false,
-
-      subscribe = _ ⇒ stay(),
-      request = (_, _) ⇒ stay(),
-      cancel = _ ⇒ stay(),
-      onSubscribe = _ ⇒ stay(),
-      onNext = (_, _) ⇒ stay(),
-      onComplete = _ ⇒ stay(),
-      onError = (_, _) ⇒ stay(),
-      xSeal = _ ⇒ stay(),
-      xStart = () ⇒ stay(),
-      xRun = () ⇒ stay(),
-      xCleanUp = () ⇒ stay())
 }
 
 private[swave] object Stage {
-
-  private[stages] final class State private[Stage] (
-    val name: String,
-    val interceptWhileHandling: Boolean,
-    val subscribe: Outport ⇒ State,
-    val request: (Int, Outport) ⇒ State,
-    val cancel: Outport ⇒ State,
-    val onSubscribe: Inport ⇒ State,
-    val onNext: (AnyRef, Inport) ⇒ State,
-    val onComplete: Inport ⇒ State,
-    val onError: (Throwable, Inport) ⇒ State,
-    val xSeal: RunContext ⇒ State,
-    val xStart: () ⇒ State,
-    val xRun: () ⇒ State,
-    val xCleanUp: () ⇒ State)
 
   private class InportStates(in: Inport, tail: InportStates,
     var pending: Int, // already requested from `in` but not yet received

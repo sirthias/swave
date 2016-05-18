@@ -17,11 +17,10 @@
 package swave.core
 
 import scala.util.control.NoStackTrace
-import swave.core.impl.stages.PipeStage
-import swave.core.impl.stages.inout.BufferBackpressureStage
+import swave.core.impl.stages.inout._
 
 sealed abstract class Overflow {
-  private[core] def newStage(size: Int): PipeStage
+  private[core] def newStage(size: Int): InOutStage
 }
 
 object Overflow {
@@ -31,7 +30,7 @@ object Overflow {
    * and thus never drops any element.
    */
   case object Backpressure extends Overflow {
-    private[core] def newStage(size: Int): PipeStage = new BufferBackpressureStage(size)
+    private[core] def newStage(size: Int): InOutStage = new BufferBackpressureStage(size)
   }
 
   /**
@@ -39,7 +38,7 @@ object Overflow {
    * if the buffer is full and a new element arrives.
    */
   case object DropHead extends Overflow {
-    private[core] def newStage(size: Int): PipeStage = ???
+    private[core] def newStage(size: Int): InOutStage = ???
   }
 
   /**
@@ -47,7 +46,7 @@ object Overflow {
    * if the buffer is full and a new element arrives.
    */
   case object DropTail extends Overflow {
-    private[core] def newStage(size: Int): PipeStage = ???
+    private[core] def newStage(size: Int): InOutStage = ???
   }
 
   /**
@@ -55,7 +54,7 @@ object Overflow {
    * if the buffer is full and a new element arrives.
    */
   case object DropBuffer extends Overflow {
-    private[core] def newStage(size: Int): PipeStage = ???
+    private[core] def newStage(size: Int): InOutStage = ???
   }
 
   /**
@@ -63,7 +62,7 @@ object Overflow {
    * if the buffer is full and a new element arrives.
    */
   case object DropNew extends Overflow {
-    private[core] def newStage(size: Int): PipeStage = ???
+    private[core] def newStage(size: Int): InOutStage = ???
   }
 
   /**
@@ -71,7 +70,7 @@ object Overflow {
    * if the buffer is full and a new element arrives.
    */
   case object Fail extends Overflow {
-    private[core] def newStage(size: Int): PipeStage = ???
+    private[core] def newStage(size: Int): InOutStage = ???
   }
 
   case object OverflowFailure extends RuntimeException with NoStackTrace

@@ -18,32 +18,31 @@ package swave.core.impl.stages.inout
 
 import swave.core.PipeElem
 import swave.core.impl.{ Outport, Inport }
+import swave.core.macros.StageImpl
 
 // format: OFF
+@StageImpl
 private[core] final class MapStage(f: AnyRef ⇒ AnyRef) extends InOutStage with PipeElem.InOut.Map {
 
   def pipeElemType: String = "map"
   def pipeElemParams: List[Any] = f :: Nil
 
-  connectInOutAndStartWith { (ctx, in, out) ⇒ running(in, out) }
+  connectInOutAndSealWith { (ctx, in, out) ⇒ running(in, out) }
 
-  def running(in: Inport, out: Outport) =
-    state(name = "running",
-      interceptWhileHandling = false,
+  def running(in: Inport, out: Outport): State = state(
+    request = (n, _) ⇒ {
+      in.request(n.toLong)
+      stay()
+    },
 
-      request = (n, _) ⇒ {
-        in.request(n.toLong)
-        stay()
-      },
+    cancel = stopCancelF(in),
 
-      cancel = stopCancelF(in),
+    onNext = (elem, _) ⇒ {
+      out.onNext(f(elem))
+      stay()
+    },
 
-      onNext = (elem, _) ⇒ {
-        out.onNext(f(elem))
-        stay()
-      },
-
-      onComplete = stopCompleteF(out),
-      onError = stopErrorF(out))
+    onComplete = stopCompleteF(out),
+    onError = stopErrorF(out))
 }
 

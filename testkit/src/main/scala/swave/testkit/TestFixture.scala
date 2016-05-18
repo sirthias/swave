@@ -50,9 +50,10 @@ object TestFixture {
     def shouldTerminate(validation: TerminalStateValidation): Unit = validation(state)
 
     def state: TestFixture.State.Terminal =
-      outTermination.value getOrElse sys.error(s"Unterminated fixture") match {
-        case Success(noError) ⇒ noError
-        case Failure(e)       ⇒ TestFixture.State.Error(e)
+      outTermination.value match {
+        case Some(Success(noError)) ⇒ noError
+        case Some(Failure(e))       ⇒ TestFixture.State.Error(e)
+        case None                   ⇒ TestFixture.State.Error(new RuntimeException("Unterminated fixture"))
       }
   }
 }

@@ -25,16 +25,17 @@ trait StreamTesting {
     import TestFixture.State._
     val inTermination = in.terminalState
     outTermination match {
-      case Cancelled ⇒ // input can be in any state
-      case Completed ⇒ if (inTermination == Error(TestError)) sys.error(s"Input error didn't propagate to stream output")
-      case error     ⇒ if (inTermination != error) sys.error(s"Unexpected stream output error: " + error)
+      case Cancelled    ⇒ // input can be in any state
+      case Completed    ⇒ if (inTermination == Error(TestError)) sys.error(s"Input error didn't propagate to stream output")
+      case x @ Error(e) ⇒ if (inTermination != x) throw e
     }
   }
 
   def likeThis(pf: PartialFunction[TestFixture.State.Terminal, Unit]): TestFixture.TerminalStateValidation =
-    outTermination ⇒ pf.applyOrElse(
-      outTermination,
-      (x: TestFixture.State.Terminal) ⇒ sys.error(s"Stream termination `$x` did not match expected pattern!"))
+    outTermination ⇒ pf.applyOrElse(outTermination, {
+      case TestFixture.State.Error(e)      ⇒ throw e
+      case (x: TestFixture.State.Terminal) ⇒ sys.error(s"Stream termination `$x` did not match expected pattern!")
+    }: (TestFixture.State.Terminal ⇒ Nothing))
 
   def withError(expected: Throwable): TestFixture.TerminalStateValidation = {
     case TestFixture.State.Error(`expected`) ⇒ // ok

@@ -16,11 +16,13 @@
 
 package swave.core.impl.stages.inout
 
+import swave.core.macros.StageImpl
 import swave.core.{ Errors, PipeElem }
 import swave.core.impl.{ Outport, Inport }
 import swave.core.util._
 
 // format: OFF
+@StageImpl
 private[core] final class LimitStage(max: Long, cost: AnyRef ⇒ Long) extends InOutStage with PipeElem.InOut.Limit {
 
   require(max >= 0)
@@ -28,35 +30,33 @@ private[core] final class LimitStage(max: Long, cost: AnyRef ⇒ Long) extends I
   def pipeElemType: String = "limit"
   def pipeElemParams: List[Any] = max :: cost :: Nil
 
-  connectInOutAndStartWith { (ctx, in, out) ⇒ running(in, out, max) }
+  connectInOutAndSealWith { (ctx, in, out) ⇒ running(in, out, max) }
 
   /**
    * @param in        the active upstream
    * @param out       the active downstream
    * @param remaining max number of elements still allowed before completion, >= 0
    */
-  def running(in: Inport, out: Outport, remaining: Long): State =
-    state(name = "running",
+  def running(in: Inport, out: Outport, remaining: Long): State = state(
+    request = (n, _) ⇒ {
+      in.request(n.toLong)
+      stay()
+    },
 
-      request = (n, _) ⇒ {
-        in.request(n.toLong)
-        stay()
-      },
+    cancel = stopCancelF(in),
 
-      cancel = stopCancelF(in),
+    onNext = (elem, _) ⇒ {
+      val rem = remaining - cost(elem)
+      if (rem >= 0) {
+        out.onNext(elem)
+        running(in, out, rem)
+      } else {
+        in.cancel()
+        stopError(new Errors.StreamLimitExceeded(max, elem), out)
+      }
+    },
 
-      onNext = (elem, _) ⇒ {
-        val rem = remaining - cost(elem)
-        if (rem >= 0) {
-          out.onNext(elem)
-          running(in, out, rem)
-        } else {
-          in.cancel()
-          stopError(new Errors.StreamLimitExceeded(max, elem), out)
-        }
-      },
-
-      onComplete = stopCompleteF(out),
-      onError = stopErrorF(out))
+    onComplete = stopCompleteF(out),
+    onError = stopErrorF(out))
 }
 

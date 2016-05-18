@@ -18,70 +18,66 @@ package swave.core.impl.stages.inout
 
 import swave.core.PipeElem
 import swave.core.impl.{ Inport, Outport }
+import swave.core.macros.StageImpl
 
 // format: OFF
+@StageImpl
 private[core] final class ScanStage(zero: AnyRef, f: (AnyRef, AnyRef) ⇒ AnyRef)
   extends InOutStage with PipeElem.InOut.Scan {
 
   def pipeElemType: String = "scan"
   def pipeElemParams: List[Any] = zero :: f :: Nil
 
-  connectInOutAndStartWith { (ctx, in, out) ⇒ awaitingDemand(in, out) }
+  connectInOutAndSealWith { (ctx, in, out) ⇒ awaitingDemand(in, out) }
 
   /**
    * @param in  the active upstream
    * @param out the active downstream
    */
-  def awaitingDemand(in: Inport, out: Outport): State =
-    state(name = "awaitingDemand",
+  def awaitingDemand(in: Inport, out: Outport): State = state(
+    request = (n, _) ⇒ {
+      out.onNext(zero)
+      if (n > 1) in.request((n - 1).toLong)
+      running(in, out, zero)
+    },
 
-      request = (n, _) ⇒ {
-        out.onNext(zero)
-        if (n > 1) in.request((n - 1).toLong)
-        running(in, out, zero)
-      },
-
-      cancel = stopCancelF(in),
-      onComplete = _ ⇒ drainingZero(out),
-      onError = stopErrorF(out))
+    cancel = stopCancelF(in),
+    onComplete = _ ⇒ drainingZero(out),
+    onError = stopErrorF(out))
 
   /**
    * @param in        the active upstream
    * @param out       the active downstream
    * @param last      the last value produced
    */
-  def running(in: Inport, out: Outport, last: AnyRef): State =
-    state(name = "running",
+  def running(in: Inport, out: Outport, last: AnyRef): State = state(
+    request = (n, _) ⇒ {
+      in.request(n.toLong)
+      stay()
+    },
 
-      request = (n, _) ⇒ {
-        in.request(n.toLong)
-        stay()
-      },
+    cancel = stopCancelF(in),
 
-      cancel = stopCancelF(in),
+    onNext = (elem, _) ⇒ {
+      val next = f(last, elem)
+      out.onNext(next)
+      running(in, out, next)
+    },
 
-      onNext = (elem, _) ⇒ {
-        val next = f(last, elem)
-        out.onNext(next)
-        running(in, out, next)
-      },
-
-      onComplete = stopCompleteF(out),
-      onError = stopErrorF(out))
+    onComplete = stopCompleteF(out),
+    onError = stopErrorF(out))
 
   /**
    * Upstream completed without having produced any element, downstream active, awaiting first request.
    *
    * @param out  the active downstream
    */
-  def drainingZero(out: Outport) =
-    state(name = "drainingZero",
+  def drainingZero(out: Outport) = state(
+    request = (_, _) ⇒ {
+      out.onNext(zero)
+      stopComplete(out)
+    },
 
-      request = (_, _) ⇒ {
-        out.onNext(zero)
-        stopComplete(out)
-      },
-
-      cancel = stopF)
+    cancel = stopF)
 }
 

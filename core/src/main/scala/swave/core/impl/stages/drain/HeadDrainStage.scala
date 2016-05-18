@@ -14,48 +14,51 @@
  * limitations under the License.
  */
 
-package swave.core
-package impl
-package stages
-package drain
+package swave.core.impl.stages.drain
 
 import scala.concurrent.Promise
+import swave.core.macros.StageImpl
+import swave.core.PipeElem
+import swave.core.impl.Inport
 
 // format: OFF
+@StageImpl
 private[core] final class HeadDrainStage(headPromise: Promise[AnyRef]) extends DrainStage with PipeElem.Drain.Head {
 
   def pipeElemType: String = "Drain.head"
   def pipeElemParams: List[Any] = headPromise :: Nil
 
-  connectInAndStartWith { (ctx, in) ⇒
+  connectInAndSealWith { (ctx, in) ⇒
     ctx.registerForXStart(this)
     awaitingXStart(in)
   }
 
-  def awaitingXStart(in: Inport) =
-    state(name = "awaitingXStart",
+  /**
+   * @param in the active upstream
+   */
+  def awaitingXStart(in: Inport) = state(
+    xStart = () => {
+      in.request(1)
+      receiveOne(in)
+    })
 
-      xStart = () => {
-        in.request(1)
-        receiveOne(in)
-      })
+  /**
+   * @param in the active upstream
+   */
+  def receiveOne(in: Inport) = state(
+    onNext = (elem, _) ⇒ {
+      headPromise.success(elem)
+      stopCancel(in)
+    },
 
-  def receiveOne(in: Inport) =
-    state(name = "receiveOne",
+    onComplete = _ ⇒ {
+      headPromise.failure(new NoSuchElementException())
+      stop()
+    },
 
-      onNext = (elem, _) ⇒ {
-        headPromise.success(elem)
-        stopCancel(in)
-      },
-
-      onComplete = _ ⇒ {
-        headPromise.failure(new NoSuchElementException())
-        stop()
-      },
-
-      onError = (e, _) ⇒ {
-        headPromise.failure(e)
-        stop()
-      })
+    onError = (e, _) ⇒ {
+      headPromise.failure(e)
+      stop()
+    })
 }
 

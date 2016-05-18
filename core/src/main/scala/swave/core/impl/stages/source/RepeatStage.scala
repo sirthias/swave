@@ -17,29 +17,29 @@
 package swave.core.impl.stages.source
 
 import scala.annotation.tailrec
+import swave.core.macros.StageImpl
 import swave.core.PipeElem
 import swave.core.impl.Outport
 
 // format: OFF
+@StageImpl
 private[core] final class RepeatStage(element: AnyRef) extends SourceStage with PipeElem.Source.Repeat {
 
   def pipeElemType: String = "Stream.repeat"
   def pipeElemParams: List[Any] = element :: Nil
 
-  connectOutAndStartWith { (ctx, out) ⇒ running(out) }
+  connectOutAndSealWith { (ctx, out) ⇒ running(out) }
 
-  def running(out: Outport): State =
-    state(name = "running",
+  def running(out: Outport): State = state(
+    request = (n, _) ⇒ {
+      @tailrec def rec(nn: Int): State =
+        if (nn > 0) {
+          out.onNext(element)
+          rec(nn - 1)
+        } else stay()
+      rec(n)
+    },
 
-      request = (n, _) ⇒ {
-        @tailrec def rec(n: Int): State =
-          if (n > 0) {
-            out.onNext(element)
-            rec(n - 1)
-          } else stay()
-        rec(n)
-      },
-
-      cancel = stopF)
+    cancel = stopF)
 }
 

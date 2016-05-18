@@ -17,11 +17,13 @@
 package swave.core.impl.stages.inout
 
 import scala.collection.mutable
+import swave.core.macros.StageImpl
 import swave.core.impl.{ Outport, Inport }
 import swave.core.PipeElem
 import swave.core.util._
 
 // format: OFF
+@StageImpl
 private[core] final class GroupedStage(groupSize: Int, emitSingleEmpty: Boolean, builder: mutable.Builder[Any, AnyRef]) extends InOutStage
   with PipeElem.InOut.Drop {
 
@@ -30,24 +32,22 @@ private[core] final class GroupedStage(groupSize: Int, emitSingleEmpty: Boolean,
   def pipeElemType: String = "group"
   def pipeElemParams: List[Any] = groupSize :: Nil
 
-  connectInOutAndStartWith { (ctx, in, out) ⇒ running(in, out) }
+  connectInOutAndSealWith { (ctx, in, out) ⇒ running(in, out) }
 
   def running(in: Inport, out: Outport): State = {
 
     /**
      * Waiting for a request from downstream.
      */
-    def awaitingDemand() =
-      state(name = "awaitingDemand",
+    def awaitingDemand() = state(
+      request = (n, _) ⇒ {
+        in.request(groupSize.toLong)
+        collecting(groupSize, n.toLong, firstElem = true)
+      },
 
-        request = (n, _) ⇒ {
-          in.request(groupSize.toLong)
-          collecting(groupSize, n.toLong, firstElem = true)
-        },
-
-        cancel = stopCancelF(in),
-        onComplete = stopCompleteF(out),
-        onError = stopErrorF(out))
+      cancel = stopCancelF(in),
+      onComplete = stopCompleteF(out),
+      onError = stopErrorF(out))
 
     /**
      * Gathering up the elements for the next group.
@@ -57,32 +57,31 @@ private[core] final class GroupedStage(groupSize: Int, emitSingleEmpty: Boolean,
      * @param remaining number of elements already requested by downstream but not yet delivered, > 0
      * @param firstElem true if we are still awaiting the very first element from upstream
      */
-    def collecting(pending: Int, remaining: Long, firstElem: Boolean): State =
-      state(name = "collecting",
-        request = (n, _) ⇒ collecting(pending, remaining ⊹ n, firstElem),
-        cancel = stopCancelF(in),
+    def collecting(pending: Int, remaining: Long, firstElem: Boolean): State = state(
+      request = (n, _) ⇒ collecting(pending, remaining ⊹ n, firstElem),
+      cancel = stopCancelF(in),
 
-        onNext = (elem, _) ⇒ {
-          builder += elem
-          if (pending == 1) {
-            val group = builder.result()
-            builder.clear()
-            out.onNext(group)
-            if (remaining > 1) {
-              in.request(groupSize.toLong)
-              collecting(groupSize, remaining - 1, firstElem = false)
-            } else awaitingDemand()
-          } else collecting(pending - 1, remaining, firstElem = false)
-        },
+      onNext = (elem, _) ⇒ {
+        builder += elem
+        if (pending == 1) {
+          val group = builder.result()
+          builder.clear()
+          out.onNext(group)
+          if (remaining > 1) {
+            in.request(groupSize.toLong)
+            collecting(groupSize, remaining - 1, firstElem = false)
+          } else awaitingDemand()
+        } else collecting(pending - 1, remaining, firstElem = false)
+      },
 
-        onComplete = _ ⇒ {
-          if (pending < groupSize || firstElem && emitSingleEmpty)
-            out.onNext(builder.result())
-          builder.clear() // don't hold on to elements
-          stopComplete(out)
-        },
+      onComplete = _ ⇒ {
+        if (pending < groupSize || firstElem && emitSingleEmpty)
+          out.onNext(builder.result())
+        builder.clear() // don't hold on to elements
+        stopComplete(out)
+      },
 
-        onError = stopErrorF(out))
+      onError = stopErrorF(out))
 
     awaitingDemand()
   }

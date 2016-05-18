@@ -18,23 +18,23 @@ package swave.core.impl.stages.source
 
 import swave.core.PipeElem
 import swave.core.impl.Outport
+import swave.core.macros.StageImpl
 
 // format: OFF
+@StageImpl
 private[core] final class OneElementStage(element: AnyRef) extends SourceStage with PipeElem.Source.OneElement {
 
   def pipeElemType: String = "Stream.one"
   def pipeElemParams: List[Any] = element :: Nil
 
-  connectOutAndStartWith { (ctx, out) ⇒ waitingForRequest(out) }
+  connectOutAndSealWith { (ctx, out) ⇒ awaitingRequest(out) }
 
-  def waitingForRequest(out: Outport): State =
-    state(name = "waitingForRequest",
+  def awaitingRequest(out: Outport): State = state(
+    request = (_, _) ⇒ {
+      out.onNext(element)
+      stopComplete(out)
+    },
 
-      request = (_, _) ⇒ {
-        out.onNext(element)
-        stopComplete(out)
-      },
-
-      cancel = stopF)
+    cancel = stopF)
 }
 

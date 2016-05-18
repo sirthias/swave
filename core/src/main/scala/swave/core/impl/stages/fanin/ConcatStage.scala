@@ -18,9 +18,11 @@ package swave.core.impl.stages.fanin
 
 import swave.core.PipeElem
 import swave.core.impl.{ InportList, Outport }
+import swave.core.macros.StageImpl
 import swave.core.util._
 
 // format: OFF
+@StageImpl
 private[core] final class ConcatStage(subs: InportList) extends FanInStage with PipeElem.FanIn.Concat {
 
   require(subs.nonEmpty)
@@ -28,38 +30,36 @@ private[core] final class ConcatStage(subs: InportList) extends FanInStage with 
   def pipeElemType: String = "fanInConcat"
   def pipeElemParams: List[Any] = Nil
 
-  connectFanInAndStartWith(subs) { (ctx, out) ⇒ running(out, subs, 0) }
+  connectFanInAndSealWith(subs) { (ctx, out) ⇒ running(out, subs, 0) }
 
   /**
    * @param out     the active downstream
    * @param ins     the active upstreams
    * @param pending number of elements requested from upstream but not yet received, >= 0
    */
-  def running(out: Outport, ins: InportList, pending: Long): State =
-    state(name = "running",
+  def running(out: Outport, ins: InportList, pending: Long): State = state(
+    request = (n, _) ⇒ {
+      ins.in.request(n.toLong)
+      running(out, ins, pending ⊹ n)
+    },
 
-      request = (n, _) ⇒ {
-        ins.in.request(n.toLong)
-        running(out, ins, pending ⊹ n)
-      },
+    cancel = stopCancelF(ins),
 
-      cancel = stopCancelF(ins),
+    onNext = (elem, _) ⇒ {
+      out.onNext(elem)
+      running(out, ins, pending - 1)
+    },
 
-      onNext = (elem, _) ⇒ {
-        out.onNext(elem)
-        running(out, ins, pending - 1)
-      },
+    onComplete = in ⇒ {
+      if (in eq ins.in) {
+        val tail = ins.tail
+        if (tail.nonEmpty) {
+          if (pending > 0) tail.in.request(pending)
+          running(out, tail, pending)
+        } else stopComplete(out)
+      } else running(out, ins remove_! in, pending)
+    },
 
-      onComplete = in ⇒ {
-        if (in eq ins.in) {
-          val tail = ins.tail
-          if (tail.nonEmpty) {
-            if (pending > 0) tail.in.request(pending)
-            running(out, tail, pending)
-          } else stopComplete(out)
-        } else running(out, ins remove_! in, pending)
-      },
-
-      onError = cancelAllAndStopErrorF(ins, out))
+    onError = cancelAllAndStopErrorF(ins, out))
 }
 

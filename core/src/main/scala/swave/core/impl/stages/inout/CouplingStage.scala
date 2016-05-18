@@ -18,32 +18,31 @@ package swave.core.impl.stages.inout
 
 import swave.core.PipeElem
 import swave.core.impl.{ Inport, Outport }
+import swave.core.macros.StageImpl
 
 // format: OFF
+@StageImpl
 private[core] final class CouplingStage extends InOutStage with PipeElem.InOut.Coupling {
 
   def pipeElemType: String = "Coupling"
   def pipeElemParams: List[Any] = Nil
 
-  connectInOutAndStartWith { (ctx, in, out) ⇒ running(in, out) }
+  connectInOutAndSealWith { (ctx, in, out) ⇒ running(in, out) }
 
-  def running(in: Inport, out: Outport) =
-    state(name = "running",
-      interceptWhileHandling = false,
+  def running(in: Inport, out: Outport) = state(
+    request = (n, _) ⇒ {
+      in.request(n.toLong)
+      stay()
+    },
 
-      request = (n, _) ⇒ {
-        in.request(n.toLong)
-        stay()
-      },
+    cancel = stopCancelF(in),
 
-      cancel = stopCancelF(in),
+    onNext = (elem, _) ⇒ {
+      out.onNext(elem)
+      stay()
+    },
 
-      onNext = (elem, _) ⇒ {
-        out.onNext(elem)
-        stay()
-      },
-
-      onComplete = stopCompleteF(out),
-      onError = stopErrorF(out))
+    onComplete = stopCompleteF(out),
+    onError = stopErrorF(out))
 }
 

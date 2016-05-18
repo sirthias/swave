@@ -17,11 +17,13 @@
 package swave.testkit.impl
 
 import scala.annotation.tailrec
+import swave.core.macros.StageImpl
 import swave.core.PipeElem
 import swave.core.impl.Outport
 import swave.testkit.TestFixture
 import swave.core.impl.stages.source.SourceStage
 
+@StageImpl
 private[testkit] final class TestStreamStage(
     val id: Int,
     val elemsIterable: Iterable[AnyRef],
@@ -44,46 +46,40 @@ private[testkit] final class TestStreamStage(
 
   // format: OFF
 
-  initialState(awaitingSubscribe)
+  initialState(awaitingSubscribe())
 
-  private def awaitingSubscribe =
-    state(name = "awaitingSubscribe",
+  def awaitingSubscribe() = state(
+    subscribe = from ⇒ {
+      ctx.trace(s"Received SUBSCRIBE from $from in 'initialState'")
+      ctx.trace("⇢ ONSUBSCRIBE")
+      _outputPipeElem = from.pipeElem
+      from.onSubscribe()
+      ready(from)
+    })
 
-      subscribe = out ⇒ {
-        ctx.trace(s"Received SUBSCRIBE from $out in 'initialState'")
-        ctx.trace("⇢ ONSUBSCRIBE")
-        setOutputElem(out.pipeElem)
-        out.onSubscribe()
-        ready(out)
-      })
+  def ready(out: Outport): State = state(
+    xSeal = c ⇒ {
+      ctx.trace("Received XSEAL in 'ready'")
+      configureFrom(c.env)
+      ctx.trace("⇢ XSEAL")
+      out.xSeal(c)
+      if (elems.hasNext) {
+        fixtureState = TestFixture.State.Running
+        producing(out)
+      } else {
+        ctx.trace("Registering for XSTART reception")
+        c.registerForXStart(this)
+        awaitingXStart(out)
+      }
+    })
 
-  private def ready(out: Outport): State =
-    fullState(name = "ready",
+  def awaitingXStart(out: Outport) = state(
+    xStart = () => {
+      ctx.trace("Received XSTART in 'ready'")
+      terminate(out)
+    })
 
-      xSeal = runCtx ⇒ {
-        ctx.trace("Received XSEAL in 'ready'")
-        configureFrom(runCtx.env)
-        ctx.trace("⇢ XSEAL")
-        out.xSeal(runCtx)
-        if (elems.hasNext) {
-          fixtureState = TestFixture.State.Running
-          producing(out)
-        } else {
-          ctx.trace("Registering for XSTART reception")
-          runCtx.registerForXStart(this)
-          awaitingXStart(out)
-        }
-      })
-
-  def awaitingXStart(out: Outport) =
-    state(name = "awaitingXStart",
-
-      xStart = () => {
-        ctx.trace("Received XSTART in 'ready'")
-        terminate(out)
-      })
-
-  private def terminate(out: Outport) =
+  def terminate(out: Outport) =
     termination match {
       case None ⇒
         ctx.run("⇢ COMPLETE")(out.onComplete())
@@ -95,76 +91,68 @@ private[testkit] final class TestStreamStage(
         errored(out)
     }
 
-  private def producing(out: Outport): State =
-    state(name = "producing",
+  def producing(out: Outport): State = state(
+    request = (n, from) ⇒ {
+      ctx.trace(s"Received REQUEST $n from $from in state 'producing'")
+      if (from eq out) {
+        if (n > 0) {
+          @tailrec def rec(nn: Int): State = {
+            val elem = elems.next()
+            recordElem(elem)
+            ctx.run("⇢ " + elem)(out.onNext(elem))
+            if (elems.hasNext) {
+              if (nn > 1) rec(nn - 1)
+              else stay()
+            } else terminate(out)
+          }
+          rec(n)
+        } else illegalState(s"Received illegal REQUEST $n from outport '$out'")
+      } else illegalState(s"Received REQUEST $n from unexpected outport '$from' instead of outport '$out'")
+    },
 
-      request = (n, from) ⇒ {
-        ctx.trace(s"Received REQUEST $n from $from in state 'producing'")
-        if (from eq out) {
-          if (n > 0) {
-            @tailrec def rec(n: Int): State = {
-              val elem = elems.next()
-              recordElem(elem)
-              ctx.run("⇢ " + elem)(out.onNext(elem))
-              if (elems.hasNext) {
-                if (n > 1) rec(n - 1)
-                else stay()
-              } else terminate(out)
-            }
-            rec(n)
-          } else illegalState(s"Received illegal REQUEST $n from outport '$out' in $this")
-        } else illegalState(s"Received REQUEST $n from unexpected outport '$from' instead of outport '$out' in $this")
-      },
+    cancel = from ⇒ {
+      ctx.trace(s"Received CANCEL from $from in state 'producing'")
+      fixtureState = TestFixture.State.Cancelled
+      if (from eq out) cancelled(out)
+      else illegalState(s"Received CANCEL from unexpected outport '$from' instead of outport '$out'")
+    })
 
-      cancel = from ⇒ {
-        ctx.trace(s"Received CANCEL from $from in state 'producing'")
-        fixtureState = TestFixture.State.Cancelled
-        if (from eq out) cancelled(out)
-        else illegalState(s"Received CANCEL from unexpected outport '$from' instead of outport '$out' in $this")
-      })
+  def cancelled(out: Outport): State = state(
+    request = (n, from) ⇒ {
+      ctx.trace(s"Received REQUEST $n from $from in state 'cancelled'")
+      if (from eq out) illegalState(s"Received REQUEST $n after CANCEL from outport '$out'")
+      else illegalState(s"Received REQUEST $n from unexpected outport '$from' instead of outport '$out'")
+    },
 
-  private def cancelled(out: Outport): State =
-    state(name = "cancelled",
+    cancel = from ⇒ {
+      ctx.trace(s"Received CANCEL from $from in state 'cancelled'")
+      if (from eq out) illegalState(s"Received double CANCEL from outport '$out'")
+      else illegalState(s"Received CANCEL from unexpected outport '$from' instead of outport '$out'")
+    })
 
-      request = (n, from) ⇒ {
-        ctx.trace(s"Received REQUEST $n from $from in state 'cancelled'")
-        if (from eq out) illegalState(s"Received REQUEST $n after CANCEL from outport '$out' in $this")
-        else illegalState(s"Received REQUEST $n from unexpected outport '$from' instead of outport '$out' in $this")
-      },
+  def completed(out: Outport): State = state(
+    request = (n, from) ⇒ {
+      ctx.trace(s"Received REQUEST $n from $from in state 'completed'")
+      if (from eq out) stay()
+      else illegalState(s"Received REQUEST $n from unexpected outport '$from' instead of outport '$out'")
+    },
 
-      cancel = from ⇒ {
-        ctx.trace(s"Received CANCEL from $from in state 'cancelled'")
-        if (from eq out) illegalState(s"Received double CANCEL from outport '$out' in $this")
-        else illegalState(s"Received CANCEL from unexpected outport '$from' instead of outport '$out' in $this")
-      })
+    cancel = from ⇒ {
+      ctx.trace(s"Received CANCEL from $from in state 'completed'")
+      if (from eq out) cancelled(out)
+      else illegalState(s"Received CANCEL from unexpected outport '$from' instead of outport '$out'")
+    })
 
-  private def completed(out: Outport): State =
-    state(name = "completed",
+  def errored(out: Outport): State = state(
+    request = (n, from) ⇒ {
+      ctx.trace(s"Received REQUEST $n from $from in state 'errored'")
+      if (from eq out) stay()
+      else illegalState(s"Received REQUEST $n from unexpected outport '$from' instead of outport '$out'")
+    },
 
-      request = (n, from) ⇒ {
-        ctx.trace(s"Received REQUEST $n from $from in state 'completed'")
-        if (from eq out) stay()
-        else illegalState(s"Received REQUEST $n from unexpected outport '$from' instead of outport '$out' in $this")
-      },
-
-      cancel = from ⇒ {
-        ctx.trace(s"Received CANCEL from $from in state 'completed'")
-        if (from eq out) cancelled(out)
-        else illegalState(s"Received CANCEL from unexpected outport '$from' instead of outport '$out' in $this")
-      })
-
-  private def errored(out: Outport): State =
-    state(name = "errored",
-
-      request = (n, from) ⇒ {
-        ctx.trace(s"Received REQUEST $n from $from in state 'errored'")
-        if (from eq out) stay()
-        else illegalState(s"Received REQUEST $n from unexpected outport '$from' instead of outport '$out' in $this")
-      },
-
-      cancel = from ⇒ {
-        ctx.trace(s"Received CANCEL from $from in state 'errored'")
-        if (from eq out) cancelled(out)
-        else illegalState(s"Received CANCEL from unexpected outport '$from' instead of outport '$out' in $this")
-      })
+    cancel = from ⇒ {
+      ctx.trace(s"Received CANCEL from $from in state 'errored'")
+      if (from eq out) cancelled(out)
+      else illegalState(s"Received CANCEL from unexpected outport '$from' instead of outport '$out'")
+    })
 }

@@ -35,7 +35,9 @@ final class InjectSpec extends PipeSpec with Inspectors {
       .input[Int]
       .output[Stream[Int]]
       .fixture(fd ⇒ Gen.listOfN(10, fd.output[Int](TestSetup.Default.nonDroppingOutputScripts)))
-      .prop.from { (in, out, allSubOuts) ⇒
+      .prop
+      //.withRandomSeed()
+      .from { (in, out, allSubOuts) ⇒
         import TestFixture.State._
 
         val iter = allSubOuts.iterator

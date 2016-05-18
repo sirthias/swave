@@ -46,12 +46,12 @@ val publishingSettings = Seq(
       </developer>
     </developers>)
 
-lazy val commonJavacOptions = Seq(
+val commonJavacOptions = Seq(
   "-encoding", "UTF-8",
   "-Xlint:unchecked",
   "-Xlint:deprecation")
 
-lazy val commonScalacOptions = Seq(
+val commonScalacOptions = Seq(
   "-deprecation",
   "-encoding", "UTF-8",
   "-feature",
@@ -71,8 +71,12 @@ lazy val commonScalacOptions = Seq(
   "-Xfuture")
 
 val noPublishingSettings = Seq(
-  publishArtifact := false,
-  publishTo := Some(Resolver.file("Unused transient repository", file("target/unusedrepo"))))
+  publish := (),
+  publishLocal := (),
+  publishArtifact := false)
+
+val macroParadise = Seq(
+  addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full))
 
 /////////////////////// DEPENDENCIES /////////////////////////
 
@@ -110,8 +114,10 @@ lazy val examples = project
   .settings(libraryDependencies ++= Seq(logback))
 
 lazy val core = project
+  .dependsOn(`core-macros`)
   .enablePlugins(AutomateHeaderPlugin)
   .settings(commonSettings: _*)
+  .settings(macroParadise: _*)
   .settings(formattingSettings: _*)
   .settings(publishingSettings: _*)
   .settings(
@@ -126,10 +132,18 @@ lazy val `core-tests` = project
   .settings(noPublishingSettings: _*)
   .settings(libraryDependencies ++= Seq(shapeless, scalatest % "test", scalacheck % "test", logback % "test"))
 
+lazy val `core-macros` = project
+  .settings(commonSettings: _*)
+  .settings(macroParadise: _*)
+  .settings(formattingSettings: _*)
+  .settings(noPublishingSettings: _*)
+  .settings(libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value)
+
 lazy val testkit = project
   .dependsOn(core)
   .enablePlugins(AutomateHeaderPlugin)
   .settings(commonSettings: _*)
+  .settings(macroParadise: _*)
   .settings(formattingSettings: _*)
   .settings(publishingSettings: _*)
   .settings(libraryDependencies ++= Seq(scalacheck))

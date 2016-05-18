@@ -18,76 +18,68 @@ package swave.core.impl.stages.source
 
 import swave.core.PipeElem
 import swave.core.impl.{ Inport, Outport, RunContext }
+import swave.core.macros.StageImpl
+import SubSourceStage._
 
 // format: OFF
+@StageImpl
 private[core] final class SubSourceStage(ctx: RunContext, in: Inport) extends SourceStage
   with PipeElem.Source.Sub {
-
-  import SubSourceStage._
 
   def pipeElemType: String = "sub"
   def pipeElemParams: List[Any] = in :: Nil
 
-  initialState(waitingForSubscribe(Termination.None))
+  initialState(awaitingSubscribe(Termination.None))
 
-  def waitingForSubscribe(termination: Termination): State =
-    fullState(name = "waitingForSubscribe",
-      interceptWhileHandling = false,
+  def awaitingSubscribe(termination: Termination): State = state(
+    subscribe = from ⇒ {
+      _outputPipeElem = from.pipeElem
+      from.onSubscribe()
+      ready(from, termination)
+    },
 
-      subscribe = out ⇒ {
-        setOutputElem(out.pipeElem)
-        out.onSubscribe()
-        ready(out, termination)
-      },
+    onComplete = _ => awaitingSubscribe(Termination.Completed),
+    onError = (e, _) => awaitingSubscribe(Termination.Error(e)))
 
-      onComplete = _ => waitingForSubscribe(Termination.Completed),
-      onError = (e, _) => waitingForSubscribe(Termination.Error(e)))
+  def ready(out: Outport, termination: Termination): State = state(
+    xSeal = subCtx ⇒ {
+      ctx.attach(subCtx)
+      configureFrom(ctx.env)
+      out.xSeal(ctx)
+      termination match {
+        case Termination.None => running(out)
+        case _ =>
+          ctx.registerForXStart(this)
+          awaitingXStart(out, termination)
+      }
+    },
 
-  def ready(out: Outport, termination: Termination): State =
-    fullState(name = "ready",
+    onComplete = _ => ready(out, Termination.Completed),
+    onError = (e, _) => ready(out, Termination.Error(e)))
 
-      xSeal = subCtx ⇒ {
-        ctx.attach(subCtx)
-        configureFrom(ctx.env)
-        out.xSeal(ctx)
-        termination match {
-          case Termination.None => running(out)
-          case _ =>
-            ctx.registerForXStart(this)
-            awaitingXStart(out, termination)
-        }
-      },
+  def awaitingXStart(out: Outport, termination: Termination) = state(
+    xStart = () => {
+      termination match {
+        case Termination.Error(e) => stopError(e, out)
+        case _ => stopComplete(out)
+      }
+    })
 
-      onComplete = _ => ready(out, Termination.Completed),
-      onError = (e, _) => ready(out, Termination.Error(e)))
+  def running(out: Outport) = state(
+    request = (n, _) ⇒ {
+      in.request(n.toLong)
+      stay()
+    },
 
-  def awaitingXStart(out: Outport, termination: Termination) =
-    state(name = "awaitingXStart",
+    cancel = stopCancelF(in),
 
-      xStart = () => {
-        termination match {
-          case Termination.Error(e) => stopError(e, out)
-          case _ => stopComplete(out)
-        }
-      })
+    onNext = (elem, _) ⇒ {
+      out.onNext(elem)
+      stay()
+    },
 
-  def running(out: Outport) =
-    fullState(name = "running",
-
-      request = (n, _) ⇒ {
-        in.request(n.toLong)
-        stay()
-      },
-
-      cancel = stopCancelF(in),
-
-      onNext = (elem, _) ⇒ {
-        out.onNext(elem)
-        stay()
-      },
-
-      onComplete = stopCompleteF(out),
-      onError = stopErrorF(out))
+    onComplete = stopCompleteF(out),
+    onError = stopErrorF(out))
 }
 
 private[core] object SubSourceStage {

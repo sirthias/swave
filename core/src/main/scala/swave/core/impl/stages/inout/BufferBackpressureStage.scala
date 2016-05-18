@@ -17,12 +17,14 @@
 package swave.core.impl.stages.inout
 
 import scala.annotation.tailrec
+import swave.core.macros.StageImpl
 import swave.core.PipeElem
 import swave.core.impl.{ Outport, Inport }
 import swave.core.util.RingBuffer
 import swave.core.util._
 
 // format: OFF
+@StageImpl
 private[core] final class BufferBackpressureStage(size: Int) extends InOutStage
   with PipeElem.InOut.BufferWithBackpressure {
 
@@ -33,18 +35,20 @@ private[core] final class BufferBackpressureStage(size: Int) extends InOutStage
 
   private[this] val buffer = new RingBuffer[AnyRef](roundUpToNextPowerOf2(size))
 
-  connectInOutAndStartWith { (ctx, in, out) ⇒
+  connectInOutAndSealWith { (ctx, in, out) ⇒
     ctx.registerForXStart(this)
     awaitingXStart(in, out)
   }
 
-  def awaitingXStart(in: Inport, out: Outport) =
-    state(name = "awaitingXStart",
-
-      xStart = () => {
-        in.request(size.toLong)
-        running(in, out, size.toLong, 0)
-      })
+  /**
+   * @param in  the active upstream
+   * @param out the active downstream
+   */
+  def awaitingXStart(in: Inport, out: Outport) = state(
+    xStart = () => {
+      in.request(size.toLong)
+      running(in, out, size.toLong, 0)
+    })
 
   /**
    * Upstream and downstream active.
@@ -58,17 +62,17 @@ private[core] final class BufferBackpressureStage(size: Int) extends InOutStage
    */
   def running(in: Inport, out: Outport, pending: Long, remaining: Long): State = {
 
-    @tailrec def handleDemand(pending: Long, remaining: Long): State =
-      if (remaining > 0 && buffer.nonEmpty) {
+    @tailrec def handleDemand(pend: Long, rem: Long): State =
+      if (rem > 0 && buffer.nonEmpty) {
         out.onNext(buffer.unsafeRead())
-        handleDemand(pending, remaining - 1)
+        handleDemand(pend, rem - 1)
       } else {
-        val remainingPlus = remaining ⊹ buffer.available
-        if (pending < remainingPlus) in.request(remainingPlus - pending)
-        running(in, out, remainingPlus, remaining)
+        val remainingPlus = rem ⊹ buffer.available
+        if (pend < remainingPlus) in.request(remainingPlus - pend)
+        running(in, out, remainingPlus, rem)
       }
 
-    state(name = "running",
+    state(
       request = (n, _) ⇒ handleDemand(pending, remaining ⊹ n),
       cancel = stopCancelF(in),
 
@@ -95,20 +99,18 @@ private[core] final class BufferBackpressureStage(size: Int) extends InOutStage
    *
    * @param out the active downstream
    */
-  def draining(out: Outport) =
-    state(name = "draining",
+  def draining(out: Outport) = state(
+    request = (n, _) ⇒ {
+      @tailrec def rec(nn: Int): State =
+        if (buffer.nonEmpty) {
+          if (nn > 0) {
+            out.onNext(buffer.unsafeRead())
+            rec(nn - 1)
+          } else stay()
+        } else stopComplete(out)
+      rec(n)
+    },
 
-      request = (n, _) ⇒ {
-        @tailrec def rec(n: Int): State =
-          if (buffer.nonEmpty) {
-            if (n > 0) {
-              out.onNext(buffer.unsafeRead())
-              rec(n - 1)
-            } else stay()
-          } else stopComplete(out)
-        rec(n)
-      },
-
-      cancel = stopF)
+    cancel = stopF)
 }
 

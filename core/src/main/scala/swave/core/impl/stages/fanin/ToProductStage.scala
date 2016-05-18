@@ -17,11 +17,13 @@
 package swave.core.impl.stages.fanin
 
 import scala.annotation.tailrec
+import swave.core.macros.StageImpl
 import swave.core.PipeElem
 import swave.core.impl.{ InportList, Outport }
 import swave.core.util._
 
 // format: OFF
+@StageImpl
 private[core] final class ToProductStage(val pipeElemType: String,
                                          subs: InportList, f: Array[AnyRef] ⇒ AnyRef) extends FanInStage
   with PipeElem.FanIn.ToProduct {
@@ -40,24 +42,25 @@ private[core] final class ToProductStage(val pipeElemType: String,
 
   private def requestNext() = subs.foreach(_.in.request(1)) // TODO: avoid function allocation
 
-  @tailrec private def cancelStillActive(remaining: InportList, completedMask: Long): Unit =
-    if (remaining ne null) {
-      if ((completedMask & 1) == 0) remaining.in.cancel()
-      cancelStillActive(remaining.tail, completedMask >> 1)
+  @tailrec private def cancelStillActive(rem: InportList, compMask: Long): Unit =
+    if (rem ne null) {
+      if ((compMask & 1) == 0) rem.in.cancel()
+      cancelStillActive(rem.tail, compMask >> 1)
     }
 
-  connectFanInAndStartWith(subs) { (ctx, out) ⇒
+  connectFanInAndSealWith(subs) { (ctx, out) ⇒
     ctx.registerForXStart(this)
     awaitingXStart(out)
   }
 
-  def awaitingXStart(out: Outport) =
-    state(name = "awaitingXStart",
-
-      xStart = () => {
-        requestNext()
-        collectingMembers(out, fullMask, 0, 0)
-      })
+  /**
+   * @param out the active downstream
+   */
+  def awaitingXStart(out: Outport) = state(
+    xStart = () => {
+      requestNext()
+      collectingMembers(out, fullMask, 0, 0)
+    })
 
   /**
    * Awaiting one element from all upstreams to complete a product.
@@ -67,46 +70,45 @@ private[core] final class ToProductStage(val pipeElemType: String,
    * @param completedMask bitmask holding a 1-bit for every input which has already completed, >= 0
    * @param remaining     number of elements already requested by downstream but not yet delivered, >= 0
    */
-  def collectingMembers(out: Outport, pendingMask: Long, completedMask: Long, remaining: Long): State =
-    state(name = "collectingMembers",
-      request = (n, _) ⇒ collectingMembers(out, pendingMask, completedMask, remaining ⊹ n),
+  def collectingMembers(out: Outport, pendingMask: Long, completedMask: Long, remaining: Long): State = state(
+    request = (n, _) ⇒ collectingMembers(out, pendingMask, completedMask, remaining ⊹ n),
 
-      cancel = _ => {
-        cancelStillActive(subs, completedMask)
-        stop()
-      },
+    cancel = _ => {
+      cancelStillActive(subs, completedMask)
+      stop()
+    },
 
-      onNext = (elem, in) ⇒ {
-        val ix = subs indexOf in
-        members(ix) = elem
-        val newPendingMask = pendingMask & ~(1L << ix)
-        if (newPendingMask == 0) {
-          if (remaining > 0) {
-            out.onNext(f(members))
-            if (completedMask == 0) {
-              requestNext()
-              collectingMembers(out, fullMask, completedMask, remaining - 1)
-            } else { cancelStillActive(subs, completedMask); stopComplete(out) }
-          } else awaitingDemand(out, completedMask)
-        } else collectingMembers(out, newPendingMask, completedMask, remaining)
-      },
+    onNext = (elem, from) ⇒ {
+      val ix = subs indexOf from
+      members(ix) = elem
+      val newPendingMask = pendingMask & ~(1L << ix)
+      if (newPendingMask == 0) {
+        if (remaining > 0) {
+          out.onNext(f(members))
+          if (completedMask == 0) {
+            requestNext()
+            collectingMembers(out, fullMask, completedMask, remaining - 1)
+          } else { cancelStillActive(subs, completedMask); stopComplete(out) }
+        } else awaitingDemand(out, completedMask)
+      } else collectingMembers(out, newPendingMask, completedMask, remaining)
+    },
 
-      onComplete = in => {
-        val bit = 1L << (subs indexOf in)
-        if ((pendingMask & bit) == 0) {
-          // upstream completed but we've already seen its member for the next element
-          collectingMembers(out, pendingMask, completedMask | bit, remaining)
-        } else {
-          cancelStillActive(subs, completedMask | bit)
-          stopComplete(out)
-        }
-      },
-
-      onError = (e, in) => {
-        val bit = 1L << (subs indexOf in)
+    onComplete = from => {
+      val bit = 1L << (subs indexOf from)
+      if ((pendingMask & bit) == 0) {
+        // upstream completed but we've already seen its member for the next element
+        collectingMembers(out, pendingMask, completedMask | bit, remaining)
+      } else {
         cancelStillActive(subs, completedMask | bit)
-        stopError(e, out)
-      })
+        stopComplete(out)
+      }
+    },
+
+    onError = (e, from) => {
+      val bit = 1L << (subs indexOf from)
+      cancelStillActive(subs, completedMask | bit)
+      stopError(e, out)
+    })
 
   /**
    * All members for one product present. Awaiting demand from downstream.
@@ -114,35 +116,33 @@ private[core] final class ToProductStage(val pipeElemType: String,
    * @param out           the active downstream
    * @param completedMask bitmask holding a 1-bit for every input which has already completed, >= 0
    */
-  def awaitingDemand(out: Outport, completedMask: Long): State =
-    state(name = "awaitingDemand",
-
-      request = (n, _) ⇒ {
-        out.onNext(f(members))
-        if (completedMask == 0) {
-          requestNext()
-          collectingMembers(out, fullMask, 0, (n - 1).toLong)
-        } else {
-          cancelStillActive(subs, completedMask)
-          stopComplete(out)
-        }
-      },
-
-      cancel = _ => {
+  def awaitingDemand(out: Outport, completedMask: Long): State = state(
+    request = (n, _) ⇒ {
+      out.onNext(f(members))
+      if (completedMask == 0) {
+        requestNext()
+        collectingMembers(out, fullMask, 0, (n - 1).toLong)
+      } else {
         cancelStillActive(subs, completedMask)
-        stop()
-      },
+        stopComplete(out)
+      }
+    },
 
-      onComplete = in => {
-        val bit = 1L << (subs indexOf in)
-        cancelStillActive(subs, completedMask | bit)
-        awaitingDemand(out, -1L)
-      },
+    cancel = _ => {
+      cancelStillActive(subs, completedMask)
+      stop()
+    },
 
-      onError = (e, in) => {
-        val bit = 1L << (subs indexOf in)
-        cancelStillActive(subs, completedMask | bit)
-        stopError(e, out)
-      })
+    onComplete = from => {
+      val bit = 1L << (subs indexOf from)
+      cancelStillActive(subs, completedMask | bit)
+      awaitingDemand(out, -1L)
+    },
+
+    onError = (e, from) => {
+      val bit = 1L << (subs indexOf from)
+      cancelStillActive(subs, completedMask | bit)
+      stopError(e, out)
+    })
 }
 

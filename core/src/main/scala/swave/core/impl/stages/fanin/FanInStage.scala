@@ -16,16 +16,17 @@
 
 package swave.core.impl.stages.fanin
 
+import scala.annotation.compileTimeOnly
 import scala.collection.mutable.ListBuffer
 import swave.core.PipeElem
-import swave.core.impl.stages.PipeStage
-import swave.core.impl.{ InportList, Outport, RunContext }
+import swave.core.impl.stages.Stage
+import swave.core.impl.{ Outport, RunContext, InportList }
 
 // format: OFF
-private[fanin] abstract class FanInStage extends PipeStage  { this: PipeElem.FanIn =>
+private[core] abstract class FanInStage extends Stage { this: PipeElem.FanIn =>
 
-  private[this] var _outputPipeElem: PipeElem.Basic = PipeElem.Unconnected
-  private[this] var _inputElems = InportList.empty
+  protected var _outputPipeElem: PipeElem.Basic = PipeElem.Unconnected
+  protected var _inputElems = InportList.empty
 
   def outputElem = _outputPipeElem
   def inputElems = {
@@ -37,38 +38,6 @@ private[fanin] abstract class FanInStage extends PipeStage  { this: PipeElem.Fan
     buf.result()
   }
 
-  protected final def connectFanInAndStartWith(subs: InportList)(f: (RunContext, Outport) ⇒ State): Unit = {
-    def connecting(out: Outport, pendingSubs: InportList): State =
-      fullState(name = "connectFanInAndStartWith:connecting",
-        interceptWhileHandling = false,
-
-        onSubscribe = sub ⇒ {
-          val newPending = pendingSubs.remove_!(sub)
-          if ((out ne null) && newPending.isEmpty) ready(out)
-          else connecting(out, newPending)
-        },
-
-        subscribe = from ⇒ {
-          if (out eq null) {
-            _outputPipeElem = from.pipeElem
-            from.onSubscribe()
-            if (pendingSubs.isEmpty) ready(from)
-            else connecting(from, pendingSubs)
-          } else illegalState(s"Double subscribe($from) in $this")
-        })
-
-    def ready(out: Outport) =
-      fullState(name = "connectFanInAndStartWith:ready",
-
-        xSeal = ctx ⇒ {
-          configureFrom(ctx.env)
-          out.xSeal(ctx)
-          subs.foreach(_.in.xSeal(ctx)) // TODO: avoid function allocation
-          f(ctx, out)
-        })
-
-    _inputElems = subs
-    initialState(connecting(out = null, subs))
-    subs.foreach(_.in.subscribe()) // TODO: avoid function allocation
-  }
+  @compileTimeOnly("Unresolved `connectFanInAndSealWith` call")
+  protected final def connectFanInAndSealWith(subs: InportList)(f: (RunContext, Outport) ⇒ State): Unit = ()
 }

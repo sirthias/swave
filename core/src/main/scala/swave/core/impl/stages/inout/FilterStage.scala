@@ -18,33 +18,32 @@ package swave.core.impl.stages.inout
 
 import swave.core.PipeElem
 import swave.core.impl.{ Outport, Inport }
+import swave.core.macros.StageImpl
 
 // format: OFF
+@StageImpl
 private[core] final class FilterStage(predicate: Any ⇒ Boolean, negated: Boolean) extends InOutStage with PipeElem.InOut.Filter {
 
   def pipeElemType: String = "filter"
   def pipeElemParams: List[Any] = predicate :: Nil
 
-  connectInOutAndStartWith { (ctx, in, out) ⇒ running(in, out) }
+  connectInOutAndSealWith { (ctx, in, out) ⇒ running(in, out) }
 
-  def running(in: Inport, out: Outport) =
-    state(name = "running",
-      interceptWhileHandling = false,
+  def running(in: Inport, out: Outport) = state(
+    request = (n, _) ⇒ {
+      in.request(n.toLong)
+      stay()
+    },
 
-      request = (n, _) ⇒ {
-        in.request(n.toLong)
-        stay()
-      },
+    cancel = stopCancelF(in),
 
-      cancel = stopCancelF(in),
+    onNext = (elem, _) ⇒ {
+      if (predicate(elem) != negated) out.onNext(elem)
+      else in.request(1)
+      stay()
+    },
 
-      onNext = (elem, _) ⇒ {
-        if (predicate(elem) != negated) out.onNext(elem)
-        else in.request(1)
-        stay()
-      },
-
-      onComplete = stopCompleteF(out),
-      onError = stopErrorF(out))
+    onComplete = stopCompleteF(out),
+    onError = stopErrorF(out))
 }
 

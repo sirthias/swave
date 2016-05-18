@@ -19,7 +19,7 @@ package swave.core
 import scala.annotation.unchecked.{ uncheckedVariance ⇒ uV }
 import shapeless._
 import swave.core.impl._
-import swave.core.impl.stages.PipeStage
+import swave.core.impl.stages.Stage
 import swave.core.impl.stages.inout.NopStage
 
 final class Pipe[-A, +B] private (
@@ -38,7 +38,7 @@ final class Pipe[-A, +B] private (
   protected def base: Inport = lastStage
   protected def wrap: Inport ⇒ Repr[_] = in ⇒ new Pipe(firstStage, in)
 
-  protected[core] def append[T](stage: PipeStage): Repr[T] = {
+  protected[core] def append[T](stage: Stage): Repr[T] = {
     lastStage.subscribe()(stage)
     new Pipe(firstStage, stage)
   }

@@ -18,9 +18,11 @@ package swave.core.impl.stages.inout
 
 import swave.core.PipeElem
 import swave.core.impl.{ Outport, Inport }
+import swave.core.macros.StageImpl
 import swave.core.util._
 
 // format: OFF
+@StageImpl
 private[core] final class DropStage(count: Long) extends InOutStage with PipeElem.InOut.Drop {
 
   require(count > 0)
@@ -28,18 +30,20 @@ private[core] final class DropStage(count: Long) extends InOutStage with PipeEle
   def pipeElemType: String = "drop"
   def pipeElemParams: List[Any] = count :: Nil
 
-  connectInOutAndStartWith { (ctx, in, out) ⇒
+  connectInOutAndSealWith { (ctx, in, out) ⇒
     ctx.registerForXStart(this)
     awaitingXStart(in, out)
   }
 
-  def awaitingXStart(in: Inport, out: Outport) =
-    state(name = "awaitingXStart",
-
-      xStart = () => {
-        in.request(count)
-        running(in, out)
-      })
+  /**
+   * @param in  the active upstream
+   * @param out the active downstream
+   */
+  def awaitingXStart(in: Inport, out: Outport) = state(
+    xStart = () => {
+      in.request(count)
+      running(in, out)
+    })
 
   def running(in: Inport, out: Outport) = {
 
@@ -48,39 +52,35 @@ private[core] final class DropStage(count: Long) extends InOutStage with PipeEle
      *
      * @param remaining number of elems still to drop, >0
      */
-    def dropping(remaining: Long): State =
-      state(name = "dropping",
+    def dropping(remaining: Long): State = state(
+      request = (n, _) ⇒ {
+        in.request(n.toLong)
+        stay()
+      },
 
-        request = (n, _) ⇒ {
-          in.request(n.toLong)
-          stay()
-        },
-
-        cancel = stopCancelF(in),
-        onNext = (_, _) ⇒ if (remaining > 1) dropping(remaining - 1) else draining(),
-        onComplete = stopCompleteF(out),
-        onError = stopErrorF(out))
+      cancel = stopCancelF(in),
+      onNext = (_, _) ⇒ if (remaining > 1) dropping(remaining - 1) else draining(),
+      onComplete = stopCompleteF(out),
+      onError = stopErrorF(out))
 
     /**
      * Simply forwarding elements from upstream to downstream.
      */
-    def draining() =
-      state(name = "draining",
+    def draining() = state(
+      request = (n, _) ⇒ {
+        in.request(n.toLong)
+        stay()
+      },
 
-        request = (n, _) ⇒ {
-          in.request(n.toLong)
-          stay()
-        },
+      cancel = stopCancelF(in),
 
-        cancel = stopCancelF(in),
+      onNext = (elem, _) ⇒ {
+        out.onNext(elem)
+        stay()
+      },
 
-        onNext = (elem, _) ⇒ {
-          out.onNext(elem)
-          stay()
-        },
-
-        onComplete = stopCompleteF(out),
-        onError = stopErrorF(out))
+      onComplete = stopCompleteF(out),
+      onError = stopErrorF(out))
 
     dropping(count)
   }

@@ -17,10 +17,12 @@
 package swave.core.impl.stages.drain
 
 import scala.concurrent.Promise
+import swave.core.macros.StageImpl
 import swave.core.PipeElem
 import swave.core.impl.Inport
 
 // format: OFF
+@StageImpl
 private[core] final class ForeachDrainStage(
     callback: AnyRef ⇒ Unit,
     terminationPromise: Promise[Unit]) extends DrainStage with PipeElem.Drain.Foreach {
@@ -28,35 +30,37 @@ private[core] final class ForeachDrainStage(
   def pipeElemType: String = "Drain.foreach"
   def pipeElemParams: List[Any] = callback :: terminationPromise :: Nil
 
-  connectInAndStartWith { (ctx, in) ⇒
+  connectInAndSealWith { (ctx, in) ⇒
     ctx.registerForXStart(this)
     awaitingXStart(in)
   }
 
-  def awaitingXStart(in: Inport) =
-    state(name = "awaitingXStart",
+  /**
+   * @param in the active upstream
+   */
+  def awaitingXStart(in: Inport) = state(
+    xStart = () => {
+      in.request(Long.MaxValue)
+      running(in)
+    })
 
-      xStart = () => {
-        in.request(Long.MaxValue)
-        running(in)
-      })
+  /**
+   * @param in the active upstream
+   */
+  def running(in: Inport) = state(
+    onNext = (elem, _) ⇒ {
+      callback(elem)
+      stay()
+    },
 
-  def running(in: Inport) =
-    state(name = "running",
+    onComplete = _ ⇒ {
+      terminationPromise.success(())
+      stop()
+    },
 
-      onNext = (elem, _) ⇒ {
-        callback(elem)
-        stay()
-      },
-
-      onComplete = _ ⇒ {
-        terminationPromise.success(())
-        stop()
-      },
-
-      onError = (e, _) ⇒ {
-        terminationPromise.failure(e)
-        stop()
-      })
+    onError = (e, _) ⇒ {
+      terminationPromise.failure(e)
+      stop()
+    })
 }
 
