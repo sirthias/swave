@@ -31,6 +31,8 @@ private[core] final class OnEventStage(callback: StreamEvent[Any] ⇒ Unit) exte
   connectInOutAndSealWith { (ctx, in, out) ⇒ running(in, out) }
 
   def running(in: Inport, out: Outport) = state(
+    intercept = false,
+
     request = (n, _) ⇒ {
       callback(StreamEvent.Request(n))
       in.request(n.toLong)

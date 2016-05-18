@@ -32,20 +32,16 @@ private[core] final class DropStage(count: Long) extends InOutStage with PipeEle
 
   connectInOutAndSealWith { (ctx, in, out) ⇒
     ctx.registerForXStart(this)
-    awaitingXStart(in, out)
+    running(in, out)
   }
 
-  /**
-   * @param in  the active upstream
-   * @param out the active downstream
-   */
-  def awaitingXStart(in: Inport, out: Outport) = state(
-    xStart = () => {
-      in.request(count)
-      running(in, out)
-    })
-
   def running(in: Inport, out: Outport) = {
+
+    def awaitingXStart() = state(
+      xStart = () => {
+        in.request(count)
+        dropping(count)
+      })
 
     /**
      * Waiting for elements from upstream to drop.
@@ -82,7 +78,7 @@ private[core] final class DropStage(count: Long) extends InOutStage with PipeEle
       onComplete = stopCompleteF(out),
       onError = stopErrorF(out))
 
-    dropping(count)
+    awaitingXStart()
   }
 }
 

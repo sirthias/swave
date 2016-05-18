@@ -30,6 +30,8 @@ private[core] final class NopStage extends InOutStage with PipeElem.InOut.Nop {
   connectInOutAndSealWith { (ctx, in, out) ⇒ running(in, out) }
 
   def running(in: Inport, out: Outport) = state(
+    intercept = false,
+
     request = (n, _) ⇒ {
       in.request(n.toLong)
       stay()

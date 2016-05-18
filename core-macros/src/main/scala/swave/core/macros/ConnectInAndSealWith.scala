@@ -14,6 +14,8 @@ trait ConnectInAndSealWith { this: Util =>
       initialState(awaitingOnSubscribe())
 
       def awaitingOnSubscribe() = state(
+        intercept = false,
+
         onSubscribe = from ⇒ {
           _inputPipeElem = from.pipeElem
           ready(from)

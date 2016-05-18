@@ -30,6 +30,8 @@ private[core] final class MapStage(f: AnyRef ⇒ AnyRef) extends InOutStage with
   connectInOutAndSealWith { (ctx, in, out) ⇒ running(in, out) }
 
   def running(in: Inport, out: Outport): State = state(
+    intercept = false,
+
     request = (n, _) ⇒ {
       in.request(n.toLong)
       stay()

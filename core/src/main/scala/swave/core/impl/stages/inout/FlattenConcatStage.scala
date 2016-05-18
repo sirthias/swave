@@ -32,24 +32,19 @@ private[core] final class FlattenConcatStage(streamable: Streamable.Aux[AnyRef, 
 
   connectInOutAndSealWith { (ctx, in, out) ⇒
     ctx.registerForXStart(this)
-    awaitingXStart(ctx, in, out)
+    running(ctx, in, out)
   }
-
-  /**
-   * @param ctx the RunContext
-   * @param in  the active upstream
-   * @param out the active downstream
-   */
-  def awaitingXStart(ctx: RunContext, in: Inport, out: Outport) = state(
-    xStart = () => {
-      in.request(1)
-      running(ctx, in, out)
-    })
 
   // TODO: switch to fully parallel subscribe of all subs at once
   // implementation idea: we need a third list containing the already subscribed but not yet "current" subs
 
   def running(ctx: RunContext, in: Inport, out: Outport) = {
+
+    def awaitingXStart() = state(
+      xStart = () => {
+        in.request(1)
+        awaitingSub(0)
+      })
 
     /**
      * No subs currently subscribing or subscribed.
@@ -171,7 +166,7 @@ private[core] final class FlattenConcatStage(streamable: Streamable.Aux[AnyRef, 
         if (subscribing ne null) cancelling(ctx, subscribing) else stop()
       })
 
-    awaitingSub(0)
+    awaitingXStart()
   }
 
   /**

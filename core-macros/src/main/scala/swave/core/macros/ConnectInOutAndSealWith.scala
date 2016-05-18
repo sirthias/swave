@@ -16,6 +16,7 @@ trait ConnectInOutAndSealWith { this: Util =>
 
       def awaitingSubscribeOrOnSubscribe() = state(
         intercept = false,
+
         onSubscribe = from ⇒ {
           _inputPipeElem = from.pipeElem
           awaitingSubscribe(from)
@@ -29,6 +30,7 @@ trait ConnectInOutAndSealWith { this: Util =>
 
       def awaitingSubscribe(in: Inport) = state(
         intercept = false,
+
         subscribe = from ⇒ {
           _outputPipeElem = from.pipeElem
           from.onSubscribe()
@@ -37,6 +39,7 @@ trait ConnectInOutAndSealWith { this: Util =>
 
       def awaitingOnSubscribe(out: Outport) = state(
         intercept = false,
+
         onSubscribe = from ⇒ {
           _inputPipeElem = from.pipeElem
           ready(from, out)
@@ -44,6 +47,7 @@ trait ConnectInOutAndSealWith { this: Util =>
 
       def ready(in: Inport, out: Outport) = state(
         intercept = false,
+
         xSeal = c ⇒ {
           configureFrom(c.env)
           in.xSeal(c)

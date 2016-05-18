@@ -14,6 +14,8 @@ trait ConnectOutAndSealWith {  this: Util =>
       initialState(awaitingSubscribe())
 
       def awaitingSubscribe() = state(
+        intercept = false,
+
         subscribe = from ⇒ {
           _outputPipeElem = from.pipeElem
           from.onSubscribe()
@@ -21,6 +23,8 @@ trait ConnectOutAndSealWith {  this: Util =>
         })
 
       def ready(out: Outport) = state(
+        intercept = false,
+
         xSeal = c ⇒ {
           configureFrom(c.env)
           out.xSeal(c)

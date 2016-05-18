@@ -34,6 +34,8 @@ trait ConnectFanInAndSealWith { this: Util =>
         })
 
       def ready(out: Outport) = state(
+        intercept = false,
+
         xSeal = c ⇒ {
           configureFrom(c.env)
           out.xSeal(c)

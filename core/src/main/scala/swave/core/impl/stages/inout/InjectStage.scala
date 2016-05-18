@@ -35,22 +35,17 @@ private[core] final class InjectStage extends InOutStage with PipeElem.InOut.Inj
   connectInOutAndSealWith { (ctx, in, out) ⇒
     ctx.registerForXCleanUp(this)
     ctx.registerForXStart(this)
-    awaitingXStart(ctx, in, out)
+    running(ctx, in, out)
   }
 
-  /**
-   * @param ctx the RunContext
-   * @param in  the active upstream
-   * @param out the active downstream
-   */
-  def awaitingXStart(ctx: RunContext, in: Inport, out: Outport) = state(
-    xStart = () => {
-      buffer = new RingBuffer[AnyRef](roundUpToNextPowerOf2(ctx.env.settings.maxBatchSize))
-      in.request(buffer.capacity.toLong)
-      running(ctx, in, out)
-    })
-
   def running(ctx: RunContext, in: Inport, out: Outport) = {
+
+    def awaitingXStart() = state(
+      xStart = () => {
+        buffer = new RingBuffer[AnyRef](roundUpToNextPowerOf2(ctx.env.settings.maxBatchSize))
+        in.request(buffer.capacity.toLong)
+        noSubAwaitingElem(buffer.capacity, mainRemaining = 0)
+      })
 
     /**
      * Buffer non-empty, no sub-stream open.
@@ -332,6 +327,6 @@ private[core] final class InjectStage extends InOutStage with PipeElem.InOut.Inj
       stay()
     }
 
-    noSubAwaitingElem(buffer.capacity, mainRemaining = 0)
+    awaitingXStart()
   }
 }
