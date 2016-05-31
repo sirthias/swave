@@ -37,7 +37,7 @@ trait ConnectFanInAndSealWith { this: Util =>
         intercept = false,
 
         xSeal = c ⇒ {
-          configureFrom(c.env)
+          configureFrom(c)
           out.xSeal(c)
           $subs.foreach(_.in.xSeal(c)) // TODO: avoid function allocation
           val $ctx = c

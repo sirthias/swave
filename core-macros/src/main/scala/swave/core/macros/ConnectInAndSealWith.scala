@@ -23,7 +23,7 @@ trait ConnectInAndSealWith { this: Util =>
 
       def ready(in: Inport) = state(
         xSeal = c ⇒ {
-          configureFrom(c.env)
+          configureFrom(c)
           in.xSeal(c)
           val $ctx = c
           val $in = in

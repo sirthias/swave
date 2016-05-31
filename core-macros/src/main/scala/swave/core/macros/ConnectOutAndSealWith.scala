@@ -26,7 +26,7 @@ trait ConnectOutAndSealWith {  this: Util =>
         intercept = false,
 
         xSeal = c ⇒ {
-          configureFrom(c.env)
+          configureFrom(c)
           out.xSeal(c)
           val $ctx = c
           val $out = out

@@ -19,7 +19,7 @@ package swave.core.macros
 import scala.annotation.{ StaticAnnotation, compileTimeOnly }
 
 @compileTimeOnly("@StageImpl can only be used as a lone method body")
-final class StageImpl(debug: Boolean = false) extends StaticAnnotation {
+final class StageImpl(dump: Boolean = false, tracing: Boolean = false) extends StaticAnnotation {
   def macroTransform(annottees: Any*): Any = macro StageImplMacro.generateStage
 }
 
@@ -96,9 +96,13 @@ class StageImplMacro(val c: scala.reflect.macros.whitebox.Context) extends Util
   import c.universe._
 
   var stateHandlers = Map.empty[String, StateHandlers]
-  val debugMode: Boolean =
+  val debugMode: Boolean = annotationFlag("dump")
+  val tracing: Boolean = annotationFlag("tracing")
+
+  private def annotationFlag(flag: String) =
     c.prefix.tree match {
-      case q"new StageImpl(debug = true)" | q"new StageImpl(true)" ⇒ true
+      case q"new StageImpl(..$params)" ⇒
+        params.collectFirst { case AssignOrNamedArg(Ident(TermName(`flag`)), Literal(Constant(true))) ⇒ }.isDefined
       case _ ⇒ false
     }
 
@@ -118,7 +122,7 @@ class StageImplMacro(val c: scala.reflect.macros.whitebox.Context) extends Util
     val parameterSet = determineParameterSet(stateParentDefs, stateDefs(sc1))
     val sc2 = stateParentDefs.foldLeft(sc1: Tree)(removeStateParentDef(parameterSet))
     val sc3 = stateDefs(sc2).foldLeft(sc2)(transformStateDef(parameterSet))
-    val sc4 = addMembers(sc3, varMembers(parameterSet), interceptingStatesImpl :: stateNameImpl :: signalHandlersImpl)
+    val sc4 = addMembers(sc3, varMembers(parameterSet), assignInterceptingStates :: stateNameImpl ::: signalHandlersImpl)
     val sc5 = transformStateCallSites(sc4)
 
     val transformedStageClass = sc5
@@ -202,7 +206,7 @@ class StageImplMacro(val c: scala.reflect.macros.whitebox.Context) extends Util
         unblock(stateCallVarAssignments(tree.pos, stateHandlers(name).params, args), q"${TermName(name)}()")
     }
 
-  def addMembers(stageClass: Tree, prepend: List[Tree], append: List[Tree]) = {
+  def addMembers(stageClass: Tree, prepend: List[ValDef], append: List[Tree]) = {
     val ClassDef(mods, name, typeDefs, Template(parents, self, body)) = stageClass
     ClassDef(mods, name, typeDefs, Template(parents, self, prepend ::: body ::: append))
   }
@@ -225,6 +229,18 @@ class StageImplMacro(val c: scala.reflect.macros.whitebox.Context) extends Util
         }
       }.reverse
 
+    def switch(signal: String, cases: List[CaseDef]): Tree = {
+      val theMatch = q"stay() match { case ..$cases }"
+      if (tracing) {
+        val res = freshName("res")
+        q"""println(this + ${Literal(Constant(": entering " + signal))})
+            val $res = $theMatch
+            println(this + ${Literal(Constant(s": exiting `$signal` with new state `"))} + stateName($res) + "`")
+            $res
+         """
+      } else theMatch
+    }
+
     def subscribeDef = {
       val from = freshName("from")
       val cases = compact {
@@ -234,7 +250,8 @@ class StageImplMacro(val c: scala.reflect.macros.whitebox.Context) extends Util
           }
         }
       }
-      if (cases.size > 1) q"protected override def _subscribe0($from: swave.core.impl.Outport): State = stay() match { case ..$cases }"
+      if (cases.size > 1)
+        q"protected override def _subscribe0($from: swave.core.impl.Outport): State = ${switch("subscribe", cases)}"
       else q"()"
     }
 
@@ -249,7 +266,7 @@ class StageImplMacro(val c: scala.reflect.macros.whitebox.Context) extends Util
         }
       }
       if (cases.size > 1) {
-        q"protected override def _request0($n: Int, $from: swave.core.impl.Outport): State = stay() match { case ..$cases }"
+        q"protected override def _request0($n: Int, $from: swave.core.impl.Outport): State = ${switch("request", cases)}"
       } else q"()"
     }
 
@@ -267,7 +284,7 @@ class StageImplMacro(val c: scala.reflect.macros.whitebox.Context) extends Util
         }
       }
       if (cases.size > 1) {
-        q"protected override def _cancel0($from: swave.core.impl.Outport): State = stay() match { case ..$cases }"
+        q"protected override def _cancel0($from: swave.core.impl.Outport): State = ${switch("cancel", cases)}"
       } else q"()"
     }
 
@@ -281,7 +298,7 @@ class StageImplMacro(val c: scala.reflect.macros.whitebox.Context) extends Util
         }
       }
       if (cases.size > 1) {
-        q"protected override def _onSubscribe0($from: swave.core.impl.Inport): State = stay() match { case ..$cases }"
+        q"protected override def _onSubscribe0($from: swave.core.impl.Inport): State = ${switch("onSubscribe", cases)}"
       } else q"()"
     }
 
@@ -296,7 +313,7 @@ class StageImplMacro(val c: scala.reflect.macros.whitebox.Context) extends Util
         }
       }
       if (cases.size > 1) {
-        q"protected override def _onNext0($elem: AnyRef, $from: swave.core.impl.Inport): State = stay() match { case ..$cases }"
+        q"protected override def _onNext0($elem: AnyRef, $from: swave.core.impl.Inport): State = ${switch("onNext", cases)}"
       } else q"()"
     }
 
@@ -314,7 +331,7 @@ class StageImplMacro(val c: scala.reflect.macros.whitebox.Context) extends Util
         }
       }
       if (cases.size > 1) {
-        q"protected override def _onComplete0($from: swave.core.impl.Inport): State = stay() match { case ..$cases }"
+        q"protected override def _onComplete0($from: swave.core.impl.Inport): State = ${switch("onComplete", cases)}"
       } else q"()"
     }
 
@@ -333,7 +350,7 @@ class StageImplMacro(val c: scala.reflect.macros.whitebox.Context) extends Util
         }
       }
       if (cases.size > 1) {
-        q"protected override def _onError0($error: Throwable, $from: swave.core.impl.Inport): State = stay() match { case ..$cases }"
+        q"protected override def _onError0($error: Throwable, $from: swave.core.impl.Inport): State = ${switch("onError", cases)}"
       } else q"()"
     }
 
@@ -347,15 +364,15 @@ class StageImplMacro(val c: scala.reflect.macros.whitebox.Context) extends Util
         }
       }
       if (cases.size > 1) {
-        val result = TermName(c.freshName())
+        val res = freshName("res")
         val extraLine = stateHandlers.get("awaitingXStart") match {
-          case Some(sh) ⇒ q"setIntercepting($result == ${sh.id})"
+          case Some(sh) ⇒ q"setIntercepting($res == ${sh.id})"
           case None     ⇒ q"()"
         }
         q"""protected override def _xSeal($ctx: swave.core.impl.RunContext): State = {
-              val $result = stay() match { case ..$cases }
+              val $res = ${switch("xSeal", cases)}
               $extraLine
-              $result
+              $res
             }"""
       } else q"()"
     }
@@ -366,7 +383,7 @@ class StageImplMacro(val c: scala.reflect.macros.whitebox.Context) extends Util
           sh.xStart.fold(acc) { case q"() => $body" ⇒ cq"${sh.id} => $body" :: acc }
         }
       }
-      if (cases.size > 1) q"protected override def _xStart(): State = stay() match { case ..$cases }" else q"()"
+      if (cases.size > 1) q"protected override def _xStart(): State = ${switch("xStart", cases)}" else q"()"
     }
 
     def xRunDef = {
@@ -375,7 +392,7 @@ class StageImplMacro(val c: scala.reflect.macros.whitebox.Context) extends Util
           sh.xRun.fold(acc) { case q"() => $body" ⇒ cq"${sh.id} => $body" :: acc }
         }
       }
-      if (cases.size > 1) q"protected override def _xRun(): State = stay() match { case ..$cases }" else q"()"
+      if (cases.size > 1) q"protected override def _xRun(): State = ${switch("xRun", cases)}" else q"()"
     }
 
     def xCleanUpDef = {
@@ -390,24 +407,26 @@ class StageImplMacro(val c: scala.reflect.macros.whitebox.Context) extends Util
           }
         }
       }
-      if (cases.size > 1) q"protected override def _xCleanUp(): State = stay() match { case ..$cases }" else q"()"
+      if (cases.size > 1) q"protected override def _xCleanUp(): State = ${switch("xCleanUp", cases)}" else q"()"
     }
 
     List(subscribeDef, requestDef, cancelDef, onSubscribeDef, onNextDef, onCompleteDef, onErrorDef,
       xSealDef, xStartDef, xRunDef, xCleanUpDef)
   }
 
-  def interceptingStatesImpl: ValDef = {
+  def assignInterceptingStates: Tree = {
     val bitMask = stateHandlers.valuesIterator.foldLeft(0) { (acc, sh) ⇒
       if (sh.intercept) acc | (1 << sh.id) else acc
     }
-    q"protected val interceptingStates: Int = $bitMask"
+    q"interceptingStates = $bitMask"
   }
 
-  def stateNameImpl: DefDef = {
+  def stateNameImpl: List[DefDef] = {
     val cases = cq"_ => super.stateName" ::
       stateHandlers.foldLeft(cq"""0 => "STOPPED"""" :: Nil) { case (acc, (name, sh)) ⇒ cq"${sh.id} => $name" :: acc }
-    q"override def stateName: String = stay() match { case ..${cases.reverse} }"
+
+    q"override def stateName: String = stateName(stay())" ::
+      q"private def stateName(id: Int): String = id match { case ..${cases.reverse} }" :: Nil
   }
 
   def stateCallVarAssignments(pos: Position, params: List[ValDef], args: List[Tree]): List[Tree] =

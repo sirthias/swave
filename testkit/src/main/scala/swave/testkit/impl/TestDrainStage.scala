@@ -60,7 +60,7 @@ private[testkit] final class TestDrainStage(
   def ready(in: Inport): State = state(
     xSeal = c ⇒ {
       testCtx.trace("Received XSEAL in 'ready'")
-      configureFrom(c.env)
+      configureFrom(c)
       testCtx.trace("⇠ XSEAL")
       in.xSeal(c)
 

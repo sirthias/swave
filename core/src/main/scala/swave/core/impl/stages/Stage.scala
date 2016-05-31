@@ -17,7 +17,7 @@
 package swave.core.impl.stages
 
 import scala.annotation.{ compileTimeOnly, tailrec }
-import swave.core.{ StreamEnv, PipeElem }
+import swave.core.PipeElem
 import swave.core.util._
 import swave.core.impl._
 
@@ -88,18 +88,18 @@ import swave.core.impl._
 private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem.Basic ⇒
   import Stage.InportStates
 
-  type State = Int
+  type State = Int // semantic alias
 
   private[this] var _intercepting = false
   private[this] var _sealed = false
   private[this] var _state: State = _ // current state; the STOPPED state is always encoded as zero
   private[this] var _mbs: Int = _
   private[this] var _inportState: InportStates = _
-  private[this] var _buffer: ResizableRingBuffer[AnyRef] = _ // TODO: evaluate inlining vs. splitting into 3 more narrowly typed buffers
+  private[this] var _buffer: ResizableRingBuffer[AnyRef] = _
 
-  protected val interceptingStates: Int // bit mask containg a 1-bit for every state which requires interception support
+  protected final var interceptingStates: Int = _ // bit mask holding a 1 bit for every state which requires interception support
 
-  protected final def configureFrom(env: StreamEnv): Unit = _mbs = env.settings.maxBatchSize
+  protected final def configureFrom(ctx: RunContext): Unit = _mbs = ctx.env.settings.maxBatchSize
 
   protected final implicit def self: this.type = this
 
@@ -122,7 +122,7 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem.Basic 
       _intercepting = interceptionNeeded
       _subscribe(from)
       handleInterceptions()
-    } else storeInterception(StageStatics.LONGS(0), from)
+    } else storeInterception(Statics._0L, from)
 
   private def _subscribe(from: Outport): Unit = _state = _subscribe0(from)
 
@@ -139,7 +139,7 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem.Basic 
       _intercepting = interceptionNeeded
       _request(n, from)
       handleInterceptions()
-    } else storeInterception(StageStatics.LONGS(1), if (n < 16) StageStatics.LONGS(n.toInt) else new java.lang.Long(n), from)
+    } else storeInterception(Statics._1L, from, if (n <= 16) Statics.LONGS(n.toInt - 1) else new java.lang.Long(n))
 
   private def _request(n: Long, from: Outport): Unit = {
     val count =
@@ -166,7 +166,7 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem.Basic 
       handleInterceptions()
     } else {
       from.asInstanceOf[Stage].clearInportState(this)
-      storeInterception(StageStatics.LONGS(2), from)
+      storeInterception(Statics._2L, from)
     }
 
   private def _cancel(from: Outport): Unit = _state = _cancel0(from)
@@ -184,7 +184,7 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem.Basic 
       _intercepting = interceptionNeeded
       _onSubscribe(from)
       handleInterceptions()
-    } else storeInterception(StageStatics.LONGS(3), from)
+    } else storeInterception(Statics._3L, from)
 
   private def _onSubscribe(from: Inport): Unit = _state = _onSubscribe0(from)
 
@@ -201,7 +201,7 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem.Basic 
       _intercepting = interceptionNeeded
       _onNext(elem, from)
       handleInterceptions()
-    } else storeInterception(StageStatics.LONGS(4), elem, from)
+    } else storeInterception(Statics._4L, from, elem)
 
   @tailrec
   private def _onNext(elem: AnyRef, from: Inport, last: InportStates = null, current: InportStates = _inportState): Unit =
@@ -238,7 +238,7 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem.Basic 
       _intercepting = interceptionNeeded
       _onComplete(from)
       handleInterceptions()
-    } else storeInterception(StageStatics.LONGS(5), from)
+    } else storeInterception(Statics._5L, from)
 
   private def _onComplete(from: Inport): Unit = {
     clearInportState(from)
@@ -258,7 +258,7 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem.Basic 
       _intercepting = interceptionNeeded
       _onError(error, from)
       handleInterceptions()
-    } else storeInterception(StageStatics.LONGS(6), error, from)
+    } else storeInterception(Statics._6L, from, error)
 
   private def _onError(error: Throwable, from: Inport): Unit = {
     clearInportState(from)
@@ -400,13 +400,13 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem.Basic 
 
   private def interceptionNeeded: Boolean = ((interceptingStates >> _state) & 1) != 0
 
-  private def storeInterception(signal: java.lang.Long, arg: AnyRef): Unit =
-    if (!buffer.write(signal, arg))
-      illegalState(s"Interception buffer overflow on signal '$signal($arg)'")
+  private def storeInterception(signal: java.lang.Long, from: Port): Unit =
+    if (!buffer.write(signal, from))
+      illegalState(s"Interception buffer overflow on signal $signal from $from'")
 
-  private def storeInterception(signal: java.lang.Long, arg0: AnyRef, arg1: AnyRef): Unit =
-    if (!buffer.write(signal, arg0, arg1))
-      illegalState(s"Interception buffer overflow on signal '$signal($arg0, $arg1)'")
+  private def storeInterception(signal: java.lang.Long, from: Port, arg: AnyRef): Unit =
+    if (!buffer.write(signal, from, arg))
+      illegalState(s"Interception buffer overflow on signal $signal($arg) from $from'")
 
   private def buffer = {
     if (_buffer eq null) {
@@ -418,15 +418,16 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem.Basic 
 
   @tailrec private def handleInterceptions(): Unit =
     if ((_buffer ne null) && _buffer.nonEmpty) {
-      def read() = _buffer.unsafeRead()
-      read().asInstanceOf[java.lang.Long].intValue() match {
-        case 0 ⇒ _subscribe(read().asInstanceOf[Stage])
-        case 1 ⇒ _request(read().asInstanceOf[java.lang.Long].longValue(), read().asInstanceOf[Stage])
-        case 2 ⇒ _cancel(read().asInstanceOf[Stage])
-        case 3 ⇒ _onSubscribe(read().asInstanceOf[Stage])
-        case 4 ⇒ _onNext(read(), read().asInstanceOf[Stage])
-        case 5 ⇒ _onComplete(read().asInstanceOf[Stage])
-        case 6 ⇒ _onError(read().asInstanceOf[Throwable], read().asInstanceOf[Stage])
+      val signal = _buffer.unsafeRead().asInstanceOf[java.lang.Long].intValue()
+      val from = _buffer.unsafeRead().asInstanceOf[Stage]
+      signal match {
+        case 0 ⇒ _subscribe(from)
+        case 1 ⇒ _request(_buffer.unsafeRead().asInstanceOf[java.lang.Long].longValue(), from)
+        case 2 ⇒ _cancel(from)
+        case 3 ⇒ _onSubscribe(from)
+        case 4 ⇒ _onNext(_buffer.unsafeRead(), from)
+        case 5 ⇒ _onComplete(from)
+        case 6 ⇒ _onError(_buffer.unsafeRead().asInstanceOf[Throwable], from)
       }
       handleInterceptions()
     } else _intercepting = false

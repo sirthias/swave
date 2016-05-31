@@ -39,7 +39,7 @@ trait ConnectFanOutAndSealWith {  this: Util =>
         xSeal = c ⇒ {
           if (in ne null) {
             if (outs.nonEmpty) {
-              configureFrom(c.env)
+              configureFrom(c)
               in.xSeal(c)
               @tailrec def rec(current: swave.core.impl.stages.Stage.OutportStates): Unit =
                 if (current ne null) { current.out.xSeal(c); rec(current.tail) }

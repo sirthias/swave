@@ -60,7 +60,7 @@ private[testkit] final class TestStreamStage(
   def ready(out: Outport): State = state(
     xSeal = c ⇒ {
       ctx.trace("Received XSEAL in 'ready'")
-      configureFrom(c.env)
+      configureFrom(c)
       ctx.trace("⇢ XSEAL")
       out.xSeal(c)
       if (elems.hasNext) {

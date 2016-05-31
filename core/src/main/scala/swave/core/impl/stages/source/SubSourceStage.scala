@@ -44,7 +44,7 @@ private[core] final class SubSourceStage(ctx: RunContext, in: Inport) extends So
   def ready(out: Outport, termination: Termination): State = state(
     xSeal = subCtx ⇒ {
       ctx.attach(subCtx)
-      configureFrom(ctx.env)
+      configureFrom(ctx)
       out.xSeal(ctx)
       termination match {
         case Termination.None => running(out)

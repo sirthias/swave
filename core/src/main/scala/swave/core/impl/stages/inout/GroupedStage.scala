@@ -25,12 +25,12 @@ import swave.core.util._
 // format: OFF
 @StageImpl
 private[core] final class GroupedStage(groupSize: Int, emitSingleEmpty: Boolean, builder: mutable.Builder[Any, AnyRef]) extends InOutStage
-  with PipeElem.InOut.Drop {
+  with PipeElem.InOut.Grouped {
 
   require(groupSize > 0)
 
-  def pipeElemType: String = "group"
-  def pipeElemParams: List[Any] = groupSize :: Nil
+  def pipeElemType: String = "grouped"
+  def pipeElemParams: List[Any] = groupSize :: emitSingleEmpty :: Nil
 
   connectInOutAndSealWith { (ctx, in, out) ⇒ running(in, out) }
 

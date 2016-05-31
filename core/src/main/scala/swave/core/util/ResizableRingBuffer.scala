@@ -16,6 +16,9 @@
 
 package swave.core.util
 
+import org.jctools.util.UnsafeAccess.UNSAFE
+import org.jctools.util.UnsafeRefArrayAccess.calcElementOffset
+
 /**
  * A mutable RingBuffer that can grow in size.
  * Contrary to many other ring buffer implementations this one does not automatically overwrite the oldest
@@ -66,7 +69,7 @@ private[swave] final class ResizableRingBuffer[T <: AnyRef](initialCap: Int, max
    */
   def write(value: T): Boolean =
     if (size < currentCapacity) { // if we have space left we can simply write and be done
-      array(writeIx & mask) = value
+      UNSAFE.putObject(array, calcElementOffset((writeIx & mask).toLong), value)
       writeIx += 1
       true
     } else grow() && write(value)
@@ -77,8 +80,8 @@ private[swave] final class ResizableRingBuffer[T <: AnyRef](initialCap: Int, max
    */
   def write(v1: T, v2: T): Boolean =
     if (size < currentCapacity - 1) { // if we have space left we can simply write and be done
-      array(writeIx & mask) = v1
-      array((writeIx + 1) & mask) = v2
+      UNSAFE.putObject(array, calcElementOffset((writeIx & mask).toLong), v1)
+      UNSAFE.putObject(array, calcElementOffset(((writeIx + 1) & mask).toLong), v2)
       writeIx += 2
       true
     } else grow() && write(v1, v2)
@@ -89,9 +92,9 @@ private[swave] final class ResizableRingBuffer[T <: AnyRef](initialCap: Int, max
    */
   def write(v1: T, v2: T, v3: T): Boolean =
     if (size < currentCapacity - 2) { // if we have space left we can simply write and be done
-      array(writeIx & mask) = v1
-      array((writeIx + 1) & mask) = v2
-      array((writeIx + 2) & mask) = v3
+      UNSAFE.putObject(array, calcElementOffset((writeIx & mask).toLong), v1)
+      UNSAFE.putObject(array, calcElementOffset(((writeIx + 1) & mask).toLong), v2)
+      UNSAFE.putObject(array, calcElementOffset(((writeIx + 2) & mask).toLong), v3)
       writeIx += 3
       true
     } else grow() && write(v1, v2, v3)
@@ -110,7 +113,7 @@ private[swave] final class ResizableRingBuffer[T <: AnyRef](initialCap: Int, max
   def unsafeRead(): T = {
     val r = readIx
     readIx += 1
-    array(r & mask).asInstanceOf[T]
+    UNSAFE.getObject(array, calcElementOffset((r & mask).toLong)).asInstanceOf[T]
   }
 
   private def grow(): Boolean =

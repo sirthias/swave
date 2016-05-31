@@ -24,7 +24,6 @@ private[core] final class FirstAvailableStage(eagerCancel: Boolean) extends FanO
   def pipeElemType: String = "fanOutFirstAvailable"
   def pipeElemParams: List[Any] = eagerCancel :: Nil
 
-  val interceptingStates: Int = 0
   override def stateName: String = ???
 }
 
