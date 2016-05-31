@@ -80,16 +80,21 @@ val macroParadise = Seq(
 
 /////////////////////// DEPENDENCIES /////////////////////////
 
+// core
 val `reactive-streams`     = "org.reactivestreams"        %   "reactive-streams"      % "1.0.0"
 val `jctools-core`         = "org.jctools"                %   "jctools-core"          % "1.2"
 val `typesafe-config`      = "com.typesafe"               %   "config"                % "1.3.0"
-val shapeless              = "com.chuusai"                %%  "shapeless"             % "2.3.0"
+val shapeless              = "com.chuusai"                %%  "shapeless"             % "2.3.1"
 val `scala-logging`        = "com.typesafe.scala-logging" %%  "scala-logging"         % "3.4.0"
 val scalactic              = "org.scalactic"              %%  "scalactic"             % "2.2.6"  // TODO: internalize
-val pprint                 = "com.lihaoyi"                %%  "pprint"                % "0.4.0"  // TODO: internalize
-val scalatest              = "org.scalatest"              %%  "scalatest"             % "2.2.6"
+
+// test
+val scalatest              = "org.scalatest"              %%  "scalatest"             % "2.2.6"   % "test"
 val scalacheck             = "org.scalacheck"             %%  "scalacheck"            % "1.12.5"
-val `reactive-streams-tck` = "org.reactivestreams"        %   "reactive-streams-tck"  % "1.0.0"
+val `reactive-streams-tck` = "org.reactivestreams"        %   "reactive-streams-tck"  % "1.0.0"   % "test"
+
+// examples
+val `akka-stream`          = "com.typesafe.akka"          %%  "akka-stream"           % "2.4.5"
 val logback                = "ch.qos.logback"             %   "logback-classic"       % "1.1.7"
 
 /////////////////////// PROJECTS /////////////////////////
@@ -111,7 +116,11 @@ lazy val examples = project
   .disablePlugins(com.typesafe.sbt.SbtScalariform)
   .settings(commonSettings: _*)
   .settings(noPublishingSettings: _*)
-  .settings(libraryDependencies ++= Seq(logback))
+  .settings(
+    fork in run := true,
+    connectInput in run := true,
+    javaOptions in run ++= Seq("-XX:+UnlockCommercialFeatures", "-XX:+FlightRecorder"),
+    libraryDependencies ++= Seq(`akka-stream`, logback))
 
 lazy val core = project
   .dependsOn(`core-macros`)
@@ -121,8 +130,8 @@ lazy val core = project
   .settings(formattingSettings: _*)
   .settings(publishingSettings: _*)
   .settings(
-    libraryDependencies ++= Seq(`reactive-streams`, `jctools-core`, `typesafe-config`, shapeless, `scala-logging`,
-      scalactic, pprint, `reactive-streams-tck` % "test", scalatest % "test", scalacheck % "test"))
+    libraryDependencies ++= Seq(`reactive-streams`,  `jctools-core`, `typesafe-config`, shapeless, `scala-logging`,
+      scalactic, `reactive-streams-tck`, scalatest, scalacheck % "test"))
 
 lazy val `core-tests` = project
   .dependsOn(core, testkit)
@@ -130,7 +139,7 @@ lazy val `core-tests` = project
   .settings(commonSettings: _*)
   .settings(formattingSettings: _*)
   .settings(noPublishingSettings: _*)
-  .settings(libraryDependencies ++= Seq(shapeless, scalatest % "test", scalacheck % "test", logback % "test"))
+  .settings(libraryDependencies ++= Seq(shapeless, scalatest, scalacheck % "test", logback % "test"))
 
 lazy val `core-macros` = project
   .settings(commonSettings: _*)

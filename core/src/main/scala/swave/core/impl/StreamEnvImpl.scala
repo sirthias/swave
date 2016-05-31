@@ -38,7 +38,7 @@ private[core] final class StreamEnvImpl(
 
   val scheduler = SchedulerImpl(settings.schedulerSettings)
 
-  if (settings.logConfigOnStart) log.info(pprint.tokenize(settings).mkString)
+  if (settings.logConfigOnStart) log.info(settings.toString) // TODO: improve rendering
 
   def defaultDispatcher = dispatchers.defaultDispatcher
 

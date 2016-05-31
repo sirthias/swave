@@ -16,32 +16,54 @@
 
 package swave.examples.pi
 
+import akka.NotUsed
 import swave.core.util.XorShiftRandom
-import swave.core._
+import akka.actor.ActorSystem
+import akka.stream.{FlowShape, ActorMaterializer}
+import akka.stream.scaladsl._
 
-object MonteCarloPi extends App {
-
-  implicit val env = StreamEnv()
+object AkkaPi extends App {
+  implicit val system = ActorSystem("AkkaPi")
+  implicit val materializer = ActorMaterializer()
 
   val random = XorShiftRandom()
 
-  Stream.continually(random.nextDouble())
+//  println("Press ENTER to start!")
+//  StdIn.readLine()
+
+  Source.fromIterator(() ⇒ Iterator.continually(random.nextDouble()))
     .grouped(2)
     .map { case x +: y +: Nil ⇒ Point(x, y) }
-    .fanOut()
-      .sub.filter(_.isInner).map(_ => InnerSample).end
-      .sub.filterNot(_.isInner).map(_ => OuterSample).end
-    .fanInMerge()
+    .via(broadcastFilterMerge)
     .scan(State(0, 0)) { _ withNextSample _ }
-    .drop(1)
-    .inject
-    .map(_ drop 999999 take 1)
-    .flattenConcat()
+    .splitWhen(_.totalSamples % 1000000 == 1)
+    .drop(999999)
+    .concatSubstreams
     .map(state ⇒ f"After ${state.totalSamples}%,10d samples π is approximated as ${state.π}%.5f")
     .take(20)
-    .foreach(println)
+    .map(println)
+    .runWith(Sink.onComplete { _ ⇒ system.terminate(); () })
 
-  println(f"Done. Total time: ${System.currentTimeMillis() - env.startTime}%,6d ms")
+  system.registerOnTermination {
+    println(f"Done. Total time: ${System.currentTimeMillis() - system.startTime}%,6d ms")
+  }
+
+  ///////////////////////////////////////////
+
+  def broadcastFilterMerge: Flow[Point, Sample, NotUsed] =
+    Flow.fromGraph(GraphDSL.create() { implicit b =>
+      import GraphDSL.Implicits._
+
+      val broadcast = b.add(Broadcast[Point](2)) // split one upstream into 2 downstreams
+      val filterInner = b.add(Flow[Point].filter(_.isInner).map(_ => InnerSample))
+      val filterOuter = b.add(Flow[Point].filterNot(_.isInner).map(_ => OuterSample))
+      val merge = b.add(Merge[Sample](2)) // merge 2 upstreams into one downstream
+
+      broadcast.out(0) ~> filterInner ~> merge.in(0)
+      broadcast.out(1) ~> filterOuter ~> merge.in(1)
+
+      FlowShape(broadcast.in, merge.out)
+    })
 
   //////////////// MODEL ///////////////
 
