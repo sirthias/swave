@@ -21,15 +21,15 @@ import swave.core._
 private[core] final class DispatchersImpl private (
     val settings: Dispatchers.Settings,
     val defaultDispatcher: Dispatcher,
-    dispatcherMap: Map[Symbol, DispatcherImpl]) extends Dispatchers {
+    dispatcherMap: Map[String, DispatcherImpl]) extends Dispatchers {
 
-  def apply(id: Symbol) = dispatcherMap(id)
+  def apply(id: String) = dispatcherMap(id)
 
   /**
    * Triggers a shutdown and returns a function that
    * returns the ids of all dispatchers that are not yet terminated.
    */
-  def shutdownAll(): () ⇒ List[Symbol] = {
+  def shutdownAll(): () ⇒ List[String] = {
     val map = dispatcherMap.mapValues(_.shutdown())
     () ⇒ map.collect({ case (id, isTerminated) if !isTerminated() ⇒ id })(collection.breakOut)
   }
@@ -41,7 +41,7 @@ private[core] object DispatchersImpl {
     val dispatcherMap =
       settings.dispatcherDefs
         .mapValues(DispatcherImpl(_))
-        .withDefault(id ⇒ sys.error(s"Dispatcher '$id is not defined"))
-    new DispatchersImpl(settings, dispatcherMap('default), dispatcherMap)
+        .withDefault(id ⇒ sys.error(s"Dispatcher '$id' is not defined"))
+    new DispatchersImpl(settings, dispatcherMap("default"), dispatcherMap)
   }
 }

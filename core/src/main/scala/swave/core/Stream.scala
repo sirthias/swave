@@ -40,17 +40,17 @@ final class Stream[+A](private[core] val inport: Inport) extends AnyVal with Str
 
   def identity: Stream[A] = this.asInstanceOf[Stream[A]]
 
-  def to[R](drain: Drain[A, R]): RunnablePiping[R] =
-    new RunnablePiping(inport, drain.consume(this))
+  def to[R](drain: Drain[A, R]): Piping[R] =
+    new Piping(inport, drain.consume(this))
 
   def via[B](pipe: A =>> B): Stream[B] = pipe.transform(this)
 
   def via[P <: HList, R, Out](joined: Module.Joined[A :: HNil, P, R])(
     implicit
-    vr: TypeLogic.ViaResult[P, RunnablePiping[R], Stream, Out]): Out = {
+    vr: TypeLogic.ViaResult[P, Piping[R], Stream, Out]): Out = {
     val out = joined.module(InportList(inport))
     val result = vr.id match {
-      case 0 ⇒ new RunnablePiping(inport, out)
+      case 0 ⇒ new Piping(inport, out)
       case 1 ⇒ new Stream(out.asInstanceOf[InportList].in)
       case 2 ⇒ new StreamOps.FanIn(out.asInstanceOf[InportList], wrap)
     }

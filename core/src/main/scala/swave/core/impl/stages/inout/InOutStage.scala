@@ -24,11 +24,11 @@ import swave.core.impl.stages.Stage
 // format: OFF
 private[core] abstract class InOutStage extends Stage { this: PipeElem.InOut =>
 
-  protected var _inputPipeElem: PipeElem.Basic = PipeElem.Unconnected
-  protected var _outputPipeElem: PipeElem.Basic = PipeElem.Unconnected
+  protected final var _inputPipeElem: PipeElem.Basic = PipeElem.Unconnected
+  protected final var _outputPipeElem: PipeElem.Basic = PipeElem.Unconnected
 
-  def inputElem = _inputPipeElem
-  def outputElem =  _outputPipeElem
+  final def inputElem = _inputPipeElem
+  final def outputElem =  _outputPipeElem
 
   @compileTimeOnly("Unresolved `connectInOutAndSealWith` call")
   protected final def connectInOutAndSealWith(f: (RunContext, Inport, Outport) ⇒ State): Unit = ()

@@ -41,13 +41,23 @@ object Dispatcher {
 
   sealed abstract class ThreadPoolConfig
   object ThreadPoolConfig {
-    def apply(c: Config, defaultThreadPoolConfig: Config): ThreadPoolConfig =
+    def apply(c: Config, defaultThreadPoolConfig: Config): ThreadPoolConfig = {
+      def forkJoin(x: Config) = ForkJoin(x withFallback (defaultThreadPoolConfig getConfig "fork-join"))
+      def threadPool(x: Config) = ThreadPool(x withFallback (defaultThreadPoolConfig getConfig "thread-pool"))
       c.getOptionalConfig("fork-join") → c.getOptionalConfig("thread-pool") match {
-        case (Some(x), None)    ⇒ ForkJoin(x withFallback (defaultThreadPoolConfig getConfig "fork-join"))
-        case (None, Some(x))    ⇒ ThreadPool(x withFallback (defaultThreadPoolConfig getConfig "thread-pool"))
-        case (None, None)       ⇒ sys.error(s"Config section '$c' is missing a mandatory 'fork-join' or 'thread-pool' section!")
-        case (Some(_), Some(_)) ⇒ sys.error(s"Config section '$c' must only define either a 'fork-join' or a 'thread-pool' section, not both!")
+        case (Some(x), None) ⇒ forkJoin(x)
+        case (None, Some(x)) ⇒ threadPool(x)
+        case (None, None)    ⇒ sys.error(s"Config section '$c' is missing a mandatory 'fork-join' or 'thread-pool' section!")
+        case (Some(x), Some(y)) ⇒
+          if (c.hasPath("type")) {
+            c.getString("type") match {
+              case "fork-join"   ⇒ forkJoin(x)
+              case "thread-pool" ⇒ threadPool(y)
+            }
+          } else sys.error(s"Config section '$c' must only define either a 'fork-join' or a 'thread-pool' section, not both. " +
+            "Either remove one of them or add a `type = fork-join` or `type = thread-pool` setting to break the ambiguity!")
       }
+    }
 
     final case class Size(factor: Double, min: Int, max: Int) {
       require(factor >= 0.0)
@@ -89,7 +99,7 @@ object Dispatcher {
         ThreadPool(
           corePoolSize = size(c, "core-pool-size"),
           maxPoolSize = size(c, "max-pool-size"),
-          keepAliveTime = c getFiniteDuration "idle-timeout",
+          keepAliveTime = c getFiniteDuration "keep-alive-time",
           allowCoreTimeout = c getBoolean "allow-core-timeout",
           prestart = c.getString("prestart").toLowerCase match {
             case "off"   ⇒ Prestart.Off

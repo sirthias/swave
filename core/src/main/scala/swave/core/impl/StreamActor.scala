@@ -17,26 +17,32 @@
 package swave.core.impl
 
 import java.util.concurrent.atomic.AtomicBoolean
-import scala.concurrent.ExecutionContext
 import scala.util.control.NonFatal
 import scala.annotation.tailrec
 import com.typesafe.scalalogging.Logger
 import org.jctools.queues.MpscLinkedQueue8
+import swave.core.Dispatcher
 
 /**
  * Minimalistic actor implementation without `become`.
  */
-private[impl] abstract class StreamActor(throughput: Int, log: Logger)(implicit executionContext: ExecutionContext) {
-  import StreamActor._
+private[impl] abstract class StreamActor(
+    protected final val throughput: Int,
+    protected final val log: Logger,
+    final val dispatcher: Dispatcher) {
+
+  type MessageType <: AnyRef
 
   /**
    * The mailbox.
    * Currently a non-intrusive MPSC-Queue-Implementation using the algorithm described here:
    * http://www.1024cores.net/home/lock-free-algorithms/queues/non-intrusive-mpsc-node-based-queue
    */
-  private[this] val mailbox: java.util.Queue[Message] =
-    new MpscLinkedQueue8[Message]() // TODO: Upgrade to intrusive variant to save the Node instance allocations
-  // intrusive variant: http://www.1024cores.net/home/lock-free-algorithms/queues/intrusive-mpsc-node-based-queue
+  private[this] val mailbox: java.util.Queue[MessageType] = {
+    // TODO: benchmark against MpscChunkedArray queue or upgrade to intrusive variant to save the Node instance allocations
+    // intrusive variant: http://www.1024cores.net/home/lock-free-algorithms/queues/intrusive-mpsc-node-based-queue
+    new MpscLinkedQueue8[MessageType]()
+  }
 
   /*
    * Internal object instance hiding the AtomicBoolean and Runnable interfaces.
@@ -68,16 +74,16 @@ private[impl] abstract class StreamActor(throughput: Int, log: Logger)(implicit 
         }
     }
 
-  protected def receive(msg: AnyRef): Unit
+  protected def receive(msg: MessageType): Unit
 
-  final def !(msg: Message): Unit = {
+  protected final def enqueue(msg: MessageType): Unit = {
     mailbox.add(msg)
     trySchedule()
   }
 
   private def trySchedule(): Unit =
     if (scheduled.compareAndSet(false, true)) {
-      try executionContext.execute(scheduled)
+      try dispatcher.execute(scheduled)
       catch {
         case NonFatal(e) ⇒
           scheduled.set(true)
@@ -91,13 +97,4 @@ private[impl] abstract class StreamActor(throughput: Int, log: Logger)(implicit 
     if (!mailbox.isEmpty)
       trySchedule()
   }
-}
-
-private[impl] object StreamActor {
-
-  /**
-   * Super-type of all actor messages.
-   * Introduced as preparation for the coming upgrade to the intrusive MPSQ-Queue mailbox.
-   */
-  trait Message
 }

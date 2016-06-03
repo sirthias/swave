@@ -49,7 +49,7 @@ private[core] final class StreamEnvImpl(
 
       def isTerminated: Boolean = schedulerTermination.isCompleted && unterminatedDispatchers.isEmpty
 
-      def unterminatedDispatchers: List[Symbol] = dispatchersTermination()
+      def unterminatedDispatchers: List[String] = dispatchersTermination()
 
       def awaitTermination(timeout: FiniteDuration): Unit = {
         require(timeout >= Duration.Zero)
@@ -64,7 +64,7 @@ private[core] final class StreamEnvImpl(
             } else {
               val unterminated =
                 if (schedulerTermination.isCompleted) unterminatedDispatchers
-                else 'scheduler :: unterminatedDispatchers
+                else "scheduler" :: unterminatedDispatchers
               throw new TimeoutException(s"StreamEnv did not shut down within specified timeout of $timeout.\n" +
                 s"Unterminated dispatchers: [${unterminated.mkString(", ")}]")
             }

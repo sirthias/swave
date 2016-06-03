@@ -42,7 +42,8 @@ trait StreamOps[A] extends Any { self ⇒
   protected def wrap: Inport ⇒ Repr[_]
   protected def append[T](stage: Stage): Repr[T]
 
-  final def async: Repr[A] = ???
+  final def async(dispatcherId: String = ""): Repr[A] =
+    append(new AsyncBoundaryStage(dispatcherId))
 
   final def attach[T, O](sub: Stream[T])(implicit ev: Lub[A, T, O]): FanIn[A :: T :: HNil, A :+: T :+: CNil, O, Repr] =
     new FanIn(InportList(base) :+ sub.inport, wrap)
@@ -352,10 +353,10 @@ object StreamOps {
 
     def fromFanInVia[P <: HList, R, Out](joined: Module.Joined[L, P, R])(
       implicit
-      vr: ViaResult[P, RunnablePiping[R], Repr, Out]): Out = {
+      vr: ViaResult[P, Piping[R], Repr, Out]): Out = {
       val out = joined.module(subs)
       val result = vr.id match {
-        case 0 ⇒ new RunnablePiping(subs.in, out)
+        case 0 ⇒ new Piping(subs.in, out)
         case 1 ⇒ rawWrap(out.asInstanceOf[InportList].in)
         case 2 ⇒ new FanIn(out.asInstanceOf[InportList], rawWrap)
       }

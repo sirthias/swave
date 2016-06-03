@@ -107,9 +107,9 @@ sealed abstract class Module[-IT <: HList, +OB <: HList, -IB <: HList, +OT <: HL
 
   /**
    * Combines this instance with the given one in a way that cross-connects all
-   * inputs and outputs and thus produces a [[RunnablePiping]].
+   * inputs and outputs and thus produces a [[Piping]].
    */
-  final def crossJoin[R](other: Module[OB, IT, OT, IB, R])(implicit ev: SelectNonUnit[Res @uV, R]): RunnablePiping[ev.Out] = {
+  final def crossJoin[R](other: Module[OB, IT, OT, IB, R])(implicit ev: SelectNonUnit[Res @uV, R]): Piping[ev.Out] = {
     val ins = nops(lit + lib)
     var result: Any = ()
     val selfOuts = self(ins) match {
@@ -123,7 +123,7 @@ sealed abstract class Module[-IT <: HList, +OB <: HList, -IB <: HList, +OT <: HL
       case res           ⇒ result = res
     }
     val entryElem = if (ins.nonEmpty) ins.in else selfOuts.in
-    new RunnablePiping(entryElem, result).asInstanceOf[RunnablePiping[ev.Out]]
+    new Piping(entryElem, result).asInstanceOf[Piping[ev.Out]]
   }
 
   /**

@@ -81,7 +81,7 @@ object StreamEnv {
   abstract class Termination private[core] {
     def isTerminated: Boolean
 
-    def unterminatedDispatchers: List[Symbol]
+    def unterminatedDispatchers: List[String]
 
     def awaitTermination(timeout: FiniteDuration): Unit
   }

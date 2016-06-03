@@ -18,6 +18,7 @@ package swave.core
 
 import scala.collection.immutable.BitSet
 import scala.collection.mutable
+import swave.core.impl.stages.Stage
 import swave.core.graph.{ GlyphSet, Digraph }
 
 sealed trait PipeElem
@@ -66,6 +67,7 @@ object PipeElem {
     final def outputElems = Nil
   }
   object Drain {
+    trait Cancelling extends Drain
     trait Foreach extends Drain
     trait Head extends Drain
     trait Test extends Drain
@@ -78,6 +80,7 @@ object PipeElem {
     final def outputElems: List[PipeElem.Basic] = outputElem :: Nil
   }
   object InOut {
+    trait AsyncBoundary extends InOut
     trait BufferWithBackpressure extends InOut
     trait Coupling extends InOut
     trait Drop extends InOut
@@ -120,14 +123,24 @@ object PipeElem {
     pipeElem: PipeElem.Basic,
     expandModules: List[String] = Nil,
     glyphSet: GlyphSet = GlyphSet.`3x3 ASCII`,
-    showParams: Boolean = true,
+    showParams: Boolean = false,
+    showDispatchers: Boolean = false,
     showNops: Boolean = false) = {
 
     val graph = PipeElem.assembleGraph(pipeElem, expandModules)
     if (!showNops) graph.markHidden(_.isInstanceOf[PipeElem.InOut.Nop])
     graph.render(glyphSet).format {
       case x: PipeElem.Basic ⇒
-        def show = if (showParams) x.pipeElemType + x.pipeElemParams.mkString("(", ", ", ")") else x.pipeElemType
+        def show =
+          if (showParams || showDispatchers) {
+            val sb = new java.lang.StringBuilder(x.pipeElemType)
+            if (showParams) sb.append(x.pipeElemParams.mkString("(", ", ", ")"))
+            if (showDispatchers) {
+              val runner = x.asInstanceOf[Stage].runner
+              sb.append(" [").append(if (runner ne null) runner.dispatcher.name else "none").append(']')
+            }
+            sb.toString
+          } else x.pipeElemType
         graph.attributes(x) match {
           case Nil     ⇒ show
           case modules ⇒ show + modules.mkString(" [", ", ", "]")

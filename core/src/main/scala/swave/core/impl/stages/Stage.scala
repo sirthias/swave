@@ -90,12 +90,18 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem.Basic 
 
   type State = Int // semantic alias
 
+  // TODO: evaluate moving the two booleans into the (upper) _state integer bits
   private[this] var _intercepting = false
   private[this] var _sealed = false
   private[this] var _state: State = _ // current state; the STOPPED state is always encoded as zero
   private[this] var _mbs: Int = _
   private[this] var _inportState: InportStates = _
   private[this] var _buffer: ResizableRingBuffer[AnyRef] = _
+
+  /**
+   * The [[StreamRunner]] that is assigned to the given stage.
+   */
+  private[core] final var runner: StreamRunner = _ // null -> sync run, non-null -> async run
 
   protected final var interceptingStates: Int = _ // bit mask holding a 1 bit for every state which requires interception support
 
@@ -114,6 +120,8 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem.Basic 
   override def toString = s"${getClass.getSimpleName}@${identityHash(this)}/$stateName"
 
   def stateName: String = s"<unknown id ${_state}>"
+
+  final def isSealed: Boolean = _sealed
 
   /////////////////////////////////////// SUBSCRIBE ///////////////////////////////////////
 

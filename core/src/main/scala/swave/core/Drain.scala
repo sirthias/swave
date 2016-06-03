@@ -16,6 +16,7 @@
 
 package swave.core
 
+import scala.annotation.tailrec
 import scala.collection.generic.CanBuildFrom
 import scala.collection.immutable
 import scala.concurrent.{ Future, Promise }
@@ -44,13 +45,55 @@ final class Drain[-T, +R] private[swave] (val outport: Outport, val result: R) {
     marker.markEntry(outport)
     this
   }
+
+  /**
+   * Marks all primary drains in the graph behind this drain's `outport` as
+   * "to be run on the dispatcher with the given id".
+   * If the `dispatcherId` is empty the default dispatcher will be assigned
+   * if no other non-default assignment has previously been made.
+   *
+   * Note that the graph behind this drain's `outport` must not contain any explicit async boundaries!
+   * Otherwise an [[IllegalStateException]] will be thrown.
+   */
+  def async(dispatcherId: String = ""): Drain[T, R] =
+    outport match {
+      case stage: DrainStage ⇒
+        stage.assignDispatcherId(dispatcherId)
+        this
+
+      case x: PipeElem.Basic ⇒
+        val assign = new (PipeElem.Basic ⇒ Unit) {
+          var visited = Set.empty[PipeElem]
+          def _apply(pe: PipeElem.Basic): Unit = apply(pe)
+          @tailrec def apply(pe: PipeElem.Basic): Unit =
+            if (!visited.contains(pe)) {
+              visited += pe
+              pe match {
+                case _: PipeElem.InOut.AsyncBoundary ⇒ fail()
+                case x: PipeElem.InOut               ⇒ { _apply(x.inputElem); apply(x.inputElem) }
+                case x: PipeElem.FanIn               ⇒ { x.inputElems.foreach(this); apply(x.outputElem) }
+                case x: PipeElem.FanOut              ⇒ { x.outputElems.foreach(this); apply(x.inputElem) }
+                case x: DrainStage                   ⇒ x.assignDispatcherId(dispatcherId)
+                case _                               ⇒ ()
+              }
+            }
+          def fail() =
+            throw new IllegalStateException(s"Cannot assign dispatcher '$dispatcherId' to drain '$this'. " +
+              "The drain's graph contains at least one explicit async boundary.")
+        }
+        assign(x)
+        this
+
+      case _ ⇒ throw new IllegalStateException
+    }
 }
 
 object Drain {
 
   def asPublisher[T](fanout: Boolean): Drain[T, Publisher[T]] = ???
 
-  def cancelling: Drain[Any, Unit] = ???
+  def cancelling: Drain[Any, Unit] =
+    new Drain(new CancellingDrainStage, ())
 
   def first[T](n: Int): Drain[T, Future[immutable.Seq[T]]] =
     Pipe[T].grouped(n, emitSingleEmpty = true).to(head).named("Drain.first")

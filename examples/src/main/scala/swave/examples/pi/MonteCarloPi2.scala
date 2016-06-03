@@ -17,9 +17,10 @@
 package swave.examples.pi
 
 import java.util.concurrent.CountDownLatch
-import swave.core._
-import swave.core.util.{DoubleCell, CellWheel, XorShiftRandom}
 import scala.util.{Failure, Success}
+import scala.concurrent.duration._
+import swave.core.util.{DoubleCell, CellWheel, XorShiftRandom}
+import swave.core._
 
 object MonteCarloPi2 extends App {
 
@@ -40,6 +41,7 @@ object MonteCarloPi2 extends App {
       .sub.filter(_.isInner).map(_ => InnerSample).end
       .sub.filterNot(_.isInner).map(_ => OuterSample).end
     .fanInMerge()
+    //.async()
     .scan(State(0, 0)) { _ withNextSample _ }
     .drop(1)
     .inject
@@ -57,6 +59,8 @@ object MonteCarloPi2 extends App {
 
   latch.await()
   println(f"Done. Total time: ${System.currentTimeMillis() - env.startTime}%,6d ms")
+  env.shutdown().awaitTermination(10.seconds)
+  println("Terminated")
 
   //////////////// MODEL ///////////////
 

@@ -19,7 +19,6 @@ package swave.core
 import scala.io.Source
 import scala.util.control.NonFatal
 import org.scalatest.{ Matchers, FreeSpec }
-import swave.core.graph.GlyphSet
 import swave.core.util._
 
 class PipeElemSpec extends FreeSpec with Matchers {
@@ -91,10 +90,10 @@ class PipeElemSpec extends FreeSpec with Matchers {
       }
 
   implicit class Example(name: String) {
-    def tests(pipeNet: ⇒ RunnablePiping[_]): Unit =
+    def tests(pipeNet: ⇒ Piping[_]): Unit =
       name in {
         val expectedRendering = examples.getOrElse(name + ':', sys.error(s"Section for '$name' not found in examples.txt"))
-        val s = PipeElem.render(pipeNet.pipeElem, List(), glyphSet = GlyphSet.`3x3 ASCII`, showNops = false)
+        val s = PipeElem.render(pipeNet.pipeElem, showParams = true)
         try s shouldEqual expectedRendering
         catch {
           case NonFatal(e) ⇒

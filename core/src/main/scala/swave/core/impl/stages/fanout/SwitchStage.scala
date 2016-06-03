@@ -23,7 +23,5 @@ private[core] final class SwitchStage(branchCount: Int, f: AnyRef ⇒ Int, eager
 
   def pipeElemType: String = "fanOutSwitch"
   def pipeElemParams: List[Any] = eagerCancel :: Nil
-
-  override def stateName: String = ???
 }
 

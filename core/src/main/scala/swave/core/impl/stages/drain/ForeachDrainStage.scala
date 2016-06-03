@@ -31,6 +31,7 @@ private[core] final class ForeachDrainStage(
   def pipeElemParams: List[Any] = callback :: terminationPromise :: Nil
 
   connectInAndSealWith { (ctx, in) ⇒
+    registerForRunnerAssignmentIfRequired(ctx)
     ctx.registerForXStart(this)
     awaitingXStart(in)
   }

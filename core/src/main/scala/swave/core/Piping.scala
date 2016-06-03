@@ -16,28 +16,41 @@
 
 package swave.core
 
+import scala.util.{ Failure, Success, Try }
 import scala.util.control.NonFatal
 import swave.core.impl.{ Port, TypeLogic, RunContext }
 
 /**
- * A [[RunnablePiping]] represents a system or network of connected pipes in which all inlet and outlets
+ * A [[Piping]] represents a system or network of connected pipes in which all inlet and outlets
  * have been properly connected and which is therefore ready to be started.
  */
-final class RunnablePiping[T](port: Port, val result: T) {
+final class Piping[T](port: Port, val result: T) {
 
   def pipeElem: PipeElem.Basic = port.pipeElem
 
-  def start()(implicit env: StreamEnv): Option[Throwable] =
-    try {
-      RunContext.start(port, env)
-      None
-    } catch {
-      case NonFatal(e) ⇒ Some(e)
+  def seal()(implicit env: StreamEnv): Try[SealedPiping[T]] =
+    Try {
+      val ctx = new RunContext(port)
+      ctx.seal()
+      new SealedPiping(ctx, result)
     }
 
   def run()(implicit env: StreamEnv, ev: TypeLogic.TryFlatten[T]): ev.Out =
-    start() match {
-      case None        ⇒ ev.success(result)
-      case Some(error) ⇒ ev.failure(error)
+    seal() match {
+      case Success(x) ⇒ x.run()
+      case Failure(e) ⇒ ev.failure(e)
+    }
+}
+
+final class SealedPiping[T](ctx: RunContext, val result: T) {
+
+  def pipeElem: PipeElem.Basic = ctx.port.pipeElem
+
+  def run()(implicit ev: TypeLogic.TryFlatten[T]): ev.Out =
+    try {
+      ctx.start()
+      ev.success(result)
+    } catch {
+      case NonFatal(e) ⇒ ev.failure(e)
     }
 }

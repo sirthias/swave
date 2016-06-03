@@ -103,7 +103,7 @@ private[core] object DispatcherImpl {
             def apply() = new ForkJoinPool(scaledPoolSize(size), this, null, asyncMode)
             def newThread(pool: ForkJoinPool): ForkJoinWorkerThread = {
               val thread = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(pool)
-              thread.setName(name + '-' + incrementAndGet())
+              thread.setName(s"swave-$name-${incrementAndGet()}")
               thread
             }
           }
@@ -121,7 +121,7 @@ private[core] object DispatcherImpl {
               }
               executor
             }
-            def newThread(r: Runnable) = new Thread(r, name + '-' + incrementAndGet())
+            def newThread(r: Runnable) = new Thread(r, s"swave-$name-${incrementAndGet()}")
           }
       }
     new DispatcherImpl(settings, create)

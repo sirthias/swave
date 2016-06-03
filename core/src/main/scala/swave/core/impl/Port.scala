@@ -22,6 +22,8 @@ private[swave] sealed trait Port {
   def pipeElem: PipeElem.Basic
 
   def xSeal(ctx: RunContext): Unit
+
+  def isSealed: Boolean
 }
 
 private[swave] sealed trait Inport extends Port {
@@ -48,11 +50,11 @@ private[swave] abstract class PipeElemImpl extends Inport with Outport { this: P
   private[this] var _moduleStarts = List.empty[PipeElem.Module]
   private[this] var _moduleEnds = List.empty[PipeElem.Module]
 
-  def pipeElem = this
+  final def pipeElem = this
 
-  def moduleEntries = _moduleStarts
-  def moduleExits = _moduleEnds
+  final def moduleEntries = _moduleStarts
+  final def moduleExits = _moduleEnds
 
-  def markModuleEntry(module: PipeElem.Module): Unit = _moduleStarts ::= module
-  def markModuleExit(module: PipeElem.Module): Unit = _moduleEnds ::= module
+  final def markModuleEntry(module: PipeElem.Module): Unit = _moduleStarts ::= module
+  final def markModuleExit(module: PipeElem.Module): Unit = _moduleEnds ::= module
 }

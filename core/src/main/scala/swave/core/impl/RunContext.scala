@@ -17,6 +17,7 @@
 package swave.core.impl
 
 import scala.annotation.tailrec
+import swave.core.impl.StreamRunner.StageDispatcherIdListMap
 import swave.core.StreamEnv
 import swave.core.impl.stages.Stage
 import swave.core.util._
@@ -25,9 +26,28 @@ import swave.core.util._
  * A `RunContext` instance keeps all the contextual information required for the start of a *single* connected stream
  * network. This does not include embedded or enclosing sub-streams (streams of streams).
  */
-private[swave] final class RunContext private (private var data: RunContext.Data) {
+private[swave] final class RunContext(val port: Port)(implicit val env: StreamEnv) {
+  private var data = new RunContext.Data
+  private var isSubContext = false
+  private var isAsyncRun = false
 
-  def env: StreamEnv = data.env
+  def seal(): Unit = {
+    if (port.isSealed) throw new IllegalStateException(port + " is already sealed. It cannot be sealed a second time.")
+    port.xSeal(this)
+    if (data.needRunner.nonEmpty) {
+      StreamRunner.assignRunners(data.needRunner, env)
+      data.needRunner = StageDispatcherIdListMap.empty
+      isAsyncRun = true
+    }
+  }
+
+  /**
+   * Registers a stage for assignment of a [[StreamRunner]] with the given `dispatcherId`.
+   * If the `dispatcherId` is empty the default dispatcher will be assigned
+   * if no other non-default assignment has previously been made.
+   */
+  def registerForRunnerAssignment(stage: Stage, dispatcherId: String): Unit =
+    data.needRunner = StageDispatcherIdListMap(stage, dispatcherId, data.needRunner)
 
   /**
    * Registers the stage for receiving `xStart` signals.
@@ -48,16 +68,27 @@ private[swave] final class RunContext private (private var data: RunContext.Data
 
   def attach(other: RunContext): Unit =
     if (other.data ne data) {
-      data.merge(other.data)
+      require(other.env == env)
+      data.needRunner = data.needRunner.append(other.data.needRunner)
+      data.needXStart = data.needXStart.append(other.data.needXStart)
+      data.needXRun = data.needXRun.append(other.data.needXRun)
+      data.needXCleanUp = data.needXCleanUp.append(other.data.needXCleanUp)
       other.data = data
+      other.isSubContext = true
     }
 
-  def start(port: Port): Unit = {
-    port.xSeal(this)
+  def sealAndStartSubStream(port: Port): Unit = {
+    val subCtx = new RunContext(port)
+    subCtx.isSubContext = true
+    subCtx.seal()
+    subCtx.start()
+  }
 
+  def start(): Unit = {
     val needXStart = data.needXStart
     data.needXStart = StageList.empty
-    needXStart.foreach(RunContext.dispatchXStart)
+    needXStart.foreach(if (isAsyncRun) RunContext.dispatchAsyncXStart else RunContext.dispatchXStart)
+    if (!isSubContext && !isAsyncRun) dispatchPostRunSignals()
   }
 
   private def dispatchPostRunSignals(): Unit = {
@@ -77,29 +108,15 @@ private[swave] final class RunContext private (private var data: RunContext.Data
 }
 
 private[swave] object RunContext {
+  private val dispatchAsyncXStart: StageList ⇒ Unit = sl ⇒ sl.stage.runner.enqueueXStart(sl.stage)
   private val dispatchXStart: StageList ⇒ Unit = _.stage.xStart()
   private val dispatchXRun: StageList ⇒ Unit = _.stage.xRun()
   private val dispatchXCleanUp: StageList ⇒ Unit = _.stage.xCleanUp()
 
-  def start(port: Port, env: StreamEnv): Unit = {
-    val data = new Data(env)
-    val ctx = new RunContext(data)
-    ctx.start(port)
-    if (ctx.data eq data) {
-      ctx.dispatchPostRunSignals()
-    } // else we are not the outermost context
-  }
-
-  private class Data(val env: StreamEnv) {
+  private class Data {
+    var needRunner: StageDispatcherIdListMap = StageDispatcherIdListMap.empty
     var needXStart: StageList = StageList.empty
     var needXRun: StageList = StageList.empty
     var needXCleanUp: StageList = StageList.empty
-
-    def merge(other: Data): Unit = {
-      require(other.env == env)
-      needXStart = needXStart.append(other.needXStart)
-      needXRun = needXRun.append(other.needXRun)
-      needXCleanUp = needXCleanUp.append(other.needXCleanUp)
-    }
   }
 }

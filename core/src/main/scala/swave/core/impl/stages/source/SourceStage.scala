@@ -23,9 +23,9 @@ import swave.core.impl.stages.Stage
 // format: OFF
 private[swave] abstract class SourceStage extends Stage { this: PipeElem.Source ⇒
 
-  protected var _outputPipeElem: PipeElem.Basic = PipeElem.Unconnected
+  protected final var _outputPipeElem: PipeElem.Basic = PipeElem.Unconnected
 
-  def outputElem = _outputPipeElem
+  final def outputElem = _outputPipeElem
 
   protected final def connectOutAndSealWith(f: (RunContext, Outport) ⇒ State): Unit = ()
 }

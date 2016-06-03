@@ -73,7 +73,7 @@ private[core] final class FlattenConcatStage(streamable: Streamable.Aux[AnyRef, 
     def awaitingSubOnSubscribe(subscribing: Inport, remaining: Long): State = state(
       onSubscribe = sub ⇒ {
         requireState(sub eq subscribing)
-        ctx.start(sub)
+        ctx.sealAndStartSubStream(sub)
         if (remaining > 0) sub.request(remaining)
         if (parallelism > 1) in.request(1)
         active(1, null, InportList(sub), remaining, remaining)
@@ -105,7 +105,7 @@ private[core] final class FlattenConcatStage(streamable: Streamable.Aux[AnyRef, 
     def active(subCount: Int, subscribing: Inport, subscribed: InportList, pending: Long, remaining: Long): State = state(
       onSubscribe = sub ⇒ {
         requireState(sub eq subscribing)
-        ctx.start(sub)
+        ctx.sealAndStartSubStream(sub)
         if (subCount < parallelism) in.request(1)
         active(subCount, null, subscribed :+ sub, pending, remaining)
       },
@@ -178,7 +178,7 @@ private[core] final class FlattenConcatStage(streamable: Streamable.Aux[AnyRef, 
    */
   def drainingWaitingForOnSubscribe(ctx: RunContext, out: Outport, subscribing: Inport, remaining: Long): State = state(
     onSubscribe = sub ⇒ {
-      ctx.start(sub)
+      ctx.sealAndStartSubStream(sub)
       if (remaining > 0) sub.request(remaining)
       draining(ctx, out, null, InportList(sub), remaining, remaining)
     },
@@ -200,7 +200,7 @@ private[core] final class FlattenConcatStage(streamable: Streamable.Aux[AnyRef, 
 
     onSubscribe = sub ⇒ {
       requireState(sub eq subscribing)
-      ctx.start(sub)
+      ctx.sealAndStartSubStream(sub)
       draining(ctx, out, null, subscribed :+ sub, pending, remaining)
     },
 
@@ -254,7 +254,7 @@ private[core] final class FlattenConcatStage(streamable: Streamable.Aux[AnyRef, 
    */
   def cancelling(ctx: RunContext, subscribing: Inport): State = state(
     onSubscribe = sub => {
-      ctx.start(sub)
+      ctx.sealAndStartSubStream(sub)
       stopCancel(sub)
     })
 }

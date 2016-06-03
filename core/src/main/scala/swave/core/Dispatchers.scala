@@ -26,20 +26,20 @@ abstract class Dispatchers private[core] {
 
   def defaultDispatcher: Dispatcher
 
-  def apply(id: Symbol): Dispatcher
+  def apply(id: String): Dispatcher
 }
 
 object Dispatchers {
 
-  final case class Settings(dispatcherDefs: Map[Symbol, Dispatcher.Settings])
+  final case class Settings(dispatcherDefs: Map[String, Dispatcher.Settings])
 
   object Settings extends SettingsCompanion[Settings]("swave.core.dispatcher") {
     def fromSubConfig(c: Config): Settings = {
       val defConf = c getConfig "default-config"
       val definition = c getConfig "definition"
       Settings {
-        definition.root().keySet().iterator().asScala.foldLeft(Map.empty[Symbol, Dispatcher.Settings]) { (map, name) ⇒
-          map.updated(Symbol(name), Dispatcher.Settings(name, definition getConfig name, defConf))
+        definition.root().keySet().iterator().asScala.foldLeft(Map.empty[String, Dispatcher.Settings]) { (map, name) ⇒
+          map.updated(name, Dispatcher.Settings(name, definition getConfig name, defConf))
         }
       }
     }

@@ -18,7 +18,7 @@ package swave.core.macros
 
 import scala.annotation.{ StaticAnnotation, compileTimeOnly }
 
-@compileTimeOnly("@StageImpl can only be used as a lone method body")
+@compileTimeOnly("Unresolved @StageImpl")
 final class StageImpl(dump: Boolean = false, tracing: Boolean = false) extends StaticAnnotation {
   def macroTransform(annottees: Any*): Any = macro StageImplMacro.generateStage
 }

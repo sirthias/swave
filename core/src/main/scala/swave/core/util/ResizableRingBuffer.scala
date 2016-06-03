@@ -29,7 +29,7 @@ private[swave] final class ResizableRingBuffer[T <: AnyRef](initialCap: Int, max
   require(isPowerOf2(initialCap) && 0 < initialCap && initialCap <= maxCap)
 
   private[this] var array = new Array[AnyRef](initialCap)
-  private[this] def mask = array.length - 1 // bit mask for converting a cursor into an array index
+  private[this] var mask = array.length - 1 // bit mask for converting a cursor into an array index
 
   /*
    * two counters counting the number of elements ever written and read; wrap-around is
@@ -69,8 +69,9 @@ private[swave] final class ResizableRingBuffer[T <: AnyRef](initialCap: Int, max
    */
   def write(value: T): Boolean =
     if (size < currentCapacity) { // if we have space left we can simply write and be done
-      UNSAFE.putObject(array, calcElementOffset((writeIx & mask).toLong), value)
-      writeIx += 1
+      val w = writeIx
+      UNSAFE.putObject(array, calcElementOffset((w & mask).toLong), value)
+      writeIx = w + 1
       true
     } else grow() && write(value)
 
@@ -80,9 +81,10 @@ private[swave] final class ResizableRingBuffer[T <: AnyRef](initialCap: Int, max
    */
   def write(v1: T, v2: T): Boolean =
     if (size < currentCapacity - 1) { // if we have space left we can simply write and be done
-      UNSAFE.putObject(array, calcElementOffset((writeIx & mask).toLong), v1)
-      UNSAFE.putObject(array, calcElementOffset(((writeIx + 1) & mask).toLong), v2)
-      writeIx += 2
+      val w = writeIx
+      UNSAFE.putObject(array, calcElementOffset((w & mask).toLong), v1)
+      UNSAFE.putObject(array, calcElementOffset(((w + 1) & mask).toLong), v2)
+      writeIx = w + 2
       true
     } else grow() && write(v1, v2)
 
@@ -92,10 +94,11 @@ private[swave] final class ResizableRingBuffer[T <: AnyRef](initialCap: Int, max
    */
   def write(v1: T, v2: T, v3: T): Boolean =
     if (size < currentCapacity - 2) { // if we have space left we can simply write and be done
-      UNSAFE.putObject(array, calcElementOffset((writeIx & mask).toLong), v1)
-      UNSAFE.putObject(array, calcElementOffset(((writeIx + 1) & mask).toLong), v2)
-      UNSAFE.putObject(array, calcElementOffset(((writeIx + 2) & mask).toLong), v3)
-      writeIx += 3
+      val w = writeIx
+      UNSAFE.putObject(array, calcElementOffset((w & mask).toLong), v1)
+      UNSAFE.putObject(array, calcElementOffset(((w + 1) & mask).toLong), v2)
+      UNSAFE.putObject(array, calcElementOffset(((w + 2) & mask).toLong), v3)
+      writeIx = w + 3
       true
     } else grow() && write(v1, v2, v3)
 
@@ -112,7 +115,7 @@ private[swave] final class ResizableRingBuffer[T <: AnyRef](initialCap: Int, max
    */
   def unsafeRead(): T = {
     val r = readIx
-    readIx += 1
+    readIx = r + 1
     UNSAFE.getObject(array, calcElementOffset((r & mask).toLong)).asInstanceOf[T]
   }
 
@@ -123,6 +126,7 @@ private[swave] final class ResizableRingBuffer[T <: AnyRef](initialCap: Int, max
       System.arraycopy(array, r, newArray, 0, array.length - r)
       System.arraycopy(array, 0, newArray, array.length - r, r)
       array = newArray
+      mask = newArray.length - 1
       writeIx = size
       readIx = 0
       true

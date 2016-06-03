@@ -21,6 +21,14 @@ import scala.annotation.tailrec
 final class RichList[T](val underlying: List[T]) extends AnyVal {
 
   /**
+   * Returns 0, 1 or 2 depending on the whether the list contains 0, 1 or more elements respectively.
+   */
+  def size012: Int =
+    if (underlying.isEmpty) 0
+    else if (underlying.tail.isEmpty) 1
+    else 2
+
+  /**
    * Reverses the list avoiding the extra allocation that is performed
    * by the default `list.reverse` if the list has one single element.
    */
