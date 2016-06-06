@@ -24,6 +24,7 @@ import shapeless._
 import swave.core.impl.{ ModuleMarker, InportList }
 import swave.core.impl.TypeLogic._
 import swave.core.impl.stages.inout.NopStage
+import swave.core.util._
 
 /**
  *  A Streaming Component with four interfaces:
@@ -48,7 +49,7 @@ sealed abstract class Module[-IT <: HList, +OB <: HList, -IB <: HList, +OT <: HL
     lob: Int, // length(OB)
     lib: Int, // length(IB)
     lot: Int /* length(OT) */ ) { self ⇒
-  Predef.require(lit + lob + lib + lot > 0, "A Module must have at least one input or output port.")
+  requireArg(lit + lob + lib + lot > 0, "A Module must have at least one input or output port.")
 
   /**
    * @param inports the streams of IT ::: IB

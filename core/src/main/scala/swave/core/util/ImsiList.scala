@@ -122,11 +122,11 @@ private[swave] object ImsiList {
     def drop(count: Int): L = {
       @tailrec def rec(remaining: Int, current: L, last: L): L =
         if (remaining == 0) {
-          require(last ne null)
+          requireArg(last ne null)
           last.tail = null
           current
         } else {
-          require(current ne null)
+          requireArg(current ne null)
           rec(remaining - 1, current.tail, current)
         }
       rec(count, underlying, null)

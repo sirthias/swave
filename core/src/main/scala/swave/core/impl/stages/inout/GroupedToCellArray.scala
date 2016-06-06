@@ -26,8 +26,8 @@ import swave.core.util._
 private[core] final class GroupedToCellArray(groupSize: Int, wheelSize: Int, emitSingleEmpty: Boolean) extends InOutStage
   with PipeElem.InOut.GroupedToCellArray {
 
-  require(groupSize > 0)
-  require(wheelSize == -1 || isPowerOf2(wheelSize))
+  requireArg(groupSize > 0)
+  requireArg(wheelSize == -1 || isPowerOf2(wheelSize))
 
   private[this] var wheel: Array[CellArray[AnyRef]] = _
   private[this] var wheelMask: Int = wheelSize - 1

@@ -147,7 +147,7 @@ private[graph] object MiscLogic {
   }
 
   def findCycle(rootNodes: Seq[Node]): Option[Edge] = {
-    require(rootNodes.nonEmpty)
+    requireArg(rootNodes.nonEmpty)
     val seen = new mutable.BitSet
     val open = new scala.collection.mutable.BitSet
     val rec = new (Node ⇒ Option[Edge]) {

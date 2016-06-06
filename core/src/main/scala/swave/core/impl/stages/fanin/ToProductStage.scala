@@ -28,13 +28,13 @@ private[core] final class ToProductStage(val pipeElemType: String,
                                          subs: InportList, f: Array[AnyRef] ⇒ AnyRef) extends FanInStage
   with PipeElem.FanIn.ToProduct {
 
-  require(subs.nonEmpty)
+  requireArg(subs.nonEmpty)
 
   def pipeElemParams: List[Any] = Nil
 
   val members = {
     val size = subs.size
-    require(size <= 64, "fanInToProduct is not supported for types with more than 64 members")
+    requireArg(size <= 64, "fanInToProduct is not supported for types with more than 64 members")
     new Array[AnyRef](size)
   }
 

@@ -27,7 +27,7 @@ import swave.core.util._
 private[core] final class GroupedStage(groupSize: Int, emitSingleEmpty: Boolean, builder: mutable.Builder[Any, AnyRef]) extends InOutStage
   with PipeElem.InOut.Grouped {
 
-  require(groupSize > 0)
+  requireArg(groupSize > 0)
 
   def pipeElemType: String = "grouped"
   def pipeElemParams: List[Any] = groupSize :: emitSingleEmpty :: Nil

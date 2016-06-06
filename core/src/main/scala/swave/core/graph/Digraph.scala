@@ -33,7 +33,7 @@ final class Digraph[V](private var graphData: GraphData[V]) {
   // - otherwise: find a regular edge whose reversal creates a root and reverse it
   // - otherwise: find a set of two edges whose reversals creates a root and reverse them (again prefer reversaphiles)
   // - continue until a root can be created
-  require(
+  requireArg(
     graphData.rootNodes.nonEmpty,
     "This rendering logic currently requires that the graph has at least one root vertex!")
 

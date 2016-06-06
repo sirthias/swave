@@ -39,13 +39,13 @@ private[core] final class SchedulerImpl private (val settings: Scheduler.Setting
   private[this] val state = new AtomicReference[State](UnstartedState)
 
   def schedule(initialDelay: FiniteDuration, interval: FiniteDuration, r: Runnable)(implicit ec: ExecutionContext): Cancellable = {
-    require(initialDelay >= Duration.Zero)
-    require(interval > Duration.Zero)
+    requireArg(initialDelay >= Duration.Zero)
+    requireArg(interval > Duration.Zero)
     schedule(initialDelay.toNanos, interval.toNanos, r)
   }
 
   def scheduleOnce(delay: FiniteDuration, r: Runnable)(implicit ec: ExecutionContext): Cancellable = {
-    require(delay >= Duration.Zero)
+    requireArg(delay >= Duration.Zero)
     schedule(delay.toNanos, 0, r)
   }
 
@@ -67,7 +67,7 @@ private[core] final class SchedulerImpl private (val settings: Scheduler.Setting
     state.get match {
       case ActiveState ⇒
         val deadline = wheel.ticks + delayNanos
-        require(deadline > 0, "delay is too large") // otherwise we had a Long overflow
+        requireArg(deadline > 0, "delay is too large") // otherwise we had a Long overflow
         val task = new Task(deadline, intervalNanos, r)
         newTasks.add(task)
         task

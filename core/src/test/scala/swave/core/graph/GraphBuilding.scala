@@ -150,11 +150,11 @@ object GraphBuilding {
       }
       def sub: SubOps = new SubOpsImpl(base)
       def subContinue: FRepr = {
-        require(inputs.isEmpty)
+        requireArg(inputs.isEmpty)
         wrap(base)
       }
       def continue: FRepr = {
-        require(inputs.size == 1, ", which means the `continue` call is illegal here")
+        requireArg(inputs.size == 1, ", which means the `continue` call is illegal here")
         wrap(inputs.head)
       }
       def subDrains(drains: String*): this.type = {

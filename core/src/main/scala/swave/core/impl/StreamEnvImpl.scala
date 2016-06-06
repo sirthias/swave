@@ -22,6 +22,7 @@ import scala.concurrent.duration._
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.Logger
 import org.slf4j.LoggerFactory
+import swave.core.util._
 import swave.core._
 
 private[core] final class StreamEnvImpl(
@@ -52,7 +53,7 @@ private[core] final class StreamEnvImpl(
       def unterminatedDispatchers: List[String] = dispatchersTermination()
 
       def awaitTermination(timeout: FiniteDuration): Unit = {
-        require(timeout >= Duration.Zero)
+        requireArg(timeout >= Duration.Zero)
         var deadline = System.nanoTime() + timeout.toNanos
         if (deadline < 0) deadline = Long.MaxValue // overflow protection
 

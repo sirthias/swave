@@ -25,7 +25,7 @@ import swave.core.util._
 @StageImpl
 private[core] final class TakeStage(count: Long) extends InOutStage with PipeElem.InOut.Take {
 
-  require(count >= 0)
+  requireArg(count >= 0)
 
   def pipeElemType: String = "take"
   def pipeElemParams: List[Any] = count :: Nil

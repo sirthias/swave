@@ -25,7 +25,7 @@ import swave.core.impl.{ InportList, Inport, Outport }
 @StageImpl
 private[core] final class FirstNonEmptyStage(subs: InportList) extends FanInStage with PipeElem.FanIn.FirstNonEmpty {
 
-  require(subs.nonEmpty)
+  requireArg(subs.nonEmpty)
 
   def pipeElemType: String = "fanInFirstNonEmpty"
   def pipeElemParams: List[Any] = Nil

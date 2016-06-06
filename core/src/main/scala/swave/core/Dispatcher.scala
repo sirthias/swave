@@ -32,7 +32,7 @@ abstract class Dispatcher private[core] extends ExecutionContextExecutor {
 object Dispatcher {
 
   final case class Settings(name: String, threadPoolConfig: ThreadPoolConfig) {
-    require(name.nonEmpty)
+    requireArg(name.nonEmpty)
   }
   object Settings {
     def apply(name: String, config: Config, defaultThreadPoolConfig: Config): Settings =
@@ -60,9 +60,9 @@ object Dispatcher {
     }
 
     final case class Size(factor: Double, min: Int, max: Int) {
-      require(factor >= 0.0)
-      require(min >= 0)
-      require(max >= min)
+      requireArg(factor >= 0.0)
+      requireArg(min >= 0)
+      requireArg(max >= min)
     }
     object Size {
       def apply(c: Config): Size = Size(c getDouble "factor", c getInt "min", c getInt "max")
@@ -85,7 +85,7 @@ object Dispatcher {
         keepAliveTime: FiniteDuration,
         allowCoreTimeout: Boolean,
         prestart: ThreadPool.Prestart) extends ThreadPoolConfig {
-      require(keepAliveTime > Duration.Zero)
+      requireArg(keepAliveTime > Duration.Zero)
     }
     object ThreadPool {
       sealed abstract class Prestart

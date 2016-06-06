@@ -25,8 +25,8 @@ import org.jctools.util.UnsafeRefArrayAccess.calcElementOffset
  * elements, rather, if full, the buffer tries to grow and rejects further writes if max capacity is reached.
  */
 private[swave] final class ResizableRingBuffer[T <: AnyRef](initialCap: Int, maxCap: Int) {
-  require(isPowerOf2(maxCap) && maxCap > 0) // automatically implies maxCap <= 0x40000000
-  require(isPowerOf2(initialCap) && 0 < initialCap && initialCap <= maxCap)
+  requireArg(isPowerOf2(maxCap) && maxCap > 0) // automatically implies maxCap <= 0x40000000
+  requireArg(isPowerOf2(initialCap) && 0 < initialCap && initialCap <= maxCap)
 
   private[this] var array = new Array[AnyRef](initialCap)
   private[this] var mask = array.length - 1 // bit mask for converting a cursor into an array index

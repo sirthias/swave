@@ -56,7 +56,7 @@ trait StreamOps[A] extends Any { self ⇒
     new FanIn(base +: fanIn.subs, wrap)
 
   final def attachAll[S, Sup >: A](subs: Traversable[S])(implicit ev: Streamable.Aux[S, Sup]): FanIn0[Sup, Repr] = {
-    require(subs.nonEmpty)
+    requireArg(subs.nonEmpty)
     new FanIn0(InportList(base) :++ subs, wrap)
   }
 
@@ -67,7 +67,7 @@ trait StreamOps[A] extends Any { self ⇒
     new FanIn(base +: InportList.fill(ti(), attachNop(fo.base)), wrap)
 
   final def buffer(size: Int, overflowStrategy: Overflow = Overflow.Backpressure): Repr[A] = {
-    require(size >= 0)
+    requireArg(size >= 0)
     if (size > 0) append(overflowStrategy.newStage(size)) else identity
   }
 
@@ -83,7 +83,7 @@ trait StreamOps[A] extends Any { self ⇒
   final def distinct[B >: A](n: Int = 1)(implicit ord: Ordering[B] = null): Repr[A] = ???
 
   final def drop(n: Long): Repr[A] = {
-    require(n >= 0)
+    requireArg(n >= 0)
     if (n > 0) append(new DropStage(n)) else identity
   }
 
@@ -287,7 +287,7 @@ object StreamOps {
       new FanIn0(sub.inport +: subs, rawWrap)
 
     def attachAll[S, Sup2 >: Sup](subs: Traversable[S])(implicit ev: Streamable.Aux[S, Sup2]): FanIn0[Sup2, Repr] = {
-      require(subs.nonEmpty)
+      requireArg(subs.nonEmpty)
       new FanIn0(this.subs :++ subs, rawWrap)
     }
 
@@ -325,7 +325,7 @@ object StreamOps {
       copy(sub.inport +: subs)
 
     final def attachAll[S, Sup2 >: Sup](subs: Traversable[S])(implicit ev: Streamable.Aux[S, Sup2]): FanIn0[Sup2, Repr] = {
-      require(subs.nonEmpty)
+      requireArg(subs.nonEmpty)
       new FanIn0(this.subs :++ subs, rawWrap)
     }
 

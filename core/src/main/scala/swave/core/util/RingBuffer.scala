@@ -21,7 +21,7 @@ package swave.core.util
  * The `cap` must be a power of two.
  */
 private[swave] final class RingBuffer[T <: AnyRef](cap: Int) {
-  require(isPowerOf2(cap) && cap > 0) // automatically implies maxCap <= 0x40000000
+  requireArg(isPowerOf2(cap) && cap > 0) // automatically implies maxCap <= 0x40000000
 
   private[this] val array = new Array[AnyRef](cap)
   private[this] def mask = array.length - 1 // bit mask for converting a cursor into an array index

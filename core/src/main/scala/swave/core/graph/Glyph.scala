@@ -17,6 +17,7 @@
 package swave.core.graph
 
 import scala.annotation.tailrec
+import swave.core.util._
 
 private[graph] sealed trait GlyphMarker // phantom type
 
@@ -125,7 +126,7 @@ object GlyphSet {
    * All Strings returned by the function must be `rows * columns + (rows - 1) * lineSep.length` characters long.
    */
   def apply(rows: Int, columns: Int, lineSep: String = "")(f: Glyph ⇒ String): GlyphSet = {
-    require(rows > 0 && columns > 0)
+    requireArg(rows > 0 && columns > 0)
     val codepoints = new Array[Int](GLYPH_COUNT * rows * columns)
 
     @tailrec def prepareGlyphs(codepointsIx: Int, glyph: Glyph, str: String, strIx: Int,
@@ -139,12 +140,12 @@ object GlyphSet {
         codepoints(codepointsIx) = cp
         prepareGlyphs(codepointsIx + 1, glyph, str, strIx + Character.charCount(cp), row, col + 1)
       } else if (row < rows - 1) {
-        require(str.indexOf(lineSep, strIx) == strIx, s", expected line separator not found in row $row of glyph $glyph")
+        requireArg(str.indexOf(lineSep, strIx) == strIx, s", expected line separator not found in row $row of glyph $glyph")
         prepareGlyphs(codepointsIx, glyph, str, strIx + lineSep.length, row + 1, col = 0)
       } else if (Glyph.idOf(glyph) < GLYPH_COUNT - 1) {
         val nextGlyph = Glyph(Glyph.idOf(glyph) + 1)
         prepareGlyphs(codepointsIx, nextGlyph, f(nextGlyph), strIx = 0, row = 0, col = 0)
-      } else require(strIx == str.length, s"string for glyph $glyph is too long")
+      } else requireArg(strIx == str.length, s"string for glyph $glyph is too long")
 
     prepareGlyphs(codepointsIx = 0, glyph = SPACE, str = f(SPACE), strIx = 0, row = 0, col = 0)
     new GlyphSet(rows, columns, codepoints)

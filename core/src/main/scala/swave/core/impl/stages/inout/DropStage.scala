@@ -25,7 +25,7 @@ import swave.core.util._
 @StageImpl
 private[core] final class DropStage(count: Long) extends InOutStage with PipeElem.InOut.Drop {
 
-  require(count > 0)
+  requireArg(count > 0)
 
   def pipeElemType: String = "drop"
   def pipeElemParams: List[Any] = count :: Nil

@@ -19,7 +19,7 @@ package swave.core.util
 import scala.reflect.ClassTag
 
 final class CellWheel[T: ClassTag](val size: Int, createCell: ⇒ T) {
-  require(isPowerOf2(size))
+  requireArg(isPowerOf2(size))
 
   private[this] val array = Array.fill(size)(createCell)
   private[this] val mask = size - 1

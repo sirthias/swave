@@ -32,9 +32,9 @@ private[swave] abstract class ImdoList[L >: Null <: ImdoList[L]] {
 private[swave] object ImdoList {
 
   def insert[L >: Null <: ImdoList[L]](node: L, before: L): Unit = {
-    require(node.nonEmpty)
-    require(before.nonEmpty)
-    require((node._next eq node) && (node._prev eq node))
+    requireArg(node.nonEmpty)
+    requireArg(before.nonEmpty)
+    requireArg((node._next eq node) && (node._prev eq node))
     val prev = before._prev
     prev._next = node
     node._prev = prev

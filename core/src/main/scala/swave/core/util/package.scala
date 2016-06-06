@@ -16,13 +16,13 @@
 
 package swave.core
 
+import com.typesafe.config.Config
 import scala.concurrent.Future
 import scala.collection.mutable
-import org.scalactic.{ Requirements, Snapshots }
 import shapeless.HList
-import com.typesafe.config.Config
+import swave.core.macros.HelperMacros
 
-package object util extends Requirements with Snapshots {
+package object util extends HelperMacros {
 
   private[this] val _identityFunc = (x: Any) ⇒ x
   def identityFunc[T]: T ⇒ T = _identityFunc.asInstanceOf[T ⇒ T]

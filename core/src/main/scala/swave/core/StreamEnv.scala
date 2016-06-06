@@ -54,8 +54,8 @@ object StreamEnv {
       dispatcherSettings: Dispatchers.Settings,
       schedulerSettings: Scheduler.Settings) {
 
-    require(throughput > 0)
-    require(0 < maxBatchSize && maxBatchSize <= 1024 * 1024)
+    requireArg(throughput > 0)
+    requireArg(0 < maxBatchSize && maxBatchSize <= 1024 * 1024)
   }
   object Settings extends SettingsCompanion[Settings]("swave.core") {
     def fromSubConfig(c: Config): Settings =

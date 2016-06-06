@@ -150,17 +150,16 @@ class AsyncSpec extends SwaveSpec {
           "Conflicting dispatcher assignment to async region containing stage 'HeadDrainStage': [disp1] vs. [disp0]")
     }
 
-    //    "complex example" in {
-    //      val piping =
-    //        Stream.continually(threadName)
-    //          .async()
-    //          .inject
-    //          .map(_.take(1).map(_ → threadName))
-    //          .flattenConcat()
-    //          .to(Drain.head).seal().get
-    //      println(PipeElem.render(piping.pipeElem, showDispatchers = true))
-    //      val (threadName0, threadName1) = piping.run().await(20.millis)
-    //      List(threadName0, threadName1) shouldEqual List()
-    //    }
+    "complex example" in {
+      val piping =
+        Stream.continually(threadName)
+          .async()
+          .inject
+          .map(_.take(1).map(_ :: threadName :: Nil))
+          .flattenConcat()
+          .to(Drain.head).seal().get
+      //println(PipeElem.render(piping.pipeElem, showDispatchers = true))
+      piping.run().await(20.millis).distinct shouldEqual List("swave-default-1")
+    }
   }
 }

@@ -20,6 +20,7 @@ import scala.collection.immutable.BitSet
 import scala.collection.mutable
 import swave.core.impl.stages.Stage
 import swave.core.graph.{ GlyphSet, Digraph }
+import swave.core.util._
 
 sealed trait PipeElem
 
@@ -187,7 +188,7 @@ object PipeElem {
             val alreadyStored = visibleCollapsed(ix)
             def containsAll(a: ModuleInfo, b: ModuleInfo) = (b.vertices &~ a.vertices).isEmpty // true if a contains all of b
             if (containsAll(info, alreadyStored)) visibleCollapsed(ix) = info
-            else Predef.require(
+            else requireArg(
               containsAll(alreadyStored, info),
               s"Modules [${alreadyStored.module.name}] and [${info.module.name}] overlap without one fully containing" +
                 "the other, which is unsupported for rendering!")

@@ -25,7 +25,7 @@ import swave.core.util._
 @StageImpl
 private[core] final class ConcatStage(subs: InportList) extends FanInStage with PipeElem.FanIn.Concat {
 
-  require(subs.nonEmpty)
+  requireArg(subs.nonEmpty)
 
   def pipeElemType: String = "fanInConcat"
   def pipeElemParams: List[Any] = Nil

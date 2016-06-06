@@ -235,7 +235,7 @@ class DigraphRendererSpec extends FreeSpec with Matchers {
       .groupBy(_.head)
       .map {
         case (name, listOfRenderLines) ⇒
-          require(listOfRenderLines.size == 1, ", which means you have an example name duplication in examples.txt")
+          requireArg(listOfRenderLines.size == 1, ", which means you have an example name duplication in examples.txt")
           name → listOfRenderLines.head.tail.mkString("\n")
       }
 

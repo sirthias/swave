@@ -21,7 +21,7 @@ import scala.annotation.tailrec
 private[swave] class RichInt(private val underlying: Int) extends AnyVal {
 
   def times(block: ⇒ Unit): Unit = {
-    require(underlying >= 0, s"`$underlying.times(...)` is illegal")
+    requireArg(underlying >= 0, s"`$underlying.times(...)` is illegal")
     @tailrec def rec(i: Int): Unit =
       if (i > 0) {
         block

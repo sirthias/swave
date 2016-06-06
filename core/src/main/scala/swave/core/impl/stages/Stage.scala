@@ -441,7 +441,7 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem.Basic 
     } else _intercepting = false
 
   private def updateInportState(in: Inport, requested: Long): Unit = {
-    require(requested > _mbs)
+    requireArg(requested > _mbs)
     @tailrec def rec(current: InportStates): Unit =
       if (current ne null) {
         if (current.in eq in) current.remaining = current.remaining ⊹ requested

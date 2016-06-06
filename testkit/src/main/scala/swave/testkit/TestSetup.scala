@@ -92,7 +92,7 @@ object TestSetup {
    * @param cancelAfter if defined triggers an early cancel after reception of n total elements
    */
   case class OutputScript(requests: Iterable[Long], cancelAfter: Option[Int] = None) {
-    require(cancelAfter.isEmpty || cancelAfter.get < requests.sum)
+    requireArg(cancelAfter.isEmpty || cancelAfter.get < requests.sum)
   }
 
   object Default {

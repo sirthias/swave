@@ -60,7 +60,7 @@ private[swave] final class LongArray private (private val array: Array[Long]) ex
 object LongArray {
 
   def apply(initialCapacity: Int = 15): LongArray = {
-    require(initialCapacity >= 0)
+    requireArg(initialCapacity >= 0)
     new LongArray(new Array[Long](initialCapacity + 1))
   }
 }

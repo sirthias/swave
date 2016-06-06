@@ -28,7 +28,7 @@ import swave.core.util._
 private[core] final class BufferBackpressureStage(size: Int) extends InOutStage
   with PipeElem.InOut.BufferWithBackpressure {
 
-  require(size > 0)
+  requireArg(size > 0)
 
   def pipeElemType: String = "bufferBackpressure"
   def pipeElemParams: List[Any] = size :: Nil

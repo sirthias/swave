@@ -25,7 +25,7 @@ import swave.core.util._
 @StageImpl
 private[core] final class FlattenConcatStage(streamable: Streamable.Aux[AnyRef, AnyRef],
                                              parallelism: Int) extends InOutStage with PipeElem.InOut.FlattenConcat {
-  require(parallelism > 0)
+  requireArg(parallelism > 0)
 
   def pipeElemType: String = "flattenConcat"
   def pipeElemParams: List[Any] = parallelism :: Nil
@@ -153,7 +153,7 @@ private[core] final class FlattenConcatStage(streamable: Streamable.Aux[AnyRef, 
               if (subscribed.tail.nonEmpty) { // and we have the next one ready
                 subscribed.tail.in.request(remaining) // retarget demand
                 active(subCount - 1, subscribing, subscribed.tail, remaining, remaining)
-              } else { requireNonNull(subscribing); awaitingSubOnSubscribe(subscribing, remaining) }
+              } else { requireState(subscribing ne null); awaitingSubOnSubscribe(subscribing, remaining) }
             } else active(subCount - 1, subscribing, subscribed remove_! from, pending, remaining)
           } else awaitingSub(remaining)
         } else draining(ctx, out, subscribing, subscribed, pending, remaining)
