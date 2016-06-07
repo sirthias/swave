@@ -77,7 +77,11 @@ trait StreamOps[A] extends Any { self ⇒
   final def concat[B >: A](other: Stream[B]): Repr[B] =
     attach(other).fanInConcat
 
-  final def conflate[B](seed: A ⇒ B)(aggregate: (B, A) ⇒ B): Repr[B] = ???
+  final def conflateWithSeed[B](lift: A ⇒ B)(aggregate: (B, A) ⇒ B): Repr[B] =
+    append(new ConflateStage(lift.asInstanceOf[AnyRef ⇒ AnyRef], aggregate.asInstanceOf[(AnyRef, AnyRef) ⇒ AnyRef]))
+
+  final def conflate[B >: A](aggregate: (B, A) ⇒ B): Repr[B] =
+    conflateWithSeed[B](identityFunc)(aggregate)
 
   final def debounce(d: FiniteDuration): Repr[A] = ???
 

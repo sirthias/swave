@@ -48,14 +48,28 @@ final class SimpleOpSpec extends PipeSpec with Inspectors {
     testSetup
       .input[Int]
       .output[Int]
-      .param(Gen.chooseNum(0, 500))
-      .prop.from { (in, out, param) ⇒
+      .prop.from { (in, out) ⇒
 
         in.stream
           .collect { case x if x < 100 ⇒ x * 2 }
           .drainTo(out.drain) shouldTerminate asScripted(in)
 
         out.received shouldEqual in.produced.collect({ case x if x < 100 ⇒ x * 2 }).take(out.scriptedSize)
+      }
+  }
+
+  "Conflate" in check {
+    testSetup
+      .input[Int]
+      .output[Vector[Int]]
+      .prop.from { (in, out) ⇒
+
+        in.stream
+          .conflateWithSeed(Vector(_))(_ :+ _)
+          .drainTo(out.drain) shouldTerminate asScripted(in)
+
+        val res = out.received.flatten
+        res shouldEqual in.produced.take(res.size)
       }
   }
 

@@ -84,6 +84,7 @@ object PipeElem {
     trait AsyncBoundary extends InOut
     trait BufferWithBackpressure extends InOut
     trait Collect extends InOut
+    trait Conflate extends InOut
     trait Coupling extends InOut
     trait Drop extends InOut
     trait Filter extends InOut
