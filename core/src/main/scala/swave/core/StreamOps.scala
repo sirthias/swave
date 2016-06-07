@@ -83,7 +83,8 @@ trait StreamOps[A] extends Any { self ⇒
   final def conflate[B >: A](aggregate: (B, A) ⇒ B): Repr[B] =
     conflateWithSeed[B](identityFunc)(aggregate)
 
-  final def debounce(d: FiniteDuration): Repr[A] = ???
+  final def deduplicate: Repr[A] =
+    append(new DeduplicateStage)
 
   final def distinct[B >: A](n: Int = 1)(implicit ord: Ordering[B] = null): Repr[A] = ???
 
@@ -97,6 +98,9 @@ trait StreamOps[A] extends Any { self ⇒
   final def dropWhile(predicate: A ⇒ Boolean): Repr[A] = ???
 
   final def dropWithin(d: FiniteDuration): Repr[A] = ???
+
+  final def duplicate: Repr[A] =
+    via(Pipe[A].map(x ⇒ x :: x :: Nil).flattenConcat() named "duplicate")
 
   final def elementAt(index: Long): Repr[A] =
     via(Pipe[A] drop index take 1 named "elementAt")
@@ -226,6 +230,8 @@ trait StreamOps[A] extends Any { self ⇒
   final def recover[B >: A](pf: PartialFunction[Throwable, B]): Repr[B] = ???
 
   final def recoverToTry: Repr[Try[A]] = ???
+
+  final def reduce[B >: A](f: (B, B) ⇒ B): Repr[B] = ???
 
   final def sample(d: FiniteDuration): Repr[A] = ???
 

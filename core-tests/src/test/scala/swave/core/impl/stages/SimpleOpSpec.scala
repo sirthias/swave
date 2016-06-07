@@ -73,6 +73,23 @@ final class SimpleOpSpec extends PipeSpec with Inspectors {
       }
   }
 
+  "Deduplicate" in check {
+    testSetup
+      .input[Int](Gen.chooseNum(1, 5))
+      .output[Int]
+      .prop.from { (in, out) ⇒
+
+        in.stream
+          .deduplicate
+          .drainTo(out.drain) shouldTerminate asScripted(in)
+
+        out.received shouldEqual in.produced
+          .scanLeft(0)((last, x) ⇒ if (x == math.abs(last)) -x else x)
+          .filter(_ > 0)
+          .take(out.scriptedSize)
+      }
+  }
+
   "Drop" in check {
     testSetup
       .input[Int]
