@@ -31,15 +31,6 @@ private[impl] final class StreamRunner(_throughput: Int, _log: Logger, _dispatch
 
   startMessageProcessing()
 
-  def enqueueXStart(target: Stage) = enqueue(new Message.XStart(target))
-  def enqueueSubscribe(target: Stage, from: Outport) = enqueue(new Message.Subscribe(target, from))
-  def enqueueRequest(target: Stage, n: Long, from: Outport) = enqueue(new Message.Request(target, n, from))
-  def enqueueCancel(target: Stage, from: Outport) = enqueue(new Message.Cancel(target, from))
-  def enqueueOnSubscribe(target: Stage, from: Inport) = enqueue(new Message.OnSubscribe(target, from))
-  def enqueueOnNext(target: Stage, elem: AnyRef, from: Inport) = enqueue(new Message.OnNext(target, elem, from))
-  def enqueueOnComplete(target: Stage, from: Inport) = enqueue(new Message.OnComplete(target, from))
-  def enqueueOnError(target: Stage, error: Throwable, from: Inport) = enqueue(new Message.OnError(target, error, from))
-
   protected def receive(msg: Message): Unit = {
     val target = msg.target
     msg.id match {
@@ -71,7 +62,7 @@ private[impl] final class StreamRunner(_throughput: Int, _log: Logger, _dispatch
 
 private[impl] object StreamRunner {
 
-  abstract class Message(val id: Int, val target: Stage)
+  sealed abstract class Message(val id: Int, val target: Stage)
   object Message {
     final class XStart(target: Stage) extends Message(0, target)
     final class Subscribe(target: Stage, val from: Outport) extends Message(1, target)

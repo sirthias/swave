@@ -18,7 +18,7 @@ package swave.core.impl.stages.inout
 
 import swave.core.PipeElem
 import swave.core.impl.stages.Stage
-import swave.core.impl.{ Inport, Outport }
+import swave.core.impl.{ StreamRunner, Inport, Outport }
 import swave.core.macros.StageImpl
 
 // format: OFF
@@ -27,6 +27,8 @@ private[core] final class AsyncBoundaryStage(dispatcherId: String) extends InOut
 
   def pipeElemType: String = "asyncBoundary"
   def pipeElemParams: List[Any] = dispatcherId :: Nil
+
+  private[this] var lastRequest: StreamRunner.Message.Request = _ // simple one value cache
 
   connectInOutAndSealWith { (ctx, in, out) ⇒
     val ins = in.asInstanceOf[Stage]
@@ -40,27 +42,29 @@ private[core] final class AsyncBoundaryStage(dispatcherId: String) extends InOut
     intercept = false,
 
     request = (n, from) ⇒ {
-      inStage.runner.enqueueRequest(inStage, n.toLong, from)
+      if ((lastRequest eq null) || lastRequest.n != n)
+        lastRequest = new StreamRunner.Message.Request(inStage, n.toLong, from)
+      inStage.runner.enqueue(lastRequest)
       stay()
     },
 
     cancel = from => {
-      inStage.runner.enqueueCancel(inStage, from)
+      inStage.runner.enqueue(new StreamRunner.Message.Cancel(inStage, from))
       stop()
     },
 
     onNext = (elem, from) ⇒ {
-      outStage.runner.enqueueOnNext(outStage, elem, from)
+      outStage.runner.enqueue(new StreamRunner.Message.OnNext(outStage, elem, from))
       stay()
     },
 
     onComplete = from => {
-      outStage.runner.enqueueOnComplete(outStage, from)
+      outStage.runner.enqueue(new StreamRunner.Message.OnComplete(outStage, from))
       stop()
     },
 
     onError = (error, from) => {
-      outStage.runner.enqueueOnError(outStage, error, from)
+      outStage.runner.enqueue(new StreamRunner.Message.OnError(outStage, error, from))
       stop()
     })
 }

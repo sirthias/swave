@@ -108,7 +108,7 @@ private[swave] final class RunContext(val port: Port)(implicit val env: StreamEn
 }
 
 private[swave] object RunContext {
-  private val dispatchAsyncXStart: StageList ⇒ Unit = sl ⇒ sl.stage.runner.enqueueXStart(sl.stage)
+  private val dispatchAsyncXStart: StageList ⇒ Unit = sl ⇒ sl.stage.runner.enqueue(new StreamRunner.Message.XStart(sl.stage))
   private val dispatchXStart: StageList ⇒ Unit = _.stage.xStart()
   private val dispatchXRun: StageList ⇒ Unit = _.stage.xRun()
   private val dispatchXCleanUp: StageList ⇒ Unit = _.stage.xCleanUp()

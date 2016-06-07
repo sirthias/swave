@@ -35,12 +35,9 @@ private[impl] abstract class StreamActor(
 
   /**
    * The mailbox.
-   * Currently a non-intrusive MPSC-Queue-Implementation using the algorithm described here:
-   * http://www.1024cores.net/home/lock-free-algorithms/queues/non-intrusive-mpsc-node-based-queue
    */
-  private[this] val mailbox: java.util.Queue[MessageType] = {
-    // TODO: benchmark against MpscChunkedArray queue or upgrade to intrusive variant to save the Node instance allocations
-    // intrusive variant: http://www.1024cores.net/home/lock-free-algorithms/queues/intrusive-mpsc-node-based-queue
+  private[this] val mailbox = {
+    // TODO: upgrade to intrusive variant as soon as https://github.com/JCTools/JCTools/issues/102 is cleared
     new MpscLinkedQueue8[MessageType]()
   }
 
@@ -76,7 +73,7 @@ private[impl] abstract class StreamActor(
 
   protected def receive(msg: MessageType): Unit
 
-  protected final def enqueue(msg: MessageType): Unit = {
+  final def enqueue(msg: MessageType): Unit = {
     mailbox.add(msg)
     trySchedule()
   }
