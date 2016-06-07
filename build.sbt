@@ -93,7 +93,7 @@ val scalacheck             = "org.scalacheck"             %%  "scalacheck"      
 val `reactive-streams-tck` = "org.reactivestreams"        %   "reactive-streams-tck"  % "1.0.0"   % "test"
 
 // examples
-val `akka-stream`          = "com.typesafe.akka"          %%  "akka-stream"           % "2.4.5"
+val `akka-stream`          = "com.typesafe.akka"          %%  "akka-stream"           % "2.4.7"
 val logback                = "ch.qos.logback"             %   "logback-classic"       % "1.1.7"
 
 /////////////////////// PROJECTS /////////////////////////
