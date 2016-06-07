@@ -18,7 +18,7 @@ package swave.core.impl.stages
 
 import org.scalacheck.Gen
 import org.scalatest.Inspectors
-import swave.core.{ Errors, StreamEnv }
+import swave.core.{ Overflow, Errors, StreamEnv }
 import swave.testkit.TestFixture
 
 final class SimpleOpSpec extends PipeSpec with Inspectors {
@@ -28,7 +28,7 @@ final class SimpleOpSpec extends PipeSpec with Inspectors {
 
   implicit val integerInput = Gen.chooseNum(0, 999)
 
-  "BufferWithBackpressure" in check {
+  "BufferBackpressure" in check {
     testSetup
       .input[Int]
       .output[Int]
@@ -41,6 +41,19 @@ final class SimpleOpSpec extends PipeSpec with Inspectors {
 
         in.size should be >= math.min(in.scriptedSize, out.scriptedSize + param)
         out.received shouldEqual in.produced.take(out.size)
+      }
+  }
+
+  "BufferDropping" in check {
+    testSetup
+      .input[Int]
+      .output[Int]
+      .param(Gen.oneOf(Overflow.DropHead, Overflow.DropTail, Overflow.DropBuffer, Overflow.DropNew))
+      .prop.from { (in, out, param) ⇒
+
+        in.stream
+          .buffer(4, param)
+          .drainTo(out.drain) shouldTerminate asScripted(in)
       }
   }
 

@@ -98,5 +98,33 @@ private[swave] final class RingBuffer[T <: AnyRef](cap: Int) {
     array(r & mask).asInstanceOf[T]
   }
 
+  /**
+   * Drops the element that would otherwise be read next.
+   * CAUTION: Must not be used if buffer is empty! This precondition is not verified!
+   */
+  def unsafeDropHead(): Unit = readIx += 1
+
+  /**
+   * Drops the element that was written last.
+   * CAUTION: Must not be used if buffer is empty! This precondition is not verified!
+   */
+  def unsafeDropTail(): Unit = writeIx -= 1
+
+  /**
+   * Resets the buffer to "is empty" status without nulling out references.
+   */
+  def softClear(): Unit = {
+    readIx = 0
+    writeIx = 0
+  }
+
+  /**
+   * Resets the buffer to "is empty" status and nulls out all references.
+   */
+  def hardClear(): Unit = {
+    softClear()
+    java.util.Arrays.fill(array, null)
+  }
+
   override def toString: String = s"RingBuffer(len=${array.length}, size=$size, writeIx=$writeIx, readIx=$readIx)"
 }

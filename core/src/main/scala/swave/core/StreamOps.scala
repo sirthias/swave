@@ -86,8 +86,6 @@ trait StreamOps[A] extends Any { self ⇒
   final def deduplicate: Repr[A] =
     append(new DeduplicateStage)
 
-  final def distinct[B >: A](n: Int = 1)(implicit ord: Ordering[B] = null): Repr[A] = ???
-
   final def drop(n: Long): Repr[A] = {
     requireArg(n >= 0)
     if (n > 0) append(new DropStage(n)) else identity

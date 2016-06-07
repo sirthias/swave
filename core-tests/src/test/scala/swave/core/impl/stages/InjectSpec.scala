@@ -36,7 +36,6 @@ final class InjectSpec extends PipeSpec with Inspectors {
       .output[Stream[Int]]
       .fixture(fd ⇒ Gen.listOfN(10, fd.output[Int](TestSetup.Default.nonDroppingOutputScripts)))
       .prop
-      //.withRandomSeed()
       .from { (in, out, allSubOuts) ⇒
         import TestFixture.State._
 
