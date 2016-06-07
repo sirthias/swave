@@ -35,7 +35,7 @@ final class FanOutSpec extends PipeSpec with Inspectors {
       .prop.from { (in, outs) ⇒
         import TestFixture.State._
 
-        in.stream.fanOut()
+        in.stream.fanOutBroadcast()
           .subDrains(outs.tail.map(_.drain.dropResult))
           .subContinue
           .drainTo(outs.head.drain)

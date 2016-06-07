@@ -27,7 +27,7 @@ import shapeless.ops.nat.ToInt
 import shapeless.ops.hlist.{ ToCoproduct, Tupler, Fill }
 import swave.core.impl.stages.Stage
 import swave.core.impl.stages.fanin.{ MergeStage, ToProductStage, FirstNonEmptyStage, ConcatStage }
-import swave.core.impl.stages.fanout.SwitchStage
+import swave.core.impl.stages.fanout.{ RoundRobinStage, FirstAvailableStage, BroadcastStage, SwitchStage }
 import swave.core.impl.{ InportList, TypeLogic, Inport }
 import swave.core.impl.stages.inout._
 import swave.core.util._
@@ -103,8 +103,14 @@ trait StreamOps[A] extends Any { self ⇒
 
   final def expand[B](seed: A ⇒ B)(extrapolate: B ⇒ B): Repr[B] = ???
 
-  final def fanOut(tpe: FanOut.Type = FanOut.Broadcast, eagerCancel: Boolean = false): FanOut[A, HNil, CNil, Nothing, Repr] =
-    new FanOut(append(tpe.newStage(eagerCancel)).base, InportList.empty, wrap)
+  final def fanOutBroadcast(eagerCancel: Boolean = false): FanOut[A, HNil, CNil, Nothing, Repr] =
+    new FanOut(append(new BroadcastStage(eagerCancel)).base, InportList.empty, wrap)
+
+  final def fanOutFirstAvailable(eagerCancel: Boolean = false): FanOut[A, HNil, CNil, Nothing, Repr] =
+    new FanOut(append(new FirstAvailableStage(eagerCancel)).base, InportList.empty, wrap)
+
+  final def fanOutRoundRobin(eagerCancel: Boolean = false): FanOut[A, HNil, CNil, Nothing, Repr] =
+    new FanOut(append(new RoundRobinStage(eagerCancel)).base, InportList.empty, wrap)
 
   final def filter(predicate: A ⇒ Boolean): Repr[A] =
     append(new FilterStage(predicate.asInstanceOf[Any ⇒ Boolean], negated = false))
@@ -257,7 +263,7 @@ trait StreamOps[A] extends Any { self ⇒
 
   final def tee(drain: Drain[A, Unit], eagerCancel: Boolean = false): Repr[A] = {
     val nop = Pipe[A].nop.to(drain) // TODO: switch to edge-based module demarcation
-    via(Pipe[A].fanOut(eagerCancel = eagerCancel).sub.to(nop).subContinue.named("tee", nop))
+    via(Pipe[A].fanOutBroadcast(eagerCancel = eagerCancel).sub.to(nop).subContinue.named("tee", nop))
   }
 
   final def throttle(d: FiniteDuration): Repr[A] = ???

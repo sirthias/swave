@@ -37,7 +37,7 @@ object MonteCarloPi2 extends App {
   val r = Stream.continually(cellWheel.next().put(random.nextDouble()))
     .groupedToCellArray(2)
     .map(ca ⇒ Point(ca(0).extract(), ca(1).extract()))
-    .fanOut()
+    .fanOutBroadcast()
       .sub.filter(_.isInner).map(_ => InnerSample).end
       .sub.filterNot(_.isInner).map(_ => OuterSample).end
     .fanInMerge()

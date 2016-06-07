@@ -133,7 +133,7 @@ class AsyncSpec extends SwaveSpec {
 
     "conflicting async boundaries" in {
       Stream.continually(threadName)
-        .fanOut()
+        .fanOutBroadcast()
         .sub.async("disp0").end
         .sub.async("disp1").end
         .fanInMerge()
@@ -143,7 +143,7 @@ class AsyncSpec extends SwaveSpec {
 
     "conflicting async markers" in {
       Stream.continually(threadName)
-        .fanOut()
+        .fanOutBroadcast()
         .sub.to(Drain.cancelling.async("disp0"))
         .subContinue
         .to(Drain.head.async("disp1")).seal().failed.get.getMessage.shouldEqual(

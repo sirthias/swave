@@ -42,7 +42,7 @@ class SyncSpec extends SwaveSpec {
       val c = Coupling[Int]
       Stream(1, 2, 3)
         .concat(c.out)
-        .fanOut().sub.first.buffer(1).map(_ + 3).to(c.in)
+        .fanOutBroadcast().sub.first.buffer(1).map(_ + 3).to(c.in)
         .subContinue should produce(1, 2, 3, 4)
     }
 
@@ -50,7 +50,7 @@ class SyncSpec extends SwaveSpec {
       case class Foo(s: String, d: Double, i: Int, b: Boolean)
 
       Stream(1, 2, 3)
-        .fanOut()
+        .fanOutBroadcast()
         .sub.buffer(4).map(_.toString).end
         .sub.buffer(4).map(_ * 2.0).end
         .sub.to(Drain.ignore.dropResult) // just for fun
@@ -70,7 +70,7 @@ class SyncSpec extends SwaveSpec {
 
     "double direct fanout" in {
       Stream(1, 2, 3)
-        .fanOut()
+        .fanOutBroadcast()
         .sub.end
         .sub.end
         .fanInMerge() should produce(1, 1, 2, 2, 3, 3)
@@ -82,7 +82,7 @@ class SyncSpec extends SwaveSpec {
     }
 
     "simple modules" in {
-      val foo = Module.Forward.from2[Int, String] { (a, b) ⇒ a.attachN(2, b.fanOut()) } named "foo"
+      val foo = Module.Forward.from2[Int, String] { (a, b) ⇒ a.attachN(2, b.fanOutBroadcast()) } named "foo"
       Stream(1, 2, 3)
         .attach(Stream("x", "y", "z"))
         .fromFanInVia(foo)
