@@ -71,7 +71,8 @@ trait StreamOps[A] extends Any { self ⇒
     if (size > 0) append(overflowStrategy.newStage(size)) else identity
   }
 
-  final def collect[B](pf: PartialFunction[A, B]): Repr[B] = ???
+  final def collect[B](pf: PartialFunction[A, B]): Repr[B] =
+    append(new CollectStage(pf.asInstanceOf[PartialFunction[AnyRef, AnyRef]]))
 
   final def concat[B >: A](other: Stream[B]): Repr[B] =
     attach(other).fanInConcat
