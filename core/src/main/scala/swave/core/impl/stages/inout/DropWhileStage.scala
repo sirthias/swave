@@ -59,6 +59,8 @@ private[core] final class DropWhileStage(predicate: Any ⇒ Boolean) extends InO
      * Simply forwarding elements from upstream to downstream.
      */
     def draining() = state(
+      intercept = false,
+
       request = (n, _) ⇒ {
         in.request(n.toLong)
         stay()

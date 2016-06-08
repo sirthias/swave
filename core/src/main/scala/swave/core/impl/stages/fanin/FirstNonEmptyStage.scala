@@ -68,6 +68,8 @@ private[core] final class FirstNonEmptyStage(subs: InportList) extends FanInStag
    * Simply forwarding elements from the given `in` to downstream.
    */
   def draining(in: Inport, out: Outport) = state(
+    intercept = false,
+
     request = (n, _) ⇒ {
       in.request(n.toLong)
       stay()

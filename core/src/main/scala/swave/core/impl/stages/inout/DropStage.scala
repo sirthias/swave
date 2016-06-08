@@ -63,6 +63,8 @@ private[core] final class DropStage(count: Long) extends InOutStage with PipeEle
      * Simply forwarding elements from upstream to downstream.
      */
     def draining() = state(
+      intercept = false,
+
       request = (n, _) ⇒ {
         in.request(n.toLong)
         stay()
