@@ -107,18 +107,33 @@ final class SimpleOpSpec extends PipeSpec with Inspectors {
     testSetup
       .input[Int]
       .output[Int]
-      .param(Gen.chooseNum(0, 5))
+      .param(Gen.chooseNum(0, 200))
       .prop.from { (in, out, param) ⇒
 
         in.stream
-          .drop(param.toLong)
+          .dropWhile(_ < param)
           .drainTo(out.drain) shouldTerminate asScripted(in)
 
-        out.received shouldEqual in.produced.drop(param).take(out.scriptedSize)
+        out.received shouldEqual in.produced.dropWhile(_ < param).take(out.scriptedSize)
       }
   }
 
   "DropLast" in check {
+    testSetup
+      .input[Int]
+      .output[Int]
+      .param(Gen.chooseNum(0, 5))
+      .prop.from { (in, out, param) ⇒
+
+        in.stream
+          .dropLast(param)
+          .drainTo(out.drain) shouldTerminate asScripted(in)
+
+        out.received shouldEqual in.produced.dropRight(param).take(out.scriptedSize)
+      }
+  }
+
+  "DropWhile" in check {
     testSetup
       .input[Int]
       .output[Int]
