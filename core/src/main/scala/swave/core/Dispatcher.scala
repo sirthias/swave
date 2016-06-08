@@ -42,8 +42,9 @@ object Dispatcher {
   sealed abstract class ThreadPoolConfig
   object ThreadPoolConfig {
     def apply(c: Config, defaultThreadPoolConfig: Config): ThreadPoolConfig = {
-      def forkJoin(x: Config) = ForkJoin(x withFallback (defaultThreadPoolConfig getConfig "fork-join"))
-      def threadPool(x: Config) = ThreadPool(x withFallback (defaultThreadPoolConfig getConfig "thread-pool"))
+      def poolConf(x: Config, name: String) = x.withFallback(defaultThreadPoolConfig getConfig name)
+      def forkJoin(x: Config) = ForkJoin(poolConf(x, "fork-join"))
+      def threadPool(x: Config) = ThreadPool(poolConf(x, "thread-pool"))
       c.getOptionalConfig("fork-join") → c.getOptionalConfig("thread-pool") match {
         case (Some(x), None) ⇒ forkJoin(x)
         case (None, Some(x)) ⇒ threadPool(x)
@@ -68,15 +69,16 @@ object Dispatcher {
       def apply(c: Config): Size = Size(c getDouble "factor", c getInt "min", c getInt "max")
     }
 
-    final case class ForkJoin(parallelism: Size, asyncMode: Boolean) extends ThreadPoolConfig
+    final case class ForkJoin(parallelism: Size, asyncMode: Boolean, daemonic: Boolean) extends ThreadPoolConfig
     object ForkJoin {
       def apply(c: Config): ForkJoin = ForkJoin(
-        Size(c getConfig "parallelism"),
-        c getString "task-peeking-mode" match {
+        parallelism = Size(c getConfig "parallelism"),
+        asyncMode = c getString "task-peeking-mode" match {
           case "FIFO" ⇒ true
           case "LIFO" ⇒ false
           case x      ⇒ throw new IllegalArgumentException(s"Illegal task-peeking-mode `$x`. Must be `FIFO` or `LIFO`.")
-        })
+        },
+        daemonic = c getBoolean "daemonic")
     }
 
     final case class ThreadPool(
@@ -84,7 +86,8 @@ object Dispatcher {
         maxPoolSize: Size,
         keepAliveTime: FiniteDuration,
         allowCoreTimeout: Boolean,
-        prestart: ThreadPool.Prestart) extends ThreadPoolConfig {
+        prestart: ThreadPool.Prestart,
+        daemonic: Boolean) extends ThreadPoolConfig {
       requireArg(keepAliveTime > Duration.Zero)
     }
     object ThreadPool {
@@ -105,7 +108,8 @@ object Dispatcher {
             case "off"   ⇒ Prestart.Off
             case "first" ⇒ Prestart.First
             case "All"   ⇒ Prestart.All
-          })
+          },
+          daemonic = c getBoolean "daemonic")
 
       private def size(c: Config, section: String): Size =
         c getString "fixed-pool-size" match {

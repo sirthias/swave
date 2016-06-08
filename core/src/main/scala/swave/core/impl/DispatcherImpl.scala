@@ -53,7 +53,6 @@ private[impl] final class DispatcherImpl(val settings: Dispatcher.Settings, crea
       case Creating ⇒
         LockSupport.parkNanos(100 * 1000) // park for 100 microseconds
         execute(r)
-
     }
 
   /**
@@ -98,17 +97,18 @@ private[core] object DispatcherImpl {
 
     val create: () ⇒ ExecutorService =
       settings match {
-        case Dispatcher.Settings(name, ForkJoin(size: Size, asyncMode)) ⇒
+        case Dispatcher.Settings(name, ForkJoin(size, asyncMode, daemonic)) ⇒
           new AtomicLong with ForkJoinPool.ForkJoinWorkerThreadFactory with (() ⇒ ExecutorService) {
             def apply() = new ForkJoinPool(scaledPoolSize(size), this, null, asyncMode)
             def newThread(pool: ForkJoinPool): ForkJoinWorkerThread = {
               val thread = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(pool)
+              thread.setDaemon(daemonic)
               thread.setName(s"swave-$name-${incrementAndGet()}")
               thread
             }
           }
 
-        case Dispatcher.Settings(name, ThreadPool(corePoolSize, maxPoolSize, keepAlive, allowCoreTimeout, prestart)) ⇒
+        case Dispatcher.Settings(name, ThreadPool(corePoolSize, maxPoolSize, keepAlive, allowCoreTimeout, prestart, daemonic)) ⇒
           new AtomicLong with ThreadFactory with (() ⇒ ExecutorService) {
             def apply() = {
               val executor = new ThreadPoolExecutor(scaledPoolSize(corePoolSize), scaledPoolSize(maxPoolSize),
@@ -121,7 +121,11 @@ private[core] object DispatcherImpl {
               }
               executor
             }
-            def newThread(r: Runnable) = new Thread(r, s"swave-$name-${incrementAndGet()}")
+            def newThread(r: Runnable) = {
+              val thread = new Thread(r, s"swave-$name-${incrementAndGet()}")
+              thread.setDaemon(daemonic)
+              thread
+            }
           }
       }
     new DispatcherImpl(settings, create)

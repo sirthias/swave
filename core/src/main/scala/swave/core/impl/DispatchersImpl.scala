@@ -30,7 +30,7 @@ private[core] final class DispatchersImpl private (
    * returns the ids of all dispatchers that are not yet terminated.
    */
   def shutdownAll(): () ⇒ List[String] = {
-    val map = dispatcherMap.mapValues(_.shutdown())
+    val map = dispatcherMap.transform((_, dispatcher) ⇒ dispatcher.shutdown())
     () ⇒ map.collect({ case (id, isTerminated) if !isTerminated() ⇒ id })(collection.breakOut)
   }
 
@@ -40,7 +40,7 @@ private[core] object DispatchersImpl {
   def apply(settings: Dispatchers.Settings): DispatchersImpl = {
     val dispatcherMap =
       settings.dispatcherDefs
-        .mapValues(DispatcherImpl(_))
+        .transform((_, settings) ⇒ DispatcherImpl(settings))
         .withDefault(id ⇒ sys.error(s"Dispatcher '$id' is not defined"))
     new DispatchersImpl(settings, dispatcherMap("default"), dispatcherMap)
   }
