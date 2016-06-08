@@ -18,10 +18,10 @@ package swave.core.util
 
 /**
  * A mutable RingBuffer with a fixed capacity.
- * The `cap` must be a power of two.
+ * The `cap` must be a positive power of two.
  */
 private[swave] final class RingBuffer[T <: AnyRef](cap: Int) {
-  requireArg(isPowerOf2(cap) && cap > 0) // automatically implies maxCap <= 0x40000000
+  requireArg(isPowerOf2(cap) && cap > 0) // automatically implies cap <= 0x40000000
 
   private[this] val array = new Array[AnyRef](cap)
   private[this] def mask = array.length - 1 // bit mask for converting a cursor into an array index

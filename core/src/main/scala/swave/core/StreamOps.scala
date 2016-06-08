@@ -91,7 +91,10 @@ trait StreamOps[A] extends Any { self ⇒
     if (n > 0) append(new DropStage(n)) else identity
   }
 
-  final def dropLast(n: Long): Repr[A] = ???
+  final def dropLast(n: Int): Repr[A] = {
+    requireArg(n >= 0)
+    if (n > 0) append(new DropLastStage(n)) else identity
+  }
 
   final def dropWhile(predicate: A ⇒ Boolean): Repr[A] = ???
 

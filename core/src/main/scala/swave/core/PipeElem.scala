@@ -89,6 +89,7 @@ object PipeElem {
     trait Coupling extends InOut
     trait Deduplicate extends InOut
     trait Drop extends InOut
+    trait DropLast extends InOut
     trait Duplicate extends InOut
     trait Filter extends InOut
     trait FlattenConcat extends InOut
