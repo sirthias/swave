@@ -18,36 +18,31 @@ package swave.examples.pi
 
 import swave.core.util.XorShiftRandom
 import swave.core._
-import scala.util.{Failure, Success}
 
 object MonteCarloPi extends App {
 
   implicit val env = StreamEnv()
-  import env.defaultDispatcher
 
   val random = XorShiftRandom()
 
-  val result =
-    Stream.continually(random.nextDouble())
-      .grouped(2)
-      .map { case x +: y +: Nil ⇒ Point(x, y) }
-      .fanOutBroadcast()
-        .sub.filter(_.isInner).map(_ => InnerSample).end
-        .sub.filterNot(_.isInner).map(_ => OuterSample).end
-      .fanInMerge()
-      .scan(State(0, 0)) { _ withNextSample _ }
-      .drop(1)
-      .inject
-      .map(_ drop 999999 take 1)
-      .flattenConcat()
-      .map(state ⇒ f"After ${state.totalSamples}%,10d samples π is approximated as ${state.π}%.5f")
-      .take(20)
-      .foreach(println)
+  Stream.continually(random.nextDouble())
+    .grouped(2)
+    .map { case x +: y +: Nil ⇒ Point(x, y) }
+    .fanOutBroadcast()
+      .sub.filter(_.isInner).map(_ => InnerSample).end
+      .sub.filterNot(_.isInner).map(_ => OuterSample).end
+    .fanInMerge()
+    .scan(State(0, 0)) { _ withNextSample _ }
+    .drop(1)
+    .inject()
+    .map(_ drop 999999 take 1)
+    .flattenConcat()
+    .map(state ⇒ f"After ${state.totalSamples}%,10d samples π is approximated as ${state.π}%.6f")
+    .take(50)
+    .foreach(println)
 
-  result.onComplete {
-    case Success(_) => println(f"Done. Total time: ${System.currentTimeMillis() - env.startTime}%,6d ms")
-    case Failure(e) => println(e)
-  }
+  val time = System.currentTimeMillis() - env.startTime
+  println(f"Done. Total time: $time%,6d ms, Throughput: ${50000.0/time}%.3fM samples/sec\n")
 
   //////////////// MODEL ///////////////
 

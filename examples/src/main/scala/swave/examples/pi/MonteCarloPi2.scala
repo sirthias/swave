@@ -16,9 +16,6 @@
 
 package swave.examples.pi
 
-import java.util.concurrent.CountDownLatch
-import scala.util.{Failure, Success}
-import scala.concurrent.duration._
 import swave.core.util.{DoubleCell, CellWheel, XorShiftRandom}
 import swave.core._
 
@@ -27,40 +24,26 @@ object MonteCarloPi2 extends App {
   val random = XorShiftRandom()
   val cellWheel = new CellWheel(4, new DoubleCell)
 
-//  println("Press ENTER to start!")
-//  StdIn.readLine()
-
   implicit val env = StreamEnv()
-  import env.defaultDispatcher
-  val latch = new CountDownLatch(1)
 
-  val r = Stream.continually(cellWheel.next().put(random.nextDouble()))
+  Stream.continually(cellWheel.next().put(random.nextDouble()))
     .groupedToCellArray(2)
     .map(ca ⇒ Point(ca(0).extract(), ca(1).extract()))
     .fanOutBroadcast()
       .sub.filter(_.isInner).map(_ => InnerSample).end
       .sub.filterNot(_.isInner).map(_ => OuterSample).end
     .fanInMerge()
-    //.async()
     .scan(State(0, 0)) { _ withNextSample _ }
     .drop(1)
-    .inject
+    .inject()
     .map(_ drop 999999 take 1)
     .flattenConcat()
     .map(state ⇒ f"After ${state.totalSamples}%,10d samples π is approximated as ${state.π}%.5f")
-    .take(20)
+    .take(50)
     .foreach(println)
-    .onComplete {
-      case Success(_) => latch.countDown()
-      case Failure(e) =>
-        e.printStackTrace()
-        latch.countDown()
-    }
 
-  latch.await()
-  println(f"Done. Total time: ${System.currentTimeMillis() - env.startTime}%,6d ms")
-  env.shutdown().awaitTermination(10.seconds)
-  println("Terminated")
+  val time = System.currentTimeMillis() - env.startTime
+  println(f"Done. Total time: $time%,6d ms, Throughput: ${50000.0/time}%.3fM samples/sec\n")
 
   //////////////// MODEL ///////////////
 
