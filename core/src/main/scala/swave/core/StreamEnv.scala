@@ -51,6 +51,7 @@ object StreamEnv {
       throughput: Int,
       maxBatchSize: Int,
       logConfigOnStart: Boolean,
+      subscriptionTimeout: Duration,
       dispatcherSettings: Dispatchers.Settings,
       schedulerSettings: Scheduler.Settings) {
 
@@ -63,6 +64,7 @@ object StreamEnv {
         throughput = c getInt "throughput",
         maxBatchSize = c getInt "max-batch-size",
         logConfigOnStart = c getBoolean "log-config-on-start",
+        subscriptionTimeout = c getScalaDuration "subscription-timeout",
         dispatcherSettings = Dispatchers.Settings fromSubConfig c.getConfig("dispatcher"),
         schedulerSettings = Scheduler.Settings fromSubConfig c.getConfig("scheduler"))
   }

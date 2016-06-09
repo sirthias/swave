@@ -306,24 +306,14 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem.Basic 
       case _ ⇒ illegalState(s"Unexpected xStart()")
     }
 
-  /////////////////////////////////////// XRUN ///////////////////////////////////////
+  /////////////////////////////////////// XEVENT ///////////////////////////////////////
 
-  final def xRun(): Unit = _state = _xRun()
+  final def xEvent(ev: AnyRef): Unit = _state = _xEvent(ev)
 
-  protected def _xRun(): State =
+  protected def _xEvent(ev: AnyRef): State =
     _state match {
       case 0 ⇒ stay()
-      case _ ⇒ illegalState(s"Unexpected xRun()")
-    }
-
-  /////////////////////////////////////// XCLEANUP ///////////////////////////////////////
-
-  final def xCleanUp(): Unit = _state = _xCleanUp()
-
-  protected def _xCleanUp(): State =
-    _state match {
-      case 0 ⇒ stay()
-      case _ ⇒ illegalState(s"Unexpected xCleanUp()")
+      case _ ⇒ illegalState(s"Unexpected xEvent($ev)")
     }
 
   /////////////////////////////////////// STATE DESIGNATOR ///////////////////////////////////////
@@ -340,8 +330,7 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem.Basic 
     onError: (Throwable, Inport) ⇒ State = null,
     xSeal: RunContext ⇒ State = null,
     xStart: () ⇒ State = null,
-    xRun: () ⇒ State = null,
-    xCleanUp: () ⇒ State = null): State = 0
+    xEvent: AnyRef ⇒ State = null): State = 0
 
   /////////////////////////////////////// STOPPERS ///////////////////////////////////////
 

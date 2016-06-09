@@ -131,7 +131,7 @@ object PipeElem {
     expandModules: List[String] = Nil,
     glyphSet: GlyphSet = GlyphSet.`3x3 ASCII`,
     showParams: Boolean = false,
-    showDispatchers: Boolean = false,
+    showRunners: Boolean = false,
     showNops: Boolean = false) = {
 
     val graph = PipeElem.assembleGraph(pipeElem, expandModules)
@@ -139,12 +139,12 @@ object PipeElem {
     graph.render(glyphSet).format {
       case x: PipeElem.Basic ⇒
         def show =
-          if (showParams || showDispatchers) {
+          if (showParams || showRunners) {
             val sb = new java.lang.StringBuilder(x.pipeElemType)
             if (showParams) sb.append(x.pipeElemParams.mkString("(", ", ", ")"))
-            if (showDispatchers) {
+            if (showRunners) {
               val runner = x.asInstanceOf[Stage].runner
-              sb.append(" [").append(if (runner ne null) runner.dispatcher.name else "none").append(']')
+              sb.append(" [").append(if (runner ne null) runner else "none").append(']')
             }
             sb.toString
           } else x.pipeElemType

@@ -17,7 +17,7 @@
 package swave.core.impl.stages.inout
 
 import swave.core.macros.StageImpl
-import swave.core.{ Errors, PipeElem }
+import swave.core.{ StreamLimitExceeded, PipeElem }
 import swave.core.impl.{ Outport, Inport }
 import swave.core.util._
 
@@ -52,7 +52,7 @@ private[core] final class LimitStage(max: Long, cost: AnyRef ⇒ Long) extends I
         running(in, out, rem)
       } else {
         in.cancel()
-        stopError(new Errors.StreamLimitExceeded(max, elem), out)
+        stopError(new StreamLimitExceeded(max, elem), out)
       }
     },
 

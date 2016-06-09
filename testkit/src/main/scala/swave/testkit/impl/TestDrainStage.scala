@@ -16,14 +16,13 @@
 
 package swave.testkit.impl
 
+import scala.util.control.NonFatal
 import swave.core.PipeElem
 import swave.core.impl.stages.drain.DrainStage
 import swave.core.impl.{ RunContext, Inport }
 import swave.core.macros.StageImpl
 import swave.core.util._
 import swave.testkit.TestFixture
-
-import scala.util.control.NonFatal
 
 @StageImpl
 private[testkit] final class TestDrainStage(
@@ -65,7 +64,7 @@ private[testkit] final class TestDrainStage(
       in.xSeal(c)
 
       c.registerForXStart(this)
-      c.registerForXRun(this)
+      c.registerForPostRunEvent(this)
       awaitingXStart(c, in)
     })
 
@@ -112,7 +111,7 @@ private[testkit] final class TestDrainStage(
       else illegalState(s"Received ERROR [$e] from unexpected inport '$from' instead of inport '$in'")
     },
 
-    xRun = () => handlePostRun(ctx))
+    xEvent = { case RunContext.PostRun => handlePostRun(ctx) })
 
   def cancel(ctx: RunContext, in: Inport, pending: Long) = {
     testCtx.run("⇠ CANCEL")(in.cancel())
@@ -141,7 +140,7 @@ private[testkit] final class TestDrainStage(
       else illegalState(s"Received ERROR [$e] from unexpected inport '$from' instead of inport '$in")
     },
 
-    xRun = () => handlePostRun(ctx))
+    xEvent = { case RunContext.PostRun => handlePostRun(ctx) })
 
   def completed(ctx: RunContext, in: Inport): State = state(
     onNext = (elem, from) ⇒ {
@@ -162,7 +161,7 @@ private[testkit] final class TestDrainStage(
       else illegalState(s"Received ERROR [$e] from unexpected inport '$from' instead of inport '$in'")
     },
 
-    xRun = () => handlePostRun(ctx))
+    xEvent = { case RunContext.PostRun => handlePostRun(ctx) })
 
   def errored(ctx: RunContext, in: Inport): State = state(
     onNext = (elem, from) ⇒ {
@@ -183,13 +182,13 @@ private[testkit] final class TestDrainStage(
       else illegalState(s"Received ERROR [$e] from unexpected inport '$from' instead of inport '$in'")
     },
 
-    xRun = () => handlePostRun(ctx))
+    xEvent = { case RunContext.PostRun => handlePostRun(ctx) })
 
   def handlePostRun(ctx: RunContext): State = {
     if (testCtx.hasSchedulings) {
       testCtx.trace(s"Running schedulings...")
       testCtx.processSchedulings()
-      ctx.registerForXRun(this)
+      ctx.registerForPostRunEvent(this)
     }
     stay()
   }

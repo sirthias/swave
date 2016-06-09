@@ -17,7 +17,7 @@
 package swave.core.util
 
 import com.typesafe.config.Config
-import swave.core.Errors
+import swave.core.ConfigurationException
 
 private[swave] abstract class SettingsCompanion[T](prefix: String) {
   import com.typesafe.config.ConfigFactory._
@@ -31,5 +31,5 @@ private[swave] abstract class SettingsCompanion[T](prefix: String) {
 
   def fromSubConfig(c: Config): T
 
-  def configError(msg: String): Nothing = throw new Errors.ConfigurationException(msg)
+  def configError(msg: String): Nothing = throw new ConfigurationException(msg)
 }

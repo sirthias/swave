@@ -50,7 +50,7 @@ final class InjectSpec extends PipeSpec with Inspectors {
         }
 
         in.stream
-          .inject
+          .inject()
           .drainTo(out.drain) shouldTerminate likeThis {
             case Cancelled ⇒ // input can be in any state
 

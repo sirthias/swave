@@ -231,14 +231,14 @@ object TestSetup {
             case _                            ⇒ Nil
           }
         val untypedList = l.toUntypedList
-        val stages = filterStages(untypedList)
+        val testStages = filterStages(untypedList)
         try {
           f(l)
-          postRunVerification(stages)
+          postRunVerification(testStages)
           Prop.proved // or rather Prop.passed?
         } catch {
           case NonFatal(e) ⇒
-            val graphRendering = stages.mapFind { stage ⇒
+            val graphRendering = testStages.mapFind { stage ⇒
               try Some(PipeElem.render(stage.asInstanceOf[Stage].pipeElem))
               catch { case e: IllegalStateException if e.getMessage contains "inconsistent edge data" ⇒ None }
             }
@@ -249,7 +249,11 @@ object TestSetup {
               case List(_: TestFixture, _*) ⇒ Nil
               case x                        ⇒ x :: Nil
             }
-            val fixtures = stages.map(s ⇒ f"${s.id}%3d: ${s.formatLong}".replace("\n", "\n       "))
+            val fixtures = testStages.map(s ⇒ f"${s.id}%3d: ${s.formatLong}".replace("\n", "\n       "))
+            val specimens = testStages.map({
+              case x: TestStreamStage ⇒ x.outputElem
+              case x: TestDrainStage  ⇒ x.inputElem
+            }).filter(_ != PipeElem.Unconnected).distinct
             println(
               s"""|Error Context
                   |  randomSeed     : ${XorShiftRandom.formatSeed(randomSeed)}
@@ -257,8 +261,11 @@ object TestSetup {
                   |  asyncScheduling: ${ctx.asyncScheduling}
                   |  asyncRate      : ${ctx.asyncRate}
                   |  params         : [${params.mkString(", ")}]
-                  |  fixtures
-                  |  ${fixtures.mkString("\n\n  ")}""".stripMargin)
+                  |  fixtures:
+                  |  ${fixtures.mkString("\n\n  ")}
+                  |
+                  |  specimens:
+                  |    ${specimens.mkString("\n\n    ")}""".stripMargin)
             Prop.exception(e)
         }
     }

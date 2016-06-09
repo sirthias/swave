@@ -16,15 +16,11 @@
 
 package swave.core
 
-import scala.util.control.NoStackTrace
+final case class StreamLimitExceeded(max: Long, offendingElem: Any)
+  extends RuntimeException(s"Limit of $max exceeded by element '$offendingElem'")
 
-object Errors {
+final class ConfigurationException(msg: String) extends RuntimeException(msg)
 
-  case class StreamLimitExceeded(max: Long, offendingElem: Any)
-    extends RuntimeException(s"Limit of $max exceeded by element '$offendingElem'")
+final class IllegalAsyncBoundaryException(msg: String) extends RuntimeException(msg)
 
-  object NoSuchElementException extends RuntimeException("NoSuchElementException") with NoStackTrace
-
-  class ConfigurationException(msg: String) extends RuntimeException(msg)
-
-}
+final class IllegalReuseException(msg: String) extends RuntimeException(msg)

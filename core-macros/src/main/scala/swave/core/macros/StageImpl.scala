@@ -386,32 +386,21 @@ class StageImplMacro(val c: scala.reflect.macros.whitebox.Context) extends Util
       if (cases.size > 1) q"protected override def _xStart(): State = ${switch("xStart", cases)}" else q"()"
     }
 
-    def xRunDef = {
+    def xEventDef = {
+      val ev = freshName("ev")
       val cases = compact {
-        stateHandlers.valuesIterator.foldLeft(cq"_ => super._xRun()" :: Nil) { (acc, sh) ⇒
-          sh.xRun.fold(acc) { case q"() => $body" ⇒ cq"${sh.id} => $body" :: acc }
-        }
-      }
-      if (cases.size > 1) q"protected override def _xRun(): State = ${switch("xRun", cases)}" else q"()"
-    }
-
-    def xCleanUpDef = {
-      val cases = compact {
-        stateHandlers.valuesIterator.foldLeft(cq"_ => super._xCleanUp()" :: Nil) { (acc, sh) ⇒
-          sh.xCleanUp.fold(acc) { tree ⇒
-            val caseBody = tree match {
-              case q"() => $body" ⇒ body
-              case x              ⇒ q"$x()"
-            }
-            cq"${sh.id} => $caseBody" :: acc
+        stateHandlers.valuesIterator.foldLeft(cq"_ => super._xEvent($ev)" :: Nil) { (acc, sh) ⇒
+          sh.xEvent.fold(acc) {
+            case q"($ev0) => $body0" ⇒ cq"${sh.id} => ${replaceIdents(body0, ev0.name → ev)}" :: acc
+            case q"{ case ..$cs }"   ⇒ cq"${sh.id} => $ev match { case ..$cs }" :: acc
           }
         }
       }
-      if (cases.size > 1) q"protected override def _xCleanUp(): State = ${switch("xCleanUp", cases)}" else q"()"
+      if (cases.size > 1) q"protected override def _xEvent($ev: AnyRef): State = ${switch("xEvent", cases)}" else q"()"
     }
 
     List(subscribeDef, requestDef, cancelDef, onSubscribeDef, onNextDef, onCompleteDef, onErrorDef,
-      xSealDef, xStartDef, xRunDef, xCleanUpDef)
+      xSealDef, xStartDef, xEventDef)
   }
 
   def assignInterceptingStates: Tree = {
@@ -480,13 +469,20 @@ class StageImplMacro(val c: scala.reflect.macros.whitebox.Context) extends Util
   case class StateHandlers(id: Int, params: List[ValDef], intercept: Boolean,
     subscribe: Option[Tree], request: Option[Tree], cancel: Option[Tree],
     onSubscribe: Option[Tree], onNext: Option[Tree], onComplete: Option[Tree], onError: Option[Tree],
-    xSeal: Option[Tree], xStart: Option[Tree], xRun: Option[Tree], xCleanUp: Option[Tree])
+    xSeal: Option[Tree], xStart: Option[Tree], xEvent: Option[Tree])
 
   object StateHandlers {
+    private val definedSignals = Seq("intercept", "subscribe", "request", "cancel",
+      "onSubscribe", "onNext", "onComplete", "onError",
+      "xSeal", "xStart", "xEvent")
+
     def apply(id: Int, params: List[ValDef], handlers: List[Tree]): StateHandlers = {
       val args = handlers.foldLeft(Map.empty[String, Tree]) {
-        case (m, q"${ ref: RefTree } = $value") ⇒ m.updated(ref.name.decodedName.toString, value)
-        case (_, x)                             ⇒ c.abort(x.pos, "All arguments to `state` must be named!")
+        case (m, x @ q"${ ref: RefTree } = $value") ⇒
+          val name = ref.name.decodedName.toString
+          if (!definedSignals.contains(name)) c.abort(x.pos, s"Unknown signal `$name`!")
+          m.updated(name, value)
+        case (_, x) ⇒ c.abort(x.pos, "All arguments to `state` must be named!")
       }
       val intercept = args.get("intercept") match {
         case None | Some(q"true") ⇒ true
@@ -496,7 +492,7 @@ class StageImplMacro(val c: scala.reflect.macros.whitebox.Context) extends Util
       StateHandlers(id, params, intercept,
         args.get("subscribe"), args.get("request"), args.get("cancel"),
         args.get("onSubscribe"), args.get("onNext"), args.get("onComplete"), args.get("onError"),
-        args.get("xSeal"), args.get("xStart"), args.get("xRun"), args.get("xCleanUp"))
+        args.get("xSeal"), args.get("xStart"), args.get("xEvent"))
     }
   }
 

@@ -17,7 +17,7 @@
 package swave.core.impl.stages.drain
 
 import scala.annotation.compileTimeOnly
-import swave.core.PipeElem
+import swave.core.{ IllegalAsyncBoundaryException, PipeElem }
 import swave.core.impl.{ RunContext, Inport }
 import swave.core.impl.stages.Stage
 
@@ -35,7 +35,7 @@ private[swave] abstract class DrainStage extends Stage { this: PipeElem.Drain =>
   final def assignDispatcherId(dispatcherId: String): Unit =
     if ((_dispatcherId eq null) || _dispatcherId.isEmpty) _dispatcherId = dispatcherId
     else if (dispatcherId.nonEmpty && dispatcherId != _dispatcherId)
-      throw new IllegalStateException("Conflicting dispatcher assignment to drain " +
+      throw new IllegalAsyncBoundaryException("Conflicting dispatcher assignment to drain " +
         s"'${getClass.getSimpleName}': [${_dispatcherId}] vs. [$dispatcherId]")
 
   protected final def registerForRunnerAssignmentIfRequired(ctx: RunContext): Unit =

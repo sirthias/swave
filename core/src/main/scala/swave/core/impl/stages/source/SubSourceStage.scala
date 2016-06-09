@@ -16,34 +16,46 @@
 
 package swave.core.impl.stages.source
 
-import swave.core.PipeElem
+import scala.concurrent.duration.Duration
+import swave.core.{ Cancellable, PipeElem }
+import swave.core.impl.stages.Stage
 import swave.core.impl.{ Inport, Outport, RunContext }
 import swave.core.macros.StageImpl
 import SubSourceStage._
 
 // format: OFF
 @StageImpl
-private[core] final class SubSourceStage(ctx: RunContext, in: Inport) extends SourceStage
+private[core] final class SubSourceStage(ctx: RunContext, in: Inport, subscriptionTimeout: Duration) extends SourceStage
   with PipeElem.Source.Sub {
 
   def pipeElemType: String = "sub"
   def pipeElemParams: List[Any] = in :: Nil
 
-  initialState(awaitingSubscribe(Termination.None))
+  initialState(awaitingSubscribe(Termination.None, null))
 
-  def awaitingSubscribe(termination: Termination): State = state(
+  def awaitingSubscribe(termination: Termination, timer: Cancellable): State = state(
     subscribe = from ⇒ {
+      if (timer ne null) timer.cancel()
       _outputPipeElem = from.pipeElem
       from.onSubscribe()
       ready(from, termination)
     },
 
-    onComplete = _ => awaitingSubscribe(Termination.Completed),
-    onError = (e, _) => awaitingSubscribe(Termination.Error(e)))
+    onComplete = _ => awaitingSubscribe(Termination.Completed, timer),
+    onError = (e, _) => awaitingSubscribe(Termination.Error(e), timer),
+
+    xEvent = {
+      case EnableSubscriptionTimeout if timer eq null =>
+        val t = ctx.scheduleSubscriptionTimeout(this, subscriptionTimeout)
+        awaitingSubscribe(termination, t)
+      case RunContext.SubscriptionTimeout =>
+        stopCancel(in)
+    })
 
   def ready(out: Outport, termination: Termination): State = state(
     xSeal = subCtx ⇒ {
       ctx.attach(subCtx)
+      ctx.registerForRunnerClamping(this, in.asInstanceOf[Stage])
       configureFrom(ctx)
       out.xSeal(ctx)
       termination match {
@@ -55,7 +67,12 @@ private[core] final class SubSourceStage(ctx: RunContext, in: Inport) extends So
     },
 
     onComplete = _ => ready(out, Termination.Completed),
-    onError = (e, _) => ready(out, Termination.Error(e)))
+    onError = (e, _) => ready(out, Termination.Error(e)),
+
+    xEvent = {
+      case EnableSubscriptionTimeout => stay() // ignore
+      case RunContext.SubscriptionTimeout => stay() // ignore
+    })
 
   def awaitingXStart(out: Outport, termination: Termination) = state(
     xStart = () => {
@@ -63,6 +80,11 @@ private[core] final class SubSourceStage(ctx: RunContext, in: Inport) extends So
         case Termination.Error(e) => stopError(e, out)
         case _ => stopComplete(out)
       }
+    },
+
+    xEvent = {
+      case EnableSubscriptionTimeout => stay() // ignore
+      case RunContext.SubscriptionTimeout => stay() // ignore
     })
 
   def running(out: Outport) = state(
@@ -79,10 +101,17 @@ private[core] final class SubSourceStage(ctx: RunContext, in: Inport) extends So
     },
 
     onComplete = stopCompleteF(out),
-    onError = stopErrorF(out))
+    onError = stopErrorF(out),
+
+    xEvent = {
+      case EnableSubscriptionTimeout => stay() // ignore
+      case RunContext.SubscriptionTimeout => stay() // ignore
+    })
 }
 
 private[core] object SubSourceStage {
+
+  case object EnableSubscriptionTimeout
 
   private abstract class Termination
   private object Termination {

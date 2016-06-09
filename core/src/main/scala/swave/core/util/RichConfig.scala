@@ -17,7 +17,7 @@
 package swave.core.util
 
 import com.typesafe.config.{ ConfigException, Config }
-import swave.core.Errors.ConfigurationException
+import swave.core.ConfigurationException
 import scala.concurrent.duration._
 
 final class RichConfig(val underlying: Config) extends AnyVal {

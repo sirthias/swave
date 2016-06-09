@@ -78,7 +78,7 @@ final class Drain[-T, +R] private[swave] (val outport: Outport, val result: R) {
               }
             }
           def fail() =
-            throw new IllegalStateException(s"Cannot assign dispatcher '$dispatcherId' to drain '$this'. " +
+            throw new IllegalAsyncBoundaryException(s"Cannot assign dispatcher '$dispatcherId' to drain '$this'. " +
               "The drain's graph contains at least one explicit async boundary.")
         }
         assign(x)

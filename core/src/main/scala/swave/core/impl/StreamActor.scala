@@ -83,7 +83,7 @@ private[impl] abstract class StreamActor(
       try dispatcher.execute(scheduled)
       catch {
         case NonFatal(e) ⇒
-          scheduled.set(true)
+          scheduled.set(false)
           throw e
       }
     }

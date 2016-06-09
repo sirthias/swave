@@ -18,7 +18,7 @@ package swave.core.impl.stages
 
 import org.scalacheck.Gen
 import org.scalatest.Inspectors
-import swave.core.{ Overflow, Errors, StreamEnv }
+import swave.core.{ StreamLimitExceeded, Overflow, StreamEnv }
 import swave.testkit.TestFixture
 
 final class SimpleOpSpec extends PipeSpec with Inspectors {
@@ -238,7 +238,7 @@ final class SimpleOpSpec extends PipeSpec with Inspectors {
           pipeline shouldTerminate asScripted(in)
           out.received shouldEqual in.produced.take(out.scriptedSize)
         } else {
-          pipeline shouldTerminate withErrorLike { case Errors.StreamLimitExceeded(`param`, _) ⇒ }
+          pipeline shouldTerminate withErrorLike { case StreamLimitExceeded(`param`, _) ⇒ }
         }
       }
   }

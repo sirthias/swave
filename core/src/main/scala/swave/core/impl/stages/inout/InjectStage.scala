@@ -17,6 +17,7 @@
 package swave.core.impl.stages.inout
 
 import scala.annotation.tailrec
+import scala.concurrent.duration._
 import swave.core.macros.StageImpl
 import swave.core.{ PipeElem, Stream }
 import swave.core.impl.stages.source.SubSourceStage
@@ -25,15 +26,17 @@ import swave.core.util._
 
 // format: OFF
 @StageImpl
-private[core] final class InjectStage extends InOutStage with PipeElem.InOut.Inject { stage =>
+private[core] final class InjectStage(_subscriptionTimeout: Duration) extends InOutStage with PipeElem.InOut.Inject { stage =>
 
   def pipeElemType: String = "inject"
   def pipeElemParams: List[Any] = Nil
 
   private[this] var buffer: RingBuffer[AnyRef] = _
+  private[this] var subscriptionTimeout = _subscriptionTimeout
 
   connectInOutAndSealWith { (ctx, in, out) ⇒
-    ctx.registerForXCleanUp(this)
+    if (subscriptionTimeout eq Duration.Undefined)
+      subscriptionTimeout = ctx.env.settings.subscriptionTimeout
     ctx.registerForXStart(this)
     running(ctx, in, out)
   }
@@ -64,15 +67,21 @@ private[core] final class InjectStage extends InOutStage with PipeElem.InOut.Inj
       },
 
       onComplete = _ => noSubAwaitingMainDemandUpstreamGone(),
-      onError = stopErrorF(out),
-      xCleanUp = () => stay())
+      onError = stopErrorF(out))
 
     /**
      * Buffer non-empty, upstream already completed, no sub-stream open.
      * Waiting for the next request from the main downstream.
      */
     def noSubAwaitingMainDemandUpstreamGone(): State = state(
-      request = (n, from) ⇒ if (from eq out) awaitingSubDemandUpstreamGone(emitNewSub(), (n - 1).toLong) else stay(),
+      request = (n, from) ⇒ {
+        if (from eq out) {
+          val s = emitNewSub()
+          s.xEvent(SubSourceStage.EnableSubscriptionTimeout)
+          awaitingSubDemandUpstreamGone(s, (n - 1).toLong)
+        } else stay()
+      },
+
       cancel = from => if (from eq out) stopCancel(in) else stay())
 
     /**
@@ -93,8 +102,7 @@ private[core] final class InjectStage extends InOutStage with PipeElem.InOut.Inj
       },
 
       onComplete = stopCompleteF(out),
-      onError = stopErrorF(out),
-      xCleanUp = () => stay())
+      onError = stopErrorF(out))
 
     /**
      * Buffer non-empty, sub-stream open.
@@ -124,7 +132,10 @@ private[core] final class InjectStage extends InOutStage with PipeElem.InOut.Inj
         if (from eq sub) {
           if (mainRemaining > 0) awaitingSubDemand(emitNewSub(), pending, mainRemaining - 1)
           else noSubAwaitingMainDemand(pending)
-        } else if (from eq out) awaitingSubDemandDownstreamGone(sub, pending)
+        } else if (from eq out) {
+          sub.xEvent(SubSourceStage.EnableSubscriptionTimeout)
+          awaitingSubDemandDownstreamGone(sub, pending)
+        }
         else stay()
       },
 
@@ -133,9 +144,11 @@ private[core] final class InjectStage extends InOutStage with PipeElem.InOut.Inj
         awaitingSubDemand(sub, pendingAfterReceive(pending), mainRemaining)
       },
 
-      onComplete = _ => awaitingSubDemandUpstreamGone(sub, mainRemaining),
-      onError = stopErrorSubAndMainF(sub),
-      xCleanUp = () => stay())
+      onComplete = _ => {
+        sub.xEvent(SubSourceStage.EnableSubscriptionTimeout)
+        awaitingSubDemandUpstreamGone(sub, mainRemaining)
+      },
+      onError = stopErrorSubAndMainF(sub))
 
     /**
      * Buffer non-empty, sub-stream open, upstream already completed.
@@ -168,9 +181,7 @@ private[core] final class InjectStage extends InOutStage with PipeElem.InOut.Inj
           else noSubAwaitingMainDemandUpstreamGone()
         } else if (from eq out) awaitingSubDemandUpAndDownstreamGone(sub)
         else stay()
-      },
-
-      xCleanUp = () => stay())
+      })
 
     /**
      * Buffer non-empty, sub-stream open, main downstream already cancelled.
@@ -201,8 +212,7 @@ private[core] final class InjectStage extends InOutStage with PipeElem.InOut.Inj
       },
 
       onComplete = _ => awaitingSubDemandUpAndDownstreamGone(sub),
-      onError = stopErrorF(sub),
-      xCleanUp = cleanup(sub))
+      onError = stopErrorF(sub))
 
     /**
      * Buffer non-empty, sub-stream open, upstream already completed, main downstream already cancelled.
@@ -223,8 +233,7 @@ private[core] final class InjectStage extends InOutStage with PipeElem.InOut.Inj
         if (from eq sub) rec(n) else stay()
       },
 
-      cancel = from => if (from eq sub) stopCancel(in) else stay(),
-      xCleanUp = cleanup(sub))
+      cancel = from => if (from eq sub) stopCancel(in) else stay())
 
     /**
      * Buffer empty, sub-stream open, demand signalled to upstream.
@@ -244,8 +253,10 @@ private[core] final class InjectStage extends InOutStage with PipeElem.InOut.Inj
 
       cancel = from => {
         if (from eq sub) noSubAwaitingElem(pending, mainRemaining)
-        else if (from eq out) awaitingElemDownstreamGone(sub, pending, subRemaining)
-        else stay()
+        else if (from eq out) {
+          sub.xEvent(SubSourceStage.EnableSubscriptionTimeout)
+          awaitingElemDownstreamGone(sub, pending, subRemaining)
+        } else stay()
       },
 
       onNext = (elem, _) ⇒ {
@@ -259,8 +270,7 @@ private[core] final class InjectStage extends InOutStage with PipeElem.InOut.Inj
       },
 
       onComplete = stopCompleteSubAndMainF(sub),
-      onError = stopErrorSubAndMainF(sub),
-      xCleanUp = cleanup(sub))
+      onError = stopErrorSubAndMainF(sub))
 
     /**
      * Buffer empty, sub-stream open, main downstream cancelled, demand signalled to upstream.
@@ -285,13 +295,12 @@ private[core] final class InjectStage extends InOutStage with PipeElem.InOut.Inj
       },
 
       onComplete = stopCompleteSubAndMainF(sub),
-      onError = stopErrorSubAndMainF(sub),
-      xCleanUp = cleanup(sub))
+      onError = stopErrorSubAndMainF(sub))
 
     ///////////////////////// helpers //////////////////////////
 
     def emitNewSub() = {
-      val s = new SubSourceStage(ctx, this)
+      val s = new SubSourceStage(ctx, this, subscriptionTimeout)
       out.onNext(new Stream(s).asInstanceOf[AnyRef])
       s
     }
@@ -318,13 +327,6 @@ private[core] final class InjectStage extends InOutStage with PipeElem.InOut.Inj
     def stopErrorSubAndMainF(s: SubSourceStage)(e: Throwable, i: Inport): State = {
       s.onError(e)
       stopError(e, out)
-    }
-
-    def cleanup(s: SubSourceStage)(): State = {
-      // in a synchronous run: if we are still in this state after the stream has run in its entirety
-      // the sub we are awaiting demand from was dropped
-      cancel()(from = s)
-      stay()
     }
 
     awaitingXStart()

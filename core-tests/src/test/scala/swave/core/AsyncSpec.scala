@@ -154,7 +154,7 @@ class AsyncSpec extends SwaveSpec {
       val piping =
         Stream.continually(threadName)
           .async()
-          .inject
+          .inject()
           .map(_.take(1).map(_ :: threadName :: Nil))
           .flattenConcat()
           .to(Drain.head).seal().get

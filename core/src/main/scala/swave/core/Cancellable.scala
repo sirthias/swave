@@ -25,8 +25,16 @@ trait Cancellable {
   def cancel(): Boolean
 
   /**
-   * Returns true if this instance is not active (anymore).
+   * Returns false if this instance is not active (anymore).
    */
-  def isCancelled: Boolean
+  def stillActive: Boolean
 
+}
+
+object Cancellable {
+
+  val Inactive = new Cancellable {
+    def cancel() = false
+    def stillActive = false
+  }
 }

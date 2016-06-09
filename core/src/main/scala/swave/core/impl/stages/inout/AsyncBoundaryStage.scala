@@ -34,7 +34,7 @@ private[core] final class AsyncBoundaryStage(dispatcherId: String) extends InOut
     val ins = in.asInstanceOf[Stage]
     val outs = out.asInstanceOf[Stage]
     ctx.registerForRunnerAssignment(ins, dispatcherId)
-    ctx.registerForRunnerAssignment(outs, "") // fallback assignment of default StreamRunner
+    ctx.registerForRunnerAssignment(outs) // fallback assignment of default StreamRunner
     running(ins, outs)
   }
 
