@@ -16,6 +16,7 @@
 
 package swave.core.impl.stages.inout
 
+import scala.util.control.NonFatal
 import swave.core.PipeElem
 import swave.core.impl.{ Inport, Outport }
 import swave.core.macros.StageImpl
@@ -46,9 +47,11 @@ private[core] final class CollectStage(pf: PartialFunction[AnyRef, AnyRef]) exte
     cancel = stopCancelF(in),
 
     onNext = (elem, _) ⇒ {
-      val collected = pf.applyOrElse(elem, mismatchFun)
-      if (collected ne this) out.onNext(collected)
-      stay()
+      try {
+        val collected = pf.applyOrElse(elem, mismatchFun)
+        if (collected ne this) out.onNext(collected)
+        stay()
+      } catch { case NonFatal(e) => { in.cancel(); stopError(e, out) } }
     },
 
     onComplete = stopCompleteF(out),

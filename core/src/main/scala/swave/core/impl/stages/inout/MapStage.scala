@@ -16,6 +16,7 @@
 
 package swave.core.impl.stages.inout
 
+import scala.util.control.NonFatal
 import swave.core.PipeElem
 import swave.core.impl.{ Outport, Inport }
 import swave.core.macros.StageImpl
@@ -40,8 +41,10 @@ private[core] final class MapStage(f: AnyRef ⇒ AnyRef) extends InOutStage with
     cancel = stopCancelF(in),
 
     onNext = (elem, _) ⇒ {
-      out.onNext(f(elem))
-      stay()
+      try {
+        out.onNext(f(elem))
+        stay()
+      } catch { case NonFatal(e) => { in.cancel(); stopError(e, out) } }
     },
 
     onComplete = stopCompleteF(out),

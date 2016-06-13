@@ -16,6 +16,7 @@
 
 package swave.core.impl.stages.drain
 
+import scala.util.control.NonFatal
 import scala.concurrent.Promise
 import swave.core.macros.StageImpl
 import swave.core.PipeElem
@@ -50,8 +51,14 @@ private[core] final class ForeachDrainStage(
    */
   def running(in: Inport) = state(
     onNext = (elem, _) ⇒ {
-      callback(elem)
-      stay()
+      try {
+        callback(elem)
+        stay()
+      } catch {
+        case NonFatal(e) =>
+          terminationPromise.failure(e)
+          stopCancel(in)
+      }
     },
 
     onComplete = _ ⇒ {

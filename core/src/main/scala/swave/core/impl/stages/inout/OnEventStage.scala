@@ -16,6 +16,7 @@
 
 package swave.core.impl.stages.inout
 
+import scala.util.control.NonFatal
 import swave.core.impl.{ Outport, Inport }
 import swave.core.macros.StageImpl
 import swave.core.{ PipeElem, StreamEvent }
@@ -34,30 +35,40 @@ private[core] final class OnEventStage(callback: StreamEvent[Any] ⇒ Unit) exte
     intercept = false,
 
     request = (n, _) ⇒ {
-      callback(StreamEvent.Request(n))
-      in.request(n.toLong)
-      stay()
+      try {
+        callback(StreamEvent.Request(n))
+        in.request(n.toLong)
+        stay()
+      } catch { case NonFatal(e) => { in.cancel(); stopError(e, out) } }
     },
 
     cancel = _ ⇒ {
-      callback(StreamEvent.Cancel)
-      stopCancel(in)
+      try {
+        callback(StreamEvent.Cancel)
+        stopCancel(in)
+      } catch { case NonFatal(e) => { in.cancel(); stopError(e, out) } }
     },
 
     onNext = (elem, _) ⇒ {
-      callback(StreamEvent.OnNext(elem))
-      out.onNext(elem)
-      stay()
+      try {
+        callback(StreamEvent.OnNext(elem))
+        out.onNext(elem)
+        stay()
+      } catch { case NonFatal(e) => { in.cancel(); stopError(e, out) } }
     },
 
     onComplete = _ ⇒ {
-      callback(StreamEvent.OnComplete)
-      stopComplete(out)
+      try {
+        callback(StreamEvent.OnComplete)
+        stopComplete(out)
+      } catch { case NonFatal(e) => { in.cancel(); stopError(e, out) } }
     },
 
     onError = (e, _) ⇒ {
-      callback(StreamEvent.OnError(e))
-      stopError(e, out)
+      try {
+        callback(StreamEvent.OnError(e))
+        stopError(e, out)
+      } catch { case NonFatal(e) => { in.cancel(); stopError(e, out) } }
     })
 }
 

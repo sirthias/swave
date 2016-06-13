@@ -16,6 +16,7 @@
 
 package swave.core.impl.stages.source
 
+import scala.util.control.NonFatal
 import scala.annotation.tailrec
 import swave.core.macros.StageImpl
 import swave.core.PipeElem
@@ -40,14 +41,16 @@ private[core] final class IteratorStage(iterator: Iterator[AnyRef]) extends Sour
 
   def running(out: Outport) = state(
     request = (n, _) ⇒ {
-      @tailrec def rec(nn: Int): State = {
-        out.onNext(iterator.next())
-        if (iterator.hasNext) {
-          if (nn > 1) rec(nn - 1)
-          else stay()
-        } else stopComplete(out)
-      }
-      rec(n)
+      try {
+        @tailrec def rec(nn: Int): State = {
+          out.onNext(iterator.next())
+          if (iterator.hasNext) {
+            if (nn > 1) rec(nn - 1)
+            else stay()
+          } else stopComplete(out)
+        }
+        rec(n)
+      } catch { case NonFatal(e) => stopError(e, out) }
     },
 
     cancel = stopF)

@@ -16,6 +16,7 @@
 
 package swave.core.impl.stages.inout
 
+import scala.util.control.NonFatal
 import swave.core.PipeElem
 import swave.core.impl.{ Inport, Outport }
 import swave.core.macros.StageImpl
@@ -59,9 +60,11 @@ private[core] final class ScanStage(zero: AnyRef, f: (AnyRef, AnyRef) ⇒ AnyRef
     cancel = stopCancelF(in),
 
     onNext = (elem, _) ⇒ {
-      val next = f(last, elem)
-      out.onNext(next)
-      running(in, out, next)
+      try {
+        val next = f(last, elem)
+        out.onNext(next)
+        running(in, out, next)
+      } catch { case NonFatal(e) => { in.cancel(); stopError(e, out) } }
     },
 
     onComplete = stopCompleteF(out),

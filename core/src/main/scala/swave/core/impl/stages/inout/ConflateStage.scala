@@ -16,6 +16,7 @@
 
 package swave.core.impl.stages.inout
 
+import scala.util.control.NonFatal
 import swave.core.PipeElem
 import swave.core.impl.{ Inport, Outport }
 import swave.core.macros.StageImpl
@@ -52,11 +53,13 @@ private[core] final class ConflateStage(lift: AnyRef => AnyRef, aggregate: (AnyR
       cancel = stopCancelF(in),
 
       onNext = (elem, _) ⇒ {
-        val lifted = lift(elem)
-        if (remaining > 0) {
-          out.onNext(lifted)
-          forwarding(remaining - 1)
-        } else conflating(lifted)
+        try {
+          val lifted = lift(elem)
+          if (remaining > 0) {
+            out.onNext(lifted)
+            forwarding(remaining - 1)
+          } else conflating(lifted)
+        } catch { case NonFatal(e) => { in.cancel(); stopError(e, out) } }
       },
 
       onComplete = stopCompleteF(out),
@@ -74,7 +77,12 @@ private[core] final class ConflateStage(lift: AnyRef => AnyRef, aggregate: (AnyR
       },
 
       cancel = stopCancelF(in),
-      onNext = (elem, _) ⇒ conflating(aggregate(acc, elem)),
+
+      onNext = (elem, _) ⇒ {
+        try conflating(aggregate(acc, elem))
+        catch { case NonFatal(e) => { in.cancel(); stopError(e, out) } }
+      },
+
       onComplete = stopCompleteF(out),
       onError = stopErrorF(out))
 

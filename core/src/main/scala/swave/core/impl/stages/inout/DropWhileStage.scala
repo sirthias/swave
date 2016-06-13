@@ -16,6 +16,7 @@
 
 package swave.core.impl.stages.inout
 
+import scala.util.control.NonFatal
 import swave.core.PipeElem
 import swave.core.impl.{ Inport, Outport }
 import swave.core.macros.StageImpl
@@ -43,13 +44,15 @@ private[core] final class DropWhileStage(predicate: Any ⇒ Boolean) extends InO
       cancel = stopCancelF(in),
 
       onNext = (elem, _) ⇒ {
-        if (predicate(elem)) {
-          in.request(1)
-          stay()
-        } else {
-          out.onNext(elem)
-          draining()
-        }
+        try {
+          if (predicate(elem)) {
+            in.request(1)
+            stay()
+          } else {
+            out.onNext(elem)
+            draining()
+          }
+        } catch { case NonFatal(e) => { in.cancel(); stopError(e, out) } }
       },
 
       onComplete = stopCompleteF(out),

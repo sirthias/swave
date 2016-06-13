@@ -16,6 +16,7 @@
 
 package swave.core.impl.stages.inout
 
+import scala.util.control.NonFatal
 import swave.core.macros.StageImpl
 import swave.core.{ StreamLimitExceeded, PipeElem }
 import swave.core.impl.{ Outport, Inport }
@@ -46,14 +47,16 @@ private[core] final class LimitStage(max: Long, cost: AnyRef ⇒ Long) extends I
     cancel = stopCancelF(in),
 
     onNext = (elem, _) ⇒ {
-      val rem = remaining - cost(elem)
-      if (rem >= 0) {
-        out.onNext(elem)
-        running(in, out, rem)
-      } else {
-        in.cancel()
-        stopError(new StreamLimitExceeded(max, elem), out)
-      }
+      try {
+        val rem = remaining - cost(elem)
+        if (rem >= 0) {
+          out.onNext(elem)
+          running(in, out, rem)
+        } else {
+          in.cancel()
+          stopError(new StreamLimitExceeded(max, elem), out)
+        }
+      } catch { case NonFatal(e) => { in.cancel(); stopError(e, out) } }
     },
 
     onComplete = stopCompleteF(out),

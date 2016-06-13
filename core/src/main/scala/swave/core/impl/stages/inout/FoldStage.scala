@@ -16,6 +16,7 @@
 
 package swave.core.impl.stages.inout
 
+import scala.util.control.NonFatal
 import swave.core.PipeElem
 import swave.core.impl.{ Outport, Inport }
 import swave.core.macros.StageImpl
@@ -53,7 +54,11 @@ private[core] final class FoldStage(zero: AnyRef, f: (AnyRef, AnyRef) ⇒ AnyRef
     def folding(acc: AnyRef): State = state(
       request = (_, _) ⇒ stay(),
       cancel = stopCancelF(in),
-      onNext = (elem, _) ⇒ folding(f(acc, elem)),
+
+      onNext = (elem, _) ⇒ {
+        try folding(f(acc, elem))
+        catch { case NonFatal(e) => { in.cancel(); stopError(e, out) } }
+      },
 
       onComplete = _ ⇒ {
         out.onNext(acc)
