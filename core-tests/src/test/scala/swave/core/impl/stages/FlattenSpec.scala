@@ -19,7 +19,7 @@ package swave.core.impl.stages
 import org.scalacheck.Gen
 import org.scalatest.Inspectors
 import swave.core._
-import swave.testkit.{ TestError, TestFixture }
+import swave.testkit.gen.{ TestFixture, TestError }
 
 final class FlattenSpec extends PipeSpec with Inspectors {
 

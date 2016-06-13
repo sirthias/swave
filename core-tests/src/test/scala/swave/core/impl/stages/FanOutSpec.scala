@@ -19,7 +19,7 @@ package swave.core.impl.stages
 import org.scalacheck.Gen
 import org.scalatest.Inspectors
 import swave.core.StreamEnv
-import swave.testkit.TestFixture
+import swave.testkit.gen.TestFixture
 
 final class FanOutSpec extends PipeSpec with Inspectors {
 

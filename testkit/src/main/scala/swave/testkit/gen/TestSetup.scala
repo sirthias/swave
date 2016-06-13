@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package swave.testkit
+package swave.testkit.gen
 
+import org.scalacheck.{ Gen, Prop }
+import shapeless._
+import shapeless.ops.function.FnToProduct
+import shapeless.ops.hlist.{ Reverse, Tupler }
 import swave.core.PipeElem
 import swave.core.impl.stages.Stage
+import swave.core.util._
+import swave.testkit.impl._
 
 import scala.util.control.NonFatal
-import org.scalacheck.{ Prop, Gen }
-import shapeless.ops.function.FnToProduct
-import shapeless.ops.hlist.{ Tupler, Reverse }
-import shapeless._
-import swave.testkit.impl._
-import swave.core.util._
 
 object TestSetup {
 

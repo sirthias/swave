@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package swave.testkit
+package swave.testkit.gen
 
 import scala.util.control.NoStackTrace
 

@@ -16,13 +16,14 @@
 
 package swave.testkit.impl
 
+import swave.testkit.gen.TestFixture
+
 import scala.util.control.NonFatal
 import swave.core.PipeElem
 import swave.core.impl.stages.drain.DrainStage
 import swave.core.impl.{ RunContext, Inport }
 import swave.core.macros.StageImpl
 import swave.core.util._
-import swave.testkit.TestFixture
 
 @StageImpl
 private[testkit] final class TestDrainStage(

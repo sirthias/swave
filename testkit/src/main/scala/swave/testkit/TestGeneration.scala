@@ -16,7 +16,9 @@
 
 package swave.testkit
 
-trait StreamTesting {
+import swave.testkit.gen._
+
+trait TestGeneration {
 
   def testSetup: TestSetup.TestSetupDef =
     TestSetup.newDslRoot

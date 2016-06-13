@@ -16,9 +16,11 @@
 
 package swave.testkit.impl
 
+import swave.testkit.gen.TestSetup
+
 import scala.annotation.tailrec
 import scala.collection.mutable.ArrayBuffer
-import swave.testkit.TestSetup.AsyncScheduling
+import TestSetup.AsyncScheduling
 import swave.core.util._
 
 private[testkit] final class TestContext(

@@ -16,7 +16,7 @@
 
 package swave.testkit.impl
 
-import swave.testkit.TestFixture
+import swave.testkit.gen.TestFixture
 
 import scala.collection.immutable.VectorBuilder
 import scala.concurrent.{ Future, Promise }

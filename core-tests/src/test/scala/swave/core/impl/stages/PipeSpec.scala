@@ -18,6 +18,6 @@ package swave.core.impl.stages
 
 import org.scalatest.prop.Checkers
 import swave.core.SwaveSpec
-import swave.testkit.StreamTesting
+import swave.testkit.TestGeneration
 
-abstract class PipeSpec extends SwaveSpec with Checkers with StreamTesting
+abstract class PipeSpec extends SwaveSpec with Checkers with TestGeneration

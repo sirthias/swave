@@ -19,7 +19,7 @@ package swave.core.impl.stages
 import org.scalacheck.Gen
 import org.scalatest.Inspectors
 import swave.core._
-import swave.testkit.{ TestError, TestFixture, TestOutput, TestSetup }
+import swave.testkit.gen.{ TestSetup, TestOutput, TestFixture, TestError }
 
 import scala.collection.mutable.ListBuffer
 

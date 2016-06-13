@@ -16,11 +16,12 @@
 
 package swave.testkit.impl
 
+import swave.testkit.gen.TestFixture
+
 import scala.annotation.tailrec
 import swave.core.macros.StageImpl
 import swave.core.PipeElem
 import swave.core.impl.Outport
-import swave.testkit.TestFixture
 import swave.core.impl.stages.source.SourceStage
 
 @StageImpl

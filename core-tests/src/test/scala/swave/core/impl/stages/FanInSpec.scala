@@ -19,7 +19,7 @@ package swave.core.impl.stages
 import org.scalacheck.Gen
 import org.scalatest.Inspectors
 import swave.core.StreamEnv
-import swave.testkit.{ TestInput, TestError, TestFixture }
+import swave.testkit.gen.{ TestInput, TestFixture, TestError }
 
 final class FanInSpec extends PipeSpec with Inspectors {
 

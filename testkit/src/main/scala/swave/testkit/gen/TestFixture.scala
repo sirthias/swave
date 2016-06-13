@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package swave.testkit
+package swave.testkit.gen
 
-import scala.util.{ Failure, Success }
-import scala.concurrent.Future
-import swave.testkit.impl.{ TestStage, TestDrainStage, TestStreamStage }
 import swave.core._
+import swave.testkit.impl.{ TestDrainStage, TestStage, TestStreamStage }
+
+import scala.concurrent.Future
+import scala.util.{ Failure, Success }
 
 sealed abstract class TestFixture {
   private[testkit] def stage: TestStage
