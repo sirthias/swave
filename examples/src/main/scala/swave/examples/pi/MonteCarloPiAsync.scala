@@ -41,12 +41,12 @@ object MonteCarloPiAsync extends App {
     .map(_ drop 999999 take 1)
     .flattenConcat()
     .map(state ⇒ f"After ${state.totalSamples}%,10d samples π is approximated as ${state.π}%.6f")
-    .take(50)
+    .take(30)
     .foreach(println)
     .onComplete {
       case Success(_) =>
         val time = System.currentTimeMillis() - env.startTime
-        println(f"Done. Total time: $time%,6d ms, Throughput: ${50000.0/time}%.3fM samples/sec\n")
+        println(f"Done. Total time: $time%,6d ms, Throughput: ${30000.0/time}%.3fM samples/sec\n")
         env.shutdown()
 
       case Failure(e) => println(e)

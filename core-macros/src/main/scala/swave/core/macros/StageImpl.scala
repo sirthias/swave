@@ -389,14 +389,14 @@ class StageImplMacro(val c: scala.reflect.macros.whitebox.Context) extends Util
     def xEventDef = {
       val ev = freshName("ev")
       val cases = compact {
-        stateHandlers.valuesIterator.foldLeft(cq"_ => super._xEvent($ev)" :: Nil) { (acc, sh) ⇒
+        stateHandlers.valuesIterator.foldLeft(cq"_ => super._xEvent0($ev)" :: Nil) { (acc, sh) ⇒
           sh.xEvent.fold(acc) {
             case q"($ev0) => $body0" ⇒ cq"${sh.id} => ${replaceIdents(body0, ev0.name → ev)}" :: acc
             case q"{ case ..$cs }"   ⇒ cq"${sh.id} => $ev match { case ..$cs }" :: acc
           }
         }
       }
-      if (cases.size > 1) q"protected override def _xEvent($ev: AnyRef): State = ${switch("xEvent", cases)}" else q"()"
+      if (cases.size > 1) q"protected override def _xEvent0($ev: AnyRef): State = ${switch("xEvent", cases)}" else q"()"
     }
 
     List(subscribeDef, requestDef, cancelDef, onSubscribeDef, onNextDef, onCompleteDef, onErrorDef,

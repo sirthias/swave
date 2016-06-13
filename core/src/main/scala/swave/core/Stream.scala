@@ -22,7 +22,7 @@ import scala.collection.generic.CanBuildFrom
 import scala.concurrent.Future
 import scala.concurrent.duration.{ Duration, FiniteDuration }
 import shapeless._
-import swave.core.impl.{ InportList, TypeLogic, Inport }
+import swave.core.impl.{ ModuleMarker, InportList, TypeLogic, Inport }
 import swave.core.impl.stages.Stage
 import swave.core.impl.stages.source._
 
@@ -71,6 +71,12 @@ final class Stream[+A](private[core] val inport: Inport) extends AnyVal with Str
 
   def drainToVector(limit: Long)(implicit env: StreamEnv): Future[Vector[A]] =
     drainToSeq[Vector](limit)
+
+  def named(name: String): Stream[A] = {
+    val marker = new ModuleMarker(name)
+    marker.markExit(inport)
+    this
+  }
 }
 
 object Stream {
@@ -80,31 +86,56 @@ object Stream {
 
   def asSubscriber[T]: (Subscriber[T], Stream[T]) = ???
 
-  def continually[T](elem: ⇒ T): Stream[T] = new Stream(new ContinuallyStage((elem _).asInstanceOf[() ⇒ AnyRef]))
+  def continually[T](elem: ⇒ T): Stream[T] = fromIterator(Iterator.continually(elem)).named("Stream.continually")
 
-  def empty[T]: Stream[T] = ???
+  def empty[T]: Stream[T] = fromIterator(Iterator.empty)
 
   def emptyFrom[T](future: Future[Unit]): Stream[T] = ???
 
   def failing[T](cause: Throwable): Stream[T] = ???
 
-  def from(start: Int): Stream[Int] = from(start, 1)
+  def from(start: Int, step: Int = 1): Stream[Int] = fromIterator(Iterator.from(start, step)).named("Stream.from")
 
-  def from(start: Int, step: Int): Stream[Int] = ???
-
-  def fromIterable[T](value: Iterable[T]): Stream[T] = new Stream(new IterableStage(value.asInstanceOf[Iterable[AnyRef]]))
+  def fromIterable[T](value: Iterable[T]): Stream[T] = fromIterator(value.iterator).named("Stream.fromIterable")
 
   def fromIterator[T](value: Iterator[T]): Stream[T] = new Stream(new IteratorStage(value.asInstanceOf[Iterator[AnyRef]]))
 
-  def iterate[T](start: T)(f: T ⇒ T): Stream[T] = ???
+  def iterate[T](start: T)(f: T ⇒ T): Stream[T] = fromIterator(Iterator.iterate(start)(f)).named("Stream.iterate")
 
-  def one[T](element: T): Stream[T] = new Stream(new OneElementStage(element.asInstanceOf[AnyRef]))
+  def one[T](element: T): Stream[T] = fromIterator(Iterator.single(element)).named("Stream.one")
 
   def repeat[T](element: T): Stream[T] = new Stream(new RepeatStage(element.asInstanceOf[AnyRef]))
 
   def tick[T](value: T, interval: FiniteDuration): Stream[T] = tick(value, Duration.Zero, interval)
 
   def tick[T](value: T, initialDelay: FiniteDuration, interval: FiniteDuration): Stream[T] = ???
+
+  /**
+   * A `Stream` that unfolds a "state" instance of type `S` into
+   * the subsequent states and output elements of type `T`.
+   *
+   * For example, all the Fibonacci numbers under 1M:
+   *
+   * {{{
+   *   Stream.unfold(0 → 1) {
+   *    case (a, b) if b > 1000000 ⇒ Stream.Unfolding.FinalElem(a)
+   *    case (a, b) ⇒ Stream.Unfolding.Iteration(a, b → (a + b))
+   *   }
+   * }}}
+   */
+  def unfold[S, T](s: S)(f: S ⇒ Unfolding[S, T]): Stream[T] = ???
+
+  /**
+   * Same as [[unfold]], but asynchronous.
+   */
+  def unfoldAsync[S, T](s: S)(f: S ⇒ Future[Unfolding[S, T]]): Stream[T] = ???
+
+  sealed abstract class Unfolding[+S, +T]
+  object Unfolding {
+    final case class Iteration[S, T](elem: T, next: S) extends Unfolding[S, T]
+    final case class FinalElem[T](elem: T) extends Unfolding[Nothing, T]
+    case object Done extends Unfolding[Nothing, Nothing]
+  }
 
   private val wrap: Inport ⇒ Stream[_] = new Stream(_)
 }

@@ -24,3 +24,5 @@ final class ConfigurationException(msg: String) extends RuntimeException(msg)
 final class IllegalAsyncBoundaryException(msg: String) extends RuntimeException(msg)
 
 final class IllegalReuseException(msg: String) extends RuntimeException(msg)
+
+final class SubscriptionTimeoutException(msg: String) extends RuntimeException(msg)

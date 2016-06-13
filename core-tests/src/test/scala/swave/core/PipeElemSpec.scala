@@ -44,7 +44,8 @@ class PipeElemSpec extends FreeSpec with Matchers {
     val foo = Module.Forward.from2[Int, String] { (a, b) ⇒
       a.attachN(2, b.fanOutBroadcast())
     } named "foo"
-    Stream(1, 2, 3)
+    Stream.from(0)
+      .duplicate
       .attach(Stream("x", "y", "z"))
       .fromFanInVia(foo)
       .fanInConcat
@@ -62,7 +63,8 @@ class PipeElemSpec extends FreeSpec with Matchers {
   }
 
   "Example 6" tests {
-    Stream(1, 2, 3)
+    Stream.from(0)
+      .deduplicate
       .zip(Stream(4, 5, 6))
       .to(Drain.head)
   }

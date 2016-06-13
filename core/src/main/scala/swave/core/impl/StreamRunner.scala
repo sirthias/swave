@@ -20,9 +20,11 @@ import scala.annotation.tailrec
 import scala.concurrent.duration._
 import com.typesafe.scalalogging.Logger
 import swave.core.PipeElem.InOut.AsyncBoundary
-import swave.core._
+import swave.core.impl.stages.drain.SubDrainStage
+import swave.core.impl.stages.source.SubSourceStage
 import swave.core.impl.stages.Stage
 import swave.core.util._
+import swave.core._
 
 private[core] final class StreamRunner(_throughput: Int, _log: Logger, _dispatcher: Dispatcher, scheduler: Scheduler)
     extends StreamActor(_throughput, _log, _dispatcher) {
@@ -100,62 +102,70 @@ private[core] object StreamRunner {
     }
   }
 
-  private final class AssignToRegion(val runner: StreamRunner) extends (PipeElem.Basic ⇒ Unit) {
-    def _apply(pe: PipeElem.Basic): Unit = apply(pe)
-    @tailrec def apply(pe: PipeElem.Basic): Unit = {
+  private final class AssignToRegion(val runner: StreamRunner, isDefault: Boolean,
+      ovrride: Boolean = false) extends (PipeElem.Basic ⇒ Boolean) {
+    def _apply(pe: PipeElem.Basic): Boolean = apply(pe)
+    @tailrec def apply(pe: PipeElem.Basic): Boolean = {
       val stage = pe.asInstanceOf[Stage]
-      if ((stage.runner eq null) && !stage.isInstanceOf[AsyncBoundary]) {
+      if (((stage.runner eq null) || (ovrride && (stage.runner ne runner))) && !stage.isInstanceOf[AsyncBoundary]) {
         stage.runner = runner
         import pe._
         3 * inputElems.size012 + outputElems.size012 match {
           case 0 /* 0:0 */ ⇒ throw new IllegalStateException // no input and no output?
-          case 1 /* 0:1 */ ⇒ apply(outputElems.head)
-          case 2 /* 0:x */ ⇒ outputElems.foreach(this)
-          case 3 /* 1:0 */ ⇒ apply(inputElems.head)
-          case 4 /* 1:1 */ ⇒ { _apply(inputElems.head); apply(outputElems.head) }
-          case 5 /* 1:x */ ⇒ { _apply(inputElems.head); outputElems.foreach(this) }
-          case 6 /* x:0 */ ⇒ inputElems.foreach(this)
-          case 7 /* x:1 */ ⇒ { inputElems.foreach(this); apply(outputElems.head) }
-          case 8 /* x:x */ ⇒ { inputElems.foreach(this); outputElems.foreach(this) }
+          case 1 /* 0:1 */ ⇒ stage match {
+            case x: SubSourceStage ⇒ subStreamBoundary(x.in, x, outputElems.head)
+            case _                 ⇒ apply(outputElems.head)
+          }
+          case 2 /* 0:x */ ⇒ outputElems.forall(this)
+          case 3 /* 1:0 */ ⇒ stage match {
+            case x: SubDrainStage ⇒ subStreamBoundary(x.out, x, inputElems.head)
+            case _                ⇒ apply(inputElems.head)
+          }
+          case 4 /* 1:1 */ ⇒ _apply(inputElems.head) && apply(outputElems.head)
+          case 5 /* 1:x */ ⇒ _apply(inputElems.head) && outputElems.forall(this)
+          case 6 /* x:0 */ ⇒ inputElems.forall(this)
+          case 7 /* x:1 */ ⇒ inputElems.forall(this) && apply(outputElems.head)
+          case 8 /* x:x */ ⇒ inputElems.forall(this) && outputElems.forall(this)
         }
-      }
+      } else true
     }
+    def subStreamBoundary(parent: Stage, subStream: Stage, next: PipeElem.Basic): Boolean =
+      if (parent.runner ne null) {
+        if (parent.runner ne runner) {
+          if (isDefault) {
+            // if we have a default runner assignment for the sub-stream move it onto the same runner as the parent
+            new AssignToRegion(parent.runner, isDefault = false, ovrride = true).apply(subStream.pipeElem)
+            false // break out of the outer assignment loop
+          } else throw new IllegalAsyncBoundaryException(
+            "An asynchronous sub-stream with a non-default dispatcher assignment (in this case `" +
+              runner.dispatcher.name + "`) must be fenced off from its parent stream with explicit async boundaries!")
+        } else apply(next) // parent and sub-stream port are on the same runner (as required!)
+      } else throw new IllegalAsyncBoundaryException("A synchronous parent stream must not contain " +
+        "an async sub-stream. You can fix this by explicitly marking the parent stream as `async`.")
   }
 
   def assignRunners(needRunner: StageDispatcherIdListMap)(implicit env: StreamEnv): Unit = {
 
-    def createAssign(dispatcher: Dispatcher) =
-      new AssignToRegion(new StreamRunner(env.settings.throughput, env.log, dispatcher, env.scheduler))
+    def createAssign(dispatcher: Dispatcher, isDefault: Boolean) =
+      new AssignToRegion(new StreamRunner(env.settings.throughput, env.log, dispatcher, env.scheduler), isDefault)
 
-    @tailrec def assignNonDefaults(remaining: StageDispatcherIdListMap, defaultAssignments: List[Stage],
-      cache: Map[String, AssignToRegion]): List[Stage] = {
-
+    @tailrec def assignNonDefaults(remaining: StageDispatcherIdListMap, defaultAssignments: List[Stage]): List[Stage] =
       if (remaining.nonEmpty) {
         import remaining._
         if (dispatcherId.nonEmpty) {
-          var nextCache = cache
-          val assign = cache.get(dispatcherId) match {
-            case Some(x) ⇒ x
-            case None ⇒
-              val a = createAssign(env.dispatchers(dispatcherId))
-              nextCache = cache.updated(dispatcherId, a)
-              a
-          }
-          if (stage.runner eq null) {
-            assign(stage.asInstanceOf[PipeElem.Basic])
-          } else if (stage.runner ne assign.runner) {
+          val assign = createAssign(env.dispatchers(dispatcherId), isDefault = false)
+          if (stage.runner ne null) {
             throw new IllegalAsyncBoundaryException("Conflicting dispatcher assignment to async region containing stage " +
               s"'${stage.getClass.getSimpleName}': [${assign.runner.dispatcher.name}] vs. [${stage.runner.dispatcher.name}]")
-          }
-          assignNonDefaults(tail, defaultAssignments, nextCache)
-        } else assignNonDefaults(tail, stage :: defaultAssignments, cache)
+          } else assign(stage.asInstanceOf[PipeElem.Basic])
+          assignNonDefaults(tail, defaultAssignments)
+        } else assignNonDefaults(tail, stage :: defaultAssignments)
       } else defaultAssignments
-    }
 
-    val defaultAssignments = assignNonDefaults(needRunner, Nil, Map.empty)
+    val defaultAssignments = assignNonDefaults(needRunner, Nil)
     defaultAssignments.foreach { stage ⇒
       if (stage.runner eq null) {
-        val assign = createAssign(env.defaultDispatcher)
+        val assign = createAssign(env.defaultDispatcher, isDefault = true)
         assign(stage.asInstanceOf[PipeElem.Basic])
       }
     }

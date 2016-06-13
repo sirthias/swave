@@ -26,22 +26,19 @@ import swave.core.util._
 
 // format: OFF
 @StageImpl
-private[core] final class InjectStage(_subscriptionTimeout: Duration) extends InOutStage with PipeElem.InOut.Inject { stage =>
+private[core] final class InjectStage(timeout: Duration) extends InOutStage with PipeElem.InOut.Inject { stage =>
 
   def pipeElemType: String = "inject"
   def pipeElemParams: List[Any] = Nil
 
   private[this] var buffer: RingBuffer[AnyRef] = _
-  private[this] var subscriptionTimeout = _subscriptionTimeout
 
   connectInOutAndSealWith { (ctx, in, out) ⇒
-    if (subscriptionTimeout eq Duration.Undefined)
-      subscriptionTimeout = ctx.env.settings.subscriptionTimeout
     ctx.registerForXStart(this)
-    running(ctx, in, out)
+    running(ctx, in, out, if (timeout eq Duration.Undefined) ctx.env.settings.subscriptionTimeout else timeout)
   }
 
-  def running(ctx: RunContext, in: Inport, out: Outport) = {
+  def running(ctx: RunContext, in: Inport, out: Outport, subscriptionTimeout: Duration) = {
 
     def awaitingXStart() = state(
       xStart = () => {

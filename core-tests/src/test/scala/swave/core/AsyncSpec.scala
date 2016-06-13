@@ -96,7 +96,7 @@ class AsyncSpec extends SwaveSpec {
         Stream.continually(threadName)
           .async("disp0")
           .map(_ → threadName)
-          .to(Drain.head.async()).seal().get
+          .to(Drain.head).seal().get
       val (threadName0, threadName1) = piping.run().await(20.millis)
 
       threadName0 shouldEqual "swave-disp0-1"
@@ -148,6 +148,46 @@ class AsyncSpec extends SwaveSpec {
         .subContinue
         .to(Drain.head.async("disp1")).seal().failed.get.getMessage.shouldEqual(
           "Conflicting dispatcher assignment to async region containing stage 'HeadDrainStage': [disp1] vs. [disp0]")
+    }
+
+    "sync sub-stream in async parent stream" in {
+      Stream.from(0)
+        .inject()
+        .map(_ elementAt 1)
+        .flattenConcat()
+        .take(5)
+        .drainTo(Drain.seq(limit = 5).async()).await(50.millis) shouldEqual List(1, 3, 5, 7, 9)
+    }
+
+    "async sub-stream in async parent stream" in {
+      Stream.from(0)
+        .inject()
+        .map(_.async().elementAt(1))
+        .flattenConcat()
+        .take(5)
+        .drainTo(Drain.seq(limit = 5).async()).await(50.millis) shouldEqual List(1, 3, 5, 7, 9)
+    }
+
+    "async sub-stream in sync parent stream" in {
+      Stream.from(0)
+        .inject()
+        .map(_.tee(Drain.ignore.dropResult.async(), eagerCancel = true).elementAt(1))
+        .flattenConcat()
+        .take(5)
+        .drainToList(5).failed.await(50.millis).getMessage.shouldEqual(
+          "A synchronous parent stream must not contain an async sub-stream. " +
+            "You can fix this by explicitly marking the parent stream as `async`.")
+    }
+
+    "conflicting runners in sub-stream setup" in {
+      Stream.from(0)
+        .inject()
+        .map(_.async("disp0").elementAt(1))
+        .flattenConcat()
+        .take(5)
+        .drainTo(Drain.seq(limit = 5).async()).failed.await(50.millis).getMessage.shouldEqual(
+          "An asynchronous sub-stream with a non-default dispatcher assignment (in this case `disp0`) must be " +
+            "fenced off from its parent stream with explicit async boundaries!")
     }
 
     "complex example" in {

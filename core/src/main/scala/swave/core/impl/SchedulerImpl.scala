@@ -29,6 +29,11 @@ import swave.core.internal.agrona.TimerWheel
 import swave.core.util._
 import swave.core._
 
+/**
+ * Initial scheduler implementation with quite some improvement potential left.
+ * Hoping that https://github.com/JCTools/JCTools/issues/109 will spare us from having to implement
+ * a better alternative outselves.
+ */
 private[core] final class SchedulerImpl private (val settings: Scheduler.Settings) extends Scheduler {
   import SchedulerImpl._
 
@@ -108,7 +113,7 @@ private[core] final class SchedulerImpl private (val settings: Scheduler.Setting
         case timer ⇒ timer.isActive && cancellations.add(timer)
       }
 
-    def isCancelled = !get.isActive
+    def stillActive = get.isActive
   }
 
   private final class TimerThread extends Thread {

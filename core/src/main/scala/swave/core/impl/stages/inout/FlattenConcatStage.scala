@@ -16,7 +16,9 @@
 
 package swave.core.impl.stages.inout
 
+import scala.concurrent.duration.Duration
 import swave.core.impl._
+import swave.core.impl.stages.drain.SubDrainStage
 import swave.core.macros.StageImpl
 import swave.core.{ PipeElem, Streamable }
 import swave.core.util._
@@ -24,7 +26,9 @@ import swave.core.util._
 // format: OFF
 @StageImpl
 private[core] final class FlattenConcatStage(streamable: Streamable.Aux[AnyRef, AnyRef],
-                                             parallelism: Int) extends InOutStage with PipeElem.InOut.FlattenConcat {
+                                             parallelism: Int, timeout: Duration)
+  extends InOutStage with PipeElem.InOut.FlattenConcat {
+
   requireArg(parallelism > 0)
 
   def pipeElemType: String = "flattenConcat"
@@ -32,13 +36,13 @@ private[core] final class FlattenConcatStage(streamable: Streamable.Aux[AnyRef, 
 
   connectInOutAndSealWith { (ctx, in, out) ⇒
     ctx.registerForXStart(this)
-    running(ctx, in, out)
+    running(ctx, in, out, if (timeout eq Duration.Undefined) ctx.env.settings.subscriptionTimeout else timeout)
   }
 
   // TODO: switch to fully parallel subscribe of all subs at once
   // implementation idea: we need a third list containing the already subscribed but not yet "current" subs
 
-  def running(ctx: RunContext, in: Inport, out: Outport) = {
+  def running(ctx: RunContext, in: Inport, out: Outport, subscriptionTimeout: Duration) = {
 
     def awaitingXStart() = state(
       xStart = () => {
@@ -56,8 +60,7 @@ private[core] final class FlattenConcatStage(streamable: Streamable.Aux[AnyRef, 
       cancel = stopCancelF(in),
 
       onNext = (elem, _) ⇒ {
-        val sub = streamable(elem).inport
-        sub.subscribe()
+        val sub = subscribeSubDrain(elem)
         awaitingSubOnSubscribe(sub, remaining)
       },
 
@@ -70,11 +73,11 @@ private[core] final class FlattenConcatStage(streamable: Streamable.Aux[AnyRef, 
      * @param subscribing sub from which we are awaiting an onSubscribe
      * @param remaining   number of elements already requested by downstream but not yet delivered, >= 0
      */
-    def awaitingSubOnSubscribe(subscribing: Inport, remaining: Long): State = state(
+    def awaitingSubOnSubscribe(subscribing: SubDrainStage, remaining: Long): State = state(
       onSubscribe = sub ⇒ {
         requireState(sub eq subscribing)
-        ctx.sealAndStartSubStream(sub)
-        if (remaining > 0) sub.request(remaining)
+        subscribing.sealAndStart()
+        if (remaining > 0) subscribing.request(remaining)
         if (parallelism > 1) in.request(1)
         active(1, null, InportList(sub), remaining, remaining)
       },
@@ -83,14 +86,14 @@ private[core] final class FlattenConcatStage(streamable: Streamable.Aux[AnyRef, 
 
       cancel = _ ⇒ {
         in.cancel()
-        cancelling(ctx, subscribing)
+        stopCancel(subscribing)
       },
 
-      onComplete = _ ⇒ drainingWaitingForOnSubscribe(ctx, out, subscribing, remaining),
+      onComplete = _ ⇒ drainingWaitingForOnSubscribe(out, subscribing, remaining),
 
       onError = (e, _) ⇒ {
         out.onError(e)
-        cancelling(ctx, subscribing)
+        stopCancel(subscribing)
       })
 
     /**
@@ -102,10 +105,11 @@ private[core] final class FlattenConcatStage(streamable: Streamable.Aux[AnyRef, 
      * @param pending     number of elements already requested from the head subscribed sub but not yet received, >= 0
      * @param remaining   number of elements already requested by downstream but not yet delivered, >= 0
      */
-    def active(subCount: Int, subscribing: Inport, subscribed: InportList, pending: Long, remaining: Long): State = state(
+    def active(subCount: Int, subscribing: SubDrainStage, subscribed: InportList, pending: Long,
+               remaining: Long): State = state(
       onSubscribe = sub ⇒ {
         requireState(sub eq subscribing)
-        ctx.sealAndStartSubStream(sub)
+        subscribing.sealAndStart()
         if (subCount < parallelism) in.request(1)
         active(subCount, null, subscribed :+ sub, pending, remaining)
       },
@@ -114,8 +118,10 @@ private[core] final class FlattenConcatStage(streamable: Streamable.Aux[AnyRef, 
         val newPending =
           if (pending == 0) {
             requireState(remaining == 0)
-            subscribed.in.request(n.toLong)
-            n.toLong
+            val nl = n.toLong
+            val x = subscribed.in
+            x.request(nl)
+            nl
           } else pending
         active(subCount, subscribing, subscribed, newPending, remaining ⊹ n)
       },
@@ -123,7 +129,7 @@ private[core] final class FlattenConcatStage(streamable: Streamable.Aux[AnyRef, 
       cancel = _ ⇒ {
         in.cancel()
         cancelAll(subscribed)
-        if (subscribing ne null) cancelling(ctx, subscribing) else stop()
+        if (subscribing ne null) stopCancel(subscribing) else stop()
       },
 
       onNext = (elem, from) ⇒ {
@@ -139,8 +145,7 @@ private[core] final class FlattenConcatStage(streamable: Streamable.Aux[AnyRef, 
           active(subCount, subscribing, subscribed, newPending, remaining - 1)
         } else {
           requireState(subscribing eq null)
-          val sub = streamable(elem).inport
-          sub.subscribe()
+          val sub = subscribeSubDrain(elem)
           active(subCount + 1, sub, subscribed, pending, remaining)
         }
       },
@@ -156,15 +161,21 @@ private[core] final class FlattenConcatStage(streamable: Streamable.Aux[AnyRef, 
               } else { requireState(subscribing ne null); awaitingSubOnSubscribe(subscribing, remaining) }
             } else active(subCount - 1, subscribing, subscribed remove_! from, pending, remaining)
           } else awaitingSub(remaining)
-        } else draining(ctx, out, subscribing, subscribed, pending, remaining)
+        } else draining(out, subscribing, subscribed, pending, remaining)
       },
 
       onError = (e, from) ⇒ {
         if (from ne in) in.cancel()
         cancelAll(subscribed, from)
         out.onError(e)
-        if (subscribing ne null) cancelling(ctx, subscribing) else stop()
+        if (subscribing ne null) stopCancel(subscribing) else stop()
       })
+
+    def subscribeSubDrain(elem: AnyRef): SubDrainStage = {
+      val sub = new SubDrainStage(ctx, this, subscriptionTimeout)
+      streamable(elem).inport.subscribe()(sub)
+      sub
+    }
 
     awaitingXStart()
   }
@@ -176,15 +187,16 @@ private[core] final class FlattenConcatStage(streamable: Streamable.Aux[AnyRef, 
    * @param subscribing sub from which we are awaiting an onSubscribe
    * @param remaining   number of elements already requested by downstream but not yet delivered, >= 0
    */
-  def drainingWaitingForOnSubscribe(ctx: RunContext, out: Outport, subscribing: Inport, remaining: Long): State = state(
+  def drainingWaitingForOnSubscribe(out: Outport, subscribing: SubDrainStage, remaining: Long): State = state(
     onSubscribe = sub ⇒ {
-      ctx.sealAndStartSubStream(sub)
-      if (remaining > 0) sub.request(remaining)
-      draining(ctx, out, null, InportList(sub), remaining, remaining)
+      requireState(sub eq subscribing)
+      subscribing.sealAndStart()
+      if (remaining > 0) subscribing.request(remaining)
+      draining(out, null, InportList(sub), remaining, remaining)
     },
 
-    request = (n, _) ⇒ drainingWaitingForOnSubscribe(ctx, out, subscribing, remaining ⊹ n),
-    cancel = _ ⇒ cancelling(ctx, subscribing))
+    request = (n, _) ⇒ drainingWaitingForOnSubscribe(out, subscribing, remaining ⊹ n),
+    cancel = stopCancelF(subscribing))
 
   /**
    * Main upstream completed, at least one sub subscribed, potentially one subscribing.
@@ -195,28 +207,30 @@ private[core] final class FlattenConcatStage(streamable: Streamable.Aux[AnyRef, 
    * @param pending     number of elements already requested from the head subscribed sub but not yet received, >= 0
    * @param remaining   number of elements already requested by downstream but not yet delivered, >= 0
    */
-  def draining(ctx: RunContext, out: Outport, subscribing: Inport, subscribed: InportList, pending: Long,
+  def draining(out: Outport, subscribing: SubDrainStage, subscribed: InportList, pending: Long,
                remaining: Long): State = state(
 
     onSubscribe = sub ⇒ {
       requireState(sub eq subscribing)
-      ctx.sealAndStartSubStream(sub)
-      draining(ctx, out, null, subscribed :+ sub, pending, remaining)
+      subscribing.sealAndStart()
+      draining(out, null, subscribed :+ sub, pending, remaining)
     },
 
     request = (n, _) ⇒ {
       val newPending =
         if (pending == 0) {
           requireState(remaining == 0)
-          subscribed.in.request(n.toLong)
-          n.toLong
+          val nl = n.toLong
+          val x = subscribed.in
+          x.request(nl)
+          nl
         } else pending
-      draining(ctx, out, subscribing, subscribed, newPending, remaining ⊹ n)
+      draining(out, subscribing, subscribed, newPending, remaining ⊹ n)
     },
 
     cancel = _ ⇒ {
       cancelAll(subscribed)
-      if (subscribing ne null) cancelling(ctx, subscribing) else stop()
+      if (subscribing ne null) stopCancel(subscribing) else stop()
     },
 
     onNext = (elem, sub) ⇒ {
@@ -228,33 +242,22 @@ private[core] final class FlattenConcatStage(streamable: Streamable.Aux[AnyRef, 
             remaining - 1
           } else 0
         } else pending - 1
-      draining(ctx, out, subscribing, subscribed, newPending, remaining - 1)
+      draining(out, subscribing, subscribed, newPending, remaining - 1)
     },
 
     onComplete = from ⇒ {
       if (from eq subscribed.in) { // if the current sub completed
         if (subscribed.tail.nonEmpty) { // and we have the next one ready
           subscribed.tail.in.request(remaining) // retarget demand
-          draining(ctx, out, subscribing, subscribed.tail, remaining, remaining)
+          draining(out, subscribing, subscribed.tail, remaining, remaining)
         } else if (subscribing eq null) stopComplete(out)
-        else drainingWaitingForOnSubscribe(ctx, out, subscribing, remaining)
-      } else draining(ctx, out, subscribing, subscribed remove_! from, pending, remaining)
+        else drainingWaitingForOnSubscribe(out, subscribing, remaining)
+      } else draining(out, subscribing, subscribed remove_! from, pending, remaining)
     },
 
     onError = (e, sub) ⇒ {
       cancelAll(subscribed, sub)
       out.onError(e)
-      if (subscribing ne null) cancelling(ctx, subscribing) else stop()
-    })
-
-  /**
-   * Waiting for onSubscribe on given Inport to immediately cancel.
-   *
-   * @param subscribing the Inport we need to immediately cancel upon onSubscribe
-   */
-  def cancelling(ctx: RunContext, subscribing: Inport): State = state(
-    onSubscribe = sub => {
-      ctx.sealAndStartSubStream(sub)
-      stopCancel(sub)
+      if (subscribing ne null) stopCancel(subscribing) else stop()
     })
 }

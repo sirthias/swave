@@ -54,9 +54,7 @@ object PipeElem {
     final def outputElems: List[PipeElem.Basic] = outputElem :: Nil
   }
   object Source {
-    trait Iterable extends Source
     trait Iterator extends Source
-    trait OneElement extends Source
     trait Repeat extends Source
     trait Sub extends Source
     trait Test extends Source
@@ -71,6 +69,7 @@ object PipeElem {
     trait Cancelling extends Drain
     trait Foreach extends Drain
     trait Head extends Drain
+    trait Sub extends Drain
     trait Test extends Drain
   }
 
@@ -91,6 +90,7 @@ object PipeElem {
     trait Drop extends InOut
     trait DropLast extends InOut
     trait DropWhile extends InOut
+    trait DropWithin extends InOut
     trait Filter extends InOut
     trait FlattenConcat extends InOut
     trait Fold extends InOut
@@ -144,7 +144,7 @@ object PipeElem {
             if (showParams) sb.append(x.pipeElemParams.mkString("(", ", ", ")"))
             if (showRunners) {
               val runner = x.asInstanceOf[Stage].runner
-              sb.append(" [").append(if (runner ne null) runner else "none").append(']')
+              sb.append(" ^").append(if (runner ne null) runner else "none")
             }
             sb.toString
           } else x.pipeElemType
@@ -152,7 +152,7 @@ object PipeElem {
           case Nil     ⇒ show
           case modules ⇒ show + modules.mkString(" [", ", ", "]")
         }
-      case x: PipeElem.Module ⇒ x.name
+      case x: PipeElem.Module ⇒ s"{${x.name}}"
     }
   }
 

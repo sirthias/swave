@@ -40,12 +40,12 @@ object AkkaPi extends App {
     .drop(999999)
     .concatSubstreams
     .map(state ⇒ f"After ${state.totalSamples}%,10d samples π is approximated as ${state.π}%.6f")
-    .take(50)
+    .take(30)
     .runForeach(println)
     .onComplete {
       case Success(_) =>
         val time = System.currentTimeMillis() - system.startTime
-        println(f"Done. Total time: $time%,6d ms, Throughput: ${50000.0/time}%.3fM samples/sec\n")
+        println(f"Done. Total time: $time%,6d ms, Throughput: ${30000.0/time}%.3fM samples/sec\n")
         system.terminate()
 
       case Failure(e) => println(e)

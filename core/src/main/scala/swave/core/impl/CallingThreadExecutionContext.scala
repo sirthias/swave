@@ -16,17 +16,16 @@
 
 package swave.core.impl
 
-import swave.core.impl.stages.Stage
-import swave.core.util.ImsiList
+import scala.concurrent.ExecutionContext
 
-private[swave] final class StageList(val stage: Stage, tail: StageList) extends ImsiList[StageList](tail)
+/**
+ * [[ExecutionContext]] which runs everything on the calling thread.
+ * Only use it for non-blocking and non-throwing tasks!
+ */
+private[swave] object CallingThreadExecutionContext extends ExecutionContext {
 
-private[swave] object StageList {
-  def empty: StageList = null
-  def apply(stage: Stage, tail: StageList = null) = new StageList(stage, tail)
+  def execute(runnable: Runnable): Unit = runnable.run()
 
-  implicit class StageListOps(private val underlying: StageList) extends AnyVal {
-    def +:(stage: Stage): StageList = new StageList(stage, underlying)
-    def :+(stage: Stage): StageList = underlying append StageList(stage)
-  }
+  override def reportFailure(t: Throwable): Unit =
+    throw new IllegalStateException("Exception in CallingThreadExecutionContext", t)
 }

@@ -17,7 +17,7 @@
 package swave.core.impl
 
 import scala.concurrent.duration.{ FiniteDuration, Duration }
-import swave.core.{ Cancellable, StreamEnv, IllegalAsyncBoundaryException, IllegalReuseException }
+import swave.core._
 import swave.core.impl.stages.Stage
 import swave.core.impl.StreamRunner._
 import swave.core.util._
@@ -41,11 +41,6 @@ private[swave] final class RunContext(val port: Port)(implicit val env: StreamEn
     port.xSeal(this)
     if (data.needRunner.nonEmpty) {
       StreamRunner.assignRunners(data.needRunner)
-      data.runnerClampings.foreach { clamping ⇒
-        if (clamping.stage0.runner ne clamping.stage1.runner)
-          throw new IllegalAsyncBoundaryException(s"Stages `${clamping.stage0.getClass.getSimpleName}` and " +
-            s"`${clamping.stage1.getClass.getSimpleName}` must not be in two different async regions!")
-      }
       data.needRunner = StageDispatcherIdListMap.empty
       isAsyncRun = true
     }
@@ -58,13 +53,6 @@ private[swave] final class RunContext(val port: Port)(implicit val env: StreamEn
    */
   def registerForRunnerAssignment(stage: Stage, dispatcherId: String = ""): Unit =
     data.needRunner = StageDispatcherIdListMap(stage, dispatcherId, data.needRunner)
-
-  /**
-   * Requests that the two given stages will never be assigned differing [[StreamRunner]] instances.
-   * If the user requests such an illegal assignment an [[IllegalAsyncBoundaryException]] will be thrown.
-   */
-  def registerForRunnerClamping(stage0: Stage, stage1: Stage): Unit =
-    data.runnerClampings = StageStageList(stage0, stage1, data.runnerClampings)
 
   /**
    * Registers the stage for receiving `xStart` signals.
@@ -108,7 +96,6 @@ private[swave] final class RunContext(val port: Port)(implicit val env: StreamEn
     if (other.data ne data) {
       requireArg(other.env == env)
       data.needRunner = data.needRunner.append(other.data.needRunner)
-      data.runnerClampings = data.runnerClampings.append(other.data.runnerClampings)
       data.needXStart = data.needXStart ::: other.data.needXStart
       data.needPostRun = data.needPostRun ::: other.data.needPostRun
       data.cleanup = data.cleanup ::: other.data.cleanup
@@ -124,12 +111,6 @@ private[swave] final class RunContext(val port: Port)(implicit val env: StreamEn
   }
 
   def start(): Unit = {
-    if (isSubContext && isAsyncRun && !parent.isAsyncRun) {
-      // TODO: can we upgrade the parent stream from sync to async mode on the fly?
-      throw new IllegalAsyncBoundaryException("Cannot start an asynchronous sub-stream underneath a synchronous " +
-        "parent stream. Please make the parent stream asynchronous by marking a `Drain` with `.async()` or " +
-        "adding an explicit asynchronous boundary.")
-    }
     val needXStart = data.needXStart
     data.needXStart = Nil
     needXStart.foreach(if (isAsyncRun) dispatchAsyncXStart else dispatchXStart)
@@ -158,7 +139,6 @@ private[swave] object RunContext {
 
   private class Data {
     var needRunner = StageDispatcherIdListMap.empty
-    var runnerClampings = StageStageList.empty
     var needXStart = List.empty[Stage]
     var needPostRun = List.empty[Stage]
     var cleanup = List.empty[Runnable]

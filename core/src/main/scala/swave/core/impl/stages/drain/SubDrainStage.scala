@@ -14,79 +14,79 @@
  * limitations under the License.
  */
 
-package swave.core.impl.stages.source
+package swave.core.impl.stages.drain
 
 import scala.concurrent.duration.Duration
-import swave.core.{ Cancellable, PipeElem }
-import swave.core.impl.{ Outport, RunContext }
+import scala.util.control.NonFatal
 import swave.core.impl.stages.Stage
+import swave.core.impl.stages.drain.SubDrainStage._
+import swave.core.impl.{ Inport, RunContext }
 import swave.core.macros.StageImpl
-import SubSourceStage._
+import swave.core.{ SubscriptionTimeoutException, Cancellable, PipeElem }
 
 // format: OFF
 @StageImpl
-private[core] final class SubSourceStage(ctx: RunContext, val in: Stage, subscriptionTimeout: Duration) extends SourceStage
-  with PipeElem.Source.Sub {
+private[core] final class SubDrainStage(ctx: RunContext, val out: Stage, subscriptionTimeout: Duration) extends DrainStage
+  with PipeElem.Drain.Sub {
 
   def pipeElemType: String = "sub"
-  def pipeElemParams: List[Any] = in :: Nil
+  def pipeElemParams: List[Any] = out :: Nil
 
-  initialState(awaitingSubscribe(Termination.None, null))
+  initialState(awaitingOnSubscribe(false, null))
 
-  def awaitingSubscribe(termination: Termination, timer: Cancellable): State = state(
-    subscribe = from ⇒ {
+  def sealAndStart() =
+    try ctx.sealAndStartSubStream(this)
+    catch {
+      case NonFatal(e) => out.onError(e)
+    }
+
+  def awaitingOnSubscribe(cancelled: Boolean, timer: Cancellable): State = state(
+    cancel = _ => awaitingOnSubscribe(cancelled = true, timer),
+
+    onSubscribe = from ⇒ {
       if (timer ne null) timer.cancel()
-      _outputPipeElem = from.pipeElem
-      from.onSubscribe()
-      ready(from, termination)
+      _inputPipeElem = from.pipeElem
+      xEvent(DoOnSubscribe) // schedule event for after the state transition
+      ready(from, cancelled)
     },
-
-    onComplete = _ => awaitingSubscribe(Termination.Completed, timer),
-    onError = (e, _) => awaitingSubscribe(Termination.Error(e), timer),
 
     xEvent = {
       case EnableSubscriptionTimeout if timer eq null =>
         val t = ctx.scheduleSubscriptionTimeout(this, subscriptionTimeout)
-        awaitingSubscribe(termination, t)
+        awaitingOnSubscribe(cancelled, t)
       case RunContext.SubscriptionTimeout =>
-        stopCancel(in)
+        val msg = s"Subscription attempt from SubDrainStage timed out after $subscriptionTimeout"
+        stopError(new SubscriptionTimeoutException(msg), out)
     })
 
-  def ready(out: Outport, termination: Termination): State = state(
+  def ready(in: Inport, cancelled: Boolean): State = state(
+    cancel = _ => ready(in, true),
+
     xSeal = subCtx ⇒ {
       ctx.attach(subCtx)
       configureFrom(ctx)
-      out.xSeal(ctx)
-      termination match {
-        case Termination.None => running(out)
-        case _ =>
-          ctx.registerForXStart(this)
-          awaitingXStart(out, termination)
-      }
+      in.xSeal(ctx)
+      if (cancelled) {
+        ctx.registerForXStart(this)
+        awaitingXStart(in)
+      } else running(in)
     },
 
-    onComplete = _ => ready(out, Termination.Completed),
-    onError = (e, _) => ready(out, Termination.Error(e)),
+    xEvent = {
+      case DoOnSubscribe => { out.onSubscribe(); stay() }
+      case EnableSubscriptionTimeout => stay() // ignore
+      case RunContext.SubscriptionTimeout => stay() // ignore
+    })
+
+  def awaitingXStart(in: Inport) = state(
+    xStart = () => stopCancel(in),
 
     xEvent = {
       case EnableSubscriptionTimeout => stay() // ignore
       case RunContext.SubscriptionTimeout => stay() // ignore
     })
 
-  def awaitingXStart(out: Outport, termination: Termination) = state(
-    xStart = () => {
-      termination match {
-        case Termination.Error(e) => stopError(e, out)
-        case _ => stopComplete(out)
-      }
-    },
-
-    xEvent = {
-      case EnableSubscriptionTimeout => stay() // ignore
-      case RunContext.SubscriptionTimeout => stay() // ignore
-    })
-
-  def running(out: Outport) = state(
+  def running(in: Inport) = state(
     intercept = false,
 
     request = (n, _) ⇒ {
@@ -110,15 +110,9 @@ private[core] final class SubSourceStage(ctx: RunContext, val in: Stage, subscri
     })
 }
 
-private[core] object SubSourceStage {
+private[core] object SubDrainStage {
 
   case object EnableSubscriptionTimeout
-
-  private abstract class Termination
-  private object Termination {
-    case object None extends Termination
-    case object Completed extends Termination
-    final case class Error(e: Throwable) extends Termination
-  }
+  private case object DoOnSubscribe
 }
 

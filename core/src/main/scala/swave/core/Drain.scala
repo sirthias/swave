@@ -70,7 +70,7 @@ final class Drain[-T, +R] private[swave] (val outport: Outport, val result: R) {
               visited += pe
               pe match {
                 case _: PipeElem.InOut.AsyncBoundary ⇒ fail()
-                case x: PipeElem.InOut               ⇒ { _apply(x.inputElem); apply(x.inputElem) }
+                case x: PipeElem.InOut               ⇒ { _apply(x.inputElem); apply(x.outputElem) }
                 case x: PipeElem.FanIn               ⇒ { x.inputElems.foreach(this); apply(x.outputElem) }
                 case x: PipeElem.FanOut              ⇒ { x.outputElems.foreach(this); apply(x.inputElem) }
                 case x: DrainStage                   ⇒ x.assignDispatcherId(dispatcherId)
@@ -116,7 +116,7 @@ object Drain {
   def headOption[T]: Drain[T, Future[Option[T]]] = ???
 
   def ignore: Drain[Any, Future[Unit]] =
-    Pipe[Any].to(foreach(util.dropFunc)).named("Drain.ignore")
+    foreach(util.dropFunc).named("Drain.ignore")
 
   def last[T]: Drain[T, Future[T]] =
     Pipe[T].last.to(head).named("Drain.last")

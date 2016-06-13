@@ -19,7 +19,7 @@ package swave.core
 import scala.annotation.{ tailrec, implicitNotFound }
 import scala.collection.generic.CanBuildFrom
 import scala.collection.immutable
-import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.duration._
 import scala.reflect.ClassTag
 import scala.util.Try
 import shapeless._
@@ -99,7 +99,8 @@ trait StreamOps[A] extends Any { self ⇒
   final def dropWhile(predicate: A ⇒ Boolean): Repr[A] =
     append(new DropWhileStage(predicate.asInstanceOf[Any ⇒ Boolean]))
 
-  final def dropWithin(d: FiniteDuration): Repr[A] = ???
+  final def dropWithin(d: FiniteDuration): Repr[A] =
+    append(new DropWithinStage(d))
 
   final def duplicate: Repr[A] =
     via(Pipe[A].map(x ⇒ x :: x :: Nil).flattenConcat() named "duplicate")
@@ -130,8 +131,10 @@ trait StreamOps[A] extends Any { self ⇒
   final def first: Repr[A] =
     via(Pipe[A] take 1 named "first")
 
-  final def flattenConcat[B](parallelism: Int = 1)(implicit ev: Streamable.Aux[A, B]): Repr[B] =
-    append(new FlattenConcatStage(ev.asInstanceOf[Streamable.Aux[AnyRef, AnyRef]], parallelism))
+  final def flattenConcat[B](parallelism: Int = 1, subscriptionTimeout: Duration = Duration.Undefined)(
+    implicit
+    ev: Streamable.Aux[A, B]): Repr[B] =
+    append(new FlattenConcatStage(ev.asInstanceOf[Streamable.Aux[AnyRef, AnyRef]], parallelism, subscriptionTimeout))
 
   final def flattenMerge[B](parallelism: Int)(implicit ev: Streamable[B]): Repr[ev.Out] = ???
 
@@ -156,8 +159,8 @@ trait StreamOps[A] extends Any { self ⇒
   final def ignoreElements: Repr[A] =
     filter(_ ⇒ false)
 
-  final def inject: Repr[Stream[A]] =
-    append(new InjectStage)
+  final def inject(subscriptionTimeout: Duration = Duration.Undefined): Repr[Stream[A]] =
+    append(new InjectStage(subscriptionTimeout))
 
   final def interleave[B >: A](other: Stream[B], segmentSize: Int, eagerComplete: Boolean): Repr[B] =
     attach(other).fanInInterleave(segmentSize, eagerComplete)
