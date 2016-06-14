@@ -130,7 +130,7 @@ lazy val core = project
   .settings(publishingSettings: _*)
   .settings(
     libraryDependencies ++= Seq(`reactive-streams`,  `jctools-core`, `typesafe-config`, shapeless, `scala-logging`,
-      `reactive-streams-tck`, scalatest, scalacheck % "test"))
+      scalatest, scalacheck % "test"))
 
 lazy val `core-tests` = project
   .dependsOn(core, testkit)
@@ -138,7 +138,7 @@ lazy val `core-tests` = project
   .settings(commonSettings: _*)
   .settings(formattingSettings: _*)
   .settings(noPublishingSettings: _*)
-  .settings(libraryDependencies ++= Seq(shapeless, scalatest, scalacheck % "test", logback % "test"))
+  .settings(libraryDependencies ++= Seq(shapeless, scalatest, `reactive-streams-tck`, scalacheck % "test", logback % "test"))
 
 lazy val `core-macros` = project
   .settings(commonSettings: _*)

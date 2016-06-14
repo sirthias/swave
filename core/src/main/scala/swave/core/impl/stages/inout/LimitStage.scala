@@ -39,11 +39,7 @@ private[core] final class LimitStage(max: Long, cost: AnyRef ⇒ Long) extends I
    * @param remaining max number of elements still allowed before completion, >= 0
    */
   def running(in: Inport, out: Outport, remaining: Long): State = state(
-    request = (n, _) ⇒ {
-      in.request(n.toLong)
-      stay()
-    },
-
+    request = requestF(in),
     cancel = stopCancelF(in),
 
     onNext = (elem, _) ⇒ {

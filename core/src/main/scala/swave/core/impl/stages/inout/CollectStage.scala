@@ -39,11 +39,7 @@ private[core] final class CollectStage(pf: PartialFunction[AnyRef, AnyRef]) exte
   def running(in: Inport, out: Outport, mismatchFun: AnyRef => this.type) = state(
     intercept = false,
 
-    request = (n, _) ⇒ {
-      in.request(n.toLong)
-      stay()
-    },
-
+    request = requestF(in),
     cancel = stopCancelF(in),
 
     onNext = (elem, _) ⇒ {

@@ -32,18 +32,9 @@ private[core] final class CouplingStage extends InOutStage with PipeElem.InOut.C
   def running(in: Inport, out: Outport) = state(
     intercept = false,
 
-    request = (n, _) ⇒ {
-      in.request(n.toLong)
-      stay()
-    },
-
+    request = requestF(in),
     cancel = stopCancelF(in),
-
-    onNext = (elem, _) ⇒ {
-      out.onNext(elem)
-      stay()
-    },
-
+    onNext = onNextF(out),
     onComplete = stopCompleteF(out),
     onError = stopErrorF(out))
 }

@@ -16,7 +16,7 @@
 
 package swave.core
 
-import org.reactivestreams.Subscriber
+import org.reactivestreams.{ Publisher, Subscriber }
 import scala.annotation.unchecked.{ uncheckedVariance ⇒ uV }
 import scala.collection.generic.CanBuildFrom
 import scala.concurrent.Future
@@ -82,33 +82,52 @@ final class Stream[+A](private[core] val inport: Inport) extends AnyVal with Str
 object Stream {
   def apply[T](value: T)(implicit ev: Streamable[T]): Stream[ev.Out] = ev(value)
 
-  def apply[T](first: T, second: T, more: T*): Stream[T] = apply(first :: second :: more.toList)
+  def apply[T](first: T, second: T, more: T*): Stream[T] =
+    apply(first :: second :: more.toList)
 
-  def asSubscriber[T]: (Subscriber[T], Stream[T]) = ???
+  def withSubscriber[T]: (Stream[T], Subscriber[T]) = {
+    val stage = new SubscriberSourceStage
+    new Stream[T](stage) → stage.subscriber.asInstanceOf[Subscriber[T]]
+  }
 
-  def continually[T](elem: ⇒ T): Stream[T] = fromIterator(Iterator.continually(elem)).named("Stream.continually")
+  def continually[T](elem: ⇒ T): Stream[T] =
+    fromIterator(Iterator.continually(elem)).named("Stream.continually")
 
-  def empty[T]: Stream[T] = fromIterator(Iterator.empty)
+  def empty[T]: Stream[T] =
+    fromIterator(Iterator.empty)
 
-  def emptyFrom[T](future: Future[Unit]): Stream[T] = ???
+  def emptyFrom[T](future: Future[Unit]): Stream[T] =
+    ???
 
-  def failing[T](cause: Throwable): Stream[T] = ???
+  def failing[T](cause: Throwable): Stream[T] =
+    new Stream(new FailingSourceStage(cause))
 
-  def from(start: Int, step: Int = 1): Stream[Int] = fromIterator(Iterator.from(start, step)).named("Stream.from")
+  def from(start: Int, step: Int = 1): Stream[Int] =
+    fromIterator(Iterator.from(start, step)).named("Stream.from")
 
-  def fromIterable[T](value: Iterable[T]): Stream[T] = fromIterator(value.iterator).named("Stream.fromIterable")
+  def fromIterable[T](value: Iterable[T]): Stream[T] =
+    fromIterator(value.iterator).named("Stream.fromIterable")
 
-  def fromIterator[T](value: Iterator[T]): Stream[T] = new Stream(new IteratorStage(value.asInstanceOf[Iterator[AnyRef]]))
+  def fromIterator[T](value: Iterator[T]): Stream[T] =
+    new Stream(new IteratorStage(value.asInstanceOf[Iterator[AnyRef]]))
 
-  def iterate[T](start: T)(f: T ⇒ T): Stream[T] = fromIterator(Iterator.iterate(start)(f)).named("Stream.iterate")
+  def fromPublisher[T](publisher: Publisher[T]): Stream[T] =
+    new Stream(new FromPublisherStage(publisher.asInstanceOf[Publisher[AnyRef]]))
 
-  def one[T](element: T): Stream[T] = fromIterator(Iterator.single(element)).named("Stream.one")
+  def iterate[T](start: T)(f: T ⇒ T): Stream[T] =
+    fromIterator(Iterator.iterate(start)(f)).named("Stream.iterate")
 
-  def repeat[T](element: T): Stream[T] = new Stream(new RepeatStage(element.asInstanceOf[AnyRef]))
+  def one[T](element: T): Stream[T] =
+    fromIterator(Iterator.single(element)).named("Stream.one")
 
-  def tick[T](value: T, interval: FiniteDuration): Stream[T] = tick(value, Duration.Zero, interval)
+  def repeat[T](element: T): Stream[T] =
+    new Stream(new RepeatStage(element.asInstanceOf[AnyRef]))
 
-  def tick[T](value: T, initialDelay: FiniteDuration, interval: FiniteDuration): Stream[T] = ???
+  def tick[T](value: T, interval: FiniteDuration): Stream[T] =
+    tick(value, Duration.Zero, interval)
+
+  def tick[T](value: T, initialDelay: FiniteDuration, interval: FiniteDuration): Stream[T] =
+    ???
 
   /**
    * A `Stream` that unfolds a "state" instance of type `S` into
@@ -123,12 +142,14 @@ object Stream {
    *   }
    * }}}
    */
-  def unfold[S, T](s: S)(f: S ⇒ Unfolding[S, T]): Stream[T] = ???
+  def unfold[S, T](s: S)(f: S ⇒ Unfolding[S, T]): Stream[T] =
+    ???
 
   /**
    * Same as [[unfold]], but asynchronous.
    */
-  def unfoldAsync[S, T](s: S)(f: S ⇒ Future[Unfolding[S, T]]): Stream[T] = ???
+  def unfoldAsync[S, T](s: S)(f: S ⇒ Future[Unfolding[S, T]]): Stream[T] =
+    ???
 
   sealed abstract class Unfolding[+S, +T]
   object Unfolding {

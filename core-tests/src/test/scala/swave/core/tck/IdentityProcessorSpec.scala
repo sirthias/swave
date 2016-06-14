@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-package swave.core
+package swave.core.tck
 
-final case class StreamLimitExceeded(max: Long, offendingElem: Any)
-  extends RuntimeException(s"Limit of $max exceeded by element '$offendingElem'")
+import org.reactivestreams.Processor
+import swave.core.{ StreamEnv, Pipe }
 
-final class ConfigurationException(msg: String) extends RuntimeException(msg)
+class IdentityProcessorSpec(ignore: Any) // disabled by default, remove parameter to enable the test
+    extends SwaveIdentityProcessorVerification[Int] {
 
-final class IllegalAsyncBoundaryException(msg: String) extends RuntimeException(msg)
+  implicit val env = StreamEnv()
 
-final class IllegalReuseException(msg: String) extends RuntimeException(msg)
+  override def createIdentityProcessor(maxBufferSize: Int): Processor[Int, Int] =
+    Pipe[Int].toProcessor.run().get
 
-final class SubscriptionTimeoutException(msg: String) extends RuntimeException(msg)
+  override def createElement(element: Int): Int = element
 
-final class UnsupportedSecondSubscriptionException extends RuntimeException
+}

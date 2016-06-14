@@ -52,11 +52,7 @@ private[core] final class ScanStage(zero: AnyRef, f: (AnyRef, AnyRef) ⇒ AnyRef
    * @param last      the last value produced
    */
   def running(in: Inport, out: Outport, last: AnyRef): State = state(
-    request = (n, _) ⇒ {
-      in.request(n.toLong)
-      stay()
-    },
-
+    request = requestF(in),
     cancel = stopCancelF(in),
 
     onNext = (elem, _) ⇒ {

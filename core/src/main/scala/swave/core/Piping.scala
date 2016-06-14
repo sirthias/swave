@@ -24,29 +24,33 @@ import swave.core.impl.{ Port, TypeLogic, RunContext }
  * A [[Piping]] represents a system or network of connected pipes in which all inlet and outlets
  * have been properly connected and which is therefore ready to be started.
  */
-final class Piping[T](port: Port, val result: T) {
+final class Piping[A] private[core] (port: Port, val result: A) {
 
   def pipeElem: PipeElem.Basic = port.pipeElem
 
-  def seal()(implicit env: StreamEnv): Try[SealedPiping[T]] =
+  def mapResult[B](f: A ⇒ B): Piping[B] = new Piping(port, f(result))
+
+  def seal()(implicit env: StreamEnv): Try[SealedPiping[A]] =
     Try {
       val ctx = new RunContext(port)
       ctx.seal()
       new SealedPiping(ctx, result)
     }
 
-  def run()(implicit env: StreamEnv, ev: TypeLogic.TryFlatten[T]): ev.Out =
+  def run()(implicit env: StreamEnv, ev: TypeLogic.TryFlatten[A]): ev.Out =
     seal() match {
       case Success(x) ⇒ x.run()
       case Failure(e) ⇒ ev.failure(e)
     }
 }
 
-final class SealedPiping[T](ctx: RunContext, val result: T) {
+final class SealedPiping[A] private[core] (ctx: RunContext, val result: A) {
 
   def pipeElem: PipeElem.Basic = ctx.port.pipeElem
 
-  def run()(implicit ev: TypeLogic.TryFlatten[T]): ev.Out =
+  def mapResult[B](f: A ⇒ B): SealedPiping[B] = new SealedPiping(ctx, f(result))
+
+  def run()(implicit ev: TypeLogic.TryFlatten[A]): ev.Out =
     try {
       ctx.start()
       ev.success(result)

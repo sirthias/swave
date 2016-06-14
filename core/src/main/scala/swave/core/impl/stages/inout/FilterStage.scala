@@ -33,11 +33,7 @@ private[core] final class FilterStage(predicate: Any ⇒ Boolean, negated: Boole
   def running(in: Inport, out: Outport) = state(
     intercept = false,
 
-    request = (n, _) ⇒ {
-      in.request(n.toLong)
-      stay()
-    },
-
+    request = requestF(in),
     cancel = stopCancelF(in),
 
     onNext = (elem, _) ⇒ {

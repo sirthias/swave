@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-package swave.core
+package swave.core.tck
 
-final case class StreamLimitExceeded(max: Long, offendingElem: Any)
-  extends RuntimeException(s"Limit of $max exceeded by element '$offendingElem'")
+import org.reactivestreams.Publisher
+import swave.core._
 
-final class ConfigurationException(msg: String) extends RuntimeException(msg)
+class ToPublisherDrainSpec(ignore: Any) // disabled by default, remove parameter to enable the test
+    extends SwavePublisherVerification[Int] {
 
-final class IllegalAsyncBoundaryException(msg: String) extends RuntimeException(msg)
+  implicit val env = StreamEnv()
 
-final class IllegalReuseException(msg: String) extends RuntimeException(msg)
-
-final class SubscriptionTimeoutException(msg: String) extends RuntimeException(msg)
-
-final class UnsupportedSecondSubscriptionException extends RuntimeException
+  def createPublisher(elements: Long): Publisher[Int] =
+    Stream.from(0).take(elements).drainTo(Drain.toPublisher()).get
+}

@@ -49,11 +49,7 @@ private[core] final class DropStage(count: Long) extends InOutStage with PipeEle
      * @param remaining number of elems still to drop, >0
      */
     def dropping(remaining: Long): State = state(
-      request = (n, _) ⇒ {
-        in.request(n.toLong)
-        stay()
-      },
-
+      request = requestF(in),
       cancel = stopCancelF(in),
       onNext = (_, _) ⇒ if (remaining > 1) dropping(remaining - 1) else draining(),
       onComplete = stopCompleteF(out),
@@ -65,18 +61,9 @@ private[core] final class DropStage(count: Long) extends InOutStage with PipeEle
     def draining() = state(
       intercept = false,
 
-      request = (n, _) ⇒ {
-        in.request(n.toLong)
-        stay()
-      },
-
+      request = requestF(in),
       cancel = stopCancelF(in),
-
-      onNext = (elem, _) ⇒ {
-        out.onNext(elem)
-        stay()
-      },
-
+      onNext = onNextF(out),
       onComplete = stopCompleteF(out),
       onError = stopErrorF(out))
 

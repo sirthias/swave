@@ -90,7 +90,11 @@ final class Drain[-T, +R] private[swave] (val outport: Outport, val result: R) {
 
 object Drain {
 
-  def asPublisher[T](fanout: Boolean): Drain[T, Publisher[T]] = ???
+  def toPublisher[T](fanoutSupport: Boolean = false): Drain[T, Publisher[T]] = {
+    if (fanoutSupport) ???
+    val stage = new ToPublisherDrainStage
+    new Drain(stage, stage.publisher.asInstanceOf[Publisher[T]])
+  }
 
   def cancelling: Drain[Any, Unit] =
     new Drain(new CancellingDrainStage, ())
@@ -106,7 +110,8 @@ object Drain {
   def fold[T, R](zero: R)(f: (R, T) ⇒ R): Drain[T, Future[R]] =
     Pipe[T].fold(zero)(f).to(head).named("Drain.fold")
 
-  def fromSubscriber[T](subscriber: Subscriber[T]): Drain[T, Unit] = ???
+  def fromSubscriber[T](subscriber: Subscriber[T]): Drain[T, Unit] =
+    new Drain(new FromSubscriberStage(subscriber.asInstanceOf[Subscriber[AnyRef]]), ())
 
   def head[T]: Drain[T, Future[T]] = {
     val promise = Promise[AnyRef]()

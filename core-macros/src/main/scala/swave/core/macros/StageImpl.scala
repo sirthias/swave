@@ -270,8 +270,12 @@ private[swave] class StageImplMacro(val c: scala.reflect.macros.whitebox.Context
       val from = freshName("from")
       val cases = compact {
         stateHandlers.valuesIterator.foldLeft(cq"_ => super._request0($n, $from)" :: Nil) { (acc, sh) ⇒
-          sh.request.fold(acc) {
-            case q"($n0, $from0) => $body0" ⇒ cq"${sh.id} => ${replaceIdents(body0, n0.name → n, from0.name → from)}" :: acc
+          sh.request.fold(acc) { tree ⇒
+            val caseBody = tree match {
+              case q"($n0, $from0) => $body0" ⇒ replaceIdents(body0, n0.name → n, from0.name → from)
+              case x                          ⇒ q"$x($n.toLong, $from)"
+            }
+            cq"${sh.id} => $caseBody" :: acc
           }
         }
       }
@@ -317,8 +321,12 @@ private[swave] class StageImplMacro(val c: scala.reflect.macros.whitebox.Context
       val from = freshName("from")
       val cases = compact {
         stateHandlers.valuesIterator.foldLeft(cq"_ => super._onNext0($elem, $from)" :: Nil) { (acc, sh) ⇒
-          sh.onNext.fold(acc) {
-            case q"($elem0, $from0) => $body0" ⇒ cq"${sh.id} => ${replaceIdents(body0, elem0.name → elem, from0.name → from)}" :: acc
+          sh.onNext.fold(acc) { tree ⇒
+            val caseBody = tree match {
+              case q"($elem0, $from0) => $body0" ⇒ replaceIdents(body0, elem0.name → elem, from0.name → from)
+              case x                             ⇒ q"$x($elem, $from)"
+            }
+            cq"${sh.id} => $caseBody" :: acc
           }
         }
       }

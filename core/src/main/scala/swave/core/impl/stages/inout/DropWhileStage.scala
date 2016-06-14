@@ -36,11 +36,7 @@ private[core] final class DropWhileStage(predicate: Any ⇒ Boolean) extends InO
      * Dropping elements until predicate returns true.
      */
     def dropping(): State = state(
-      request = (n, _) ⇒ {
-        in.request(n.toLong)
-        stay()
-      },
-
+      request = requestF(in),
       cancel = stopCancelF(in),
 
       onNext = (elem, _) ⇒ {
@@ -64,18 +60,9 @@ private[core] final class DropWhileStage(predicate: Any ⇒ Boolean) extends InO
     def draining() = state(
       intercept = false,
 
-      request = (n, _) ⇒ {
-        in.request(n.toLong)
-        stay()
-      },
-
+      request = requestF(in),
       cancel = stopCancelF(in),
-
-      onNext = (elem, _) ⇒ {
-        out.onNext(elem)
-        stay()
-      },
-
+      onNext = onNextF(out),
       onComplete = stopCompleteF(out),
       onError = stopErrorF(out))
 

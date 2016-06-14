@@ -49,22 +49,22 @@ private[core] final class AsyncBoundaryStage(dispatcherId: String) extends InOut
     },
 
     cancel = from => {
-      inStage.runner.enqueue(new StreamRunner.Message.Cancel(inStage, from))
+      inStage.runner.enqueueCancel(inStage, from)
       stop()
     },
 
     onNext = (elem, from) ⇒ {
-      outStage.runner.enqueue(new StreamRunner.Message.OnNext(outStage, elem, from))
+      outStage.runner.enqueueOnNext(outStage, elem, from)
       stay()
     },
 
     onComplete = from => {
-      outStage.runner.enqueue(new StreamRunner.Message.OnComplete(outStage, from))
+      outStage.runner.enqueueOnComplete(outStage, from)
       stop()
     },
 
     onError = (error, from) => {
-      outStage.runner.enqueue(new StreamRunner.Message.OnError(outStage, error, from))
+      outStage.runner.enqueueOnError(outStage, error, from)
       stop()
     })
 }

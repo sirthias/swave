@@ -122,5 +122,5 @@ object TestStream {
 
   final class ExpectationFailedException(received: Any, expected: Any)
     extends RuntimeException("Test expectation failed: received " +
-      (if (received == null) s"`$received`" else "nothing") + s" but expected `$expected`")
+      (if (received != null) s"`$received`" else "nothing") + s" but expected `$expected`")
 }

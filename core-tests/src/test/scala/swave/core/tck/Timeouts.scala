@@ -14,17 +14,12 @@
  * limitations under the License.
  */
 
-package swave.core
+package swave.core.tck
 
-final case class StreamLimitExceeded(max: Long, offendingElem: Any)
-  extends RuntimeException(s"Limit of $max exceeded by element '$offendingElem'")
+import scala.concurrent.duration._
 
-final class ConfigurationException(msg: String) extends RuntimeException(msg)
+object Timeouts {
+  def publisherShutdownTimeout = 3000.millis
 
-final class IllegalAsyncBoundaryException(msg: String) extends RuntimeException(msg)
-
-final class IllegalReuseException(msg: String) extends RuntimeException(msg)
-
-final class SubscriptionTimeoutException(msg: String) extends RuntimeException(msg)
-
-final class UnsupportedSecondSubscriptionException extends RuntimeException
+  def defaultTimeout = 800.millis
+}

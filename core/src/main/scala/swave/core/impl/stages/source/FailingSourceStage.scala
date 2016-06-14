@@ -14,17 +14,25 @@
  * limitations under the License.
  */
 
-package swave.core
+package swave.core.impl.stages.source
 
-final case class StreamLimitExceeded(max: Long, offendingElem: Any)
-  extends RuntimeException(s"Limit of $max exceeded by element '$offendingElem'")
+import swave.core.PipeElem
+import swave.core.impl.Outport
+import swave.core.macros.StageImpl
 
-final class ConfigurationException(msg: String) extends RuntimeException(msg)
+// format: OFF
+@StageImpl
+private[core] final class FailingSourceStage(error: Throwable) extends SourceStage with PipeElem.Source.Repeat {
 
-final class IllegalAsyncBoundaryException(msg: String) extends RuntimeException(msg)
+  def pipeElemType: String = "Stream.failing"
+  def pipeElemParams: List[Any] = error :: Nil
 
-final class IllegalReuseException(msg: String) extends RuntimeException(msg)
+  connectOutAndSealWith { (ctx, out) ⇒
+    ctx.registerForXStart(this)
+    awaitingXStart(out)
+  }
 
-final class SubscriptionTimeoutException(msg: String) extends RuntimeException(msg)
+  def awaitingXStart(out: Outport) = state(
+    xStart = () => stopError(error, out))
+}
 
-final class UnsupportedSecondSubscriptionException extends RuntimeException

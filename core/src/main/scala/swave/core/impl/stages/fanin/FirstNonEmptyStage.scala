@@ -70,17 +70,9 @@ private[core] final class FirstNonEmptyStage(subs: InportList) extends FanInStag
   def draining(in: Inport, out: Outport) = state(
     intercept = false,
 
-    request = (n, _) ⇒ {
-      in.request(n.toLong)
-      stay()
-    },
-
+    request = requestF(in),
     cancel = stopCancelF(in),
-
-    onNext = (elem, _) ⇒ {
-      out.onNext(elem)
-      stay()
-    },
+    onNext = onNextF(out),
 
     onComplete = from => {
       // ignore completes from other ins that might have dispatched before our cancellation arrived

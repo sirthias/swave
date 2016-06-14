@@ -16,11 +16,13 @@
 
 package swave.core
 
+import org.reactivestreams.Processor
 import scala.annotation.unchecked.{ uncheckedVariance ⇒ uV }
 import shapeless._
-import swave.core.impl._
+import swave.core.impl.rs.SubPubProcessor
 import swave.core.impl.stages.Stage
 import swave.core.impl.stages.inout.NopStage
+import swave.core.impl._
 
 final class Pipe[-A, +B] private (
     private val firstStage: Outport,
@@ -65,6 +67,11 @@ final class Pipe[-A, +B] private (
       case 2 ⇒ new StreamOps.FanIn(out.asInstanceOf[InportList], wrap)
     }
     result.asInstanceOf[Out]
+  }
+
+  def toProcessor: Piping[Processor[A @uV, B @uV]] = {
+    val (stream, subscriber) = Stream.withSubscriber[A]
+    stream.via(this).to(Drain.toPublisher()).mapResult(new SubPubProcessor(subscriber, _))
   }
 
   def named(name: String): A =>> B = {

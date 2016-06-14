@@ -89,18 +89,9 @@ private[core] final class SubDrainStage(ctx: RunContext, val out: Stage, subscri
   def running(in: Inport) = state(
     intercept = false,
 
-    request = (n, _) ⇒ {
-      in.request(n.toLong)
-      stay()
-    },
-
+    request = requestF(in),
     cancel = stopCancelF(in),
-
-    onNext = (elem, _) ⇒ {
-      out.onNext(elem)
-      stay()
-    },
-
+    onNext = onNextF(out),
     onComplete = stopCompleteF(out),
     onError = stopErrorF(out),
 

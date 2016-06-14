@@ -30,11 +30,7 @@ private[core] final class DeduplicateStage extends InOutStage with PipeElem.InOu
   connectInOutAndSealWith { (ctx, in, out) ⇒ running(in, out, this) }
 
   def running(in: Inport, out: Outport, last: AnyRef): State = state(
-    request = (n, _) ⇒ {
-      in.request(n.toLong)
-      stay()
-    },
-
+    request = requestF(in),
     cancel = stopCancelF(in),
 
     onNext = (elem, _) ⇒ {

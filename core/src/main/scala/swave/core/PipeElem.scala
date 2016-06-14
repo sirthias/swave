@@ -54,10 +54,13 @@ object PipeElem {
     final def outputElems: List[PipeElem.Basic] = outputElem :: Nil
   }
   object Source {
+    trait Failing extends Source
+    trait FromPublisher extends Source
     trait Iterator extends Source
     trait Repeat extends Source
     trait Sub extends Source
     trait Test extends Source
+    trait Subscriber extends Source
   }
 
   sealed trait Drain extends Basic {
@@ -68,7 +71,9 @@ object PipeElem {
   object Drain {
     trait Cancelling extends Drain
     trait Foreach extends Drain
+    trait FromSubscriber extends Drain
     trait Head extends Drain
+    trait Publisher extends Drain
     trait Sub extends Drain
     trait Test extends Drain
   }

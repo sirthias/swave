@@ -34,6 +34,21 @@ private[core] final class StreamRunner(_throughput: Int, _log: Logger, _dispatch
 
   startMessageProcessing()
 
+  def enqueueRequest(target: Stage, n: Long, from: Outport): Unit =
+    enqueue(new StreamRunner.Message.Request(target, n, from))
+  def enqueueCancel(target: Stage, from: Outport): Unit =
+    enqueue(new StreamRunner.Message.Cancel(target, from))
+
+  def enqueueOnNext(target: Stage, elem: AnyRef, from: Inport): Unit =
+    enqueue(new StreamRunner.Message.OnNext(target, elem, from))
+  def enqueueOnComplete(target: Stage, from: Inport): Unit =
+    enqueue(new StreamRunner.Message.OnComplete(target, from))
+  def enqueueOnError(target: Stage, e: Throwable, from: Inport): Unit =
+    enqueue(new StreamRunner.Message.OnError(target, e, from))
+
+  def enqueueXEvent(target: Stage, ev: AnyRef): Unit =
+    enqueue(new StreamRunner.Message.XEvent(target, ev, this))
+
   protected def receive(msg: Message): Unit = {
     val target = msg.target
     msg.id match {

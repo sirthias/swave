@@ -14,17 +14,12 @@
  * limitations under the License.
  */
 
-package swave.core
+package swave.core.impl.stages
 
-final case class StreamLimitExceeded(max: Long, offendingElem: Any)
-  extends RuntimeException(s"Limit of $max exceeded by element '$offendingElem'")
+private[stages] abstract class StreamTermination
 
-final class ConfigurationException(msg: String) extends RuntimeException(msg)
-
-final class IllegalAsyncBoundaryException(msg: String) extends RuntimeException(msg)
-
-final class IllegalReuseException(msg: String) extends RuntimeException(msg)
-
-final class SubscriptionTimeoutException(msg: String) extends RuntimeException(msg)
-
-final class UnsupportedSecondSubscriptionException extends RuntimeException
+private[stages] object StreamTermination {
+  case object None extends StreamTermination
+  case object Completed extends StreamTermination
+  final case class Error(e: Throwable) extends StreamTermination
+}

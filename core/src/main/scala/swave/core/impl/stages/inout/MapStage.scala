@@ -33,11 +33,7 @@ private[core] final class MapStage(f: AnyRef ⇒ AnyRef) extends InOutStage with
   def running(in: Inport, out: Outport): State = state(
     intercept = false,
 
-    request = (n, _) ⇒ {
-      in.request(n.toLong)
-      stay()
-    },
-
+    request = requestF(in),
     cancel = stopCancelF(in),
 
     onNext = (elem, _) ⇒ {

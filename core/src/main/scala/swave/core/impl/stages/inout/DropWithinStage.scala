@@ -46,10 +46,7 @@ private[core] final class DropWithinStage(duration: FiniteDuration) extends InOu
      * Dropping all elements while the timer hasn't fired yet.
      */
     def dropping(timer: Cancellable): State = state(
-      request = (n, _) ⇒ {
-        in.request(n.toLong)
-        stay()
-      },
+      request = requestF(in),
 
       cancel = _ => {
         timer.cancel()
@@ -79,18 +76,9 @@ private[core] final class DropWithinStage(duration: FiniteDuration) extends InOu
     def draining() = state(
       intercept = false,
 
-      request = (n, _) ⇒ {
-        in.request(n.toLong)
-        stay()
-      },
-
+      request = requestF(in),
       cancel = stopCancelF(in),
-
-      onNext = (elem, _) ⇒ {
-        out.onNext(elem)
-        stay()
-      },
-
+      onNext = onNextF(out),
       onComplete = stopCompleteF(out),
       onError = stopErrorF(out),
 

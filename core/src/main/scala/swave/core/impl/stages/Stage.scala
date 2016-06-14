@@ -155,6 +155,11 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem.Basic 
       case _ ⇒ illegalState(s"Unexpected request($n) from out '$from'")
     }
 
+  protected final def requestF(in: Inport)(n: Long, from: Outport): State = {
+    in.request(n)
+    stay()
+  }
+
   /////////////////////////////////////// CANCEL ///////////////////////////////////////
 
   final def cancel()(implicit from: Outport): Unit =
@@ -229,6 +234,11 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem.Basic 
       case 0 ⇒ stay()
       case _ ⇒ illegalState(s"Unexpected onNext($elem) from out '$from'")
     }
+
+  protected final def onNextF(out: Outport)(elem: AnyRef, from: Inport): State = {
+    out.onNext(elem)
+    stay()
+  }
 
   /////////////////////////////////////// ONCOMPLETE ///////////////////////////////////////
 
@@ -429,7 +439,6 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem.Basic 
     } else _intercepting = false
 
   private def updateInportState(in: Inport, requested: Long): Unit = {
-    requireArg(requested > _mbs)
     @tailrec def rec(current: InportStates): Unit =
       if (current ne null) {
         if (current.in eq in) current.remaining = current.remaining ⊹ requested
