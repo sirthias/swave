@@ -21,7 +21,7 @@ import org.scalatest.Inspectors
 import swave.core.StreamEnv
 import swave.testkit.gen.TestFixture
 
-final class FanOutSpec extends PipeSpec with Inspectors {
+final class FanOutSpec extends SyncPipeSpec with Inspectors {
 
   implicit val env = StreamEnv()
   implicit val config = PropertyCheckConfig(minSuccessful = 1000)

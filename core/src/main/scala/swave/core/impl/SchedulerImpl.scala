@@ -131,7 +131,7 @@ private[core] final class SchedulerImpl private (val settings: Scheduler.Setting
             case ActiveState ⇒
               processCancellations()
               val count = wheel.expireTimers()
-              log.debug("{} timers expired", count)
+              log.trace("{} timers expired", count)
               if (state.get == ActiveState) {
                 importNewTasks()
                 val millis = wheel.computeDelayInMs()

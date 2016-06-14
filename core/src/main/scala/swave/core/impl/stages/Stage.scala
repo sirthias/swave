@@ -33,8 +33,7 @@ import swave.core.impl._
  * and
  * - xSeal
  * - xStart
- * - xRun
- * - xCleanUp
+ * - xEvent
  *
  * Phases (disjunct sets of states):
  *
@@ -57,7 +56,7 @@ import swave.core.impl._
  *
  * AWAITING-XSTART (single state)
  * - only for stages which have previously registered interest in `xStart`
- * - must throw exception upon reception of signal other than `xStart` or `xSeal`
+ * - must throw exception upon reception of any non `x...` signal
  * - must ignore `xSeal`
  * - upon reception of `xStart`:
  *   - may send one or more non-x signals
@@ -65,21 +64,13 @@ import swave.core.impl._
  *   - must dequeue all intercepted signals
  *
  * RUNNING (potentially several states)
- * - must throw exception upon reception of `xStart`, `xCleanUp` or `xRun` (the latter is ok if interest was previously registered)
+ * - must throw exception upon reception of `xStart`
  * - must ignore `xSeal`
  * - upon signal reception:
- *   - may send one or more non-x signals
+ *   - may send one or more signals
  *   - must queue (intercept) all signals while handling one signal instance
  *   - must dequeue all intercepted signals after having finished handling one signal instance
- *   - may (re-)register for `xRun` reception
- *   - may transition to AWAITING-XCLEANUP or STOPPED
- *
- * AWAITING-XCLEANUP (single state)
- * - only for stages which have previously registered interest in `xCleanUp`
- * - must ignore all signals other than `xCleanUp`
- * - upon reception of `xCleanUp`:
- *   - clean up internal state / release resources
- *   - transition to STOPPED
+ *   - may transition to STOPPED
  *
  * STOPPED (single state)
  * - ignore all signals
@@ -101,7 +92,7 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem.Basic 
   /**
    * The [[StreamRunner]] that is assigned to the given stage.
    */
-  private[core] final var runner: StreamRunner = _ // null -> sync run, non-null -> async run
+  private[swave] final var runner: StreamRunner = _ // null -> sync run, non-null -> async run
 
   protected final var interceptingStates: Int = _ // bit mask holding a 1 bit for every state which requires interception support
 

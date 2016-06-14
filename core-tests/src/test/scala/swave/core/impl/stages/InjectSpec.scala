@@ -23,7 +23,7 @@ import swave.testkit.gen.{ TestSetup, TestOutput, TestFixture, TestError }
 
 import scala.collection.mutable.ListBuffer
 
-final class InjectSpec extends PipeSpec with Inspectors {
+final class InjectSpec extends SyncPipeSpec with Inspectors {
 
   implicit val env = StreamEnv()
   implicit val config = PropertyCheckConfig(minSuccessful = 1000)

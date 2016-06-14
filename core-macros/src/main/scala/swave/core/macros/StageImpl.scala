@@ -19,7 +19,7 @@ package swave.core.macros
 import scala.annotation.{ StaticAnnotation, compileTimeOnly }
 
 @compileTimeOnly("Unresolved @StageImpl")
-final class StageImpl(dump: Boolean = false, tracing: Boolean = false) extends StaticAnnotation {
+private[swave] final class StageImpl(dump: Boolean = false, tracing: Boolean = false) extends StaticAnnotation {
   def macroTransform(annottees: Any*): Any = macro StageImplMacro.generateStage
 }
 
@@ -87,7 +87,7 @@ final class StageImpl(dump: Boolean = false, tracing: Boolean = false) extends S
 
 // TODO
 // - improve hygiene (e.g. naming resilience)
-class StageImplMacro(val c: scala.reflect.macros.whitebox.Context) extends Util
+private[swave] class StageImplMacro(val c: scala.reflect.macros.whitebox.Context) extends Util
     with ConnectFanInAndSealWith
     with ConnectFanOutAndSealWith
     with ConnectInAndSealWith
@@ -110,14 +110,16 @@ class StageImplMacro(val c: scala.reflect.macros.whitebox.Context) extends Util
     annottees.map(_.tree) match {
       case (stageClass: ClassDef) :: Nil                           ⇒ transformStageImpl(stageClass, None)
       case (stageClass: ClassDef) :: (companion: ModuleDef) :: Nil ⇒ transformStageImpl(stageClass, Some(companion))
+      case (stageObj: ModuleDef) :: Nil                            ⇒ transformStageImpl(stageObj, None)
       case other :: Nil ⇒ c.abort(
         c.enclosingPosition,
         "@StageImpl can only be applied to final classes inheriting from swave.core.impl.stages.Stage")
     }
 
-  def transformStageImpl(stageClass: ClassDef, companion: Option[ModuleDef]): c.Expr[Any] = {
-    if (!stageClass.mods.hasFlag(Flag.FINAL)) c.abort(stageClass.pos, "Stage implementations must be final")
-    val sc1 = expandConnectingStates(c.untypecheck(stageClass))
+  def transformStageImpl(stageImpl: ImplDef, companion: Option[ModuleDef]): c.Expr[Any] = {
+    if (stageImpl.isInstanceOf[ClassDefApi] && !stageImpl.mods.hasFlag(Flag.FINAL))
+      c.abort(stageImpl.pos, "Stage implementation classes must be final")
+    val sc1 = expandConnectingStates(c.untypecheck(stageImpl))
     val stateParentDefs = sc1.impl.body collect { case StateParentDef(x) ⇒ x }
     val parameterSet = determineParameterSet(stateParentDefs, stateDefs(sc1))
     val sc2 = stateParentDefs.foldLeft(sc1: Tree)(removeStateParentDef(parameterSet))
@@ -125,31 +127,32 @@ class StageImplMacro(val c: scala.reflect.macros.whitebox.Context) extends Util
     val sc4 = addMembers(sc3, varMembers(parameterSet), assignInterceptingStates :: stateNameImpl ::: signalHandlersImpl)
     val sc5 = transformStateCallSites(sc4)
 
-    val transformedStageClass = sc5
+    val transformedStageImpl = sc5
     val result = c.Expr {
       companion match {
         case Some(comp) ⇒ q"""
-          $transformedStageClass
+          $transformedStageImpl
           $comp"""
-        case None ⇒ transformedStageClass
+        case None ⇒ transformedStageImpl
       }
     }
-    if (debugMode) trace(s"\n******** Generated stage class ${stageClass.name} ********\n\n" + showCode(result.tree))
+    if (debugMode) trace(s"\n******** Generated stage ${stageImpl.name} ********\n\n" + showCode(result.tree))
     result
   }
 
-  def expandConnectingStates(stageClass: Tree): ClassDef = {
-    val ClassDef(mods, name, typeDefs, Template(parents, self, body0)) = stageClass
-    val body = body0 flatMap {
-      case q"connectFanInAndSealWith($subs) { $f }" ⇒ connectFanInAndSealWith(subs, f)
-      case q"connectFanOutAndSealWith { $f }"       ⇒ connectFanOutAndSealWith(f)
-      case q"connectInAndSealWith { $f }"           ⇒ connectInAndSealWith(f)
-      case q"connectInOutAndSealWith { $f }"        ⇒ connectInOutAndSealWith(f)
-      case q"connectOutAndSealWith { $f }"          ⇒ connectOutAndSealWith(f)
-      case x                                        ⇒ x :: Nil
+  def expandConnectingStates(stageImpl: Tree): ImplDef =
+    mapTemplate(stageImpl) {
+      mapBody {
+        _ flatMap {
+          case q"connectFanInAndSealWith($subs) { $f }" ⇒ connectFanInAndSealWith(subs, f)
+          case q"connectFanOutAndSealWith { $f }"       ⇒ connectFanOutAndSealWith(f)
+          case q"connectInAndSealWith { $f }"           ⇒ connectInAndSealWith(f)
+          case q"connectInOutAndSealWith { $f }"        ⇒ connectInOutAndSealWith(f)
+          case q"connectOutAndSealWith { $f }"          ⇒ connectOutAndSealWith(f)
+          case x                                        ⇒ x :: Nil
+        }
+      }
     }
-    ClassDef(mods, name, typeDefs, Template(parents, self, body))
-  }
 
   type ParameterSet = Map[String, Tree] // parameter -> tpt (type tree)
 
@@ -175,7 +178,7 @@ class StageImplMacro(val c: scala.reflect.macros.whitebox.Context) extends Util
   }
 
   def stateDefs(stageClass: Tree): List[StateDef] =
-    stageClass.asInstanceOf[ClassDef].impl.body collect { case StateDef(x) ⇒ x }
+    stageClass.asInstanceOf[ImplDef].impl.body collect { case StateDef(x) ⇒ x }
 
   def removeStateParentDef(parameterSet: ParameterSet)(stageClass: Tree, spd: StateParentDef) = {
     val StateParentDef(tree, name, params, defDefs, entryCall) = spd
@@ -206,10 +209,17 @@ class StageImplMacro(val c: scala.reflect.macros.whitebox.Context) extends Util
         unblock(stateCallVarAssignments(tree.pos, stateHandlers(name).params, args), q"${TermName(name)}()")
     }
 
-  def addMembers(stageClass: Tree, prepend: List[ValDef], append: List[Tree]) = {
-    val ClassDef(mods, name, typeDefs, Template(parents, self, body)) = stageClass
-    ClassDef(mods, name, typeDefs, Template(parents, self, prepend ::: body ::: append))
-  }
+  def addMembers(stageImpl: Tree, prepend: List[ValDef], append: List[Tree]) =
+    mapTemplate(stageImpl)(mapBody(prepend ::: _ ::: append))
+
+  def mapBody(f: List[Tree] ⇒ List[Tree]): Template ⇒ Template =
+    { case Template(parents, self, body) ⇒ Template(parents, self, f(body)) }
+
+  def mapTemplate(stageImpl: Tree)(f: Template ⇒ Template): ImplDef =
+    stageImpl match {
+      case ClassDef(mods, name, typeDefs, template) ⇒ ClassDef(mods, name, typeDefs, f(template))
+      case ModuleDef(mods, name, template)          ⇒ ModuleDef(mods, name, f(template))
+    }
 
   def varMembers(parameterSet: ParameterSet): List[ValDef] =
     parameterSet.map { case (name, tpt) ⇒ q"private[this] var ${TermName("__" + name)}: $tpt = _" }(collection.breakOut)

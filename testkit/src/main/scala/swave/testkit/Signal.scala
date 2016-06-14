@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-package swave.core.impl.stages
+package swave.testkit
 
-import org.scalatest.prop.Checkers
-import swave.core.SwaveSpec
-import swave.testkit.TestGeneration
+sealed abstract class Signal
 
-abstract class PipeSpec extends SwaveSpec with Checkers with TestGeneration
+object Signal {
+  final case class Request(n: Long) extends Signal
+  case object Cancel extends Signal
+  final case class OnNext(value: Any) extends Signal
+  case object OnComplete extends Signal
+  final case class OnError(e: Throwable) extends Signal
+}

@@ -55,4 +55,3 @@ private[core] final class IteratorStage(iterator: Iterator[AnyRef]) extends Sour
 
     cancel = stopF)
 }
-

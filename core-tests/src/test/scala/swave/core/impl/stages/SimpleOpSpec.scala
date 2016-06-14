@@ -21,7 +21,7 @@ import org.scalatest.Inspectors
 import swave.core.{ StreamLimitExceeded, Overflow, StreamEnv }
 import swave.testkit.gen.TestFixture
 
-final class SimpleOpSpec extends PipeSpec with Inspectors {
+final class SimpleOpSpec extends SyncPipeSpec with Inspectors {
 
   implicit val env = StreamEnv()
   implicit val config = PropertyCheckConfig(minSuccessful = 1000)

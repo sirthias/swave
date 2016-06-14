@@ -21,7 +21,7 @@ import org.scalatest.Inspectors
 import swave.core._
 import swave.testkit.gen.{ TestFixture, TestError }
 
-final class FlattenSpec extends PipeSpec with Inspectors {
+final class FlattenSpec extends SyncPipeSpec with Inspectors {
 
   implicit val env = StreamEnv()
   implicit val config = PropertyCheckConfig(minSuccessful = 1000)
