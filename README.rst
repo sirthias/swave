@@ -1,6 +1,10 @@
 swave.io
 ========
 
+.. image:: https://badges.gitter.im/sirthias/swave.svg
+   :alt: Join the chat at https://gitter.im/sirthias/swave
+   :target: https://gitter.im/sirthias/swave?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+
 **swave** is a lightweight Reactive-Streams_ infrastructure toolkit for Scala.
 It attempts to provide all the general-purpose stream construction, stream consumption and stream transformation logic
 that is typically required in applications that work with Reactive-Streams_.
