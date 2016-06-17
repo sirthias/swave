@@ -11,7 +11,7 @@ that is typically required in applications that work with Reactive-Streams_.
 
 .. image:: https://img.shields.io/maven-central/v/io.swave/swave-core_2.11.svg
    :alt: The latest swave artifacts on Maven Central
-   :target: https://maven-badges.herokuapp.com/maven-central/io.swave/swave_2.11
+   :target: https://maven-badges.herokuapp.com/maven-central/io.swave/swave-core_2.11
 
 ----
 

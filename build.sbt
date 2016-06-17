@@ -129,7 +129,7 @@ lazy val examples = project
     javaOptions in run ++= Seq("-XX:+UnlockCommercialFeatures", "-XX:+FlightRecorder"),
     libraryDependencies ++= Seq(`akka-stream`, logback))
 
-lazy val core = project
+lazy val core = Project("swave-core", file("core"))
   .dependsOn(`core-macros`)
   .enablePlugins(AutomateHeaderPlugin)
   .settings(commonSettings: _*)
@@ -155,7 +155,7 @@ lazy val `core-macros` = project
   .settings(noPublishingSettings: _*)
   .settings(libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value)
 
-lazy val testkit = project
+lazy val testkit = Project("swave-testkit", file("testkit"))
   .dependsOn(core)
   .enablePlugins(AutomateHeaderPlugin)
   .settings(commonSettings: _*)
