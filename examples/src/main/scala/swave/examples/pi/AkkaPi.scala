@@ -20,13 +20,17 @@ import akka.NotUsed
 import scala.util.{Failure, Success}
 import swave.core.util.XorShiftRandom
 import akka.actor.ActorSystem
-import akka.stream.{FlowShape, ActorMaterializer}
+import akka.stream.{ActorMaterializerSettings, FlowShape, ActorMaterializer}
 import akka.stream.scaladsl._
 
 object AkkaPi extends App {
   implicit val system = ActorSystem("AkkaPi")
   import system.dispatcher
-  implicit val materializer = ActorMaterializer()
+
+  private val settings = ActorMaterializerSettings(system)
+    .withSyncProcessingLimit(Int.MaxValue)
+    .withInputBuffer(256, 256)
+  implicit val materializer = ActorMaterializer(settings)
 
   val random = XorShiftRandom()
 
