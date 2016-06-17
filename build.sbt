@@ -1,19 +1,27 @@
 import scalariform.formatter.preferences._
+import de.heikoseeberger.sbtheader.HeaderPattern
 import com.typesafe.sbt.SbtScalariform._
 
 val commonSettings = Seq(
-  version := "0.1-SNAPSHOT",
+  version := "0.5-M1",
   organization := "io.swave",
   scalaVersion := "2.11.8",
   homepage := Some(new URL("http://swave.io")),
-  description := "A Reactive Streams implementation in Scala",
+  description := "A Reactive Streams infrastructure implementation in Scala",
   startYear := Some(2016),
-  licenses := Seq("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt")),
+  licenses := Seq("MPL 2.0" -> new URL("https://www.mozilla.org/en-US/MPL/2.0/")),
   javacOptions ++= commonJavacOptions,
   scalacOptions ++= commonScalacOptions,
   scalacOptions in Test ~= (_ filterNot (_ == "-Ywarn-value-discard")),
   scalacOptions in (Test, console) ~= { _ filterNot { o => o == "-Ywarn-unused-import" || o == "-Xfatal-warnings" } },
-  headers := Map("scala" -> de.heikoseeberger.sbtheader.license.Apache2_0("© 2016", "Mathias Doenitz")))
+  scalacOptions in (Compile, doc) ~= { _.filterNot(o => o == "-Xlint" || o == "-Xfatal-warnings").:+("-nowarn") },
+  headers := Map("scala" -> (
+    HeaderPattern.cStyleBlockComment,
+    """/* This Source Code Form is subject to the terms of the Mozilla Public
+      | * License, v. 2.0. If a copy of the MPL was not distributed with this
+      | * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+      |
+      |""".stripMargin)))
 
 val formattingSettings = Seq(
   ScalariformKeys.preferences := ScalariformKeys.preferences.value
@@ -46,12 +54,12 @@ val publishingSettings = Seq(
       </developer>
     </developers>)
 
-val commonJavacOptions = Seq(
+lazy val commonJavacOptions = Seq(
   "-encoding", "UTF-8",
   "-Xlint:unchecked",
   "-Xlint:deprecation")
 
-val commonScalacOptions = Seq(
+lazy val commonScalacOptions = Seq(
   "-deprecation",
   "-encoding", "UTF-8",
   "-feature",

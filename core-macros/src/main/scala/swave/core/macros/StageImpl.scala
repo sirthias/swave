@@ -273,7 +273,7 @@ private[swave] class StageImplMacro(val c: scala.reflect.macros.whitebox.Context
           sh.request.fold(acc) { tree ⇒
             val caseBody = tree match {
               case q"($n0, $from0) => $body0" ⇒ replaceIdents(body0, n0.name → n, from0.name → from)
-              case x                          ⇒ q"$x($n.toLong, $from)"
+              case x                          ⇒ q"$x($n, $from)"
             }
             cq"${sh.id} => $caseBody" :: acc
           }
