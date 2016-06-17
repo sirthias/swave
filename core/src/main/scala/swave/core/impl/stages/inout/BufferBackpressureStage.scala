@@ -67,9 +67,15 @@ private[core] final class BufferBackpressureStage(size: Int) extends InOutStage
         out.onNext(buffer.unsafeRead())
         handleDemand(pend, rem - 1)
       } else {
-        val remainingPlus = rem ⊹ buffer.available
-        if (pend < remainingPlus) in.request(remainingPlus - pend)
-        running(in, out, remainingPlus, rem)
+        val alreadyRequested = pend ⊹ buffer.size
+        val target = rem ⊹ size
+        val delta = target - alreadyRequested
+        val newPending =
+          if (delta > (size >> 1)) { // we suppress requesting a number of elems < half the buffer size
+            in.request(delta)
+            pend + delta
+          } else pend
+        running(in, out, newPending, rem)
       }
 
     state(

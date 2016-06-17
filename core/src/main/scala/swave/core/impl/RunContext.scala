@@ -132,7 +132,7 @@ private[swave] object RunContext {
   case object PostRun
   case object SubscriptionTimeout
 
-  private val dispatchAsyncXStart: Stage ⇒ Unit = stage ⇒ stage.runner.enqueue(new StreamRunner.Message.XStart(stage))
+  private val dispatchAsyncXStart: Stage ⇒ Unit = stage ⇒ stage.runner.enqueueXStart(stage)
   private val dispatchXStart: Stage ⇒ Unit = _.xStart()
   private val dispatchPostRun: Stage ⇒ Unit = _.xEvent(PostRun)
   private val dispatchCleanup: Runnable ⇒ Unit = _.run()

@@ -34,18 +34,20 @@ private[core] final class StreamRunner(_throughput: Int, _log: Logger, _dispatch
 
   startMessageProcessing()
 
-  def enqueueRequest(target: Stage, n: Long, from: Outport): Unit =
+  def enqueueRequest(target: Stage, n: Long)(implicit from: Outport): Unit =
     enqueue(new StreamRunner.Message.Request(target, n, from))
-  def enqueueCancel(target: Stage, from: Outport): Unit =
+  def enqueueCancel(target: Stage)(implicit from: Outport): Unit =
     enqueue(new StreamRunner.Message.Cancel(target, from))
 
-  def enqueueOnNext(target: Stage, elem: AnyRef, from: Inport): Unit =
+  def enqueueOnNext(target: Stage, elem: AnyRef)(implicit from: Inport): Unit =
     enqueue(new StreamRunner.Message.OnNext(target, elem, from))
-  def enqueueOnComplete(target: Stage, from: Inport): Unit =
+  def enqueueOnComplete(target: Stage)(implicit from: Inport): Unit =
     enqueue(new StreamRunner.Message.OnComplete(target, from))
-  def enqueueOnError(target: Stage, e: Throwable, from: Inport): Unit =
+  def enqueueOnError(target: Stage, e: Throwable)(implicit from: Inport): Unit =
     enqueue(new StreamRunner.Message.OnError(target, e, from))
 
+  def enqueueXStart(target: Stage): Unit =
+    enqueue(new StreamRunner.Message.XStart(target))
   def enqueueXEvent(target: Stage, ev: AnyRef): Unit =
     enqueue(new StreamRunner.Message.XEvent(target, ev, this))
 

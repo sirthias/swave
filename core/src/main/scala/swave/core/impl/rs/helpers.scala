@@ -33,9 +33,9 @@ private[impl] class SyncSubscription extends Subscription {
 
 private[impl] class ForwardToRunnerSubscription(stage: Stage) extends Subscription {
   def request(n: Long) =
-    if (n > 0) stage.runner.enqueueRequest(stage, n, stage)
+    if (n > 0) stage.runner.enqueueRequest(stage, n)(stage)
     else stage.runner.enqueueXEvent(stage, ForwardToRunnerSubscription.IllegalRequest(n))
-  def cancel() = stage.runner.enqueueCancel(stage, stage)
+  def cancel() = stage.runner.enqueueCancel(stage)(stage)
 }
 
 private[impl] object ForwardToRunnerSubscription {
@@ -65,13 +65,13 @@ class ForwardToRunnerSubscriber(stage: Stage) extends Subscriber[AnyRef] {
   }
   def onNext(elem: AnyRef) = {
     if (elem eq null) throw new NullPointerException("Element must be non-null (see reactive-streams spec, rule 2.13)")
-    stage.runner.enqueueOnNext(stage, elem, stage)
+    stage.runner.enqueueOnNext(stage, elem)(stage)
   }
 
-  def onComplete() = stage.runner.enqueueOnComplete(stage, stage)
+  def onComplete() = stage.runner.enqueueOnComplete(stage)(stage)
 
   def onError(e: Throwable) = {
     if (e eq null) throw new NullPointerException("Throwable must be non-null (see reactive-streams spec, rule 2.13)")
-    stage.runner.enqueueOnError(stage, e, stage)
+    stage.runner.enqueueOnError(stage, e)(stage)
   }
 }

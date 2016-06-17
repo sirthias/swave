@@ -42,8 +42,8 @@ trait StreamOps[A] extends Any { self ⇒
   protected def wrap: Inport ⇒ Repr[_]
   protected def append[T](stage: Stage): Repr[T]
 
-  final def async(dispatcherId: String = ""): Repr[A] =
-    append(new AsyncBoundaryStage(dispatcherId))
+  final def async(dispatcherId: String = "", bufferSize: Int = 16): Repr[A] =
+    append(new AsyncBoundaryStage(dispatcherId)).buffer(bufferSize, Overflow.Backpressure)
 
   final def attach[T, O](sub: Stream[T])(implicit ev: Lub[A, T, O]): FanIn[A :: T :: HNil, A :+: T :+: CNil, O, Repr] =
     new FanIn(InportList(base) :+ sub.inport, wrap)

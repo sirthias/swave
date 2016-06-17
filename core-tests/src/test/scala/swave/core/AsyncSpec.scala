@@ -162,7 +162,7 @@ class AsyncSpec extends SwaveSpec {
     "async sub-stream in async parent stream" in {
       Stream.from(0)
         .inject()
-        .map(_.async().elementAt(1))
+        .map(_.async(bufferSize = 0).elementAt(1))
         .flattenConcat()
         .take(5)
         .drainTo(Drain.seq(limit = 5).async()).await(50.millis) shouldEqual List(1, 3, 5, 7, 9)

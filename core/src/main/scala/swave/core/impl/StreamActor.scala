@@ -73,8 +73,8 @@ private[impl] abstract class StreamActor(
 
   protected def receive(msg: MessageType): Unit
 
-  final def enqueue(msg: MessageType): Unit = {
-    mailbox.add(msg)
+  protected final def enqueue(msg: MessageType): Unit = {
+    mailbox.offer(msg)
     trySchedule()
   }
 

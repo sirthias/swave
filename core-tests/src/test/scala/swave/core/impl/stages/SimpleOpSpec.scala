@@ -39,7 +39,6 @@ final class SimpleOpSpec extends SyncPipeSpec with Inspectors {
           .buffer(param)
           .drainTo(out.drain) shouldTerminate asScripted(in)
 
-        in.size should be >= math.min(in.scriptedSize, out.scriptedSize + param)
         out.received shouldEqual in.produced.take(out.size)
       }
   }
