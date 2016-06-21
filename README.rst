@@ -5,13 +5,21 @@ swave.io
 It attempts to provide all the general-purpose stream construction, stream consumption and stream transformation logic
 that is typically required in applications that work with Reactive-Streams_.
 
-.. image:: https://badges.gitter.im/Join%20Chat.svg
-   :alt: Gitter chat for swave https://gitter.im/sirthias/swave
-   :target: https://gitter.im/sirthias/swave
-
 .. image:: https://img.shields.io/maven-central/v/io.swave/swave-core_2.11.svg
-   :alt: The latest swave artifacts on Maven Central
    :target: https://maven-badges.herokuapp.com/maven-central/io.swave/swave-core_2.11
+   :alt: The latest swave artifacts on Maven Central
+
+.. image:: https://img.shields.io/badge/mailing%20list-active-brightgreen.svg
+   :target: https://groups.google.com/forum/#!forum/swave-user
+   :alt: Mailing list for swave users
+
+.. image:: https://img.shields.io/gitter/room/nwjs/nw.js.svg?maxAge=86400
+   :target: https://gitter.im/sirthias/swave
+   :alt: Gitter chat for swave https://gitter.im/sirthias/swave
+
+.. image:: https://img.shields.io/badge/uses-badges-ff69b4.svg
+   :target: http://shields.io/
+   :alt: uses badges
 
 .. _Reactive-Streams: http://reactive-streams.org/
 
