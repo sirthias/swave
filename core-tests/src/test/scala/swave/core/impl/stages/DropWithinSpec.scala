@@ -19,20 +19,20 @@ final class DropWithinSpec extends FreeSpec with StreamEnvShutdown {
     val stream = TestStream.probe[Symbol]()
     val drain = TestDrain.probe[Symbol]()
 
-    stream.dropWithin(30.millis).drainTo(drain) shouldEqual Try(())
+    stream.dropWithin(50.millis).drainTo(drain) shouldEqual Try(())
 
     drain.send.request(5)
-    stream.expect.request(5) within 10.millis
+    stream.expect.request(5) within 20.millis
     stream.send.onNext('a)
-    stream.expect.request(1) within 10.millis
+    stream.expect.request(1) within 20.millis
     stream.send.onNext('b)
-    stream.expect.request(1) within 10.millis
+    stream.expect.request(1) within 20.millis
     stream.send.onNext('c)
-    stream.expect.request(1) within 10.millis
-    Thread.sleep(40)
+    stream.expect.request(1) within 20.millis
+    Thread.sleep(60)
     stream.send.onNext('d)
-    drain.expect.onNext('d) within 10.millis
+    drain.expect.onNext('d) within 20.millis
     stream.send.onComplete()
-    drain.expect.onComplete() within 10.millis
+    drain.expect.onComplete() within 20.millis
   }
 }
