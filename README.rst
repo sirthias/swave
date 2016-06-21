@@ -13,6 +13,8 @@ that is typically required in applications that work with Reactive-Streams_.
    :alt: The latest swave artifacts on Maven Central
    :target: https://maven-badges.herokuapp.com/maven-central/io.swave/swave-core_2.11
 
+.. _Reactive-Streams: http://reactive-streams.org/
+
 ----
 
 .. contents:: Contents of this Document
@@ -79,11 +81,15 @@ Up until this goal is reached here are the most important entry points to the *s
 Resources
 ---------
 
+Talk: "swave - Reactive Streams in Scala" presented at `ScalaDays 2016 (Berlin)`_ (Jun 2016)
+  | Slides: http://swave.io/scaladays/2016/
+  | Video: <coming>
+
 Talk: "swave - A Preview" presented at SCALAR_ (Apr 2016)
   | Slides: http://swave.io/scalar/
   | Video: <coming>
 
-.. _Reactive-Streams: http://reactive-streams.org/
+.. _ScalaDays 2016 (Berlin): http://event.scaladays.org/scaladays-berlin-2016
 .. _SCALAR: http://scalar-conf.com/
 
 
