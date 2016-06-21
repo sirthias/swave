@@ -5,7 +5,7 @@
 package swave.core.graph
 
 import scala.annotation.tailrec
-import swave.core.util._
+import swave.core.macros._
 
 private[graph] sealed trait GlyphMarker // phantom type
 

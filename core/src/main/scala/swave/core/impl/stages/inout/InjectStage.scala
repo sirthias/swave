@@ -6,10 +6,10 @@ package swave.core.impl.stages.inout
 
 import scala.annotation.tailrec
 import scala.concurrent.duration._
-import swave.core.macros.StageImpl
 import swave.core.{ PipeElem, Stream }
 import swave.core.impl.stages.source.SubSourceStage
 import swave.core.impl.{ RunContext, Outport, Inport }
+import swave.core.macros._
 import swave.core.util._
 
 // format: OFF

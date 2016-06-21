@@ -8,9 +8,8 @@ import com.typesafe.config.Config
 import scala.concurrent.Future
 import scala.collection.mutable
 import shapeless.HList
-import swave.core.macros.HelperMacros
 
-package object util extends HelperMacros {
+package object util {
 
   private[this] val _identityFunc = (x: Any) ⇒ x
   def identityFunc[T]: T ⇒ T = _identityFunc.asInstanceOf[T ⇒ T]

@@ -12,7 +12,7 @@ import shapeless._
 import swave.core.impl.{ ModuleMarker, InportList }
 import swave.core.impl.TypeLogic._
 import swave.core.impl.stages.inout.NopStage
-import swave.core.util._
+import swave.core.macros._
 
 /**
  *  A Streaming Component with four interfaces:

@@ -5,9 +5,9 @@
 package swave.core.impl.stages.inout
 
 import scala.collection.mutable
-import swave.core.macros.StageImpl
 import swave.core.impl.{ Outport, Inport }
 import swave.core.PipeElem
+import swave.core.macros._
 import swave.core.util._
 
 // format: OFF

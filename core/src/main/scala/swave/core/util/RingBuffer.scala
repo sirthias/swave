@@ -4,6 +4,8 @@
 
 package swave.core.util
 
+import swave.core.macros._
+
 /**
  * A mutable RingBuffer with a fixed capacity.
  * The `cap` must be a positive power of two.

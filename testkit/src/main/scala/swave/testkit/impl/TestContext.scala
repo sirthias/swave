@@ -4,12 +4,12 @@
 
 package swave.testkit.impl
 
-import swave.testkit.gen.TestSetup
-
 import scala.annotation.tailrec
 import scala.collection.mutable.ArrayBuffer
-import TestSetup.AsyncScheduling
+import swave.core.macros._
 import swave.core.util._
+import swave.testkit.gen.TestSetup
+import TestSetup.AsyncScheduling
 
 private[testkit] final class TestContext(
     val runNr: Int,

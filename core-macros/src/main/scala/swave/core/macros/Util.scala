@@ -1,6 +1,6 @@
 package swave.core.macros
 
-trait Util {
+private[macros] trait Util {
   val c: scala.reflect.macros.whitebox.Context
   import c.universe._
 

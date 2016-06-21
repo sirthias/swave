@@ -5,11 +5,11 @@
 package swave.core.impl.stages.inout
 
 import scala.concurrent.duration.Duration
-import swave.core.impl._
 import swave.core.impl.stages.drain.SubDrainStage
-import swave.core.macros.StageImpl
 import swave.core.{ PipeElem, Streamable }
+import swave.core.macros._
 import swave.core.util._
+import swave.core.impl._
 
 // format: OFF
 @StageImpl

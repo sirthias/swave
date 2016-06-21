@@ -12,8 +12,7 @@ import scala.concurrent.duration.Duration
 import swave.core.{ Drain, PipeElem }
 import swave.core.impl.Inport
 import swave.core.impl.stages.drain.DrainStage
-import swave.core.macros.StageImpl
-import swave.core.util._
+import swave.core.macros._
 
 object TestDrain {
 

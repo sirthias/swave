@@ -7,7 +7,7 @@ package swave.core
 import scala.io.Source
 import scala.util.control.NonFatal
 import org.scalatest.{ Matchers, FreeSpec }
-import swave.core.util._
+import swave.core.macros._
 
 class PipeElemSpec extends FreeSpec with Matchers {
 

@@ -12,9 +12,8 @@ import scala.concurrent.ExecutionContext
 import swave.core.PipeElem
 import swave.core.impl.Outport
 import swave.core.impl.stages.source.SourceStage
-import swave.core.macros.StageImpl
-import swave.core.util._
 import swave.core.Stream
+import swave.core.macros._
 
 // TODO: introduce default expect timeout read from config as well as dilation logic
 object TestStream {

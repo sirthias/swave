@@ -7,8 +7,8 @@ package swave.core.impl.stages.inout
 import scala.annotation.tailrec
 import swave.core.{ Overflow, PipeElem }
 import swave.core.impl.{ Inport, Outport }
-import swave.core.macros.StageImpl
-import swave.core.util.{ RingBuffer, _ }
+import swave.core.macros._
+import swave.core.util._
 
 // format: OFF
 @StageImpl

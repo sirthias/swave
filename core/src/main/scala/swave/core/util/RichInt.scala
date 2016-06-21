@@ -5,6 +5,7 @@
 package swave.core.util
 
 import scala.annotation.tailrec
+import swave.core.macros._
 
 private[swave] class RichInt(private val underlying: Int) extends AnyVal {
 

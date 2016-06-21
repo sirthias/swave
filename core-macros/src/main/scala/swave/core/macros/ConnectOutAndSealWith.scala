@@ -1,6 +1,6 @@
 package swave.core.macros
 
-trait ConnectOutAndSealWith {  this: Util =>
+private[macros] trait ConnectOutAndSealWith {  this: Util =>
   val c: scala.reflect.macros.whitebox.Context
   import c.universe._
 

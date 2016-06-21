@@ -6,6 +6,7 @@ package swave.core.util
 
 import scala.annotation.tailrec
 import scala.collection.immutable.Stream
+import swave.core.macros._
 
 /**
  * xorshift128+ random number generator as proposed by Sebastiano Vigna in

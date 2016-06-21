@@ -6,7 +6,6 @@ package swave.examples.timertest
 
 import com.typesafe.config.ConfigFactory
 import scala.concurrent.duration._
-import swave.core.util._
 import swave.core._
 
 object TimerTest extends App {
@@ -18,7 +17,7 @@ object TimerTest extends App {
 
   System.console().readLine()
   println("cancelling")
-  requireState(job.cancel())
+  require(job.cancel())
 
   System.console().readLine()
   println("shutting down")

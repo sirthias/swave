@@ -8,7 +8,7 @@ import scala.collection.immutable.BitSet
 import scala.collection.mutable
 import swave.core.impl.stages.Stage
 import swave.core.graph.{ GlyphSet, Digraph }
-import swave.core.util._
+import swave.core.macros._
 
 sealed trait PipeElem
 

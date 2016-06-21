@@ -7,6 +7,7 @@ package swave.core.graph.impl
 import scala.annotation.tailrec
 import scala.collection.mutable
 import swave.core.graph.Digraph
+import swave.core.macros._
 import swave.core.util._
 import Infrastructure._
 

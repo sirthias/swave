@@ -5,10 +5,9 @@
 package swave.core.impl.stages.inout
 
 import scala.util.control.NonFatal
-import swave.core.macros.StageImpl
 import swave.core.{ StreamLimitExceeded, PipeElem }
 import swave.core.impl.{ Outport, Inport }
-import swave.core.util._
+import swave.core.macros._
 
 // format: OFF
 @StageImpl

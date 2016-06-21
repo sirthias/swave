@@ -4,7 +4,7 @@
 
 package swave.core.graph
 
-import swave.core.util._
+import swave.core.macros._
 
 object GraphBuilding {
   import Dsl._

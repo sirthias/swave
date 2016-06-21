@@ -5,9 +5,9 @@
 package swave.core.impl.stages.fanin
 
 import scala.annotation.tailrec
-import swave.core.macros.StageImpl
 import swave.core.PipeElem
 import swave.core.impl.{ InportAnyRefList, InportList, Outport }
+import swave.core.macros._
 import swave.core.util._
 
 // format: OFF

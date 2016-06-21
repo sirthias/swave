@@ -130,7 +130,7 @@ lazy val examples = project
     libraryDependencies ++= Seq(`akka-stream`, logback))
 
 lazy val core = Project("swave-core", file("core"))
-  .dependsOn(`core-macros`)
+  .dependsOn(`core-macros` % "compile-internal, test-internal")
   .enablePlugins(AutomateHeaderPlugin)
   .settings(commonSettings: _*)
   .settings(macroParadise: _*)
@@ -141,7 +141,7 @@ lazy val core = Project("swave-core", file("core"))
       scalatest, scalacheck % "test"))
 
 lazy val `core-tests` = project
-  .dependsOn(core, testkit)
+  .dependsOn(core, testkit, `core-macros` % "test-internal")
   .enablePlugins(AutomateHeaderPlugin)
   .settings(commonSettings: _*)
   .settings(formattingSettings: _*)
@@ -156,7 +156,7 @@ lazy val `core-macros` = project
   .settings(libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value)
 
 lazy val testkit = Project("swave-testkit", file("testkit"))
-  .dependsOn(core)
+  .dependsOn(core, `core-macros` % "compile-internal")
   .enablePlugins(AutomateHeaderPlugin)
   .settings(commonSettings: _*)
   .settings(macroParadise: _*)

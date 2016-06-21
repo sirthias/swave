@@ -9,6 +9,7 @@ import scala.concurrent.duration._
 import com.typesafe.scalalogging.Logger
 import swave.core.impl.StreamEnvImpl
 import swave.core.util._
+import swave.core.macros._
 
 abstract class StreamEnv private[core] {
 

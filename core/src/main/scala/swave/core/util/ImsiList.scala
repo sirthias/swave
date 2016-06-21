@@ -6,6 +6,7 @@ package swave.core.util
 
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
+import swave.core.macros._
 
 /**
  * Intrusive, mutable, single-linked list.

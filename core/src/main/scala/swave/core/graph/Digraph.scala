@@ -7,6 +7,7 @@ package swave.core.graph
 import scala.collection.immutable.BitSet
 import scala.collection.mutable
 import swave.core.graph.impl._
+import swave.core.macros._
 import swave.core.util._
 
 /**

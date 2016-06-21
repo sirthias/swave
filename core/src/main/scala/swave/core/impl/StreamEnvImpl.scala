@@ -10,7 +10,7 @@ import scala.concurrent.duration._
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.Logger
 import org.slf4j.LoggerFactory
-import swave.core.util._
+import swave.core.macros._
 import swave.core._
 
 private[core] final class StreamEnvImpl(

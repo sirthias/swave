@@ -7,6 +7,7 @@ package swave.core
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.{ Duration, FiniteDuration }
 import com.typesafe.config.Config
+import swave.core.macros._
 import swave.core.util._
 
 trait Scheduler {

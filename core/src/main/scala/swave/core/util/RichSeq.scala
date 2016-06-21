@@ -7,6 +7,7 @@ package swave.core.util
 import scala.annotation.tailrec
 import scala.collection.LinearSeq
 import scala.collection.generic.CanBuildFrom
+import swave.core.macros._
 
 final class RichSeq[A](val underlying: Seq[A]) extends AnyVal {
 

@@ -6,6 +6,7 @@ package swave.core.util
 
 import org.jctools.util.UnsafeAccess.UNSAFE
 import org.jctools.util.UnsafeRefArrayAccess.calcElementOffset
+import swave.core.macros._
 
 /**
  * A mutable RingBuffer that can grow in size.

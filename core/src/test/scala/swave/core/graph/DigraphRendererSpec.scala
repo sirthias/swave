@@ -7,7 +7,7 @@ package swave.core.graph
 import scala.util.control.NonFatal
 import scala.io.Source
 import org.scalatest.{ Matchers, FreeSpec }
-import swave.core.util._
+import swave.core.macros._
 
 class DigraphRendererSpec extends FreeSpec with Matchers {
   import GraphBuilding._

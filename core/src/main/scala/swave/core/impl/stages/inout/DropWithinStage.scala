@@ -7,8 +7,7 @@ package swave.core.impl.stages.inout
 import scala.concurrent.duration._
 import swave.core.{ Cancellable, PipeElem }
 import swave.core.impl.{ StreamRunner, Inport, Outport }
-import swave.core.macros.StageImpl
-import swave.core.util._
+import swave.core.macros._
 
 // format: OFF
 @StageImpl

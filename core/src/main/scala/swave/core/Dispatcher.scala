@@ -9,6 +9,7 @@ import scala.concurrent.duration.{ FiniteDuration, Duration }
 import com.typesafe.config.Config
 import swave.core.impl.DispatcherImpl
 import swave.core.util._
+import swave.core.macros._
 
 abstract class Dispatcher private[core] extends ExecutionContextExecutor {
 

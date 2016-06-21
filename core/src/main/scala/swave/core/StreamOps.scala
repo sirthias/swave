@@ -19,6 +19,7 @@ import swave.core.impl.stages.fanout.{ RoundRobinStage, FirstAvailableStage, Bro
 import swave.core.impl.{ InportList, TypeLogic, Inport }
 import swave.core.impl.stages.inout._
 import swave.core.util._
+import swave.core.macros._
 import TypeLogic._
 
 trait StreamOps[A] extends Any { self ⇒

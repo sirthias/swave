@@ -4,6 +4,8 @@
 
 package swave.core.util
 
+import swave.core.macros._
+
 private[swave] final class LongArray private (private val array: Array[Long]) extends AnyVal {
 
   def size: Int = array(0).toInt

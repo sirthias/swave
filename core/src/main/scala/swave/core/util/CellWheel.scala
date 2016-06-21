@@ -5,6 +5,7 @@
 package swave.core.util
 
 import scala.reflect.ClassTag
+import swave.core.macros._
 
 final class CellWheel[T: ClassTag](val size: Int, createCell: ⇒ T) {
   requireArg(isPowerOf2(size))

@@ -14,7 +14,7 @@ import scala.util.control.NonFatal
 import scala.concurrent.duration._
 import scala.concurrent.{ Promise, Future, ExecutionContext }
 import swave.core.internal.agrona.TimerWheel
-import swave.core.util._
+import swave.core.macros._
 import swave.core._
 
 /**

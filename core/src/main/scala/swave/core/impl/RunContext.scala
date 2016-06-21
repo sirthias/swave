@@ -5,10 +5,11 @@
 package swave.core.impl
 
 import scala.concurrent.duration.{ FiniteDuration, Duration }
-import swave.core._
 import swave.core.impl.stages.Stage
 import swave.core.impl.StreamRunner._
+import swave.core.macros._
 import swave.core.util._
+import swave.core._
 
 /**
  * A `RunContext` instance keeps all the contextual information required for the start of a *single* connected stream
