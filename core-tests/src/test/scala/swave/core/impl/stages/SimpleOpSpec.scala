@@ -193,22 +193,6 @@ final class SimpleOpSpec extends SyncPipeSpec with Inspectors {
       }
   }
 
-  "GroupedToCellArray" in check {
-    testSetup
-      .input[Int]
-      .output[List[Int]]
-      .param(Gen.chooseNum(1, 10))
-      .prop.from { (in, out, param) ⇒
-
-        in.stream
-          .groupedToCellArray(param)
-          .map(_.toSeq[List])
-          .drainTo(out.drain) shouldTerminate asScripted(in)
-
-        out.received shouldEqual in.produced.grouped(param).take(out.size).toList
-      }
-  }
-
   "Limit" in check {
     testSetup
       .input[Int]

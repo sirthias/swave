@@ -135,9 +135,6 @@ trait StreamOps[A] extends Any { self ⇒
   final def grouped(groupSize: Int, emitSingleEmpty: Boolean = false): Repr[immutable.Seq[A]] =
     groupedTo[immutable.Seq](groupSize, emitSingleEmpty)
 
-  final def groupedToCellArray(groupSize: Int, wheelSize: Int = -1, emitSingleEmpty: Boolean = false): Repr[CellArray[A]] =
-    append(new GroupedToCellArray(groupSize, wheelSize, emitSingleEmpty))
-
   final def groupedTo[M[+_]](groupSize: Int, emitSingleEmpty: Boolean = false)(implicit cbf: CanBuildFrom[M[A], A, M[A]]): Repr[M[A]] =
     append(new GroupedStage(groupSize, emitSingleEmpty, cbf.apply().asInstanceOf[scala.collection.mutable.Builder[Any, AnyRef]]))
 
