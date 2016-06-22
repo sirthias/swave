@@ -89,7 +89,7 @@ Up until this goal is reached here are the most important entry points to the *s
 Resources
 ---------
 
-Talk: "swave - Reactive Streams in Scala" presented at `ScalaDays 2016 (Berlin)`_ (Jun 2016)
+Talk: "swave - Reactive Streams in Scala" presented at `ScalaDays 2016 @ Berlin`_ (Jun 2016)
   | Slides: http://swave.io/scaladays/2016/
   | Video: <coming>
 
@@ -97,7 +97,7 @@ Talk: "swave - A Preview" presented at SCALAR_ (Apr 2016)
   | Slides: http://swave.io/scalar/
   | Video: <coming>
 
-.. _ScalaDays 2016 (Berlin): http://event.scaladays.org/scaladays-berlin-2016
+.. _ScalaDays 2016 @ Berlin: http://event.scaladays.org/scaladays-berlin-2016
 .. _SCALAR: http://scalar-conf.com/
 
 
@@ -108,7 +108,7 @@ Participating
 Model, aimed at providing an optimal collaboration model for free software projects.
 
 This process was originally designed by `@hintjens`_ for the `ZeroMQ`_ community where it has worked exceptionally well
-since 2012. It has these goals (quote from `C4 specification`_):
+for many years. It has these goals (quote from `C4 specification`_):
 
     1. To maximize the scale and diversity of the community around a project, by reducing the friction for new Contributors and creating a scaled participation model with strong positive feedbacks;
 
