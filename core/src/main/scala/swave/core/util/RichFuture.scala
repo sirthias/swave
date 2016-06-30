@@ -13,12 +13,11 @@ final class RichFuture[T](val underlying: Future[T]) extends AnyVal {
   def fast: FastFuture[T] = new FastFuture[T](underlying)
 
   def await(timeout: FiniteDuration = 10.seconds): T =
-    if (timeout == Duration.Zero) {
-      underlying.value match {
-        case Some(t) ⇒ t.get
-        case None    ⇒ throw new TimeoutException(s"Future was not completed")
-      }
-    } else Await.result(underlying, timeout)
+    underlying.value match {
+      case Some(t)                          ⇒ t.get
+      case None if timeout == Duration.Zero ⇒ throw new TimeoutException(s"Future was not completed")
+      case _                                ⇒ Await.result(underlying, timeout)
+    }
 
   def delay(duration: FiniteDuration)(implicit env: StreamEnv): Future[T] = {
     import env.defaultDispatcher

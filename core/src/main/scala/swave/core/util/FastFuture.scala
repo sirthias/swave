@@ -4,7 +4,7 @@
 
 /**
  * The code in this file is only slightly adapted from a previous version, which
- * is also licensed under the Apache License 2.0 and bears this copyright notice:
+ * is licensed under the Apache License 2.0 and bears this copyright notice:
  *
  *     Copyright (C) 2009-2015 Typesafe Inc. <http://www.typesafe.com>
  *

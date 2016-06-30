@@ -5,6 +5,7 @@
 package swave.core
 
 import com.typesafe.config.Config
+import scala.concurrent.duration._
 import scala.concurrent.Future
 import scala.collection.mutable
 import shapeless.HList
@@ -16,8 +17,9 @@ package object util {
 
   def identityHash(obj: AnyRef): String = Integer.toHexString(System.identityHashCode(obj))
 
-  private[this] val _dropFunc = (_: Any) ⇒ ()
-  def dropFunc[T]: T ⇒ Unit = _dropFunc.asInstanceOf[T ⇒ Unit]
+  val dropFunc: Any ⇒ Unit = _ ⇒ ()
+
+  val oneIntFunc: Any ⇒ Int = _ ⇒ 1
 
   def isPowerOf2(i: Int): Boolean = Integer.lowestOneBit(i) == i
 
@@ -25,6 +27,8 @@ package object util {
 
   implicit def richByteArray(array: Array[Byte]): RichByteArray = new RichByteArray(array)
   implicit def richConfig[T](config: Config): RichConfig = new RichConfig(config)
+  implicit def richDuration(duration: Duration): RichDuration = new RichDuration(duration)
+  implicit def richFiniteDuration(duration: FiniteDuration): RichFiniteDuration = new RichFiniteDuration(duration)
   implicit def richFuture[T](future: Future[T]): RichFuture[T] = new RichFuture(future)
   implicit def richHList[L <: HList](list: L): RichHList[L] = new RichHList(list)
   implicit def richInt(int: Int): RichInt = new RichInt(int)

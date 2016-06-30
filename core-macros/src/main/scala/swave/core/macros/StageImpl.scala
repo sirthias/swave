@@ -395,10 +395,11 @@ private[swave] class StageImplMacro(val c: scala.reflect.macros.whitebox.Context
     def xEventDef = {
       val ev = freshName("ev")
       val cases = compact {
-        stateHandlers.valuesIterator.foldLeft(cq"_ => super._xEvent0($ev)" :: Nil) { (acc, sh) ⇒
+        val default = cq"_ => super._xEvent0($ev)"
+        stateHandlers.valuesIterator.foldLeft(default :: Nil) { (acc, sh) ⇒
           sh.xEvent.fold(acc) {
             case q"($ev0) => $body0" ⇒ cq"${sh.id} => ${replaceIdents(body0, ev0.name → ev)}" :: acc
-            case q"{ case ..$cs }"   ⇒ cq"${sh.id} => $ev match { case ..$cs }" :: acc
+            case q"{ case ..$cs }"   ⇒ cq"${sh.id} => $ev match { case ..${cs :+ default} }" :: acc
           }
         }
       }

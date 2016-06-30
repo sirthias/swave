@@ -7,7 +7,8 @@ package swave.core.impl.stages
 import org.scalacheck.Gen
 import org.scalatest.Inspectors
 import swave.core._
-import swave.testkit.gen.{ TestFixture, TestError }
+import swave.testkit.TestError
+import swave.testkit.gen.TestFixture
 
 final class FlattenSpec extends SyncPipeSpec with Inspectors {
 

@@ -5,6 +5,7 @@
 package swave.testkit.gen
 
 import org.scalacheck.{ Gen, Prop }
+import swave.testkit.TestError
 import scala.util.control.NonFatal
 import shapeless.ops.function.FnToProduct
 import shapeless.ops.hlist.{ Reverse, Tupler }
