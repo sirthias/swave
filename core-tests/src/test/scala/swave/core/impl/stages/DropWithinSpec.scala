@@ -4,35 +4,52 @@
 
 package swave.core.impl.stages
 
-import scala.util.Try
+import scala.util.Success
 import org.scalatest.FreeSpec
 import scala.concurrent.duration._
-import swave.testkit.{ TestDrain, TestStream }
+import swave.testkit.Probes
 import swave.core.{ StreamEnvShutdown, StreamEnv }
+import swave.core.util._
+import Probes._
 
 final class DropWithinSpec extends FreeSpec with StreamEnvShutdown {
 
   implicit val env = StreamEnv()
-  import env.defaultDispatcher
 
-  "DropWithin" in {
-    val stream = TestStream.probe[Symbol]()
-    val drain = TestDrain.probe[Symbol]()
+  "DropWithin must" - {
 
-    stream.dropWithin(50.millis).drainTo(drain) shouldEqual Try(())
+    "deliver elements after the duration, but not before" in {
+      val input = Iterator.from(1)
+      val stream = StreamProbe[Int]
+      val drain = DrainProbe[Int]
 
-    drain.send.request(5)
-    stream.expect.request(5) within 20.millis
-    stream.send.onNext('a)
-    stream.expect.request(1) within 20.millis
-    stream.send.onNext('b)
-    stream.expect.request(1) within 20.millis
-    stream.send.onNext('c)
-    stream.expect.request(1) within 20.millis
-    Thread.sleep(60)
-    stream.send.onNext('d)
-    drain.expect.onNext('d) within 20.millis
-    stream.send.onComplete()
-    drain.expect.onComplete() within 20.millis
+      stream.dropWithin(100.millis).drainTo(drain) shouldBe a[Success[_]]
+
+      drain.sendRequest(100)
+      val demand1 = stream.expectRequestAggregated(20.millis)
+      demand1.toInt.times { stream.sendNext(input.next()) }
+      val demand2 = stream.expectRequestAggregated(20.millis)
+      demand2.toInt.times { stream.sendNext(input.next()) }
+      val demand3 = stream.expectRequestAggregated(100.millis)
+
+      stream.expectNoSignal()
+      demand3.toInt.times { stream.sendNext(input.next()) }
+      ((demand1 + demand2 + 1).toInt to (demand1 + demand2 + demand3).toInt).foreach(drain.expectNext(_))
+
+      stream.sendComplete()
+      drain.expectComplete()
+    }
+
+    "deliver completion even before the duration" in {
+      val stream = StreamProbe[Int]
+      val drain = DrainProbe[Int]
+
+      stream.dropWithin(1.second).drainTo(drain) shouldBe a[Success[_]]
+
+      stream.sendComplete()
+      drain.expectComplete()
+      drain.verifyCleanStop()
+    }
   }
+
 }
