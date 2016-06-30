@@ -24,6 +24,13 @@ object Streamable {
     }
   implicit def forStream[T]: Aux[Stream[T], T] = stream.asInstanceOf[Aux[Stream[T], T]]
 
+  private[core] val option =
+    new Streamable[Option[AnyRef]] {
+      type Out = AnyRef
+      def apply(value: Option[AnyRef]): Stream[AnyRef] = Stream.fromOption(value)
+    }
+  implicit def forOption[T]: Aux[Option[T], T] = iterable.asInstanceOf[Aux[Option[T], T]]
+
   private[core] val iterable =
     new Streamable[Iterable[AnyRef]] {
       type Out = AnyRef
