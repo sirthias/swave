@@ -5,6 +5,7 @@
 package swave.core
 
 import com.typesafe.config.{ Config, ConfigFactory }
+import scala.concurrent.Future
 import scala.concurrent.duration._
 import com.typesafe.scalalogging.Logger
 import swave.core.impl.StreamEnvImpl
@@ -32,6 +33,8 @@ abstract class StreamEnv private[core] {
   implicit def defaultDispatcher: Dispatcher
 
   def shutdown(): StreamEnv.Termination
+
+  def getOrLoadExtension[T <: Extension](ext: ExtensionId[T]): Future[T]
 }
 
 object StreamEnv {
@@ -42,10 +45,11 @@ object StreamEnv {
       logConfigOnStart: Boolean,
       subscriptionTimeout: Duration,
       dispatcherSettings: Dispatchers.Settings,
-      schedulerSettings: Scheduler.Settings) {
+      schedulerSettings: Scheduler.Settings,
+      extensionSettings: Extension.Settings) {
 
-    requireArg(throughput > 0)
-    requireArg(0 < maxBatchSize && maxBatchSize <= 1024 * 1024)
+    requireArg(throughput > 0, "`throughput` must be > 0")
+    requireArg(0 < maxBatchSize && maxBatchSize <= 1024 * 1024, "`maxBatchSize` must be > 0 and <= 1M")
   }
   object Settings extends SettingsCompanion[Settings]("swave.core") {
     def fromSubConfig(c: Config): Settings =
@@ -55,7 +59,8 @@ object StreamEnv {
         logConfigOnStart = c getBoolean "log-config-on-start",
         subscriptionTimeout = c getScalaDuration "subscription-timeout",
         dispatcherSettings = Dispatchers.Settings fromSubConfig c.getConfig("dispatcher"),
-        schedulerSettings = Scheduler.Settings fromSubConfig c.getConfig("scheduler"))
+        schedulerSettings = Scheduler.Settings fromSubConfig c.getConfig("scheduler"),
+        extensionSettings = Extension.Settings fromSubConfig c.getConfig("extensions"))
   }
 
   def apply(

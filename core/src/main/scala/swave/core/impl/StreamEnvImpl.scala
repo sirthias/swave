@@ -4,8 +4,10 @@
 
 package swave.core.impl
 
-import java.util.concurrent.TimeoutException
+import java.util.concurrent.{ ConcurrentHashMap, TimeoutException }
 import scala.annotation.tailrec
+import scala.util.Try
+import scala.concurrent.{ Promise, Future }
 import scala.concurrent.duration._
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.Logger
@@ -63,4 +65,21 @@ private[core] final class StreamEnvImpl(
       }
     }
 
+  private[this] val _extensions = new ConcurrentHashMap[ExtensionId[_], Future[_ <: Extension]]
+
+  @tailrec def getOrLoadExtension[T <: Extension](id: ExtensionId[T]): Future[T] =
+    _extensions.get(id) match {
+      case null ⇒
+        val promise = Promise[T]()
+        _extensions.putIfAbsent(id, promise.future) match {
+          case null ⇒
+            val tryValue = Try(id.createExtension(this))
+            promise.complete(tryValue)
+            val future = Promise.fromTry(tryValue).future
+            _extensions.put(id, future) // speed up future accesses somewhat
+            future
+          case _ ⇒ getOrLoadExtension(id)
+        }
+      case x ⇒ x.asInstanceOf[Future[T]]
+    }
 }
