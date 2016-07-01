@@ -23,7 +23,7 @@ private[core] final class InjectStage(timeout: Duration) extends InOutStage with
 
   connectInOutAndSealWith { (ctx, in, out) ⇒
     ctx.registerForXStart(this)
-    running(ctx, in, out, if (timeout eq Duration.Undefined) ctx.env.settings.subscriptionTimeout else timeout)
+    running(ctx, in, out, timeout orElse ctx.env.settings.subscriptionTimeout)
   }
 
   def running(ctx: RunContext, in: Inport, out: Outport, subscriptionTimeout: Duration) = {

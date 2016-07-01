@@ -48,7 +48,7 @@ private[core] final class FromSubscriberStage(subscriber: Subscriber[AnyRef])
 
     onError = (e, _) => {
       subscriber.onError(e)
-      stop()
+      stop(e)
     },
 
     xEvent = { case ForwardToRunnerSubscription.IllegalRequest(n) =>

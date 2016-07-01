@@ -17,7 +17,7 @@ private[core] final class SubSourceStage(ctx: RunContext, val in: Stage, subscri
   with PipeElem.Source.Sub {
 
   def pipeElemType: String = "sub"
-  def pipeElemParams: List[Any] = in :: Nil
+  def pipeElemParams: List[Any] = in :: subscriptionTimeout :: Nil
 
   initialState(awaitingSubscribe(StreamTermination.None, null))
 

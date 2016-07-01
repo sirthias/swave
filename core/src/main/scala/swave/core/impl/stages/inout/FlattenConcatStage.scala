@@ -24,7 +24,7 @@ private[core] final class FlattenConcatStage(streamable: Streamable.Aux[AnyRef, 
 
   connectInOutAndSealWith { (ctx, in, out) ⇒
     ctx.registerForXStart(this)
-    running(ctx, in, out, if (timeout eq Duration.Undefined) ctx.env.settings.subscriptionTimeout else timeout)
+    running(ctx, in, out, timeout orElse ctx.env.settings.subscriptionTimeout)
   }
 
   // TODO: switch to fully parallel subscribe of all subs at once
@@ -156,7 +156,7 @@ private[core] final class FlattenConcatStage(streamable: Streamable.Aux[AnyRef, 
         if (from ne in) in.cancel()
         cancelAll(subscribed, from)
         out.onError(e)
-        if (subscribing ne null) stopCancel(subscribing) else stop()
+        if (subscribing ne null) stopCancel(subscribing) else stop(e)
       })
 
     def subscribeSubDrain(elem: AnyRef): SubDrainStage = {
@@ -246,6 +246,6 @@ private[core] final class FlattenConcatStage(streamable: Streamable.Aux[AnyRef, 
     onError = (e, sub) ⇒ {
       cancelAll(subscribed, sub)
       out.onError(e)
-      if (subscribing ne null) stopCancel(subscribing) else stop()
+      if (subscribing ne null) stopCancel(subscribing) else stop(e)
     })
 }

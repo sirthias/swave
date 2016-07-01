@@ -210,6 +210,9 @@ trait StreamOps[A] extends Any { self ⇒
   final def onRequest(callback: Int ⇒ Unit): Repr[A] =
     onEventPF { case StreamEvent.Request(count) ⇒ callback(count) }
 
+  final def onStart(callback: () ⇒ Unit): Repr[A] =
+    append(new OnStartStage(callback))
+
   final def onTerminate(callback: Option[Throwable] ⇒ Unit): Repr[A] =
     onEventPF {
       case StreamEvent.OnComplete     ⇒ callback(None)
@@ -263,7 +266,7 @@ trait StreamOps[A] extends Any { self ⇒
     via(Pipe[A].fanOutBroadcast(eagerCancel = eagerCancel).sub.to(nop).subContinue.named("tee", nop))
   }
 
-  final def throttle(elements: Int, per: FiniteDuration, burst: Int = 0): Repr[A] =
+  final def throttle(elements: Int, per: FiniteDuration, burst: Int = 1): Repr[A] =
     throttle(elements, per, burst, oneIntFunc)
 
   def throttle(cost: Int, per: FiniteDuration, burst: Int, costFn: A ⇒ Int): Repr[A] =

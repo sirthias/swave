@@ -25,7 +25,7 @@ final class Piping[A] private[core] (port: Port, val result: A) {
       new SealedPiping(ctx, result)
     }
 
-  def run()(implicit env: StreamEnv, ev: TypeLogic.TryFlatten[A]): ev.Out =
+  def run()(implicit env: StreamEnv, ev: TypeLogic.ToTryOrFuture[A]): ev.Out =
     seal() match {
       case Success(x) ⇒ x.run()
       case Failure(e) ⇒ ev.failure(e)
@@ -38,7 +38,7 @@ final class SealedPiping[A] private[core] (ctx: RunContext, val result: A) {
 
   def mapResult[B](f: A ⇒ B): SealedPiping[B] = new SealedPiping(ctx, f(result))
 
-  def run()(implicit ev: TypeLogic.TryFlatten[A]): ev.Out =
+  def run()(implicit ev: TypeLogic.ToTryOrFuture[A]): ev.Out =
     try {
       ctx.start()
       ev.success(result)

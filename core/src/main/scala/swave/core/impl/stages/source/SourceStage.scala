@@ -4,6 +4,7 @@
 
 package swave.core.impl.stages.source
 
+import scala.annotation.compileTimeOnly
 import swave.core.PipeElem
 import swave.core.impl.{ Outport, RunContext }
 import swave.core.impl.stages.Stage
@@ -15,5 +16,6 @@ private[swave] abstract class SourceStage extends Stage { this: PipeElem.Source 
 
   final def outputElem = _outputPipeElem
 
+  @compileTimeOnly("Unresolved `connectOutAndSealWith` call")
   protected final def connectOutAndSealWith(f: (RunContext, Outport) ⇒ State): Unit = ()
 }

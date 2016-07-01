@@ -49,6 +49,6 @@ private[core] final class AsyncBoundaryStage(dispatcherId: String) extends InOut
 
     onError = (error, _) => {
       outStage.runner.enqueueOnError(outStage, error)
-      stop()
+      stop(error)
     })
 }

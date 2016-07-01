@@ -56,6 +56,6 @@ private[core] final class ForeachDrainStage(
 
     onError = (e, _) ⇒ {
       terminationPromise.failure(e)
-      stop()
+      stop(e)
     })
 }

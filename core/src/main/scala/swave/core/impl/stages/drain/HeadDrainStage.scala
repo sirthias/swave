@@ -47,6 +47,6 @@ private[core] final class HeadDrainStage(headPromise: Promise[AnyRef]) extends D
 
     onError = (e, _) ⇒ {
       headPromise.failure(e)
-      stop()
+      stop(e)
     })
 }

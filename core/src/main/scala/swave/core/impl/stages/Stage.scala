@@ -4,7 +4,10 @@
 
 package swave.core.impl.stages
 
+import swave.core.impl.stages.Stage.RegisterStopPromise
+
 import scala.annotation.{ compileTimeOnly, tailrec }
+import scala.concurrent.Promise
 import swave.core.PipeElem
 import swave.core.util._
 import swave.core.impl._
@@ -76,6 +79,7 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem.Basic 
   private[this] var _mbs: Int = _
   private[this] var _inportState: InportStates = _
   private[this] var _buffer: ResizableRingBuffer[AnyRef] = _
+  private[this] var _stopPromise: Promise[Unit] = _
 
   /**
    * The [[StreamRunner]] that is assigned to the given stage.
@@ -101,6 +105,7 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem.Basic 
   def stateName: String = s"<unknown id ${_state}>"
 
   final def isSealed: Boolean = _sealed
+  final def isStopped: Boolean = _state == 0
 
   /////////////////////////////////////// SUBSCRIBE ///////////////////////////////////////
 
@@ -307,9 +312,15 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem.Basic 
   private def _xEvent(ev: AnyRef): Unit = _state = _xEvent0(ev)
 
   protected def _xEvent0(ev: AnyRef): State =
-    _state match {
-      case 0 ⇒ stay()
-      case _ ⇒ illegalState(s"Unexpected xEvent($ev)")
+    ev match {
+      case RegisterStopPromise(p) ⇒
+        if (_stopPromise eq null) {
+          if (isStopped) p.success(())
+          else _stopPromise = p
+        } else p.completeWith(_stopPromise.future)
+        stay()
+      case _ if isStopped ⇒ stay()
+      case _              ⇒ illegalState(s"Unexpected xEvent($ev)")
     }
 
   /////////////////////////////////////// STATE DESIGNATOR ///////////////////////////////////////
@@ -330,7 +341,11 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem.Basic 
 
   /////////////////////////////////////// STOPPERS ///////////////////////////////////////
 
-  protected final def stop(): State = {
+  protected final def stop(e: Throwable = null): State = {
+    if (_stopPromise ne null) {
+      if (e ne null) _stopPromise.failure(e)
+      else _stopPromise.success(())
+    }
     _buffer = null // don't hang on to elements
     0 // STOPPED state encoding
   }
@@ -360,7 +375,7 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem.Basic 
 
   protected final def stopError(e: Throwable, out: Outport): State = {
     out.onError(e)
-    stop()
+    stop(e)
   }
 
   protected final def stopErrorF(out: Outport)(e: Throwable, in: Inport): State =
@@ -441,6 +456,15 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem.Basic 
 
 private[swave] object Stage {
 
+  /**
+   * Can be sent as an `xEvent` to register the given promise for completion when the stage is stopped.
+   * If the stage is already stopped the promise is completed as soon as possible.
+   * Note that error completion of the promise is performed on a best-effort basis, i.e. it might
+   * happen that the stage was stopped due to an error but the promise is still completed with a `Success`
+   * (e.g. when the [[RegisterStopPromise]] command arrives *after* the stage has already been stopped.
+   */
+  final case class RegisterStopPromise(promise: Promise[Unit])
+
   private class InportStates(in: Inport, tail: InportStates,
     var pending: Int, // already requested from `in` but not yet received
     var remaining: Long) // already requested by us but not yet forwarded to `in`
@@ -449,4 +473,33 @@ private[swave] object Stage {
   private[stages] class OutportStates(out: Outport, tail: OutportStates,
     var remaining: Long) // requested by this `out` but not yet delivered, i.e. unfulfilled demand
       extends AbstractOutportList[OutportStates](out, tail)
+
+  def discoverGraph(stage: Stage): Set[Stage] = {
+    import PipeElem.{ Basic ⇒ PB }
+    val discover = new ((Set[PB], PB) ⇒ Set[PB]) {
+      private def _apply(set: Set[PB], pe: PB) = apply(set, pe)
+      @tailrec def apply(set: Set[PB], pe: PB): Set[PB] =
+        set + pe match {
+          case `set` ⇒ set
+          case newSet ⇒
+            val stage = pe.asInstanceOf[Stage]
+            import pe._
+            3 * inputElems.size012 + outputElems.size012 match {
+              case 0 /* 0:0 */ ⇒ throw new IllegalStateException // no input and no output?
+              case 1 /* 0:1 */ ⇒ apply(newSet, outputElems.head)
+              case 2 /* 0:x */ ⇒ outputElems.foldLeft(newSet)(this)
+              case 3 /* 1:0 */ ⇒ apply(newSet, inputElems.head)
+              case 4 /* 1:1 */ ⇒
+                if (newSet.contains(inputElems.head)) apply(newSet, outputElems.head)
+                else if (newSet.contains(outputElems.head)) apply(newSet, inputElems.head)
+                else { _apply(newSet, inputElems.head); apply(newSet, outputElems.head) }
+              case 5 /* 1:x */ ⇒ { _apply(newSet, inputElems.head); outputElems.foldLeft(newSet)(this) }
+              case 6 /* x:0 */ ⇒ inputElems.foldLeft(newSet)(this)
+              case 7 /* x:1 */ ⇒ { inputElems.foldLeft(newSet)(this); apply(newSet, outputElems.head) }
+              case 8 /* x:x */ ⇒ { inputElems.foldLeft(newSet)(this); outputElems.foldLeft(newSet)(this) }
+            }
+        }
+    }
+    discover(Set.empty, stage.pipeElem).asInstanceOf[Set[Stage]]
+  }
 }

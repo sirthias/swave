@@ -7,12 +7,14 @@ package swave.core
 import scala.annotation.tailrec
 import scala.collection.generic.CanBuildFrom
 import scala.collection.immutable
+import scala.concurrent.duration._
 import scala.concurrent.{ Future, Promise }
 import org.reactivestreams.{ Publisher, Subscriber }
+import swave.core.impl.TypeLogic.ToFuture
 import swave.core.impl.{ ModuleMarker, Outport }
 import swave.core.impl.stages.drain._
 
-final class Drain[-T, +R] private[swave] (val outport: Outport, val result: R) {
+final class Drain[-T, +R] private[swave] (private[swave] val outport: Outport, val result: R) {
 
   def pipeElem: PipeElem = outport.pipeElem
 
@@ -27,6 +29,8 @@ final class Drain[-T, +R] private[swave] (val outport: Outport, val result: R) {
   }
 
   def dropResult: Drain[T, Unit] = new Drain(outport, ())
+
+  def mapResult[P](f: R ⇒ P): Drain[T, P] = new Drain(outport, f(result))
 
   def named(name: String): this.type = {
     val marker = new ModuleMarker(name)
@@ -88,7 +92,7 @@ object Drain {
     new Drain(new CancellingDrainStage, ())
 
   def first[T](n: Int): Drain[T, Future[immutable.Seq[T]]] =
-    Pipe[T].grouped(n, emitSingleEmpty = true).to(head).named("Drain.first")
+    Pipe[T].grouped(n, emitSingleEmpty = true).to(head) named "Drain.first"
 
   def foreach[T](callback: T ⇒ Unit): Drain[T, Future[Unit]] = {
     val promise = Promise[Unit]()
@@ -96,7 +100,7 @@ object Drain {
   }
 
   def fold[T, R](zero: R)(f: (R, T) ⇒ R): Drain[T, Future[R]] =
-    Pipe[T].fold(zero)(f).to(head).named("Drain.fold")
+    Pipe[T].fold(zero)(f).to(head) named "Drain.fold"
 
   def fromSubscriber[T](subscriber: Subscriber[T]): Drain[T, Unit] =
     new Drain(new FromSubscriberStage(subscriber.asInstanceOf[Subscriber[AnyRef]]), ())
@@ -109,13 +113,23 @@ object Drain {
   def headOption[T]: Drain[T, Future[Option[T]]] = ???
 
   def ignore: Drain[Any, Future[Unit]] =
-    foreach(util.dropFunc).named("Drain.ignore")
+    foreach(util.dropFunc) named "Drain.ignore"
 
   def last[T]: Drain[T, Future[T]] =
-    Pipe[T].last.to(head).named("Drain.last")
+    Pipe[T].last.to(head) named "Drain.last"
 
   def lastOption[T]: Drain[T, Future[Option[T]]] =
-    Pipe[T].last.to(headOption).named("Drain.lastOption")
+    Pipe[T].last.to(headOption) named "Drain.lastOption"
+
+  def lazyStart[T, R](
+    onStart: () ⇒ Drain[T, R],
+    subscriptionTimeout: Duration = Duration.Undefined)(implicit tf: ToFuture[R]): Drain[T, Future[tf.Out]] = {
+    val promise = Promise[tf.Out]()
+    val rawOnStart = onStart.asInstanceOf[() ⇒ Drain[AnyRef, AnyRef]]
+    val stage = new LazyStartDrainStage(rawOnStart, subscriptionTimeout,
+      { x ⇒ promise.completeWith(tf(x.asInstanceOf[R])); () })
+    new Drain(stage, promise.future)
+  }
 
   def parallelForeach[T](parallelism: Int)(f: T ⇒ Unit): Drain[T, Future[Unit]] = ???
 
@@ -123,7 +137,7 @@ object Drain {
     generalSeq[immutable.Seq, T](limit)
 
   def generalSeq[M[+_], T](limit: Long)(implicit cbf: CanBuildFrom[M[T], T, M[T]]): Drain[T, Future[M[T]]] =
-    Pipe[T].limit(limit).groupedTo[M](Integer.MAX_VALUE, emitSingleEmpty = true).to(head).named("Drain.seq")
+    Pipe[T].limit(limit).groupedTo[M](Integer.MAX_VALUE, emitSingleEmpty = true).to(head) named "Drain.seq"
 
   sealed abstract class Capture[-R, P] {
     def apply(result: R, promise: Promise[P]): Unit

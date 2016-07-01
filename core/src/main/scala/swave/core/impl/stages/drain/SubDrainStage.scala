@@ -18,7 +18,7 @@ private[core] final class SubDrainStage(ctx: RunContext, val out: Stage, subscri
   with PipeElem.Drain.Sub {
 
   def pipeElemType: String = "sub"
-  def pipeElemParams: List[Any] = out :: Nil
+  def pipeElemParams: List[Any] = out :: subscriptionTimeout :: Nil
 
   initialState(awaitingOnSubscribe(false, null))
 

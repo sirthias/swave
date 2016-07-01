@@ -19,7 +19,7 @@ private[impl] abstract class StreamActor(
     protected final val log: Logger,
     final val dispatcher: Dispatcher) {
 
-  type MessageType <: AnyRef
+  protected type MessageType <: AnyRef
 
   /**
    * The mailbox.

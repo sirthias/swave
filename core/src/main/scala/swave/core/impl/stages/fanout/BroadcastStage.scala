@@ -78,7 +78,7 @@ private[core] final class BroadcastStage(eagerCancel: Boolean) extends FanOutSta
           if (current ne null) {
             current.out.onError(e)
             rec(current.tail)
-          } else stop()
+          } else stop(e)
         rec(outs)
       })
   }

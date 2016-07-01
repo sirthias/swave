@@ -14,7 +14,7 @@ import swave.core.impl.{ ModuleMarker, InportList, TypeLogic, Inport }
 import swave.core.impl.stages.Stage
 import swave.core.impl.stages.source._
 
-final class Stream[+A](private[core] val inport: Inport) extends AnyVal with StreamOps[A @uV] {
+final class Stream[+A](private[swave] val inport: Inport) extends AnyVal with StreamOps[A @uV] {
   type Repr[T] = Stream[T]
 
   protected def base: Inport = inport
@@ -48,7 +48,7 @@ final class Stream[+A](private[core] val inport: Inport) extends AnyVal with Str
   def foreach(callback: A ⇒ Unit)(implicit env: StreamEnv): Future[Unit] =
     drainTo(Drain.foreach(callback))
 
-  def drainTo[R](drain: Drain[A, R])(implicit env: StreamEnv, ev: TypeLogic.TryFlatten[R]): ev.Out =
+  def drainTo[R](drain: Drain[A, R])(implicit env: StreamEnv, ev: TypeLogic.ToTryOrFuture[R]): ev.Out =
     to(drain).run()
 
   def drainToSeq[M[+_]](limit: Long)(implicit env: StreamEnv, cbf: CanBuildFrom[M[A], A, M[A @uV]]): Future[M[A]] =
@@ -79,7 +79,7 @@ object Stream {
   }
 
   def continually[T](elem: ⇒ T): Stream[T] =
-    fromIterator(Iterator.continually(elem)).named("Stream.continually")
+    fromIterator(Iterator.continually(elem)) named "Stream.continually"
 
   def empty[T]: Stream[T] =
     fromIterator(Iterator.empty)
@@ -91,22 +91,28 @@ object Stream {
     new Stream(new FailingSourceStage(cause))
 
   def from(start: Int, step: Int = 1): Stream[Int] =
-    fromIterator(Iterator.from(start, step)).named("Stream.from")
+    fromIterator(Iterator.from(start, step)) named "Stream.from"
 
   def fromIterable[T](value: Iterable[T]): Stream[T] =
-    fromIterator(value.iterator).named("Stream.fromIterable")
+    fromIterator(value.iterator) named "Stream.fromIterable"
 
   def fromIterator[T](value: Iterator[T]): Stream[T] =
     new Stream(new IteratorStage(value.asInstanceOf[Iterator[AnyRef]]))
+
+  def fromOption[T](value: Option[T]): Stream[T] =
+    (if (value.isEmpty) empty else one(value.get)) named "Stream.fromOption"
 
   def fromPublisher[T](publisher: Publisher[T]): Stream[T] =
     new Stream(new FromPublisherStage(publisher.asInstanceOf[Publisher[AnyRef]]))
 
   def iterate[T](start: T)(f: T ⇒ T): Stream[T] =
-    fromIterator(Iterator.iterate(start)(f)).named("Stream.iterate")
+    fromIterator(Iterator.iterate(start)(f)) named "Stream.iterate"
+
+  def lazyStart[T](onStart: () ⇒ Stream[T], subscriptionTimeout: Duration = Duration.Undefined): Stream[T] =
+    new Stream(new LazyStartSourceStage(onStart.asInstanceOf[() ⇒ Stream[AnyRef]], subscriptionTimeout))
 
   def one[T](element: T): Stream[T] =
-    fromIterator(Iterator.single(element)).named("Stream.one")
+    fromIterator(Iterator.single(element)) named "Stream.one"
 
   def repeat[T](element: T): Stream[T] =
     new Stream(new RepeatStage(element.asInstanceOf[AnyRef]))

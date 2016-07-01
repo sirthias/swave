@@ -18,7 +18,7 @@ private[core] final class StreamRunner(_throughput: Int, _log: Logger, _dispatch
     extends StreamActor(_throughput, _log, _dispatcher) {
   import StreamRunner._
 
-  type MessageType = Message
+  protected type MessageType = Message
 
   startMessageProcessing()
 
@@ -92,8 +92,8 @@ private[core] object StreamRunner {
 
   case object Timeout
 
-  sealed abstract class Message(val id: Int, val target: Stage)
-  object Message {
+  protected sealed abstract class Message(val id: Int, val target: Stage)
+  protected object Message {
     final class Subscribe(target: Stage, val from: Outport) extends Message(0, target)
     final class Request(target: Stage, val n: Long, val from: Outport) extends Message(1, target)
     final class Cancel(target: Stage, val from: Outport) extends Message(2, target)

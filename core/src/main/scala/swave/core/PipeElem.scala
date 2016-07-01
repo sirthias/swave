@@ -45,6 +45,7 @@ object PipeElem {
     trait Failing extends Source
     trait FromPublisher extends Source
     trait Iterator extends Source
+    trait Lazy extends Source
     trait Repeat extends Source
     trait Sub extends Source
     trait Test extends Source
@@ -61,6 +62,7 @@ object PipeElem {
     trait Foreach extends Drain
     trait FromSubscriber extends Drain
     trait Head extends Drain
+    trait Lazy extends Drain
     trait Publisher extends Drain
     trait Sub extends Drain
     trait Test extends Drain
@@ -88,14 +90,15 @@ object PipeElem {
     trait FlattenConcat extends InOut
     trait Fold extends InOut
     trait Grouped extends InOut
-    trait GroupedToCellArray extends InOut
     trait Inject extends InOut
     trait Limit extends InOut
     trait Map extends InOut
     trait Nop extends InOut
     trait OnEvent extends InOut
+    trait OnStart extends InOut
     trait Scan extends InOut
     trait Take extends InOut
+    trait Throttle extends InOut
   }
 
   sealed trait FanIn extends Basic {

@@ -38,25 +38,44 @@ object TypeLogic {
     implicit def apply[H0, H1, T <: HList]: IsHCons2[H0 :: H1 :: T] = null
   }
 
-  sealed abstract class TryFlatten[T] {
+  sealed abstract class ToTryOrFuture[T] {
     type Out
     def success(value: T): Out
     def failure(error: Throwable): Out
   }
-  object TryFlatten extends Flatten0 {
-    implicit def forFuture[T]: TryFlatten[Future[T]] { type Out = Future[T] } =
-      new TryFlatten[Future[T]] {
+  object ToTryOrFuture extends ToTryOrFuture0 {
+    implicit def forFuture[T] =
+      new ToTryOrFuture[Future[T]] {
         type Out = Future[T]
         def success(value: Future[T]) = value
         def failure(error: Throwable) = FastFuture.failed(error)
       }
   }
-  sealed abstract class Flatten0 {
-    implicit def forAny[T]: TryFlatten[T] { type Out = Try[T] } =
-      new TryFlatten[T] {
+  sealed abstract class ToTryOrFuture0 {
+    implicit def forAny[T] =
+      new ToTryOrFuture[T] {
         type Out = Try[T]
         def success(value: T) = Success(value)
         def failure(error: Throwable) = Failure(error)
+      }
+  }
+
+  sealed abstract class ToFuture[T] {
+    type Out
+    def apply(t: T): Future[Out]
+  }
+  object ToFuture extends ToFuture0 {
+    implicit def forFuture[T] =
+      new ToFuture[Future[T]] {
+        type Out = T
+        def apply(value: Future[T]) = value
+      }
+  }
+  sealed abstract class ToFuture0 {
+    implicit def forAny[T] =
+      new ToFuture[T] {
+        type Out = T
+        def apply(value: T) = Future.successful(value)
       }
   }
 

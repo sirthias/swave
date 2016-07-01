@@ -4,7 +4,11 @@
 
 package swave.core
 
+import java.util.concurrent.atomic.AtomicReference
 import org.reactivestreams.Processor
+import scala.util.control.NonFatal
+import scala.annotation.tailrec
+import scala.concurrent.duration.Duration
 import scala.annotation.unchecked.{ uncheckedVariance ⇒ uV }
 import shapeless._
 import swave.core.impl.rs.SubPubProcessor
@@ -13,12 +17,15 @@ import swave.core.impl.stages.inout.NopStage
 import swave.core.impl._
 
 final class Pipe[-A, +B] private (
-    private val firstStage: Outport,
-    private val lastStage: Inport) extends StreamOps[B @uV] {
+    private[core] val firstStage: Outport,
+    private[core] val lastStage: Inport) extends StreamOps[B @uV] {
 
   type Repr[T] = Pipe[A @uV, T]
 
   def pipeElem: PipeElem = firstStage.pipeElem
+
+  def inputAsDrain: Drain[A, Unit] = new Drain(firstStage, ())
+  def outputAsStream: Stream[B] = new Stream(lastStage)
 
   private[core] def transform(stream: Stream[A]): Stream[B] = {
     stream.inport.subscribe()(firstStage)
@@ -91,5 +98,34 @@ object Pipe {
   def apply[T]: T =>> T = {
     val stage = new NopStage
     new Pipe(stage, stage)
+  }
+
+  def fromDrainAndStream[A, B](drain: Drain[A, Unit], stream: Stream[B]): Pipe[A, B] =
+    new Pipe(drain.outport, stream.inport)
+
+  def fromProcessor[A, B](processor: Processor[A, B]): Pipe[A, B] =
+    fromDrainAndStream(Drain.fromSubscriber(processor), Stream.fromPublisher(processor))
+
+  def lazyStart[A, B](onStart: () ⇒ Pipe[A, B], subscriptionTimeout: Duration = Duration.Undefined): Pipe[A, B] = {
+    val innerPipeRef = new AtomicReference[Pipe[A, B]]
+    val placeholder = Pipe[A].asInstanceOf[Pipe[A, B]]
+    @tailrec def innerPipe: Pipe[A, B] =
+      innerPipeRef.get match {
+        case null ⇒
+          if (innerPipeRef.compareAndSet(null, placeholder)) {
+            val pipe =
+              try onStart()
+              catch { case NonFatal(e) ⇒ fromDrainAndStream(Drain.cancelling, Stream.failing(e)) }
+            innerPipeRef.set(pipe)
+            pipe
+          } else innerPipe
+        case `placeholder` ⇒
+          // Thread.onSpinWait() // enable once we are on JDK9
+          innerPipe
+        case x ⇒ x
+      }
+    fromDrainAndStream(
+      drain = Drain.lazyStart(() ⇒ innerPipe.inputAsDrain).dropResult, // TODO: remove superfluous intermediate allocations
+      stream = Stream.lazyStart(() ⇒ innerPipe.outputAsStream))
   }
 }

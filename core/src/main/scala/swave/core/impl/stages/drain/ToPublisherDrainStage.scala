@@ -49,7 +49,7 @@ private[core] final class ToPublisherDrainStage extends DrainStage with PipeElem
           val s = new SyncSubscription
           sub.onSubscribe(s)
           if (!s.cancelled) sub.onError(e)
-          stop()
+          stop(e)
       }
     })
 
@@ -71,7 +71,7 @@ private[core] final class ToPublisherDrainStage extends DrainStage with PipeElem
 
     onError = (e, _) => {
       subscriber.onError(e)
-      stop()
+      stop(e)
     },
 
     xEvent = {
