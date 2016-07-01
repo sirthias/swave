@@ -165,6 +165,17 @@ final class XorShiftRandom(seed0: Long, seed1: Long) {
     rec(array.length - 1)
   }
 
+  def alphanumericChars: Iterator[Char] =
+    Iterator continually {
+      val chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+      chars charAt nextInt(chars.length)
+    }
+
+  def alphanumericString(length: Int): String = {
+    val iter = alphanumericChars
+    new String(Array.fill(length)(iter.next()))
+  }
+
   def asScalaRandom = new XorShiftRandom.Random(this)
 }
 

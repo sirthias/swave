@@ -263,7 +263,11 @@ trait StreamOps[A] extends Any { self ⇒
     via(Pipe[A].fanOutBroadcast(eagerCancel = eagerCancel).sub.to(nop).subContinue.named("tee", nop))
   }
 
-  final def throttle(d: FiniteDuration): Repr[A] = ???
+  final def throttle(elements: Int, per: FiniteDuration, burst: Int = 0): Repr[A] =
+    throttle(elements, per, burst, oneIntFunc)
+
+  def throttle(cost: Int, per: FiniteDuration, burst: Int, costFn: A ⇒ Int): Repr[A] =
+    append(new ThrottleStage(cost, per, burst, costFn.asInstanceOf[AnyRef ⇒ Int]))
 
   def via[B](pipe: A =>> B): Repr[B]
 
