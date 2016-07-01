@@ -105,40 +105,42 @@ val `typesafe-config`      = "com.typesafe"               %   "config"          
 val shapeless              = "com.chuusai"                %%  "shapeless"             % "2.3.1"
 val `scala-logging`        = "com.typesafe.scala-logging" %%  "scala-logging"         % "3.4.0"
 
+// akka-compat
+val `akka-stream`          = "com.typesafe.akka"          %%  "akka-stream"           % "2.4.7"
+
 // test
 val scalatest              = "org.scalatest"              %%  "scalatest"             % "2.2.6"   % "test"
 val scalacheck             = "org.scalacheck"             %%  "scalacheck"            % "1.12.5"
 val `reactive-streams-tck` = "org.reactivestreams"        %   "reactive-streams-tck"  % "1.0.0"   % "test"
 
 // examples
-val `akka-stream`          = "com.typesafe.akka"          %%  "akka-stream"           % "2.4.7"
+val `akka-http-core`       = "com.typesafe.akka"          %%  "akka-http-core"        % "2.4.7"
 val logback                = "ch.qos.logback"             %   "logback-classic"       % "1.1.7"
 
 /////////////////////// PROJECTS /////////////////////////
 
 lazy val swave = project.in(file("."))
-  .aggregate(benchmarks, examples, core, `core-tests`, testkit)
+  .aggregate(akkaCompat, benchmarks, core, `core-macros`, `core-tests`, examples, testkit)
   .settings(commonSettings: _*)
   .settings(releaseSettings: _*)
   .settings(noPublishingSettings: _*)
+
+lazy val akkaCompat = project
+  .dependsOn(core, testkit)
+  .enablePlugins(AutomateHeaderPlugin)
+  .settings(commonSettings: _*)
+  .settings(releaseSettings: _*)
+  .settings(publishingSettings: _*)
+  .settings(
+    moduleName := "swave-akka-compat",
+    macroParadise,
+    libraryDependencies ++= Seq(`akka-stream`, scalatest))
 
 lazy val benchmarks = project
   .dependsOn(core)
   .enablePlugins(AutomateHeaderPlugin)
   .settings(commonSettings: _*)
   .settings(noPublishingSettings: _*)
-
-lazy val examples = project
-  .dependsOn(core)
-  .enablePlugins(AutomateHeaderPlugin)
-  .disablePlugins(com.typesafe.sbt.SbtScalariform)
-  .settings(commonSettings: _*)
-  .settings(noPublishingSettings: _*)
-  .settings(
-    fork in run := true,
-    connectInput in run := true,
-    javaOptions in run ++= Seq("-XX:+UnlockCommercialFeatures", "-XX:+FlightRecorder"),
-    libraryDependencies ++= Seq(`akka-stream`, logback))
 
 lazy val core = project
   .dependsOn(`core-macros` % "compile-internal, test-internal")
@@ -152,13 +154,6 @@ lazy val core = project
     libraryDependencies ++= Seq(`reactive-streams`,  `jctools-core`, `typesafe-config`, shapeless, `scala-logging`,
       scalatest, scalacheck % "test"))
 
-lazy val `core-tests` = project
-  .dependsOn(core, testkit, `core-macros` % "test-internal")
-  .enablePlugins(AutomateHeaderPlugin)
-  .settings(commonSettings: _*)
-  .settings(noPublishingSettings: _*)
-  .settings(libraryDependencies ++= Seq(shapeless, scalatest, `reactive-streams-tck`, scalacheck % "test", logback % "test"))
-
 lazy val `core-macros` = project
   .enablePlugins(AutomateHeaderPlugin)
   .settings(commonSettings: _*)
@@ -166,6 +161,25 @@ lazy val `core-macros` = project
   .settings(
     macroParadise,
     libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value)
+
+lazy val `core-tests` = project
+  .dependsOn(core, testkit, `core-macros` % "test-internal")
+  .enablePlugins(AutomateHeaderPlugin)
+  .settings(commonSettings: _*)
+  .settings(noPublishingSettings: _*)
+  .settings(libraryDependencies ++= Seq(shapeless, scalatest, `reactive-streams-tck`, scalacheck % "test", logback % "test"))
+
+lazy val examples = project
+  .dependsOn(core, akkaCompat)
+  .enablePlugins(AutomateHeaderPlugin)
+  .disablePlugins(com.typesafe.sbt.SbtScalariform)
+  .settings(commonSettings: _*)
+  .settings(noPublishingSettings: _*)
+  .settings(
+    fork in run := true,
+    connectInput in run := true,
+    javaOptions in run ++= Seq("-XX:+UnlockCommercialFeatures", "-XX:+FlightRecorder"),
+    libraryDependencies ++= Seq(`akka-stream`, `akka-http-core`, logback))
 
 lazy val testkit = project
   .dependsOn(core, `core-macros` % "compile-internal")
