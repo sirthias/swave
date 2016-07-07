@@ -5,6 +5,7 @@
 package swave.core
 
 import com.typesafe.config.{ Config, ConfigFactory }
+import swave.core.io.files.FileIO
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import com.typesafe.scalalogging.Logger
@@ -46,6 +47,7 @@ object StreamEnv {
       subscriptionTimeout: Duration,
       dispatcherSettings: Dispatchers.Settings,
       schedulerSettings: Scheduler.Settings,
+      fileIOSettings: FileIO.Settings,
       extensionSettings: Extension.Settings) {
 
     requireArg(throughput > 0, "`throughput` must be > 0")
@@ -60,6 +62,7 @@ object StreamEnv {
         subscriptionTimeout = c getScalaDuration "subscription-timeout",
         dispatcherSettings = Dispatchers.Settings fromSubConfig c.getConfig("dispatcher"),
         schedulerSettings = Scheduler.Settings fromSubConfig c.getConfig("scheduler"),
+        fileIOSettings = FileIO.Settings fromSubConfig c.getConfig("file-io"),
         extensionSettings = Extension.Settings fromSubConfig c.getConfig("extensions"))
   }
 

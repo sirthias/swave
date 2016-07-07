@@ -22,6 +22,10 @@ trait StreamEnvShutdown extends Matchers with Inside with BeforeAndAfterAll { th
 
   override val invokeBeforeAllAndAfterAllEvenIfNoTestsAreExpected = true
 
-  override protected def afterAll(): Unit = env.shutdown().awaitTermination(2.seconds)
+  override protected def afterAll(): Unit = {
+    env.shutdown().awaitTermination(2.seconds)
+    afterTermination()
+  }
 
+  protected def afterTermination(): Unit = ()
 }

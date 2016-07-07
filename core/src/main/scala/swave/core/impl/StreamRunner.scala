@@ -7,8 +7,8 @@ package swave.core.impl
 import scala.annotation.tailrec
 import scala.concurrent.duration._
 import com.typesafe.scalalogging.Logger
-import swave.core.PipeElem.InOut.AsyncBoundary
 import swave.core.impl.stages.drain.SubDrainStage
+import swave.core.impl.stages.inout.AsyncBoundaryStage
 import swave.core.impl.stages.source.SubSourceStage
 import swave.core.impl.stages.Stage
 import swave.core.util._
@@ -110,30 +110,35 @@ private[core] object StreamRunner {
   private final class AssignToRegion(val runner: StreamRunner, isDefault: Boolean,
       ovrride: Boolean = false) extends (PipeElem.Basic ⇒ Boolean) {
     def _apply(pe: PipeElem.Basic): Boolean = apply(pe)
-    @tailrec def apply(pe: PipeElem.Basic): Boolean = {
-      val stage = pe.asInstanceOf[Stage]
-      if (((stage.runner eq null) || (ovrride && (stage.runner ne runner))) && !stage.isInstanceOf[AsyncBoundary]) {
-        stage.runner = runner
-        import pe._
-        3 * inputElems.size012 + outputElems.size012 match {
-          case 0 /* 0:0 */ ⇒ throw new IllegalStateException // no input and no output?
-          case 1 /* 0:1 */ ⇒ stage match {
-            case x: SubSourceStage ⇒ subStreamBoundary(x.in, x, outputElems.head)
-            case _                 ⇒ apply(outputElems.head)
+    @tailrec def apply(pe: PipeElem.Basic): Boolean =
+      pe match {
+        case x: AsyncBoundaryStage ⇒
+          // async boundary stages belong to their upstream runner
+          x.runner = x.inputElem.asInstanceOf[Stage].runner
+          true
+        case stage: Stage if (stage.runner eq null) || (ovrride && (stage.runner ne runner)) ⇒
+          stage.runner = runner
+          import pe._
+          3 * inputElems.size012 + outputElems.size012 match {
+            case 0 /* 0:0 */ ⇒ throw new IllegalStateException // no input and no output?
+            case 1 /* 0:1 */ ⇒ stage match {
+              case x: SubSourceStage ⇒ subStreamBoundary(x.in, x, outputElems.head)
+              case _                 ⇒ apply(outputElems.head)
+            }
+            case 2 /* 0:x */ ⇒ outputElems.forall(this)
+            case 3 /* 1:0 */ ⇒ stage match {
+              case x: SubDrainStage ⇒ subStreamBoundary(x.out, x, inputElems.head)
+              case _                ⇒ apply(inputElems.head)
+            }
+            case 4 /* 1:1 */ ⇒ _apply(inputElems.head) && apply(outputElems.head)
+            case 5 /* 1:x */ ⇒ _apply(inputElems.head) && outputElems.forall(this)
+            case 6 /* x:0 */ ⇒ inputElems.forall(this)
+            case 7 /* x:1 */ ⇒ inputElems.forall(this) && apply(outputElems.head)
+            case 8 /* x:x */ ⇒ inputElems.forall(this) && outputElems.forall(this)
           }
-          case 2 /* 0:x */ ⇒ outputElems.forall(this)
-          case 3 /* 1:0 */ ⇒ stage match {
-            case x: SubDrainStage ⇒ subStreamBoundary(x.out, x, inputElems.head)
-            case _                ⇒ apply(inputElems.head)
-          }
-          case 4 /* 1:1 */ ⇒ _apply(inputElems.head) && apply(outputElems.head)
-          case 5 /* 1:x */ ⇒ _apply(inputElems.head) && outputElems.forall(this)
-          case 6 /* x:0 */ ⇒ inputElems.forall(this)
-          case 7 /* x:1 */ ⇒ inputElems.forall(this) && apply(outputElems.head)
-          case 8 /* x:x */ ⇒ inputElems.forall(this) && outputElems.forall(this)
-        }
-      } else true
-    }
+        case _ ⇒ true
+      }
+
     def subStreamBoundary(parent: Stage, subStream: Stage, next: PipeElem.Basic): Boolean =
       if (parent.runner ne null) {
         if (parent.runner ne runner) {
