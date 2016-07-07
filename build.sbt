@@ -3,6 +3,9 @@ import de.heikoseeberger.sbtheader.HeaderPattern
 import com.typesafe.sbt.SbtScalariform._
 import ReleaseTransformations._
 
+lazy val contributors = Seq(
+  "Mathias Doenitz" -> "sirthias")
+
 lazy val commonSettings = Seq(
   organization := "io.swave",
   scalaVersion := "2.11.8",
@@ -44,7 +47,9 @@ lazy val publishingSettings = Seq(
   },
   pomExtra :=
     <developers>
-      <developer><id>sirthias</id><name>Mathias Doenitz</name><url>https://github.com/sirthias/</url></developer>
+      {for ((name, username) <- contributors)
+        yield <developer><id>{username}</id><name>{name}</name><url>http://github.com/{username}</url></developer>
+      }
     </developers>)
 
 lazy val noPublishingSettings = Seq(
@@ -105,8 +110,9 @@ val `typesafe-config`      = "com.typesafe"               %   "config"          
 val shapeless              = "com.chuusai"                %%  "shapeless"             % "2.3.1"
 val `scala-logging`        = "com.typesafe.scala-logging" %%  "scala-logging"         % "3.4.0"
 
-// akka-compat
+// *-compat
 val `akka-stream`          = "com.typesafe.akka"          %%  "akka-stream"           % "2.4.7"
+val `scodec-bits`          = "org.scodec"                 %%  "scodec-bits"           % "1.1.0"
 
 // test
 val scalatest              = "org.scalatest"              %%  "scalatest"             % "2.2.6"   % "test"
@@ -120,20 +126,19 @@ val logback                = "ch.qos.logback"             %   "logback-classic" 
 /////////////////////// PROJECTS /////////////////////////
 
 lazy val swave = project.in(file("."))
-  .aggregate(akkaCompat, benchmarks, core, `core-macros`, `core-tests`, examples, testkit)
+  .aggregate(akkaCompat, benchmarks, core, `core-macros`, `core-tests`, examples, scodecCompat, testkit)
   .settings(commonSettings: _*)
   .settings(releaseSettings: _*)
   .settings(noPublishingSettings: _*)
 
 lazy val akkaCompat = project
-  .dependsOn(core, testkit)
+  .dependsOn(core, `core-macros` % "compile-internal", testkit)
   .enablePlugins(AutomateHeaderPlugin)
   .settings(commonSettings: _*)
   .settings(releaseSettings: _*)
   .settings(publishingSettings: _*)
   .settings(
     moduleName := "swave-akka-compat",
-    macroParadise,
     libraryDependencies ++= Seq(`akka-stream`, scalatest))
 
 lazy val benchmarks = project
@@ -180,6 +185,16 @@ lazy val examples = project
     connectInput in run := true,
     javaOptions in run ++= Seq("-XX:+UnlockCommercialFeatures", "-XX:+FlightRecorder"),
     libraryDependencies ++= Seq(`akka-stream`, `akka-http-core`, logback))
+
+lazy val scodecCompat = project
+  .dependsOn(core, `core-macros` % "compile-internal", testkit, `core-tests` % "test->test")
+  .enablePlugins(AutomateHeaderPlugin)
+  .settings(commonSettings: _*)
+  .settings(releaseSettings: _*)
+  .settings(publishingSettings: _*)
+  .settings(
+    moduleName := "swave-scodec-compat",
+    libraryDependencies ++= Seq(`scodec-bits`, scalatest, logback % "test"))
 
 lazy val testkit = project
   .dependsOn(core, `core-macros` % "compile-internal")

@@ -4,6 +4,7 @@
 
 package swave.core
 
+import java.nio.charset.Charset
 import com.typesafe.config.Config
 import scala.concurrent.duration._
 import scala.concurrent.Future
@@ -20,6 +21,9 @@ package object util {
   val dropFunc: Any ⇒ Unit = _ ⇒ ()
 
   val oneIntFunc: Any ⇒ Int = _ ⇒ 1
+
+  val UTF8 = Charset.forName("UTF-8")
+  val ASCII = Charset.forName("US-ASCII")
 
   def isPowerOf2(i: Int): Boolean = Integer.lowestOneBit(i) == i
 
