@@ -63,7 +63,7 @@ private[impl] final class DispatcherImpl(val settings: Dispatcher.Settings, crea
       case Terminated(result) ⇒ result
 
       case Creating ⇒
-        LockSupport.parkNanos(100 * 1000) // park for 100 microseconds
+        // Thread.onSpinWait() // TODO: enable once we are on JDK9
         shutdown()
     }
 

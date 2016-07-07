@@ -120,7 +120,7 @@ object Pipe {
             pipe
           } else innerPipe
         case `placeholder` ⇒
-          // Thread.onSpinWait() // enable once we are on JDK9
+          // Thread.onSpinWait() // TODO: enable once we are on JDK9
           innerPipe
         case x ⇒ x
       }
