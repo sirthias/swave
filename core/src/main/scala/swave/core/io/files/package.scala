@@ -4,8 +4,17 @@
 
 package swave.core.io
 
+import java.nio.channels.FileChannel
+
+import swave.core._
+
+import scala.util.control.NonFatal
+
 package object files {
 
-  implicit class RichStream(underlying: Stream.type) extends FileIO
+  implicit class RichStream(val underlying: Stream.type) extends AnyVal with StreamFromFiles
+  implicit class RichDrain(val underlying: Drain.type) extends AnyVal with DrainToFiles
 
+  private[io] def quietClose(channel: FileChannel): Unit =
+    try channel.close() catch { case NonFatal(_) ⇒ }
 }

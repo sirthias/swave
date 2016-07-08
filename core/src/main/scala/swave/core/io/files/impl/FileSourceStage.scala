@@ -2,34 +2,35 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package swave.core.impl.stages.source
+package swave.core.io.files.impl
 
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.channels.FileChannel
 import java.nio.file.Path
-import scala.annotation.tailrec
-import scala.util.control.NonFatal
 import com.typesafe.scalalogging.Logger
-import swave.core.io.Byteable
+import scala.annotation.tailrec
 import swave.core.PipeElem
 import swave.core.impl.Outport
+import swave.core.impl.stages.source.SourceStage
+import swave.core.io.Bytes
+import swave.core.io.files.quietClose
 import swave.core.macros._
 
 // format: OFF
 @StageImpl
-private[core] final class FileSourceStage[T <: AnyRef](path: Path, _chunkSize: Int)(implicit byteable: Byteable[T])
+private[core] final class FileSourceStage[T](path: Path, _chunkSize: Int)(implicit bytes: Bytes[T])
   extends SourceStage with PipeElem.Source.File {
 
   def pipeElemType: String = "Stream.fromPath"
   def pipeElemParams: List[Any] = path :: _chunkSize :: Nil
 
   private[this] val log = Logger(getClass)
-  private implicit def decorator(value: T): Byteable.Decorator[T] = Byteable.decorator(value)
+  private implicit def decorator(value: T): Bytes.Decorator[T] = Bytes.decorator(value)
 
   connectOutAndSealWith { (ctx, out) ⇒
     ctx.registerForXStart(this)
-    val cSize = if (_chunkSize > 0) _chunkSize else ctx.env.settings.fileIOSettings.defaultFileChunkSize
+    val cSize = if (_chunkSize > 0) _chunkSize else ctx.env.settings.fileIOSettings.defaultFileReadingChunkSize
     val buf = ByteBuffer.allocate(cSize)
     running(out, cSize, buf)
   }
@@ -67,16 +68,16 @@ private[core] final class FileSourceStage[T <: AnyRef](path: Path, _chunkSize: I
         @tailrec def rec(remaining: Int, chunk: T): State =
           if (chunk.nonEmpty) {
             if (remaining > 0) {
-              out.onNext(chunk)
+              out.onNext(chunk.asInstanceOf[AnyRef])
               rec(remaining - 1, readChunk(channel))
             } else reading(channel, chunk)
           } else stopComplete(out)
 
-        out.onNext(nextChunk)
+        out.onNext(nextChunk.asInstanceOf[AnyRef])
         try rec(n - 1, readChunk(channel))
         catch {
           case e: IOException =>
-            log.debug("Error reading from file-system path `{}`: {}", path, e)
+            log.debug("Error reading from `{}`: {}", path, e)
             quietClose(channel)
             stopError(e, out)
         }
@@ -86,7 +87,7 @@ private[core] final class FileSourceStage[T <: AnyRef](path: Path, _chunkSize: I
         try channel.close()
         catch {
           case e: IOException =>
-            log.debug("Error closing file-system path `{}`: {}", path, e)
+            log.debug("Error closing `{}`: {}", path, e)
             stopError(e, out)
         }
         stop()
@@ -94,17 +95,14 @@ private[core] final class FileSourceStage[T <: AnyRef](path: Path, _chunkSize: I
 
     def readChunk(chan: FileChannel): T =
       chan.read(buffer) match {
-        case -1 => byteable.empty // EOF
+        case -1 => bytes.empty // EOF
         case n =>
           requireState(n > 0, "FileChannel::read returned " + n)
           buffer.flip()
-          val result = byteable(buffer)
+          val result = bytes(buffer)
           buffer.clear()
           result
       }
-
-    def quietClose(chan: FileChannel): Unit =
-      try chan.close() catch { case NonFatal(_) => }
 
     awaitingXStart()
   }

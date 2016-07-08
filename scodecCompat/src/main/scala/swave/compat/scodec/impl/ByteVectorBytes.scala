@@ -7,13 +7,11 @@ package swave.compat.scodec.impl
 import java.io.OutputStream
 import java.nio.ByteBuffer
 import java.nio.charset.{ CharacterCodingException, Charset }
-
-import scodec.bits.ByteVector
-import swave.core.io.Byteable
-
 import scala.collection.GenTraversableOnce
+import scodec.bits.ByteVector
+import swave.core.io.Bytes
 
-class ByteVectorByteable extends Byteable[ByteVector] {
+class ByteVectorBytes extends Bytes[ByteVector] {
 
   ///////////////// CONSTRUCTION ///////////////////
 

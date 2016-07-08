@@ -28,7 +28,7 @@ final class Drain[-T, +R] private[swave] (private[swave] val outport: Outport, v
     dropResult
   }
 
-  def dropResult: Drain[T, Unit] = new Drain(outport, ())
+  def dropResult: Drain[T, Unit] = Drain(outport)
 
   def mapResult[P](f: R ⇒ P): Drain[T, P] = new Drain(outport, f(result))
 
@@ -89,7 +89,7 @@ object Drain {
   }
 
   def cancelling: Drain[Any, Unit] =
-    new Drain(new CancellingDrainStage, ())
+    Drain(new CancellingDrainStage)
 
   def first[T](n: Int): Drain[T, Future[immutable.Seq[T]]] =
     Pipe[T].grouped(n, emitSingleEmpty = true).to(head) named "Drain.first"
@@ -103,7 +103,7 @@ object Drain {
     Pipe[T].fold(zero)(f).to(head) named "Drain.fold"
 
   def fromSubscriber[T](subscriber: Subscriber[T]): Drain[T, Unit] =
-    new Drain(new FromSubscriberStage(subscriber.asInstanceOf[Subscriber[AnyRef]]), ())
+    Drain(new FromSubscriberStage(subscriber.asInstanceOf[Subscriber[AnyRef]]))
 
   def head[T]: Drain[T, Future[T]] = {
     val promise = Promise[AnyRef]()
@@ -138,6 +138,8 @@ object Drain {
 
   def generalSeq[M[+_], T](limit: Long)(implicit cbf: CanBuildFrom[M[T], T, M[T]]): Drain[T, Future[M[T]]] =
     Pipe[T].limit(limit).groupedTo[M](Integer.MAX_VALUE, emitSingleEmpty = true).to(head) named "Drain.seq"
+
+  private[swave] def apply[T](outport: Outport): Drain[T, Unit] = new Drain(outport, ())
 
   sealed abstract class Capture[-R, P] {
     def apply(result: R, promise: Promise[P]): Unit

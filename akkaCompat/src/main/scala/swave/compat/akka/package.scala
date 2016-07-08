@@ -8,7 +8,7 @@ import scala.concurrent.{ Promise, Future }
 import _root_.akka.NotUsed
 import _root_.akka.stream.Materializer
 import _root_.akka.stream.scaladsl.{ Keep, Flow, Sink, Source }
-import swave.compat.akka.impl.ByteStringByteable
+import swave.compat.akka.impl.ByteStringBytes
 import swave.core.impl.Inport
 import swave.core._
 
@@ -94,7 +94,7 @@ package object akka {
     }
   }
 
-  implicit val byteVectorByteable: ByteStringByteable = new ByteStringByteable
+  implicit val byteStringBytes: ByteStringBytes = new ByteStringBytes
 }
 
 package akka {

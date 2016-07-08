@@ -4,10 +4,10 @@
 
 package swave.compat
 
-import swave.compat.scodec.impl.ByteVectorByteable
+import swave.compat.scodec.impl.ByteVectorBytes
 
 package object scodec {
 
-  implicit val byteVectorByteable: ByteVectorByteable = new ByteVectorByteable
+  implicit val byteVectorBytes: ByteVectorBytes = new ByteVectorBytes
 
 }

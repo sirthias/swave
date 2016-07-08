@@ -7,12 +7,12 @@ package swave.core.impl.stages
 import java.nio.charset.StandardCharsets._
 import java.nio.file.Files
 import scodec.bits.ByteVector
-import swave.core.{ StreamEnv, SwaveSpec }
+import swave.core._
 import swave.testkit.Probes._
 
 class FileSourceSpec extends SwaveSpec {
-  import swave.core.io.files._
   import swave.compat.scodec._
+  import swave.core.io.files._
 
   implicit val env = StreamEnv()
 

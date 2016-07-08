@@ -4,52 +4,27 @@
 
 package swave.core.io.files
 
-import java.io.File
-import java.nio.file.Path
+import java.nio.file.StandardOpenOption
 import com.typesafe.config.Config
-import swave.core.impl.stages.source.FileSourceStage
-import swave.core.io.Byteable
-import swave.core.macros._
 import swave.core.util.SettingsCompanion
-import swave.core._
+import swave.core.macros._
 
-trait FileIO {
+object FileIO extends StreamFromFiles with DrainToFiles {
 
-  /**
-   * Creates a `Stream` instance that streams the contents of the given file in chunks of the
-   * given size (if `chunkSize` > 0) or the configured `swave.core.file-io.default-file-chunk-size`.
-   *
-   * Since there is no truly async kernel API for file IO and thus file IO is necessarily blocking
-   * the actual reading from the file system happens on the dispatcher configured via
-   * `swave.core.dispatcher.definition.blocking-io`, i.e. the `Stream` created by this method is always
-   * an async stream.
-   */
-  def fromFile[T <: AnyRef](file: File, chunkSize: Int = 0)(implicit b: Byteable[T]): Stream[T] =
-    fromPath(file.toPath)
+  val WriteCreateOptions: Set[StandardOpenOption] = Set(StandardOpenOption.WRITE, StandardOpenOption.CREATE)
 
-  /**
-   * Creates a `Stream` instance that streams the contents of the given file in chunks of the
-   * given size (if `chunkSize` > 0) or the configured `swave.core.file-io.default-file-chunk-size`.
-   *
-   * Since there is no truly async kernel API for file IO and thus file IO is necessarily blocking
-   * the actual reading from the file system happens on the dispatcher configured via
-   * `swave.core.dispatcher.definition.blocking-io`, i.e. the `Stream` created by this method is always
-   * an async stream.
-   */
-  def fromPath[T <: AnyRef](path: Path, chunkSize: Int = 0)(implicit b: Byteable[T]): Stream[T] =
-    new Stream(new FileSourceStage(path, chunkSize)).async("blocking-io")
-}
-
-object FileIO extends FileIO {
-
-  final case class Settings(defaultFileChunkSize: Int) {
-    requireArg(defaultFileChunkSize > 0, "`defaultFileChunkSize` must be > 0")
+  final case class Settings(
+      defaultFileReadingChunkSize: Int,
+      defaultFileWritingChunkSize: Int) {
+    requireArg(defaultFileReadingChunkSize > 0, "`defaultFileChunkSize` must be > 0")
+    requireArg(defaultFileWritingChunkSize >= 0, "`defaultFileWritingChunkSize` must be >= 0")
   }
 
   object Settings extends SettingsCompanion[Settings]("swave.core.file-io") {
     def fromSubConfig(c: Config): Settings =
       Settings(
-        defaultFileChunkSize = c getInt "default-file-chunk-size")
+        defaultFileReadingChunkSize = c getInt "default-file-reading-chunk-size",
+        defaultFileWritingChunkSize = c getInt "default-file-writing-chunk-size")
   }
 
 }

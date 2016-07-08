@@ -8,15 +8,13 @@ import java.io.OutputStream
 import java.nio.charset.{ CharacterCodingException, Charset }
 import java.nio.{ ByteBuffer, CharBuffer }
 import java.util
-
-import akka.util.ByteString
-import swave.core.io.Byteable
-import swave.core.macros._
-
 import scala.annotation.tailrec
 import scala.collection.GenTraversableOnce
+import akka.util.ByteString
+import swave.core.io.Bytes
+import swave.core.macros._
 
-class ByteStringByteable extends Byteable[ByteString] {
+class ByteStringBytes extends Bytes[ByteString] {
 
   ///////////////// CONSTRUCTION ///////////////////
 

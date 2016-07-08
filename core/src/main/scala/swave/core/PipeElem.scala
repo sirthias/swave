@@ -60,6 +60,7 @@ object PipeElem {
   }
   object Drain {
     trait Cancelling extends Drain
+    trait File extends Drain
     trait Foreach extends Drain
     trait FromSubscriber extends Drain
     trait Head extends Drain

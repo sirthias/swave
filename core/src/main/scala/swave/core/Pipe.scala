@@ -24,7 +24,7 @@ final class Pipe[-A, +B] private (
 
   def pipeElem: PipeElem = firstStage.pipeElem
 
-  def inputAsDrain: Drain[A, Unit] = new Drain(firstStage, ())
+  def inputAsDrain: Drain[A, Unit] = Drain(firstStage)
   def outputAsStream: Stream[B] = new Stream(lastStage)
 
   private[core] def transform(stream: Stream[A]): Stream[B] = {
