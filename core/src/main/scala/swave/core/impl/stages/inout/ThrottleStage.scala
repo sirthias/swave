@@ -115,10 +115,12 @@ private[core] final class ThrottleStage(cost: Int, per: FiniteDuration, burst: I
           stopComplete(out)
       })
 
-    def processElement(elem: AnyRef, rem: Long): State =
-      try {
+    def processElement(elem: AnyRef, rem: Long): State = {
+      var funError: Throwable = null
+      val elemCost = try costFn(elem) catch { case NonFatal(e) => { funError = e; 0 } }
+      if (funError eq null) {
         requireState(rem > 0, s"`remaining` must be > 0")
-        val delay = tokenBucket.offer(costFn(elem).toLong)
+        val delay = tokenBucket.offer(elemCost.toLong)
         if (delay > 0L) {
           val t = runner.scheduleTimeout(this, delay.nanos)
           awaitingTimeout(t, elem, rem)
@@ -127,7 +129,11 @@ private[core] final class ThrottleStage(cost: Int, per: FiniteDuration, burst: I
           in.request(1)
           awaitingElement(rem - 1)
         }
-      } catch { case NonFatal(e) => { in.cancel(); stopError(e, out) }}
+      } else {
+        in.cancel()
+        stopError(funError, out)
+      }
+    }
 
     awaitingXStart()
   }

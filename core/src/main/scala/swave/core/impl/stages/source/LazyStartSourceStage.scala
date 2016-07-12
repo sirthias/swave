@@ -29,14 +29,13 @@ private[core] final class LazyStartSourceStage(onStart: () => Stream[AnyRef], ti
 
   def awaitingXStart(ctx: RunContext, out: Outport) = state(
     xStart = () => {
-      try {
-        val inport = onStart().inport
+      var funError: Throwable = null
+      val inport = try onStart().inport catch { case NonFatal(e) => { funError = e; null } }
+      if (funError eq null) {
         val sub = new SubDrainStage(ctx, this, timeout orElse ctx.env.settings.subscriptionTimeout)
         inport.subscribe()(sub)
         awaitingOnSubscribe(ctx, sub, out)
-      } catch {
-        case NonFatal(e) => stopError(e, out)
-      }
+      } else stopError(funError, out)
     })
 
   def awaitingOnSubscribe(ctx: RunContext, in: Inport, out: Outport) = state(

@@ -23,39 +23,52 @@ private[core] final class OnEventStage(callback: StreamEvent[Any] ⇒ Unit) exte
     intercept = false,
 
     request = (n, _) ⇒ {
-      try {
-        callback(StreamEvent.Request(n))
+      val callbackError = try { callback(StreamEvent.Request(n)); null } catch { case NonFatal(e) => e }
+      if (callbackError eq null) {
         in.request(n.toLong)
         stay()
-      } catch { case NonFatal(e) => { in.cancel(); stopError(e, out) } }
+      } else {
+        in.cancel()
+        stopError(callbackError, out)
+      }
     },
 
     cancel = _ ⇒ {
-      try {
-        callback(StreamEvent.Cancel)
-        stopCancel(in)
-      } catch { case NonFatal(e) => { in.cancel(); stopError(e, out) } }
+      try callback(StreamEvent.Cancel)
+      catch {
+        case NonFatal(e) => () // no point in forwarding the error since our downstream is already cancelled
+      }
+      stopCancel(in)
     },
 
     onNext = (elem, _) ⇒ {
-      try {
-        callback(StreamEvent.OnNext(elem))
+      val callbackError = try { callback(StreamEvent.OnNext(elem)); null } catch { case NonFatal(e) => e }
+      if (callbackError eq null) {
         out.onNext(elem)
         stay()
-      } catch { case NonFatal(e) => { in.cancel(); stopError(e, out) } }
+      } else {
+        in.cancel()
+        stopError(callbackError, out)
+      }
     },
 
     onComplete = _ ⇒ {
-      try {
-        callback(StreamEvent.OnComplete)
-        stopComplete(out)
-      } catch { case NonFatal(e) => { in.cancel(); stopError(e, out) } }
+      val callbackError =
+        try {
+          callback(StreamEvent.OnComplete)
+          null
+        } catch { case NonFatal(e) => e }
+      if (callbackError eq null) stopComplete(out)
+      else stopError(callbackError, out)
     },
 
     onError = (e, _) ⇒ {
-      try {
-        callback(StreamEvent.OnError(e))
-        stopError(e, out)
-      } catch { case NonFatal(e) => { in.cancel(); stopError(e, out) } }
+      // if the callback throws an exception we prioritize it over the stream error so as to not drop it silently
+      val error =
+        try {
+          callback(StreamEvent.OnError(e))
+          e
+        } catch { case NonFatal(x) => x }
+      stopError(error, out)
     })
 }

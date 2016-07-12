@@ -44,11 +44,15 @@ private[core] final class ScanStage(zero: AnyRef, f: (AnyRef, AnyRef) ⇒ AnyRef
     cancel = stopCancelF(in),
 
     onNext = (elem, _) ⇒ {
-      try {
-        val next = f(last, elem)
+      var funError: Throwable = null
+      val next = try f(last, elem) catch { case NonFatal(e) => { funError = e; null } }
+      if (funError eq null) {
         out.onNext(next)
         running(in, out, next)
-      } catch { case NonFatal(e) => { in.cancel(); stopError(e, out) } }
+      } else {
+        in.cancel()
+        stopError(funError, out)
+      }
     },
 
     onComplete = stopCompleteF(out),

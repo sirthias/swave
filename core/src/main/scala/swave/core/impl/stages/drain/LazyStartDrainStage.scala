@@ -27,15 +27,21 @@ private[core] final class LazyStartDrainStage(onStart: () => Drain[AnyRef, AnyRe
 
   def awaitingXStart(ctx: RunContext, in: Inport) = state(
     xStart = () => {
-      try {
-        val innerDrain = onStart()
-        connectResult(innerDrain.result)
+      var funError: Throwable = null
+      val innerDrain =
+        try {
+          val d = onStart()
+          connectResult(d.result)
+          d
+        } catch { case NonFatal(e) => { funError = e; null } }
+      if (funError eq null) {
         val sub = new SubSourceStage(ctx, this, timeout orElse ctx.env.settings.subscriptionTimeout)
         sub.subscribe()(innerDrain.outport)
         ctx.sealAndStartSubStream(sub)
         running(in, sub)
-      } catch {
-        case NonFatal(e) => stopError(e, out)
+      } else {
+        in.cancel()
+        stopError(funError, out)
       }
     })
 

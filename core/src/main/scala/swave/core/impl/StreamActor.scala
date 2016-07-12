@@ -53,7 +53,9 @@ private[impl] abstract class StreamActor(
             }
           processMailbox(throughput)
         } catch {
-          case NonFatal(e) ⇒ log.error("Uncaught exception in SimpleActor::receive", e)
+          // Non-fatal exceptions thrown in user code should never bubble up to here!
+          // Non-fatal exceptions thrown in (async) swave code should always bubble up to here!
+          case NonFatal(e) ⇒ log.error("Uncaught exception in StreamActor::receive", e)
         } finally {
           startMessageProcessing()
         }

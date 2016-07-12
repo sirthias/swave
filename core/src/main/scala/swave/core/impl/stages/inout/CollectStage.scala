@@ -31,11 +31,15 @@ private[core] final class CollectStage(pf: PartialFunction[AnyRef, AnyRef]) exte
     cancel = stopCancelF(in),
 
     onNext = (elem, _) ⇒ {
-      try {
-        val collected = pf.applyOrElse(elem, mismatchFun)
+      var funError: Throwable = null
+      val collected = try pf.applyOrElse(elem, mismatchFun) catch { case NonFatal(e) => { funError = e; null } }
+      if (funError eq null) {
         if (collected ne this) out.onNext(collected)
         stay()
-      } catch { case NonFatal(e) => { in.cancel(); stopError(e, out) } }
+      } else {
+        in.cancel()
+        stopError(funError, out)
+      }
     },
 
     onComplete = stopCompleteF(out),

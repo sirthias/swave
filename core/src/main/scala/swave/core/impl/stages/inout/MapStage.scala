@@ -25,10 +25,15 @@ private[core] final class MapStage(f: AnyRef ⇒ AnyRef) extends InOutStage with
     cancel = stopCancelF(in),
 
     onNext = (elem, _) ⇒ {
-      try {
-        out.onNext(f(elem))
+      var funError: Throwable = null
+      val mapped = try f(elem) catch { case NonFatal(e) => { funError = e; null } }
+      if (funError eq null) {
+        out.onNext(mapped)
         stay()
-      } catch { case NonFatal(e) => { in.cancel(); stopError(e, out) } }
+      } else {
+        in.cancel()
+        stopError(funError, out)
+      }
     },
 
     onComplete = stopCompleteF(out),

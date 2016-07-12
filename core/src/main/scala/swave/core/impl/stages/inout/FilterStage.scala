@@ -25,11 +25,16 @@ private[core] final class FilterStage(predicate: Any ⇒ Boolean, negated: Boole
     cancel = stopCancelF(in),
 
     onNext = (elem, _) ⇒ {
-      try {
-        if (predicate(elem) != negated) out.onNext(elem)
+      var funError: Throwable = null
+      val p = try predicate(elem) catch { case NonFatal(e) => { funError = e; false } }
+      if (funError eq null) {
+        if (p != negated) out.onNext(elem)
         else in.request(1)
         stay()
-      } catch { case NonFatal(e) => { in.cancel(); stopError(e, out) } }
+      } else {
+        in.cancel()
+        stopError(funError, out)
+      }
     },
 
     onComplete = stopCompleteF(out),

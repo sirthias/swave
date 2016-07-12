@@ -29,16 +29,18 @@ private[core] final class IteratorStage(iterator: Iterator[AnyRef]) extends Sour
 
   def running(out: Outport) = state(
     request = (n, _) ⇒ {
-      try {
-        @tailrec def rec(nn: Int): State = {
-          out.onNext(iterator.next())
+      @tailrec def rec(nn: Int): State = {
+        var iterError: Throwable = null
+        val next = try iterator.next() catch { case NonFatal(e) => { iterError = e; null } }
+        if (iterError eq null) {
+          out.onNext(next)
           if (iterator.hasNext) {
             if (nn > 1) rec(nn - 1)
             else stay()
           } else stopComplete(out)
-        }
-        rec(n)
-      } catch { case NonFatal(e) => stopError(e, out) }
+        } else stopError(iterError, out)
+      }
+      rec(n)
     },
 
     cancel = stopF)

@@ -28,15 +28,20 @@ private[core] final class DropWhileStage(predicate: Any ⇒ Boolean) extends InO
       cancel = stopCancelF(in),
 
       onNext = (elem, _) ⇒ {
-        try {
-          if (predicate(elem)) {
+        var funError: Throwable = null
+        val drop = try predicate(elem) catch { case NonFatal(e) => { funError = e; false } }
+        if (funError eq null) {
+          if (drop) {
             in.request(1)
             stay()
           } else {
             out.onNext(elem)
             draining()
           }
-        } catch { case NonFatal(e) => { in.cancel(); stopError(e, out) } }
+        } else {
+          in.cancel()
+          stopError(funError, out)
+        }
       },
 
       onComplete = stopCompleteF(out),

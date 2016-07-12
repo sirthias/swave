@@ -41,13 +41,17 @@ private[core] final class ConflateStage(lift: AnyRef => AnyRef, aggregate: (AnyR
       cancel = stopCancelF(in),
 
       onNext = (elem, _) ⇒ {
-        try {
-          val lifted = lift(elem)
+        var funError: Throwable = null
+        val lifted = try lift(elem) catch { case NonFatal(e) => { funError = e; null } }
+        if (funError eq null) {
           if (remaining > 0) {
             out.onNext(lifted)
             forwarding(remaining - 1)
           } else conflating(lifted)
-        } catch { case NonFatal(e) => { in.cancel(); stopError(e, out) } }
+        } else {
+          in.cancel()
+          stopError(funError, out)
+        }
       },
 
       onComplete = stopCompleteF(out),

@@ -30,8 +30,9 @@ private[core] final class LimitStage(max: Long, cost: AnyRef ⇒ Long) extends I
     cancel = stopCancelF(in),
 
     onNext = (elem, _) ⇒ {
-      try {
-        val rem = remaining - cost(elem)
+      var funError: Throwable = null
+      val rem = try remaining - cost(elem) catch { case NonFatal(e) => { funError = e; 0L } }
+      if (funError eq null) {
         if (rem >= 0) {
           out.onNext(elem)
           running(in, out, rem)
@@ -39,7 +40,10 @@ private[core] final class LimitStage(max: Long, cost: AnyRef ⇒ Long) extends I
           in.cancel()
           stopError(new StreamLimitExceeded(max, elem), out)
         }
-      } catch { case NonFatal(e) => { in.cancel(); stopError(e, out) } }
+      } else {
+        in.cancel()
+        stopError(funError, out)
+      }
     },
 
     onComplete = stopCompleteF(out),
