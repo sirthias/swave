@@ -6,18 +6,6 @@ package swave.core.impl.rs
 
 import org.reactivestreams._
 import swave.core.impl.stages.Stage
-import swave.core.util._
-
-private[impl] class SyncSubscription extends Subscription {
-  var cancelled = false
-  var requested = 0L
-
-  def request(n: Long) = {
-    requested ⊹= n
-  }
-
-  def cancel() = cancelled = true
-}
 
 private[impl] class ForwardToRunnerSubscription(stage: Stage) extends Subscription {
   def request(n: Long) =
@@ -38,28 +26,12 @@ private[core] class SubPubProcessor[A, B](sub: Subscriber[A], pub: Publisher[B])
   override def onError(e: Throwable): Unit = sub.onError(e)
 }
 
-private[impl] class ForwardToRunnerPublisher(stage: Stage) extends Publisher[AnyRef] {
-  def subscribe(subscriber: Subscriber[_ >: AnyRef]) = {
-    if (subscriber eq null)
-      throw new NullPointerException("Subscriber must be non-null (see reactive-streams spec, rule 1.9)")
-    stage.runner.enqueueXEvent(stage, subscriber)
-  }
-}
+private[impl] object RSCompliance {
+  def verifyNonNull(value: AnyRef, subject: String, ruleNumber: String): Unit =
+    if (value eq null)
+      throw new NullPointerException(s"$subject must be non-null (see reactive-streams spec, rule $ruleNumber)")
 
-class ForwardToRunnerSubscriber(stage: Stage) extends Subscriber[AnyRef] {
-  def onSubscribe(s: Subscription) = {
-    if (s eq null) throw new NullPointerException("Subscription must be non-null (see reactive-streams spec, rule 2.13)")
-    stage.runner.enqueueXEvent(stage, s)
-  }
-  def onNext(elem: AnyRef) = {
-    if (elem eq null) throw new NullPointerException("Element must be non-null (see reactive-streams spec, rule 2.13)")
-    stage.runner.enqueueOnNext(stage, elem)(stage)
-  }
+  class IllegalRequestCountException extends IllegalArgumentException(
+    "The number of elements requested must be > 0 (see reactive-streams spec, rule 3.9)")
 
-  def onComplete() = stage.runner.enqueueOnComplete(stage)(stage)
-
-  def onError(e: Throwable) = {
-    if (e eq null) throw new NullPointerException("Throwable must be non-null (see reactive-streams spec, rule 2.13)")
-    stage.runner.enqueueOnError(stage, e)(stage)
-  }
 }

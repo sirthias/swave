@@ -4,16 +4,16 @@
 
 package swave.core.impl.stages.source
 
-import org.reactivestreams.{ Subscription, Publisher }
+import org.reactivestreams.{ Subscriber, Subscription, Publisher }
 import swave.core.PipeElem
 import swave.core.impl.Outport
-import swave.core.impl.rs.ForwardToRunnerSubscriber
+import swave.core.impl.rs.RSCompliance
 import swave.core.macros.StageImpl
 
 // format: OFF
 @StageImpl
 private[core] final class FromPublisherStage(publisher: Publisher[AnyRef])
-  extends SourceStage with PipeElem.Source.FromPublisher {
+  extends SourceStage with PipeElem.Source.FromPublisher { stage =>
 
   def pipeElemType: String = "Stream.fromPublisher"
   def pipeElemParams: List[Any] = publisher :: Nil
@@ -26,7 +26,23 @@ private[core] final class FromPublisherStage(publisher: Publisher[AnyRef])
 
   def awaitingXStart(out: Outport) = state(
     xStart = () => {
-      publisher.subscribe(new ForwardToRunnerSubscriber(this))
+      publisher.subscribe {
+        new Subscriber[AnyRef] {
+          def onSubscribe(s: Subscription) = {
+            RSCompliance.verifyNonNull(s, "Subscription", "2.13")
+            runner.enqueueXEvent(stage, s)
+          }
+          def onNext(elem: AnyRef) = {
+            RSCompliance.verifyNonNull(elem, "Element", "2.13")
+            runner.enqueueOnNext(stage, elem)(stage)
+          }
+          def onComplete() = runner.enqueueOnComplete(stage)(stage)
+          def onError(e: Throwable) = {
+            RSCompliance.verifyNonNull(e, "Throwable", "2.13")
+            stage.runner.enqueueOnError(stage, e)(stage)
+          }
+        }
+      }
       awaitingSubscription(out)
     })
 
