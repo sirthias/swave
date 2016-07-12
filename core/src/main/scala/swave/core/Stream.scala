@@ -71,7 +71,7 @@ object Stream {
   def apply[T](value: T)(implicit ev: Streamable[T]): Stream[ev.Out] = ev(value)
 
   def apply[T](first: T, second: T, more: T*): Stream[T] =
-    apply(first :: second :: more.toList)
+    fromIterator(Iterator.single(first) ++ Iterator.single(second) ++ more.iterator) named "Stream.apply"
 
   def withSubscriber[T]: (Stream[T], Subscriber[T]) = {
     val stage = new SubscriberSourceStage

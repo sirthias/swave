@@ -1,11 +1,11 @@
 Example 1:
- o {Stream.fromIterable}
+ o {Stream.apply}
  |
  |
  o Drain.head()
 
 Example 2:
- o {Stream.fromIterable}
+ o {Stream.apply}
  |
  |
  o map(<function1>)
@@ -14,7 +14,7 @@ Example 2:
  o Drain.foreach(<function1>, List())
 
 Example 3:
- o {Stream.fromIterable}
+ o {Stream.apply}
  |
  |
  o-----+ fanInConcat()
@@ -44,7 +44,7 @@ Example 4:
  o {duplicate}
  |
  |
- |  o {Stream.fromIterable}
+ |  o {Stream.apply}
  |  |
  |  |
  o--+--+ {foo}
@@ -59,7 +59,7 @@ Example 4:
  o {Drain.first}
 
 Example 5:
- o {Stream.fromIterable}
+ o {Stream.apply}
  |
  |
  o--+ fanOutBroadcast(false)
@@ -77,7 +77,7 @@ Example 6:
  o deduplicate()
  |
  |
- |  o {Stream.fromIterable}
+ |  o {Stream.apply}
  |  |
  |  |
  o--+ {zip}
@@ -86,7 +86,7 @@ Example 6:
  o Drain.head()
 
 Example 7:
- o {Stream.fromIterable}
+ o {Stream.apply}
  |
  |
  o--+ {tee}
