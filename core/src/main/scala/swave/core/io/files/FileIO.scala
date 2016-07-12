@@ -4,14 +4,19 @@
 
 package swave.core.io.files
 
-import java.nio.file.StandardOpenOption
+import java.io.File
+import java.nio.file.{ Files, Path, StandardOpenOption }
 import com.typesafe.config.Config
+import swave.core.io.Bytes
 import swave.core.util.SettingsCompanion
 import swave.core.macros._
 
 object FileIO extends StreamFromFiles with DrainToFiles {
 
-  val WriteCreateOptions: Set[StandardOpenOption] = Set(StandardOpenOption.WRITE, StandardOpenOption.CREATE)
+  val WriteCreateOptions: Set[StandardOpenOption] = {
+    import StandardOpenOption._
+    Set(CREATE, TRUNCATE_EXISTING, WRITE)
+  }
 
   final case class Settings(
       defaultFileReadingChunkSize: Int,
@@ -26,5 +31,17 @@ object FileIO extends StreamFromFiles with DrainToFiles {
         defaultFileReadingChunkSize = c getInt "default-file-reading-chunk-size",
         defaultFileWritingChunkSize = c getInt "default-file-writing-chunk-size")
   }
+
+  def writeFile[T: Bytes](fileName: String, data: T): Unit = writeFile(resolveFileSystemPath(fileName), data)
+  def writeFile[T: Bytes](file: File, data: T): Unit = writeFile(file.toPath, data)
+  def writeFile[T: Bytes](path: Path, data: T, options: StandardOpenOption*): Unit = {
+    implicit def decorator(value: T): Bytes.Decorator[T] = Bytes.decorator(value)
+    Files.write(path, data.toArray, options: _*)
+    ()
+  }
+
+  def readFile[T: Bytes](fileName: String): T = readFile(resolveFileSystemPath(fileName))
+  def readFile[T: Bytes](file: File): T = readFile(file.toPath)
+  def readFile[T: Bytes](path: Path): T = implicitly[Bytes[T]].apply(Files.readAllBytes(path))
 
 }

@@ -21,6 +21,18 @@ trait StreamFromFiles extends Any {
    * `swave.core.dispatcher.definition.blocking-io`, i.e. the `Stream` created by this method is always
    * an async stream.
    */
+  def fromFileName[T: Bytes](fileName: String, chunkSize: Int = 0): Stream[T] =
+    fromPath(resolveFileSystemPath(fileName))
+
+  /**
+   * Creates a `Stream` instance that streams the contents of the given file in chunks of the
+   * given size (if `chunkSize` > 0) or the configured `swave.core.file-io.default-file-chunk-size`.
+   *
+   * Since there is no truly async kernel API for file IO and thus file IO is necessarily blocking
+   * the actual reading from the file system happens on the dispatcher configured via
+   * `swave.core.dispatcher.definition.blocking-io`, i.e. the `Stream` created by this method is always
+   * an async stream.
+   */
   def fromFile[T: Bytes](file: File, chunkSize: Int = 0): Stream[T] =
     fromPath(file.toPath)
 
