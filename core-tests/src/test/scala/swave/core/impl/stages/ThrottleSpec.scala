@@ -4,13 +4,11 @@
 
 package swave.core.impl.stages
 
-import swave.core.util.XorShiftRandom
-import swave.testkit.TestError
-
 import scala.util.Success
 import scala.concurrent.duration._
-import org.scalatest.FreeSpec
+import swave.testkit.TestError
 import swave.testkit.Probes._
+import swave.core.util.XorShiftRandom
 import swave.core._
 
 /**
@@ -18,7 +16,7 @@ import swave.core._
  *
  *    Copyright (C) 2015-2016 Lightbend Inc. <http://www.lightbend.com>
  */
-final class ThrottleSpec extends FreeSpec with StreamEnvShutdown {
+final class ThrottleSpec extends SwaveSpec {
 
   implicit val env = StreamEnv()
 

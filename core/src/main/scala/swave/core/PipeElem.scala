@@ -45,6 +45,7 @@ object PipeElem {
     trait Failing extends Source
     trait File extends Source
     trait FromPublisher extends Source
+    trait Future extends Source
     trait Iterator extends Source
     trait Lazy extends Source
     trait Repeat extends Source

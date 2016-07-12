@@ -17,45 +17,45 @@ abstract class Streamable[-T] {
 object Streamable {
   type Aux[T, Out0] = Streamable[T] { type Out = Out0 }
 
-  private[core] val stream =
+  private val stream =
     new Streamable[Stream[AnyRef]] {
       type Out = AnyRef
       def apply(value: Stream[AnyRef]) = value
     }
   implicit def forStream[T]: Aux[Stream[T], T] = stream.asInstanceOf[Aux[Stream[T], T]]
 
-  private[core] val option =
+  private val option =
     new Streamable[Option[AnyRef]] {
       type Out = AnyRef
       def apply(value: Option[AnyRef]): Stream[AnyRef] = Stream.fromOption(value)
     }
-  implicit def forOption[T]: Aux[Option[T], T] = iterable.asInstanceOf[Aux[Option[T], T]]
+  implicit def forOption[T]: Aux[Option[T], T] = option.asInstanceOf[Aux[Option[T], T]]
 
-  private[core] val iterable =
+  private val iterable =
     new Streamable[Iterable[AnyRef]] {
       type Out = AnyRef
       def apply(value: Iterable[AnyRef]): Stream[AnyRef] = Stream.fromIterable(value)
     }
   implicit def forIterable[T]: Aux[Iterable[T], T] = iterable.asInstanceOf[Aux[Iterable[T], T]]
 
-  private[core] val iterator =
+  private val iterator =
     new Streamable[Iterator[AnyRef]] {
       type Out = AnyRef
       def apply(value: Iterator[AnyRef]): Stream[AnyRef] = Stream.fromIterator(value)
     }
-  implicit def forIterator[T]: Aux[Iterator[T], T] = iterable.asInstanceOf[Aux[Iterator[T], T]]
+  implicit def forIterator[T]: Aux[Iterator[T], T] = iterator.asInstanceOf[Aux[Iterator[T], T]]
 
-  private[core] val publisher =
+  private val publisher =
     new Streamable[Publisher[AnyRef]] {
       type Out = AnyRef
-      def apply(value: Publisher[AnyRef]): Stream[AnyRef] = ???
+      def apply(value: Publisher[AnyRef]): Stream[AnyRef] = Stream.fromPublisher(value)
     }
-  implicit def forPublisher[T]: Aux[Publisher[T], T] = iterable.asInstanceOf[Aux[Publisher[T], T]]
+  implicit def forPublisher[T]: Aux[Publisher[T], T] = publisher.asInstanceOf[Aux[Publisher[T], T]]
 
-  private[core] val future =
+  private val future =
     new Streamable[Future[AnyRef]] {
       type Out = AnyRef
-      def apply(value: Future[AnyRef]): Stream[AnyRef] = ???
+      def apply(value: Future[AnyRef]): Stream[AnyRef] = Stream.fromFuture(value)
     }
   implicit def forFuture[T]: Aux[Future[T], T] = future.asInstanceOf[Aux[Future[T], T]]
 }

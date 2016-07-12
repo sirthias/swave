@@ -85,7 +85,7 @@ object Stream {
     fromIterator(Iterator.empty)
 
   def emptyFrom[T](future: Future[Unit]): Stream[T] =
-    ???
+    fromFuture(future).drop(1).named("Stream.emptyFrom").asInstanceOf[Stream[T]]
 
   def failing[T](cause: Throwable): Stream[T] =
     new Stream(new FailingSourceStage(cause))
@@ -93,14 +93,17 @@ object Stream {
   def from(start: Int, step: Int = 1): Stream[Int] =
     fromIterator(Iterator.from(start, step)) named "Stream.from"
 
-  def fromIterable[T](value: Iterable[T]): Stream[T] =
-    fromIterator(value.iterator) named "Stream.fromIterable"
+  def fromFuture[T](future: Future[T]): Stream[T] =
+    new Stream(new FromFutureStage(future.asInstanceOf[Future[AnyRef]]))
 
-  def fromIterator[T](value: Iterator[T]): Stream[T] =
-    new Stream(new IteratorStage(value.asInstanceOf[Iterator[AnyRef]]))
+  def fromIterable[T](iterable: Iterable[T]): Stream[T] =
+    fromIterator(iterable.iterator) named "Stream.fromIterable"
 
-  def fromOption[T](value: Option[T]): Stream[T] =
-    (if (value.isEmpty) empty else one(value.get)) named "Stream.fromOption"
+  def fromIterator[T](iterator: Iterator[T]): Stream[T] =
+    new Stream(new IteratorStage(iterator.asInstanceOf[Iterator[AnyRef]]))
+
+  def fromOption[T](option: Option[T]): Stream[T] =
+    (if (option.isEmpty) empty else one(option.get)) named "Stream.fromOption"
 
   def fromPublisher[T](publisher: Publisher[T]): Stream[T] =
     new Stream(new FromPublisherStage(publisher.asInstanceOf[Publisher[AnyRef]]))

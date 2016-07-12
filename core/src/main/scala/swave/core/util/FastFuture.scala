@@ -39,7 +39,16 @@ private[swave] class FastFuture[A](val future: Future[A]) extends AnyVal {
   def foreach(f: A ⇒ Unit)(implicit ec: ExecutionContext): Unit = { map(f); () }
 
   def transformWith[B](f: Try[A] ⇒ Future[B])(implicit executor: ExecutionContext): Future[B] =
-    transformWith(a ⇒ f(Success(a)), e ⇒ f(Failure(e)))
+    future match {
+      case x: Impl[A] ⇒ try f(x.valueTry) catch { case NonFatal(e) ⇒ ErrorFuture(e) }
+      case _ ⇒ future.value match {
+        case None ⇒
+          val p = Promise[B]()
+          future.onComplete(x ⇒ p.completeWith(try f(x) catch { case NonFatal(e) ⇒ ErrorFuture(e) }))
+          p.future
+        case Some(x) ⇒ try f(x) catch { case NonFatal(e) ⇒ ErrorFuture(e) }
+      }
+    }
 
   def transformWith[B](s: A ⇒ Future[B], f: Throwable ⇒ Future[B])(implicit executor: ExecutionContext): Future[B] = {
     def strictTransform[T](x: T, f: T ⇒ Future[B]) =

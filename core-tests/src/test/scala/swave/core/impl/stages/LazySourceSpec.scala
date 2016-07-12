@@ -8,14 +8,14 @@ import org.scalacheck.Gen
 import org.scalatest.Inspectors
 import swave.core._
 
-final class SourceSpec extends SyncPipeSpec with Inspectors {
+final class LazySourceSpec extends SyncPipeSpec with Inspectors {
 
   implicit val env = StreamEnv()
-  implicit val config = PropertyCheckConfig(minSuccessful = 1000)
+  implicit val config = PropertyCheckConfig(minSuccessful = 100)
 
   implicit val integerInput = Gen.chooseNum(0, 999)
 
-  "Source.lazy" in check {
+  "Stream.lazy" in check {
     testSetup
       .input[Int]
       .output[String]
