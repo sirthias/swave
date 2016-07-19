@@ -11,7 +11,7 @@ import scala.concurrent.duration._
 import scala.concurrent.{ Future, Promise }
 import org.reactivestreams.{ Publisher, Subscriber }
 import swave.core.impl.TypeLogic.ToFuture
-import swave.core.impl.{ ModuleMarker, Outport }
+import swave.core.impl.Outport
 import swave.core.impl.stages.drain._
 
 final class Drain[-T, +R] private[swave] (private[swave] val outport: Outport, val result: R) {
@@ -33,8 +33,7 @@ final class Drain[-T, +R] private[swave] (private[swave] val outport: Outport, v
   def mapResult[P](f: R ⇒ P): Drain[T, P] = new Drain(outport, f(result))
 
   def named(name: String): this.type = {
-    val marker = new ModuleMarker(name)
-    marker.markEntry(outport)
+    Module.ID(name).markAsInnerEntry(outport)
     this
   }
 
@@ -53,11 +52,11 @@ final class Drain[-T, +R] private[swave] (private[swave] val outport: Outport, v
         stage.assignDispatcherId(dispatcherId)
         this
 
-      case x: PipeElem.Basic ⇒
-        val assign = new (PipeElem.Basic ⇒ Unit) {
+      case x: PipeElem ⇒
+        val assign = new (PipeElem ⇒ Unit) {
           var visited = Set.empty[PipeElem]
-          def _apply(pe: PipeElem.Basic): Unit = apply(pe)
-          @tailrec def apply(pe: PipeElem.Basic): Unit =
+          def _apply(pe: PipeElem): Unit = apply(pe)
+          @tailrec def apply(pe: PipeElem): Unit =
             if (!visited.contains(pe)) {
               visited += pe
               pe match {

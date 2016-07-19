@@ -11,7 +11,7 @@ import swave.core.macros._
 import swave.core.util._
 
 /**
- * A very basic model for a Directed Graph, providing only what is required for rendering (prepation),
+ * A very basic mutable model for a Directed Graph, providing only what is required for rendering (preparation),
  * not general graph manipulation or analysis.
  */
 final class Digraph[V](private var graphData: GraphData[V]) {
@@ -32,6 +32,12 @@ final class Digraph[V](private var graphData: GraphData[V]) {
   def vertices: Vector[V] = graphData.vertices
 
   /**
+   * Returns an independent copy of this graph with all vertices mapped via the given function.
+   * All other information (e.g. edge or vertex attributes) is preserved as is.
+   */
+  def mapVertices[VV](f: V ⇒ VV): Digraph[VV] = new Digraph(graphData.mapVertices(f))
+
+  /**
    * Apply the given attributes to all edges of all paths leading from the `origin` vertex to the `target` vertex.
    * If there is no path from `origin` to `target` or `origin` and `target` are the same vertex
    * then this method has no effect.
@@ -48,8 +54,8 @@ final class Digraph[V](private var graphData: GraphData[V]) {
 
   def attributes(vertex: V): List[AnyRef] = graphData.nodeFor(vertex).attributes
 
-  def discoverRegion(entries: Seq[V], exits: Seq[V]): BitSet =
-    MiscLogic.discoverRegion(entries.map(graphData.nodeFor), exits.map(graphData.nodeFor))
+  def discoverRegion(boundaries: Seq[Digraph.RegionBoundary[V]]): BitSet =
+    MiscLogic.discoverRegion(boundaries.map(b ⇒ b.copy(vertex = graphData.nodeFor(b.vertex))))
 
   def xRankOrdering: Ordering[V] = {
     preparedGraphData // trigger xRanking
@@ -137,4 +143,13 @@ object Digraph {
   }
 
   final case class VertexRendering[V](vertex: V, lines: Seq[String])
+
+  /**
+   * Meta-data around a vertex of type `V` required for delimiting a vertex region in a digraph.
+   *
+   * @param vertex the vertex
+   * @param isEntry true if the vertex is an entry node, false if it is an exit node
+   * @param isInner true if the vertex is part of the region, false if it isn't
+   */
+  final case class RegionBoundary[V](vertex: V, isEntry: Boolean, isInner: Boolean)
 }

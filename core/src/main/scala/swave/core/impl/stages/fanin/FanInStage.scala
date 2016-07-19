@@ -13,14 +13,14 @@ import swave.core.impl.{ Outport, RunContext, InportList }
 // format: OFF
 private[core] abstract class FanInStage extends Stage { this: PipeElem.FanIn =>
 
-  protected final var _outputPipeElem: PipeElem.Basic = PipeElem.Unconnected
+  protected final var _outputPipeElem: PipeElem = PipeElem.Unconnected
   protected final var _inputElems = InportList.empty
 
   final def outputElem = _outputPipeElem
   final def inputElems = {
-    val buf = new ListBuffer[PipeElem.Basic]
+    val buf = new ListBuffer[PipeElem]
     for (i <- _inputElems) {
-      buf += i.in.asInstanceOf[PipeElem.Basic]
+      buf += i.in.asInstanceOf[PipeElem]
       ()
     }
     buf.result()

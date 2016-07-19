@@ -4,10 +4,10 @@
 
 package swave.core.impl
 
-import swave.core.PipeElem
+import swave.core.{ Module, PipeElem }
 
 private[swave] sealed trait Port {
-  def pipeElem: PipeElem.Basic
+  def pipeElem: PipeElem
 
   def xSeal(ctx: RunContext): Unit
 
@@ -34,15 +34,12 @@ private[swave] sealed trait Outport extends Port {
   def onError(error: Throwable)(implicit from: Inport): Unit
 }
 
-private[swave] abstract class PipeElemImpl extends Inport with Outport { this: PipeElem.Basic ⇒
-  private[this] var _moduleStarts = List.empty[PipeElem.Module]
-  private[this] var _moduleEnds = List.empty[PipeElem.Module]
+private[swave] abstract class PipeElemImpl extends Inport with Outport { this: PipeElem ⇒
+  private[this] var _boundaryOf = List.empty[Module.ID]
 
   final def pipeElem = this
 
-  final def moduleEntries = _moduleStarts
-  final def moduleExits = _moduleEnds
+  final def boundaryOf = _boundaryOf
 
-  final def markModuleEntry(module: PipeElem.Module): Unit = _moduleStarts ::= module
-  final def markModuleExit(module: PipeElem.Module): Unit = _moduleEnds ::= module
+  final def markAsBoundaryOf(moduleID: Module.ID): Unit = _boundaryOf ::= moduleID
 }

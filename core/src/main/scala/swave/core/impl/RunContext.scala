@@ -84,7 +84,7 @@ private[swave] final class RunContext(val port: Port)(implicit val env: StreamEn
   def attach(other: RunContext): Unit =
     if (other.data ne data) {
       requireArg(other.env == env)
-      data.needRunner = data.needRunner.append(other.data.needRunner)
+      data.needRunner = data.needRunner append other.data.needRunner
       data.needXStart = data.needXStart ::: other.data.needXStart
       data.needPostRun = data.needPostRun ::: other.data.needPostRun
       data.cleanup = data.cleanup ::: other.data.cleanup

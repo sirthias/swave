@@ -4,11 +4,12 @@
 
 package swave.core.impl
 
+import scala.annotation.implicitNotFound
 import scala.concurrent.Future
 import scala.util.{ Failure, Success, Try }
 import shapeless._
-import shapeless.ops.hlist.ToCoproduct
-import swave.core.StreamOps
+import shapeless.ops.hlist.{ Comapped, ToCoproduct }
+import swave.core.{ Stream, StreamOps }
 import swave.core.util.FastFuture
 
 object TypeLogic {
@@ -37,6 +38,9 @@ object TypeLogic {
   object IsHCons2 {
     implicit def apply[H0, H1, T <: HList]: IsHCons2[H0 :: H1 :: T] = null
   }
+
+  @implicitNotFound(msg = "Argument must be an HList of `Stream[_]`")
+  type IsHListOfStream[L <: HList] = Comapped[L, Stream]
 
   sealed abstract class ToTryOrFuture[T] {
     type Out

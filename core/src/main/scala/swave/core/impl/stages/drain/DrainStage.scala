@@ -12,12 +12,12 @@ import swave.core.impl.stages.Stage
 // format: OFF
 private[swave] abstract class DrainStage extends Stage { this: PipeElem.Drain =>
 
-  protected final var _inputPipeElem: PipeElem.Basic = PipeElem.Unconnected
+  protected final var _inputPipeElem: PipeElem = PipeElem.Unconnected
   private[this] var _dispatcherId: String = null
 
   final def inputElem = _inputPipeElem
 
-  protected final def setInputElem(elem: PipeElem.Basic): Unit =
+  protected final def setInputElem(elem: PipeElem): Unit =
     _inputPipeElem = elem
 
   final def assignDispatcherId(dispatcherId: String): Unit =

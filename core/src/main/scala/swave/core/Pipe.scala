@@ -52,10 +52,10 @@ final class Pipe[-A, +B] private (
     new Pipe(firstStage, pipe.lastStage)
   }
 
-  def via[P <: HList, R, Out](joined: Module.Joined[B :: HNil, P, R])(
+  def via[P <: HList, R, Out](joined: Module.TypeLogic.Joined[B :: HNil, P, R])(
     implicit
     vr: TypeLogic.ViaResult[P, Drain[A @uV, R], Repr @uV, Out]): Out = {
-    val out = joined.module(InportList(lastStage))
+    val out = ModuleImpl(joined.module)(InportList(lastStage))
     val result = vr.id match {
       case 0 ⇒ new Drain(firstStage, out)
       case 1 ⇒ new Pipe(firstStage, out.asInstanceOf[InportList].in)
@@ -69,26 +69,12 @@ final class Pipe[-A, +B] private (
     stream.via(this).to(Drain.toPublisher()).mapResult(new SubPubProcessor(subscriber, _))
   }
 
-  def named(name: String): A =>> B = {
-    val marker = new ModuleMarker(name)
-    marker.markEntry(firstStage)
-    marker.markExit(lastStage)
-    this
-  }
+  def named(name: String): A =>> B = named(Module.ID(name))
 
-  def named(name: String, otherInput: Stream[_]): A =>> B = {
-    val marker = new ModuleMarker(name)
-    marker.markEntry(firstStage)
-    marker.markEntry(otherInput.inport)
-    marker.markExit(lastStage)
-    this
-  }
-
-  def named(name: String, otherOutput: Drain[_, _]): A =>> B = {
-    val marker = new ModuleMarker(name)
-    marker.markEntry(firstStage)
-    marker.markExit(lastStage)
-    marker.markExit(otherOutput.outport)
+  def named(moduleID: Module.ID): A =>> B = {
+    moduleID
+      .markAsInnerEntry(firstStage)
+      .markAsInnerExit(lastStage)
     this
   }
 }

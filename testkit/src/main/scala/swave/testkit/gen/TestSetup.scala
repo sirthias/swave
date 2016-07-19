@@ -11,7 +11,7 @@ import shapeless.ops.function.FnToProduct
 import shapeless.ops.hlist.{ Reverse, Tupler }
 import shapeless._
 import swave.testkit.impl._
-import swave.core.PipeElem
+import swave.core.{ GraphRendering, PipeElem }
 import swave.core.impl.stages.Stage
 import swave.core.util._
 import swave.core.macros._
@@ -228,7 +228,7 @@ object TestSetup {
         } catch {
           case NonFatal(e) ⇒
             val graphRendering = testStages.mapFind { stage ⇒
-              try Some(PipeElem.render(stage.asInstanceOf[Stage].pipeElem))
+              try Some(GraphRendering(stage.asInstanceOf[Stage].pipeElem))
               catch { case e: IllegalStateException if e.getMessage contains "inconsistent edge data" ⇒ None }
             }
             println(graphRendering getOrElse "(no graph rendering available)")

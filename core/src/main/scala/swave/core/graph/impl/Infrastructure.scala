@@ -35,6 +35,17 @@ private[graph] object Infrastructure {
         s"attrs=${attributes.mkString("[", ",", "]")}, " +
         s"preds=${preds.map(_.id).mkString("[", ",", "]")}, " +
         s"succs=${succs.map(_.id).mkString("[", ",", "]")}" + (if (isHidden) ", hidden)" else ")")
+
+    def partialCopyWith(newVertex: Any): Node = {
+      val n = new Node(id, newVertex)
+      n.isHidden = isHidden
+      n.desCount = desCount
+      n.inDegree = inDegree
+      n.xRank = xRank
+      glyphs.foreach(g ⇒ n.glyphs += g)
+      n.attributes = attributes
+      n
+    }
   }
 
   final class XRank(val id: Int) {

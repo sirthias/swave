@@ -193,48 +193,50 @@ private[graph] object MiscLogic {
     }
 
   /**
-   * Walks the graph starting from the entry nodes and discovers a node region that is "fenced off" from the rest of
-   * the graph with entry and exit nodes.
-   * Entry nodes are part of the region but none of their predecessors are.
-   * Exit nodes are part of the region but none of their successors are.
+   * Discovers a node region that is "fenced off" from the rest of the graph by the given boundaries.
    *
-   * If the region is sound, i.e. its impossible to reach an entry node from above or an exit node from below, the
-   * method returns a bitset marking all region nodes.
+   * If the region is sound, i.e. it's impossible to reach an entry node from above or an exit node from below
+   * without previously crossing a boundary, the method returns a bitset marking all region nodes.
    * If the region is unsound the method returns an empty BitSet.
    */
-  def discoverRegion(entries: Seq[Node], exits: Seq[Node]): BitSet = {
-    val bitSet = new mutable.BitSet
+  def discoverRegion(boundaries: Seq[Digraph.RegionBoundary[Node]]): BitSet = {
+    val result = new mutable.BitSet
     val entriesSet = new mutable.BitSet
-    entries.foreach(n ⇒ entriesSet += n.id)
     val exitsSet = new mutable.BitSet
-    exits.foreach(n ⇒ exitsSet += n.id)
+    boundaries.foreach { b1 ⇒
+      if (b1.isEntry) entriesSet += b1.vertex.id else exitsSet += b1.vertex.id
+      boundaries.foreach { b2 ⇒
+        requireArg(b1 == b2 || b1.vertex != b2.vertex || b1.isInner && b2.isInner, s"Inconsistent RegionBoundaries: $b1 and $b2")
+      }
+    }
 
     @tailrec def rec(remaining: List[Node]): BitSet =
-      remaining match {
-        case Nil ⇒ BitSet.empty | bitSet
-        case head :: tail ⇒
-          bitSet += head.id
+      if (remaining.nonEmpty) {
+        if (!result.contains(remaining.head.id)) {
+          result += remaining.head.id
           val tail1 =
-            if (entriesSet contains head.id) tail
-            else {
-              head.preds.foldLeft(tail) { (acc, p) ⇒
-                if (bitSet contains p.id) acc
+            if (!entriesSet.contains(remaining.head.id)) {
+              remaining.head.preds.foldLeft(remaining.tail) { (acc, p) ⇒
+                def pIsOuterEntry = Digraph.RegionBoundary(p, isEntry = true, isInner = false)
+                if (result.contains(p.id) || (entriesSet.contains(p.id) && boundaries.contains(pIsOuterEntry))) acc
                 else if (exitsSet contains p.id) throw UnsoundRegion else p :: acc
               }
-            }
+            } else remaining.tail
           val tail2 =
-            if (exitsSet contains head.id) tail1
-            else {
-              head.succs.foldLeft(tail1) { (acc, s) ⇒
-                if (bitSet contains s.id) acc
+            if (!exitsSet.contains(remaining.head.id)) {
+              remaining.head.succs.foldLeft(tail1) { (acc, s) ⇒
+                def sIsOuterExit = Digraph.RegionBoundary(s, isEntry = false, isInner = false)
+                if (result.contains(s.id) || (exitsSet.contains(s.id) && boundaries.contains(sIsOuterExit))) acc
                 else if (entriesSet contains s.id) throw UnsoundRegion else s :: acc
               }
-            }
+            } else tail1
           rec(tail2)
-      }
+        } else rec(remaining.tail)
+      } else BitSet.empty | result
 
-    try rec((entries ++ exits).toList)
-    catch {
+    try {
+      rec(boundaries.collect { case b if b.isInner ⇒ b.vertex }(collection.breakOut))
+    } catch {
       case UnsoundRegion ⇒ BitSet.empty
     }
   }

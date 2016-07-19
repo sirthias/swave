@@ -16,7 +16,7 @@ import shapeless.ops.hlist.{ ToCoproduct, Tupler, Fill }
 import swave.core.impl.stages.Stage
 import swave.core.impl.stages.fanin.{ MergeStage, ToProductStage, FirstNonEmptyStage, ConcatStage }
 import swave.core.impl.stages.fanout.{ RoundRobinStage, FirstAvailableStage, BroadcastStage, SwitchStage }
-import swave.core.impl.{ InportList, TypeLogic, Inport }
+import swave.core.impl.{ ModuleImpl, InportList, TypeLogic, Inport }
 import swave.core.impl.stages.inout._
 import swave.core.util._
 import swave.core.macros._
@@ -261,10 +261,8 @@ trait StreamOps[A] extends Any { self ⇒
 
   final def takeWithin(d: FiniteDuration): Repr[A] = ???
 
-  final def tee(drain: Drain[A, Unit], eagerCancel: Boolean = false): Repr[A] = {
-    val nop = Pipe[A].nop.to(drain) // TODO: switch to edge-based module demarcation
-    via(Pipe[A].fanOutBroadcast(eagerCancel = eagerCancel).sub.to(nop).subContinue.named("tee", nop))
-  }
+  final def tee(drain: Drain[A, Unit], eagerCancel: Boolean = false): Repr[A] =
+    via(Pipe[A].fanOutBroadcast(eagerCancel).sub.to(drain).subContinue named "tee")
 
   final def throttle(elements: Int, per: FiniteDuration, burst: Int = 1): Repr[A] =
     throttle(elements, per, burst, oneIntFunc)
@@ -275,8 +273,9 @@ trait StreamOps[A] extends Any { self ⇒
   def via[B](pipe: A =>> B): Repr[B]
 
   final def zip[B](other: Stream[B]): Repr[(A, B)] = {
-    val nop = other.nop // TODO: switch to edge-based module demarcation
-    via(Pipe[A].attach(nop).fanInToTuple.named("zip", nop))
+    val moduleID = Module.ID("zip")
+    moduleID.markAsOuterEntry(other.inport)
+    via(Pipe[A].attach(other).fanInToTuple named moduleID)
   }
 }
 
@@ -366,10 +365,10 @@ object StreamOps {
     final def fanInToSum[T](eagerComplete: Boolean = true)(implicit ev: FanInReq[L], gen: Summable[T, C]): Repr[T] =
       fanInToCoproduct(eagerComplete).asInstanceOf[StreamOps[C]].map(c ⇒ gen from c).asInstanceOf[Repr[T]]
 
-    def fromFanInVia[P <: HList, R, Out](joined: Module.Joined[L, P, R])(
+    def fromFanInVia[P <: HList, R, Out](joined: Module.TypeLogic.Joined[L, P, R])(
       implicit
       vr: ViaResult[P, Piping[R], Repr, Out]): Out = {
-      val out = joined.module(subs)
+      val out = ModuleImpl(joined.module)(subs)
       val result = vr.id match {
         case 0 ⇒ new Piping(subs.in, out)
         case 1 ⇒ rawWrap(out.asInstanceOf[InportList].in)
@@ -475,10 +474,10 @@ object StreamOps {
 
     def via[B](pipe: A =>> B): Repr[B] = new SubStreamOps(fo, stream via pipe)
 
-    def via[P <: HList, R, Out](joined: Module.Joined[A :: HNil, P, R])(
+    def via[P <: HList, R, Out](joined: Module.TypeLogic.Joined[A :: HNil, P, R])(
       implicit
       vr: TypeLogic.ViaResult[P, F, Repr, Out]): Out = {
-      val out = joined.module(InportList(stream.inport))
+      val out = ModuleImpl(joined.module)(InportList(stream.inport))
       val result = vr.id match {
         case 0 ⇒ fo
         case 1 ⇒ new SubStreamOps[A, L, C, Sup, FRepr, F](fo, new Stream(out.asInstanceOf[InportList].in))

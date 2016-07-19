@@ -6,6 +6,7 @@ package swave.core.graph.impl
 
 import scala.annotation.tailrec
 import scala.collection.immutable.VectorBuilder
+import swave.core.graph.Digraph
 import Infrastructure._
 
 /**
@@ -29,6 +30,34 @@ private[graph] final case class GraphData[V](
   def printNodes() = {
     for (n ← nodes) println(n)
     println()
+  }
+
+  def mapVertices[VV](f: V ⇒ VV): GraphData[VV] = {
+    var vertexTranslation = Map.empty[V, VV]
+    val newVertices = vertices.map { v ⇒
+      val vv = f(v)
+      vertexTranslation = vertexTranslation.updated(v, vv)
+      vv
+    }
+    var nodeTranslation = Map.empty[Node, Node]
+    val newNodes = nodes.map { n ⇒
+      val nn = n.partialCopyWith(vertexTranslation(n.vertex.asInstanceOf[V]))
+      nodeTranslation = nodeTranslation.updated(n, nn)
+      nn
+    }
+    nodes.foreach { n ⇒
+      val nn = nodeTranslation(n)
+      n.preds.foreach(p ⇒ nn.preds += nodeTranslation(p))
+      n.succs.foreach(s ⇒ nn.succs += nodeTranslation(s))
+    }
+    GraphData(
+      vertices = newVertices,
+      vertexMap = vertices.foldLeft(Map.empty[VV, Node])((map, v) ⇒ map.updated(vertexTranslation(v), vertexMap(v))),
+      nodes = newNodes,
+      rootNodes = rootNodes.map(nodeTranslation),
+      edgeAttrs = edgeAttrs.foldLeft(Map.empty[Edge, Digraph.EdgeAttributes]) {
+        case (map, ((from, to), attrs)) ⇒ map.updated(nodeTranslation(from) → nodeTranslation(to), attrs)
+      })
   }
 }
 

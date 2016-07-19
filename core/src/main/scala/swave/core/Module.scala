@@ -4,26 +4,19 @@
 
 package swave.core
 
-import scala.annotation.unchecked.{ uncheckedVariance ⇒ uV }
-import scala.annotation.tailrec
+import scala.annotation.implicitNotFound
 import shapeless.ops.product.ToHList
 import shapeless.ops.hlist.Prepend
 import shapeless._
-import swave.core.impl.{ ModuleMarker, InportList }
 import swave.core.impl.TypeLogic._
-import swave.core.impl.stages.inout.NopStage
-import swave.core.macros._
+import swave.core.impl._
 
 /**
- *  A Streaming Component with four interfaces:
- *
- *  1. Incoming streams:
- *     - On the top: IT
- *     - On the bottom: IB
- *
- *  2. Outgoing streams:
- *     - On the top: OT
- *     - On the bottom: OB
+ *  A Streaming Component with up to four interfaces:
+ *  - A `Top` input
+ *  - A `Top` output
+ *  - A `Bottom` input
+ *  - A `Bottom` output
  *
  *       IT    OT
  *    ┌──▼──┬──▲──┐
@@ -31,254 +24,318 @@ import swave.core.macros._
  *    │     │     │
  *    └──▼──┴──▲──┘
  *       OB    IB
+ *
+ *  A `Module` without output interfaces might produce a result of type `R`.
  */
-sealed abstract class Module[-IT <: HList, +OB <: HList, -IB <: HList, +OT <: HList, +Res] private[core] (
-    lit: Int, // length(IT)
-    lob: Int, // length(OB)
-    lib: Int, // length(IB)
-    lot: Int /* length(OT) */ ) { self ⇒
-  requireArg(lit + lob + lib + lot > 0, "A Module must have at least one input or output port.")
+abstract class Module[I <: Module.Input, O <: Module.Output] private[core] {
+  import Module.TypeLogic._
+  import Module._
 
-  /**
-   * @param inports the streams of IT ::: IB
-   * @return the streams of OB ::: OT as an InportList or the cap result of type `Res`
-   */
-  private[core] def apply(inports: InportList): Any
+  def id: Module.ID
 
   /**
    * Returns a new anonymous [[Module]] consisting of this one and the given one
    * whereby the bottom interfaces of this module are connected to the top interfaces of the given one.
    */
-  final def atop[X >: OB <: HList, OB2 <: HList, IB2 <: HList, Y <: IB, R](
-    other: Module[X, OB2, IB2, Y, R])(implicit ib2Len: HLen[IB2], ob2Len: HLen[OB2], ev: Res @uV =:= Unit): Module[IT, OB2, IB2, OT, R] =
-    new Module(lit, ob2Len.value, ib2Len.value, lot) {
-      def apply(inports: InportList) = {
-        var it = inports
-        val ib2 = if (lit == 0) { it = InportList.empty; inports } else inports.drop(lit)
-        val ib = nops(lib)
-        val selfOuts = self(it append ib).asInstanceOf[InportList]
-
-        var ob = selfOuts
-        val ot = if (self.lob == 0) { ob = InportList.empty; selfOuts } else selfOuts.drop(self.lob)
-        val otherOuts = other(ob append ib2)
-
-        otherOuts match {
-          case x: InportList ⇒
-            var ob2 = x
-            connect(ib, if (lob == 0) { ob2 = InportList.empty; x } else x.drop(lob))
-            ob2 append ot
-          case result ⇒ result
-        }
-      }
-    }
+  def atop[I2 <: Input, O2 <: Output](other: Module[I2, O2])(implicit ev: Atop[I, O, I2, O2]): Module[ev.IR, ev.OR]
 
   /**
-   * Returns a new anonymous [[Module]] which performs the same logic as this one
-   * but with all forward/backward directions flipped.
-   * The new [[Module]] carries the same name as this instance.
+   * Returns a new [[Module]] which performs the same logic as this one but with all forward/backward directions
+   * flipped. The new [[Module]] carries the same name as this instance.
    */
-  final def flip: Module[IB, OT, IT, OB, Res] =
-    new Module(lib, lot, lit, lob) {
-      def apply(inports: InportList) = {
-        var it = inports
-        val ib = if (lit == 0) { it = InportList.empty; inports } else inports.drop(lit)
-        self(ib append it) match {
-          case outs: InportList ⇒
-            var ob = outs
-            val ot = if (lob == 0) {
-              ob = InportList.empty; outs
-            } else outs.drop(lob)
-            ot append ob
-          case result ⇒ result
-        }
-      }
-    }
+  def flip(implicit ev: Flip[I, O]): Module[ev.IR, ev.OR]
 
   /**
    * Combines this instance with the given one in a way that cross-connects all
    * inputs and outputs and thus produces a [[Piping]].
    */
-  final def crossJoin[R](other: Module[OB, IT, OT, IB, R])(implicit ev: SelectNonUnit[Res @uV, R]): Piping[ev.Out] = {
-    val ins = nops(lit + lib)
-    var result: Any = ()
-    val selfOuts = self(ins) match {
-      case x: InportList ⇒ x
-      case res           ⇒ { result = res; InportList.empty }
-    }
-    var ob = selfOuts
-    val ot = if (lob == 0) { ob = InportList.empty; selfOuts } else selfOuts.drop(lob)
-    other(ot append ob) match {
-      case x: InportList ⇒ connect(ins, x)
-      case res           ⇒ result = res
-    }
-    val entryElem = if (ins.nonEmpty) ins.in else selfOuts.in
-    new Piping(entryElem, result).asInstanceOf[Piping[ev.Out]]
-  }
+  def crossJoin[I2 <: Input, O2 <: Output](other: Module[I2, O2])(implicit ev: CrossJoin[I, O, I2, O2]): Piping[Unit]
 
   /**
    * Returns a copy of this [[Module]] with the name changed to the given one.
    */
-  final def named(name: String): Module[IT, OB, IB, OT, Res] =
-    new Module(lit, lob, lib, lot) {
-      private val marker = new ModuleMarker(name)
-      def apply(inports: InportList) = {
-        val nops = inports.flatMap { ins ⇒
-          val nop = new NopStage
-          ins.in.subscribe()(nop)
-          marker.markEntry(nop)
-          InportList(nop)
-        }
-        val outs = self(nops)
-        outs match {
-          case list: InportList ⇒ list.foreach(ins ⇒ marker.markExit(ins.in))
-          case _                ⇒ // nothing to do
-        }
-        outs
-      }
-    }
-
-  @tailrec private def nops(count: Int, result: InportList = InportList.empty): InportList =
-    if (count > 0) nops(count - 1, new NopStage +: result) else result
-
-  @tailrec private def connect(nops: InportList, outs: InportList): Unit =
-    if (nops.nonEmpty) {
-      outs.in.subscribe()(nops.in.asInstanceOf[NopStage])
-      connect(nops.tail, outs.tail)
-    }
+  def named(name: String): Module[I, O]
 }
 
 object Module {
+  sealed trait Input {
+    type Top <: HList
+    type Bottom <: HList
+  }
+  object Input {
+    type None = Bidi[HNil, HNil]
+    type Top1[T] = Top[T :: HNil]
+    type Top[L <: HList] = Bidi[L, HNil]
+    type Bottom1[T] = Bottom[T :: HNil]
+    type Bottom[L <: HList] = Bidi[HNil, L]
+    type Bidi11[T, B] = Bidi[T :: HNil, B :: HNil]
+    type Bidi[T <: HList, B <: HList] = Input { type Top = T; type Bottom = B }
+  }
 
-  def fromStream[T](stream: Stream[T]): Forward[HNil, T :: HNil] =
-    new Module(0, 1, 0, 0) {
-      def apply(inports: InportList) = InportList(stream.inport)
+  sealed trait Output {
+    type Top <: HList
+    type Bottom <: HList
+  }
+  object Output {
+    type None = Bidi[HNil, HNil]
+    type Top1[T] = Top[T :: HNil]
+    type Top[L <: HList] = Bidi[L, HNil]
+    type Bottom1[T] = Bottom[T :: HNil]
+    type Bottom[L <: HList] = Bidi[HNil, L]
+    type Bidi11[T, B] = Bidi[T :: HNil, B :: HNil]
+    sealed trait Bidi[T <: HList, B <: HList] extends Output {
+      type Top = T
+      type Bottom = B
+    }
+    sealed trait Result[R] extends Output {
+      type Top = Nothing
+      type Bottom = Nothing
     }
 
+    import TypeLogic._
+    def None: Creation[Output.None] =
+      new Creation(())
+    def Top1[T](stream: Stream[T]): Creation[Output.Top1[T]] =
+      new Creation(InportList(stream.inport))
+    def Top[L <: HList](hListOfStreams: L)(implicit ev: IsHListOfStream[L]): Creation[Output.Top[ev.Out]] =
+      new Creation(InportList fromHList hListOfStreams)
+    def Bottom1[T](stream: Stream[T]): Creation[Output.Bottom1[T]] =
+      new Creation(InportList(stream.inport))
+    def Bottom[L <: HList](hListOfStreams: L)(implicit ev: IsHListOfStream[L]): Creation[Output.Bottom[ev.Out]] =
+      new Creation(InportList fromHList hListOfStreams)
+    def Bidi11[T, B](topOutput: Stream[T], bottomOutput: Stream[B]): Creation[Output.Bidi11[T, B]] =
+      new Creation(topOutput.inport +: bottomOutput.inport +: InportList.empty)
+    def Bidi[T <: HList, B <: HList](top: T, bottom: B)(implicit evT: IsHListOfStream[T], evB: IsHListOfStream[B]): Creation[Output.Bidi[evT.Out, evB.Out]] =
+      new Creation(InportList.fromHList(top) append InportList.fromHList(bottom))
+    def Result[T](result: T): Creation[Output.Result[T]] =
+      new Creation(result)
+  }
+
+  /**
+   * Packages the given [[Stream]] as a [[Module]].
+   */
+  def fromStream[T](stream: Stream[T]): Module[Input.None, Output.Bottom1[T]] =
+    ModuleImpl(0, 0)(_ ⇒ InportList(stream.inport))
+
+  /**
+   * Packages the given [[Pipe]] as a [[Module]].
+   */
   def fromPipe[A, B](pipe: A =>> B): Forward[A :: HNil, B :: HNil] =
-    new Module(1, 1, 0, 0) {
-      def apply(inports: InportList) = InportList(pipe.transform(new Stream(inports.in)).inport)
-    }
+    ModuleImpl(1, 0)(inports ⇒ InportList(pipe.transform(new Stream(inports.in)).inport))
 
-  def fromDrain[T, R](drain: Drain[T, R]): ForwardCap[T :: HNil, R] =
-    new Module(1, 0, 0, 0) {
-      def apply(inports: InportList) = drain.consume(new Stream(inports.in))
-    }
+  /**
+   * Packages the given [[Drain]] as a [[Module]].
+   */
+  def fromDrain[T, R](drain: Drain[T, R]): Module[Input.Top1[T], Output.Result[R]] =
+    ModuleImpl(1, 0)(inports ⇒ drain.consume(new Stream(inports.in)))
 
-  def apply[IT <: HList, OB <: HList, IB <: HList, OT <: HList](implicit c: Creator[IT, OB, IB, OT]) = c
+  def apply[I <: Input, O <: Output](implicit c: TypeLogic.Creator[I, O]) = c
 
-  type Forward[I <: HList, O <: HList] = Module[I, O, HNil, HNil, Unit]
-  type ForwardCap[I <: HList, Res] = Module[I, HNil, HNil, HNil, Res]
+  type Forward[I <: HList, O <: HList] = Module[Input.Top[I], Output.Bottom[O]]
 
   object Forward {
-    def apply[I <: HList, O <: HList](implicit c: Creator[I, O, HNil, HNil]) = c
+    import TypeLogic._
+    def apply[I <: HList, O <: HList](implicit c: Creator[Input.Top[I], Output.Bottom[O]]) = c
+
+    @implicitNotFound(msg = "`Forward` modules must not have a top output.")
+    private type Req[O <: Output] = IsHNil[O#Top]
 
     object from0 {
-      def apply[CR, O <: HList, R](f: ⇒ CR)(implicit ev: CR ⇒ Creation[O, R], l: HLen[O]): Module[HNil, O, HNil, HNil, R] =
-        Module.from(0, l.value, 0, 0, ins ⇒ ev(f))
+      def apply[CR, O <: Output](f: ⇒ CR)(implicit c: CR ⇒ Creation[O], ev: Req[O]): Module[Input.None, O] =
+        ModuleImpl(0, 0)(_ ⇒ c(f).out)
     }
 
     def from1[A]: From1[A] = new From1
     final class From1[A] private[Forward] {
-      def apply[CR, O <: HList, R](f: Stream[A] ⇒ CR)(implicit ev: CR ⇒ Creation[O, R], l: HLen[O]): Module[A :: HNil, O, HNil, HNil, R] =
-        Module.from(1, l.value, 0, 0, ins ⇒ ev(f(new Stream(ins.in))))
+      def apply[CR, O <: Output](f: Stream[A] ⇒ CR)(implicit c: CR ⇒ Creation[O], ev: Req[O]): Module[Input.Top1[A], O] =
+        ModuleImpl(1, 0)(ins ⇒ c(f(new Stream(ins.in))).out)
     }
 
     def from2[A, B]: From2[A, B] = new From2
     final class From2[A, B] private[Forward] {
-      def apply[CR, O <: HList, R](f: (Stream[A], Stream[B]) ⇒ CR)(implicit ev: CR ⇒ Creation[O, R], l: HLen[O]): Module[A :: B :: HNil, O, HNil, HNil, R] =
-        Module.from(2, l.value, 0, 0, ins ⇒ ev(f(new Stream(ins.in), new Stream(ins.tail.in))))
+      def apply[CR, O <: Output](f: (Stream[A], Stream[B]) ⇒ CR)(implicit c: CR ⇒ Creation[O], ev: Req[O]): Module[Input.Top[A :: B :: HNil], O] =
+        ModuleImpl(2, 0)(ins ⇒ c(f(new Stream(ins.in), new Stream(ins.tail.in))).out)
     }
 
     def from3[A, B, C]: From3[A, B, C] = new From3
     final class From3[A, B, C] private[Forward] {
-      def apply[CR, O <: HList, R](f: (Stream[A], Stream[B], Stream[CR]) ⇒ CR)(implicit ev: CR ⇒ Creation[O, R], l: HLen[O]): Module[A :: B :: CR :: HNil, O, HNil, HNil, R] =
-        Module.from(3, l.value, 0, 0, ins ⇒ ev(f(new Stream(ins.in), new Stream(ins.tail.in), new Stream(ins.tail.tail.in))))
+      def apply[CR, O <: Output](f: (Stream[A], Stream[B], Stream[C]) ⇒ CR)(implicit c: CR ⇒ Creation[O], ev: Req[O]): Module[Input.Top[A :: B :: C :: HNil], O] =
+        ModuleImpl(3, 0)(ins ⇒ c(f(new Stream(ins.in), new Stream(ins.tail.in), new Stream(ins.tail.tail.in))).out)
     }
 
     def from4[A, B, C, D]: From4[A, B, C, D] = new From4
     final class From4[A, B, C, D] private[Forward] {
-      def apply[CR, O <: HList, R](f: (Stream[A], Stream[B], Stream[CR], Stream[D]) ⇒ CR)(implicit ev: CR ⇒ Creation[O, R], l: HLen[O]): Module[A :: B :: CR :: D :: HNil, O, HNil, HNil, R] =
-        Module.from(4, l.value, 0, 0, ins ⇒ ev(f(new Stream(ins.in), new Stream(ins.tail.in), new Stream(ins.tail.tail.in), new Stream(ins.tail.tail.tail.in))))
+      def apply[CR, O <: Output](f: (Stream[A], Stream[B], Stream[C], Stream[D]) ⇒ CR)(implicit c: CR ⇒ Creation[O], ev: Req[O]): Module[Input.Top[A :: B :: C :: D :: HNil], O] =
+        ModuleImpl(4, 0)(ins ⇒ c(f(new Stream(ins.in), new Stream(ins.tail.in), new Stream(ins.tail.tail.in), new Stream(ins.tail.tail.tail.in))).out)
     }
   }
 
-  type Backward[I <: HList, O <: HList] = Module[HNil, HNil, I, O, Unit]
+  type SimpleBidi[IT, IB, OT, OB] = Module[Input.Bidi11[IT, IB], Output.Bidi11[OT, OB]]
 
-  object Backward {
-    def apply[I <: HList, O <: HList](implicit c: Creator[HNil, HNil, I, O]) = c
-
-    // TODO: add more convenience constructors in analogy to `Forward`
+  object SimpleBidi {
+    def apply[IT, IB, OT, OB](f: (Stream[IT], Stream[IB]) ⇒ (Stream[OT], Stream[OB])): SimpleBidi[IT, IB, OT, OB] =
+      ModuleImpl(1, 1) { inports ⇒
+        val (ot, ob) = f(new Stream(inports.in), new Stream(inports.tail.in))
+        ot.inport +: ob.inport +: InportList.empty
+      }
   }
 
-  type Bidi[IT, OB, IB, OT] = Module[IT :: HNil, OB :: HNil, IB :: HNil, OT :: HNil, Unit]
+  final case class Boundary(elem: PipeElem, isEntry: Boolean, isInner: Boolean) {
+    override def toString = {
+      val tpe = (isEntry, isInner) match {
+        case (false, false) ⇒ "OuterExit"
+        case (false, true)  ⇒ "InnerExit"
+        case (true, false)  ⇒ "OuterEntry"
+        case (true, true)   ⇒ "InnerEntry"
+      }
+      s"Boundary(${elem.pipeElemType}, type=$tpe)"
+    }
+  }
 
-  object Bidi {
-    def apply[IT, OB, IB, OT](f: (Stream[IT], Stream[IB]) ⇒ (Stream[OB], Stream[OT])): Bidi[IT, OB, IB, OT] =
-      new Module(1, 1, 1, 1) {
-        def apply(inports: InportList) = {
-          val (ob, ot) = f(new Stream(inports.in), new Stream(inports.tail.in))
-          ob.inport +: ot.inport +: InportList.empty
+  def ID(name: String = "") = new ID(name)
+
+  final class ID private[Module] (val name: String) {
+    private[this] var _boundaries = List.empty[Boundary]
+    def boundaries: List[Boundary] = _boundaries
+
+    private[swave] def markAsOuterEntry(inport: Inport): this.type = mark(inport, asEntry = true, asInner = false)
+    private[swave] def markAsInnerEntry(outport: Outport): this.type = mark(outport, asEntry = true, asInner = true)
+    private[swave] def markAsInnerExit(inport: Inport): this.type = mark(inport, asEntry = false, asInner = true)
+    private[swave] def markAsOuterExit(outport: Outport): this.type = mark(outport, asEntry = false, asInner = false)
+
+    private def mark(port: Port, asEntry: Boolean, asInner: Boolean): this.type = {
+      val elem = port.asInstanceOf[PipeElem with PipeElemImpl]
+      val boundary = Boundary(elem, asEntry, asInner)
+      _boundaries ::= boundary
+      elem.markAsBoundaryOf(this)
+      this
+    }
+
+    //override def toString = s"Module.ID($name)"
+    override def toString = s"""Module.ID(name="$name", boundaries=$boundaries)"""
+  }
+
+  object TypeLogic {
+
+    sealed trait Atop[I <: Input, O <: Output, I2 <: Input, O2 <: Output] {
+      type IR <: Input
+      type OR <: Output
+    }
+
+    object Atop {
+      @implicitNotFound(msg = "Cannot assemble modules. The bottom module cannot digest the bottom output of the top module.")
+      private type Req0[O <: Output, I2 <: Input] = O#Bottom <:< I2#Top
+      @implicitNotFound(msg = "Cannot assemble modules. The top module cannot digest the top output of the bottom module.")
+      private type Req1[O2 <: Output, I <: Input] = O2#Top <:< I#Bottom
+
+      @implicitNotFound(msg = "Cannot assemble modules. The top module must not be a result-producing module.")
+      sealed trait TopAndBottom[O <: Output, O2 <: Output] {
+        type Out <: Output
+      }
+
+      object TopAndBottom {
+
+        import Output._
+
+        implicit def _0[O <: Bidi[_ <: HList, _ <: HList], O2 <: Bidi[_ <: HList, _ <: HList]]: TopAndBottom[O, O2] { type Out = Bidi[O#Top, O2#Bottom] } = null
+
+        implicit def _1[O <: Bidi[_ <: HList, _ <: HList], O2 <: Result[_]]: TopAndBottom[O, O2] { type Out = O2 } = null
+      }
+
+      implicit def apply[I <: Input, O <: Output, I2 <: Input, O2 <: Output](
+        implicit
+        ev0: Req0[O, I2], ev1: Req1[O2, I], tab: TopAndBottom[O, O2]): Atop[I, O, I2, O2] {
+        type IR = Input.Bidi[I#Top, I2#Bottom]
+        type OR = tab.Out
+      } = null
+    }
+
+    sealed trait Flip[I <: Input, O <: Output] {
+      type IR <: Input
+      type OR <: Output
+    }
+
+    object Flip {
+      @implicitNotFound(msg = "Cannot flip a result-producing module.")
+      private type Req[O <: Output] = O <:< Output.Bidi[_, _]
+
+      implicit def apply[I <: Input, O <: Output](implicit ev: Req[O]): Flip[I, O] {
+        type IR = Input.Bidi[I#Bottom, I#Top]
+        type OR = Output.Bidi[O#Bottom, O#Top]
+      } = null
+    }
+
+    sealed trait CrossJoin[I <: Input, O <: Output, I2 <: Input, O2 <: Output] {
+      type Res
+    }
+
+    object CrossJoin {
+      @implicitNotFound(msg = "Cannot crossJoin modules. The 2nd module's top input cannot digest the bottom output of the 1st module.")
+      private type Req0[O <: Output, I2 <: Input] = O#Bottom <:< I2#Top
+      @implicitNotFound(msg = "Cannot crossJoin modules. The 1st module's top input cannot digest the bottom output of the 2nd module.")
+      private type Req1[O2 <: Output, I <: Input] = O2#Bottom <:< I#Top
+      @implicitNotFound(msg = "Cannot crossJoin modules. The 1st module's bottom input cannot digest the top output of the 2nd module.")
+      private type Req2[O2 <: Output, I <: Input] = O2#Top <:< I#Bottom
+      @implicitNotFound(msg = "Cannot crossJoin modules. The 2nd module's bottom input cannot digest the top output of the 1st module.")
+      private type Req3[O <: Output, I2 <: Input] = O#Top <:< I2#Bottom
+
+      implicit def apply[I <: Input, O <: Output, I2 <: Input, O2 <: Output](
+        implicit
+        ev0: Req0[O, I2], ev1: Req1[O2, I], ev2: Req0[O2, I], ev3: Req1[O, I2]): CrossJoin[I, O, I2, O2] = null
+    }
+
+    sealed abstract class Creator[I <: Input, O <: Output] private (lit: Int, lot: Int) {
+      type In <: HList
+      type InUnified
+
+      final def from(f: In ⇒ Creation[O]): Module[I, O] =
+        ModuleImpl(lit, lot)(ins ⇒ f(ins.reverse.toReversedStreamHList.asInstanceOf[In]).out)
+
+      final def fromBranchOut(f: StreamOps.BranchOut[In, HNil, CNil, InUnified, Stream] ⇒ Creation[O]): Module[I, O] =
+        ModuleImpl(lit, lot)(ins ⇒ f(new StreamOps.BranchOut(ins, InportList.empty, new Stream(_))).out)
+    }
+
+    object Creator {
+      implicit def apply[I <: Input, O <: Output, IT <: HList, IB <: HList, IX <: HList](
+        implicit
+        a: Mapped.Aux[I#Top, Stream, IT], b: Mapped.Aux[I#Bottom, Stream, IB], c: Prepend.Aux[IT, IB, IX],
+        lit: HLen[I#Top], lot: HLen[O#Top], iu: HLub[IX]) =
+        new Creator[I, O](lit.value, lot.value) {
+          type In = IX
+          type InUnified = iu.Out
         }
-      }
-
-    // TODO: add more convenience constructors in analogy to `Forward`
-  }
-
-  sealed abstract class Creator[IT <: HList, OB <: HList, IB <: HList, OT <: HList] private[Module] (
-      lit: Int, lib: Int, lot: Int, lob: Int) {
-    type In <: HList
-    type Out <: HList
-    type InUnified
-
-    final def from[O <: HList, Res](f: In ⇒ Creation[O, Res])(implicit ev: O <:< Out): Module[IT, IB, OT, OB, Res] =
-      Module.from(lit, lob, lib, lot, f.compose[InportList](_.reverse.toReversedStreamHList.asInstanceOf[In]))
-
-    final def fromBranchOut[O <: HList, Res](f: StreamOps.BranchOut[In, HNil, CNil, InUnified, Stream] ⇒ Creation[O, Res])(implicit ev: O <:< Out): Module[IT, IB, OT, OB, Res] =
-      Module.from(lit, lob, lib, lot, f.compose[InportList](ins ⇒ new StreamOps.BranchOut(ins, InportList.empty, new Stream(_))))
-  }
-
-  object Creator {
-    implicit def apply[IT <: HList, OB <: HList, IB <: HList, OT <: HList, ITM <: HList, OBM <: HList, IBM <: HList, OTM <: HList, I <: HList, O <: HList](
-      implicit
-      a: Mapped.Aux[IT, Stream, ITM], b: Mapped.Aux[OB, Stream, OBM], c: Mapped.Aux[IB, Stream, IBM], d: Mapped.Aux[OT, Stream, OTM],
-      e: Prepend.Aux[ITM, IBM, I], f: Prepend.Aux[OTM, OBM, O], lit: HLen[IT], lob: HLen[OB], lib: HLen[IB], lot: HLen[OT],
-      iu: HLub[I]) =
-      new Creator[IT, OB, IB, OT](lit.value, lob.value, lib.value, lot.value) {
-        type In = I
-        type Out = O
-        type InUnified = iu.Out
-      }
-  }
-
-  final class Joined[-I <: HList, +O <: HList, +Res] private (private[core] val module: Module[_, _, _, _, _]) extends AnyVal
-  object Joined {
-    implicit def apply[IT <: HList, OB <: HList, IB <: HList, OT <: HList, I <: HList, O <: HList, R](
-      module: Module[IT, OB, IB, OT, R])(implicit e: Prepend.Aux[IT, IB, I], f: Prepend.Aux[OB, OT, O]): Joined[I, O, R] =
-      new Joined(module)
-  }
-
-  def Result[T](result: T): Result[T] = new Result(result)
-  final class Result[T](val result: T) extends AnyVal
-
-  final class Creation[+O <: HList, Res] private (val out: Any)
-  object Creation {
-    private val empty = new Creation[HNil, Unit](())
-    implicit def fromUnit(unit: Unit): Creation[HNil, Unit] = empty
-    implicit def fromResult[T](res: Result[T]): Creation[HNil, T] =
-      new Creation(res.result)
-    implicit def fromStream[T](stream: Stream[T]): Creation[T :: HNil, Unit] =
-      new Creation(InportList(stream.inport))
-    implicit def fromHList[O <: HList](hlist: O): Creation[O, Unit] =
-      new Creation(InportList fromHList hlist)
-    implicit def fromProduct[P <: Product, O <: HList](product: P)(implicit ev: ToHList[P]): Creation[ev.Out, Unit] =
-      new Creation(InportList fromHList ev(product))
-    implicit def fromFanIn[O <: HList](fanIn: StreamOps.FanIn[O, _, _, Stream]): Creation[O, Unit] =
-      new Creation(fanIn.subs)
-  }
-
-  private def from[IT <: HList, OB <: HList, IB <: HList, OT <: HList, R](lit: Int, lob: Int, lib: Int, lot: Int,
-    f: InportList ⇒ Creation[_, _]) =
-    new Module[IT, IB, OT, OB, R](lit, lob, lib, lot) {
-      def apply(inports: InportList) = f(inports).out
     }
+
+    final class Creation[+O <: Output](val out: Any) extends AnyVal
+
+    object Creation {
+      implicit def fromStream[T](stream: Stream[T]): Creation[Output.Bottom1[T]] =
+        new Creation(InportList(stream.inport))
+
+      implicit def fromHList[L <: HList](hlist: L)(implicit ev: IsHListOfStream[L]): Creation[Output.Bottom[ev.Out]] =
+        new Creation(InportList fromHList hlist)
+
+      implicit def fromProduct[P <: Product, L <: HList](product: P)(implicit ev0: ToHList.Aux[P, L], ev1: IsHListOfStream[L]): Creation[Output.Bottom[ev1.Out]] =
+        new Creation(InportList fromHList ev0(product))
+
+      implicit def fromFanIn[L <: HList](fanIn: StreamOps.FanIn[L, _, _, Stream]): Creation[Output.Bottom[L]] =
+        new Creation(fanIn.subs)
+    }
+
+    final class Joined[-I <: HList, +O <: HList, +Res] private[Module] (private[core] val module: Module[_, _]) extends AnyVal
+
+    object Joined extends LowPriorityJoined {
+      implicit def _1[I <: Input, R, O <: Output.Result[R], IJ <: HList](module: Module[I, O])(
+        implicit
+        ev: Prepend.Aux[I#Top, I#Bottom, IJ]): Joined[IJ, HNil, R] =
+        new Joined(module)
+    }
+
+    sealed abstract class LowPriorityJoined {
+      implicit def _0[I <: Input, O <: Output, IJ <: HList, OJ <: HList](module: Module[I, O])(
+        implicit
+        ev0: Prepend.Aux[I#Top, I#Bottom, IJ], ev1: Prepend.Aux[O#Top, O#Bottom, OJ]): Joined[IJ, OJ, Unit] =
+        new Joined(module)
+    }
+  }
 }

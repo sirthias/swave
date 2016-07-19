@@ -12,7 +12,7 @@ import swave.core.macros._
 class PipeElemSpec extends FreeSpec with Matchers {
 
   "Example 1" tests {
-    Stream(1, 2, 3).to(Drain.head)
+    Stream.repeat(42).to(Drain.head)
   }
 
   "Example 2" tests {
@@ -83,7 +83,7 @@ class PipeElemSpec extends FreeSpec with Matchers {
     def tests(pipeNet: ⇒ Piping[_]): Unit =
       name in {
         val expectedRendering = examples.getOrElse(name + ':', sys.error(s"Section for '$name' not found in examples.txt"))
-        val s = PipeElem.render(pipeNet.pipeElem, showParams = true)
+        val s = GraphRendering(pipeNet.pipeElem, showParams = true)
         try s shouldEqual expectedRendering
         catch {
           case NonFatal(e) ⇒

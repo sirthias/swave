@@ -29,7 +29,6 @@ private[core] final class ToPublisherDrainStage extends DrainStage with PipeElem
   private[this] val refPub =
     new AtomicReference[AnyRef] with Publisher[AnyRef] {
       @tailrec def subscribe(subscriber: Subscriber[_ >: AnyRef]): Unit = {
-        println("MARK-A")
         RSCompliance.verifyNonNull(subscriber, "Subscriber", "1.9")
         get match {
           case null => if (!compareAndSet(null, subscriber)) subscribe(subscriber)
@@ -49,7 +48,6 @@ private[core] final class ToPublisherDrainStage extends DrainStage with PipeElem
 
   def awaitingXStart(in: Inport) = state(
     xStart = () => {
-      println("MARK-B")
       @tailrec def rec(): State =
         refPub.get match {
           case null if refPub.compareAndSet(null, runner) => awaitingSubscriber(in, StreamTermination.None)

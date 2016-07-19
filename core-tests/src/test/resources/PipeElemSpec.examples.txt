@@ -1,5 +1,5 @@
 Example 1:
- o {Stream.apply}
+ o Stream.repeat(42)
  |
  |
  o Drain.head()

@@ -10,7 +10,7 @@ import scala.collection.generic.CanBuildFrom
 import scala.concurrent.Future
 import scala.concurrent.duration.{ Duration, FiniteDuration }
 import shapeless._
-import swave.core.impl.{ ModuleMarker, InportList, TypeLogic, Inport }
+import swave.core.impl.{ ModuleImpl, InportList, TypeLogic, Inport }
 import swave.core.impl.stages.Stage
 import swave.core.impl.stages.source._
 
@@ -33,10 +33,10 @@ final class Stream[+A](private[swave] val inport: Inport) extends AnyVal with St
 
   def via[B](pipe: A =>> B): Stream[B] = pipe.transform(this)
 
-  def via[P <: HList, R, Out](joined: Module.Joined[A :: HNil, P, R])(
+  def via[P <: HList, R, Out](joined: Module.TypeLogic.Joined[A :: HNil, P, R])(
     implicit
     vr: TypeLogic.ViaResult[P, Piping[R], Stream, Out]): Out = {
-    val out = joined.module(InportList(inport))
+    val out = ModuleImpl(joined.module)(InportList(inport))
     val result = vr.id match {
       case 0 ⇒ new Piping(inport, out)
       case 1 ⇒ new Stream(out.asInstanceOf[InportList].in)
@@ -61,8 +61,7 @@ final class Stream[+A](private[swave] val inport: Inport) extends AnyVal with St
     drainToSeq[Vector](limit)
 
   def named(name: String): Stream[A] = {
-    val marker = new ModuleMarker(name)
-    marker.markExit(inport)
+    Module.ID(name).markAsInnerExit(inport)
     this
   }
 }

@@ -16,6 +16,11 @@ private[swave] abstract class AbstractInportList[L >: Null <: AbstractInportList
 private[swave] object AbstractInportList {
   implicit class InportListOps[L >: Null <: AbstractInportList[L]](private val underlying: L) extends AnyVal {
 
+    def contains(in: Inport): Boolean = {
+      @tailrec def rec(current: L): Boolean = (current ne null) && ((current.in eq in) || rec(current.tail))
+      rec(underlying)
+    }
+
     def find_!(in: Inport): L = {
       @tailrec def rec(current: L): L =
         if (current ne null) {

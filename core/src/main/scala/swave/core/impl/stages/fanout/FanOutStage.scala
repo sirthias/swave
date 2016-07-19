@@ -14,14 +14,14 @@ import swave.core.impl.stages.Stage.OutportStates
 // format: OFF
 private[core] abstract class FanOutStage extends Stage { this: PipeElem.FanOut =>
 
-  protected final var _inputPipeElem: PipeElem.Basic = PipeElem.Unconnected
+  protected final var _inputPipeElem: PipeElem = PipeElem.Unconnected
   protected final var _outputElems: OutportStates = _
 
   final def inputElem = _inputPipeElem
   final def outputElems =  {
-    val buf = new ListBuffer[PipeElem.Basic]
+    val buf = new ListBuffer[PipeElem]
     for (o <- _outputElems) {
-      buf += o.out.asInstanceOf[PipeElem.Basic]
+      buf += o.out.asInstanceOf[PipeElem]
       ()
     }
     buf.result()

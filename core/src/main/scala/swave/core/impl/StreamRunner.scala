@@ -108,9 +108,9 @@ private[core] object StreamRunner {
   }
 
   private final class AssignToRegion(val runner: StreamRunner, isDefault: Boolean,
-      ovrride: Boolean = false) extends (PipeElem.Basic ⇒ Boolean) {
-    def _apply(pe: PipeElem.Basic): Boolean = apply(pe)
-    @tailrec def apply(pe: PipeElem.Basic): Boolean =
+      ovrride: Boolean = false) extends (PipeElem ⇒ Boolean) {
+    def _apply(pe: PipeElem): Boolean = apply(pe)
+    @tailrec def apply(pe: PipeElem): Boolean =
       pe match {
         case x: AsyncBoundaryStage ⇒
           // async boundary stages belong to their upstream runner
@@ -139,7 +139,7 @@ private[core] object StreamRunner {
         case _ ⇒ true
       }
 
-    def subStreamBoundary(parent: Stage, subStream: Stage, next: PipeElem.Basic): Boolean =
+    def subStreamBoundary(parent: Stage, subStream: Stage, next: PipeElem): Boolean =
       if (parent.runner ne null) {
         if (parent.runner ne runner) {
           if (isDefault) {
@@ -167,7 +167,7 @@ private[core] object StreamRunner {
           if (stage.runner ne null) {
             throw new IllegalAsyncBoundaryException("Conflicting dispatcher assignment to async region containing stage " +
               s"'${stage.getClass.getSimpleName}': [${assign.runner.dispatcher.name}] vs. [${stage.runner.dispatcher.name}]")
-          } else assign(stage.asInstanceOf[PipeElem.Basic])
+          } else assign(stage.asInstanceOf[PipeElem])
           assignNonDefaults(tail, defaultAssignments)
         } else assignNonDefaults(tail, stage :: defaultAssignments)
       } else defaultAssignments
@@ -176,7 +176,7 @@ private[core] object StreamRunner {
     defaultAssignments.foreach { stage ⇒
       if (stage.runner eq null) {
         val assign = createAssign(env.defaultDispatcher, isDefault = true)
-        assign(stage.asInstanceOf[PipeElem.Basic])
+        assign(stage.asInstanceOf[PipeElem])
       }
     }
   }

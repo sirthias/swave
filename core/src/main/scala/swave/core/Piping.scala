@@ -14,7 +14,7 @@ import swave.core.impl.{ Port, TypeLogic, RunContext }
  */
 final class Piping[A] private[core] (port: Port, val result: A) {
 
-  def pipeElem: PipeElem.Basic = port.pipeElem
+  def pipeElem: PipeElem = port.pipeElem
 
   def mapResult[B](f: A ⇒ B): Piping[B] = new Piping(port, f(result))
 
@@ -34,7 +34,7 @@ final class Piping[A] private[core] (port: Port, val result: A) {
 
 final class SealedPiping[A] private[core] (ctx: RunContext, val result: A) {
 
-  def pipeElem: PipeElem.Basic = ctx.port.pipeElem
+  def pipeElem: PipeElem = ctx.port.pipeElem
 
   def mapResult[B](f: A ⇒ B): SealedPiping[B] = new SealedPiping(ctx, f(result))
 
