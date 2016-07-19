@@ -63,7 +63,7 @@ private[graph] final case class GraphData[V](
 
 private[graph] object GraphData {
 
-  def apply[V](entryVertex: V, predecessors: V ⇒ Seq[V], successors: V ⇒ Seq[V]): GraphData[V] = {
+  def apply[V](entryVertices: Iterable[V], predecessors: V ⇒ Seq[V], successors: V ⇒ Seq[V]): GraphData[V] = {
     var vertexMap = Map.empty[V, Node]
     val nodeBuilder = new VectorBuilder[Node]
     val nodeIds = Iterator from 0
@@ -99,7 +99,7 @@ private[graph] object GraphData {
         }
       }
 
-    rec(getOrCreateNode(entryVertex), null)
+    for (v ← entryVertices) rec(getOrCreateNode(v), null)
 
     // verify complete reciprocity of preds and succs assignments
     val nodes = nodeBuilder.result()

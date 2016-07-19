@@ -106,8 +106,8 @@ object Digraph {
    *
    * Self edges are ignored.
    */
-  def apply[V](entryVertex: V, predecessors: V ⇒ Seq[V], successors: V ⇒ Seq[V]): Digraph[V] =
-    new Digraph[V](GraphData(entryVertex, predecessors, successors))
+  def apply[V](entryVertices: Iterable[V], predecessors: V ⇒ Seq[V], successors: V ⇒ Seq[V]): Digraph[V] =
+    new Digraph[V](GraphData(entryVertices, predecessors, successors))
 
   type EdgeAttributes = Int
   object EdgeAttributes {
@@ -127,8 +127,9 @@ object Digraph {
     def format(renderVertex: V ⇒ String, nodeRow: Int = (linesPerVertex - 1) / 2): String = {
       val sb = new java.lang.StringBuilder
       for (r @ VertexRendering(n, lines) ← vertexRenderings) {
+        def isFirstOrLast = (r eq vertexRenderings.head) || (r eq vertexRenderings.last)
         lines foreachWithIndex { (line, ix) ⇒
-          if (line.nonEmpty || ix == nodeRow) {
+          if (line.nonEmpty || ix == nodeRow || !isFirstOrLast) {
             if (sb.length > 0) sb.append('\n')
             sb.append(line)
             if (ix == nodeRow) {

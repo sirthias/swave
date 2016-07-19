@@ -63,6 +63,14 @@ class PipeElemSpec extends FreeSpec with Matchers {
       .to(Drain.head)
   }
 
+  "Example 8" tests {
+    Stream.from(0)
+      .map(_ * 2)
+      .via(Pipe.fromDrainAndStream[Int, String](Drain.cancelling, Stream.empty))
+      .filterNot(_.isEmpty)
+      .to(Drain.head)
+  }
+
   val examples: Map[String, String] =
     Source.fromInputStream(getClass.getResourceAsStream("/PipeElemSpec.examples.txt")).getLines()
       .scanLeft(Left(Nil): Either[List[String], List[String]]) {
@@ -83,7 +91,7 @@ class PipeElemSpec extends FreeSpec with Matchers {
     def tests(pipeNet: ⇒ Piping[_]): Unit =
       name in {
         val expectedRendering = examples.getOrElse(name + ':', sys.error(s"Section for '$name' not found in examples.txt"))
-        val s = GraphRendering(pipeNet.pipeElem, showParams = true)
+        val s = Graph.render(pipeNet.pipeElem, showParams = true)
         try s shouldEqual expectedRendering
         catch {
           case NonFatal(e) ⇒

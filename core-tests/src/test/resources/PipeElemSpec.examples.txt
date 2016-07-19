@@ -97,4 +97,19 @@ Example 7:
     |
     o {Drain.ignore}
 
+Example 8:
+ o {Stream.from}
+ |
+ |
+ o map(<function1>)
+ |
+ |
+ o {Pipe.fromDrainAndStream}
+ |
+ |
+ o filter(<function1>)
+ |
+ |
+ o Drain.head()
+
 -- last line -- do not remove --

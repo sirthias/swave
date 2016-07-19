@@ -87,7 +87,7 @@ object Pipe {
   }
 
   def fromDrainAndStream[A, B](drain: Drain[A, Unit], stream: Stream[B]): Pipe[A, B] =
-    new Pipe(drain.outport, stream.inport)
+    new Pipe(drain.outport, stream.inport) named "Pipe.fromDrainAndStream"
 
   def fromProcessor[A, B](processor: Processor[A, B]): Pipe[A, B] =
     fromDrainAndStream(Drain.fromSubscriber(processor), Stream.fromPublisher(processor))
