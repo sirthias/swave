@@ -4,11 +4,9 @@
 
 package swave.core.impl.stages
 
-import swave.core.impl.stages.Stage.RegisterStopPromise
-
 import scala.annotation.{ compileTimeOnly, tailrec }
 import scala.concurrent.Promise
-import swave.core.PipeElem
+import swave.core.{ Module, PipeElem }
 import swave.core.util._
 import swave.core.impl._
 
@@ -278,6 +276,17 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
   final def xSeal(ctx: RunContext): Unit =
     if (!_sealed) {
       _sealed = true
+      @tailrec def sealBoundaries(remaining: List[Module.Boundary]): Unit =
+        if (remaining.nonEmpty) {
+          remaining.head.elem.asInstanceOf[Stage].xSeal(ctx)
+          sealBoundaries(remaining.tail)
+        }
+      @tailrec def sealModules(remaining: List[Module.ID]): Unit =
+        if (remaining.nonEmpty) {
+          if (remaining.head.markSealed()) sealBoundaries(remaining.head.boundaries)
+          sealModules(remaining.tail)
+        }
+      sealModules(boundaryOf)
       _state = _xSeal(ctx)
     }
 
@@ -313,7 +322,7 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
 
   protected def _xEvent0(ev: AnyRef): State =
     ev match {
-      case RegisterStopPromise(p) ⇒
+      case Stage.RegisterStopPromise(p) ⇒
         if (_stopPromise eq null) {
           if (isStopped) p.success(())
           else _stopPromise = p

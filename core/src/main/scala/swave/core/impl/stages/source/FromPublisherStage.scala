@@ -9,6 +9,7 @@ import swave.core.PipeElem
 import swave.core.impl.Outport
 import swave.core.impl.rs.RSCompliance
 import swave.core.macros.StageImpl
+import swave.core.util._
 
 // format: OFF
 @StageImpl
@@ -43,11 +44,28 @@ private[core] final class FromPublisherStage(publisher: Publisher[AnyRef])
           }
         }
       }
-      awaitingSubscription(out)
+      awaitingSubscription(out, 0L)
     })
 
-  def awaitingSubscription(out: Outport) = state(
-    xEvent = { case s: Subscription => running(out, s) })
+  def awaitingSubscription(out: Outport, requested: Long): State = state(
+    request = (n, _) ⇒ awaitingSubscription(out, requested ⊹ n),
+    cancel = _ => awaitingSubscriptionDownstreamCancelled(),
+
+    xEvent = {
+      case s: Subscription =>
+        if (requested > 0) s.request(requested)
+        running(out, s)
+    })
+
+  def awaitingSubscriptionDownstreamCancelled(): State = state(
+    request = (_, _) ⇒ stay(),
+    cancel = _ => stay(),
+
+    xEvent = {
+      case s: Subscription =>
+        s.cancel()
+        stop()
+    })
 
   def running(out: Outport, subscription: Subscription) = state(
     intercept = false,

@@ -16,9 +16,20 @@ object Graph {
 
   type Vertex = Either[Module.ID, PipeElem]
 
+  trait ExpandModules extends (Module.ID ⇒ Boolean)
+  object ExpandModules {
+    def apply(predicate: Module.ID ⇒ Boolean): ExpandModules =
+      new ExpandModules {
+        def apply(id: Module.ID) = predicate(id)
+      }
+    val None = ExpandModules(_ ⇒ false)
+    val All = ExpandModules(_ ⇒ true)
+    def Some(names: List[String]) = ExpandModules(id ⇒ names contains id.name)
+  }
+
   def render(
     pipeElem: PipeElem,
-    expandModules: List[String] = Nil,
+    expandModules: ExpandModules = ExpandModules.None,
     glyphSet: GlyphSet = GlyphSet.`3x3 ASCII`,
     showParams: Boolean = false,
     showRunners: Boolean = false,
@@ -90,7 +101,7 @@ object Graph {
     new Rec().run()
   }
 
-  def create(entryElem: PipeElem, expandModules: List[String] = Nil): Digraph[Vertex] = {
+  def create(entryElem: PipeElem, expandModules: ExpandModules = ExpandModules.None): Digraph[Vertex] = {
     import Digraph.EdgeAttributes._
 
     ///////////////// STEP 1: discover complete graph ///////////////////////
@@ -127,7 +138,7 @@ object Graph {
 
     val visibleCollapsed = new mutable.ArrayBuffer[ModuleInfo]
     for (info ← allModuleInfos) {
-      if (info.id.name.nonEmpty && !expandModules.contains(info.id.name)) {
+      if (info.id.name.nonEmpty && !expandModules(info.id)) {
         visibleCollapsed.indexWhere(m ⇒ (m.vertices & info.vertices).nonEmpty) match {
           case -1 ⇒ visibleCollapsed += info
           case ix ⇒

@@ -60,6 +60,9 @@ final class Stream[+A](private[swave] val inport: Inport) extends AnyVal with St
   def drainToVector(limit: Long)(implicit env: StreamEnv): Future[Vector[A]] =
     drainToSeq[Vector](limit)
 
+  def drainToBlackHole()(implicit env: StreamEnv): Future[Unit] =
+    drainTo(Drain.ignore)
+
   def named(name: String): Stream[A] = {
     Module.ID(name).markAsInnerExit(inport)
     this

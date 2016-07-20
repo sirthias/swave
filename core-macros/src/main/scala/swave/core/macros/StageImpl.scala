@@ -7,7 +7,7 @@ package swave.core.macros
 import scala.annotation.{ StaticAnnotation, compileTimeOnly }
 
 @compileTimeOnly("Unresolved @StageImpl")
-private[swave] final class StageImpl(dump: Boolean = false, tracing: Boolean = false) extends StaticAnnotation {
+private[swave] final class StageImpl(dump: Boolean = false, trace: Boolean = false) extends StaticAnnotation {
   def macroTransform(annottees: Any*): Any = macro StageImplMacro.generateStage
 }
 
@@ -85,7 +85,7 @@ private[swave] class StageImplMacro(val c: scala.reflect.macros.whitebox.Context
 
   var stateHandlers = Map.empty[String, StateHandlers]
   val debugMode: Boolean = annotationFlag("dump")
-  val tracing: Boolean = annotationFlag("tracing")
+  val tracing: Boolean = annotationFlag("trace")
 
   private def annotationFlag(flag: String) =
     c.prefix.tree match {

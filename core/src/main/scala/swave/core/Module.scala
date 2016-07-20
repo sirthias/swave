@@ -196,6 +196,7 @@ object Module {
 
   final class ID private[Module] (val name: String) {
     private[this] var _boundaries = List.empty[Boundary]
+    private[this] var _sealed = false
     def boundaries: List[Boundary] = _boundaries
 
     private[swave] def markAsOuterEntry(inport: Inport): this.type = mark(inport, asEntry = true, asInner = false)
@@ -211,7 +212,8 @@ object Module {
       this
     }
 
-    //override def toString = s"Module.ID($name)"
+    private[core] def markSealed(): Boolean = !_sealed && { _sealed = true; true }
+
     override def toString = s"""Module.ID(name="$name", boundaries=$boundaries)"""
   }
 

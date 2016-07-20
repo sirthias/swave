@@ -101,7 +101,7 @@ object GraphBuilding {
       def to(coupling: Coupling) = append(coupling.asInstanceOf[CouplingImpl]).toDigraph
       def toDigraph = {
         import Digraph.EdgeAttributes._
-        val graph = Digraph[Node](node, _.asInstanceOf[NodeImpl].inputs, _.asInstanceOf[NodeImpl].outputs)
+        val graph = Digraph[Node](node :: Nil, _.asInstanceOf[NodeImpl].inputs, _.asInstanceOf[NodeImpl].outputs)
         graph.vertices.foreach {
           case x: CouplingImpl ⇒ graph.markPaths(x, impl(x.input).node, Reversaphile | Fusable)
           case _               ⇒ // nothing to do

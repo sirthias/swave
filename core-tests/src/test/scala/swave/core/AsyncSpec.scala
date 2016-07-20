@@ -179,15 +179,12 @@ class AsyncSpec extends SwaveSpec {
     }
 
     "complex example" in {
-      val piping =
-        Stream.continually(threadName)
-          .async()
-          .inject()
-          .map(_.take(1).map(_ :: threadName :: Nil))
-          .flattenConcat()
-          .to(Drain.head).seal().get
-      //println(PipeElem.render(piping.pipeElem, showDispatchers = true))
-      piping.run().await(20.millis).distinct shouldEqual List("swave-default-1")
+      Stream.continually(threadName)
+        .async()
+        .inject()
+        .map(_.take(1).map(_ :: threadName :: Nil))
+        .flattenConcat()
+        .drainTo(Drain.head).await(20.millis).distinct shouldEqual List("swave-default-1")
     }
   }
 }
