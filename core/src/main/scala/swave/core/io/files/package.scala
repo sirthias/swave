@@ -12,7 +12,7 @@ import swave.core._
 
 package object files {
 
-  implicit class RichStream(val underlying: Stream.type) extends AnyVal with StreamFromFiles
+  implicit class RichSpout(val underlying: Spout.type) extends AnyVal with SpoutFromFiles
   implicit class RichDrain(val underlying: Drain.type) extends AnyVal with DrainToFiles
 
   private[io] def quietClose(channel: FileChannel): Unit =

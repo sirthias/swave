@@ -11,8 +11,8 @@ import swave.core.util._
 
 abstract class SwaveSpec extends FreeSpec with StreamEnvShutdown {
 
-  def produce[T](expected: T*): Matcher[Stream[T]] = produceSeq(expected)
-  def produceSeq[T](expected: Seq[T]): Matcher[Stream[T]] =
+  def produce[T](expected: T*): Matcher[Spout[T]] = produceSeq(expected)
+  def produceSeq[T](expected: Seq[T]): Matcher[Spout[T]] =
     equal(expected).matcher[Seq[T]].compose(_.drainTo(Drain.seq(100)).await(Duration.Zero))
 }
 

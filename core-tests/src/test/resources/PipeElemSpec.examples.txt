@@ -1,11 +1,11 @@
 Example 1:
- o Stream.repeat(42)
+ o Spout.repeat(42)
  |
  |
  o Drain.head()
 
 Example 2:
- o {Stream.apply}
+ o {Spout.apply}
  |
  |
  o map(<function1>)
@@ -14,7 +14,7 @@ Example 2:
  o Drain.foreach(<function1>, List())
 
 Example 3:
- o {Stream.apply}
+ o {Spout.apply}
  |
  |
  o-----+ fanInConcat()
@@ -38,13 +38,13 @@ Example 3:
  o--+ Coupling()
 
 Example 4:
- o {Stream.from}
+ o {Spout.from}
  |
  |
  o {duplicate}
  |
  |
- |  o {Stream.apply}
+ |  o {Spout.apply}
  |  |
  |  |
  o--+--+ {foo}
@@ -59,7 +59,7 @@ Example 4:
  o {Drain.first}
 
 Example 5:
- o {Stream.apply}
+ o {Spout.apply}
  |
  |
  o--+ fanOutBroadcast(false)
@@ -71,13 +71,13 @@ Example 5:
  o Drain.head()
 
 Example 6:
- o {Stream.from}
+ o {Spout.from}
  |
  |
  o deduplicate()
  |
  |
- |  o {Stream.apply}
+ |  o {Spout.apply}
  |  |
  |  |
  o--+ {zip}
@@ -86,7 +86,7 @@ Example 6:
  o Drain.head()
 
 Example 7:
- o {Stream.apply}
+ o {Spout.apply}
  |
  |
  o--+ {tee}
@@ -98,13 +98,13 @@ Example 7:
     o {Drain.ignore}
 
 Example 8:
- o {Stream.from}
+ o {Spout.from}
  |
  |
  o map(<function1>)
  |
  |
- o {Pipe.fromDrainAndStream}
+ o {Pipe.fromDrainAndSpout}
  |
  |
  o filter(<function1>)

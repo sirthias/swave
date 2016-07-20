@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package swave.core.impl.stages.source
+package swave.core.impl.stages.spout
 
 import scala.concurrent.Future
 import scala.util.{ Failure, Success }
@@ -12,9 +12,9 @@ import swave.core.macros.StageImpl
 
 // format: OFF
 @StageImpl
-private[core] final class FromFutureStage(future: Future[AnyRef]) extends SourceStage with PipeElem.Source.Future {
+private[core] final class FutureSpoutStage(future: Future[AnyRef]) extends SpoutStage with PipeElem.Source.Future {
 
-  def pipeElemType: String = "Stream.fromFuture"
+  def pipeElemType: String = "Spout.fromFuture"
   def pipeElemParams: List[Any] = future :: Nil
 
   connectOutAndSealWith { (ctx, out) ⇒

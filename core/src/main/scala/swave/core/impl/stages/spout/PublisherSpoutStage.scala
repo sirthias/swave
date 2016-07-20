@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package swave.core.impl.stages.source
+package swave.core.impl.stages.spout
 
 import org.reactivestreams.{ Subscriber, Subscription, Publisher }
 import swave.core.PipeElem
@@ -13,10 +13,10 @@ import swave.core.util._
 
 // format: OFF
 @StageImpl
-private[core] final class FromPublisherStage(publisher: Publisher[AnyRef])
-  extends SourceStage with PipeElem.Source.FromPublisher { stage =>
+private[core] final class PublisherSpoutStage(publisher: Publisher[AnyRef])
+  extends SpoutStage with PipeElem.Source.Publisher { stage =>
 
-  def pipeElemType: String = "Stream.fromPublisher"
+  def pipeElemType: String = "Spout.fromPublisher"
   def pipeElemParams: List[Any] = publisher :: Nil
 
   connectOutAndSealWith { (ctx, out) ⇒

@@ -12,8 +12,8 @@ import swave.core.macros.StageImpl
 
 // format: OFF
 @StageImpl
-private[core] final class FromSubscriberStage(subscriber: Subscriber[AnyRef])
-  extends DrainStage with PipeElem.Drain.FromSubscriber {
+private[core] final class SubscriberDrainStage(subscriber: Subscriber[AnyRef])
+  extends DrainStage with PipeElem.Drain.Subscriber {
 
   def pipeElemType: String = "Drain.fromSubscriber"
   def pipeElemParams: List[Any] = subscriber :: Nil

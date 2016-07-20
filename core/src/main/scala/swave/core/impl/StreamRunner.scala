@@ -9,7 +9,7 @@ import scala.concurrent.duration._
 import com.typesafe.scalalogging.Logger
 import swave.core.impl.stages.drain.SubDrainStage
 import swave.core.impl.stages.inout.AsyncBoundaryStage
-import swave.core.impl.stages.source.SubSourceStage
+import swave.core.impl.stages.spout.SubSpoutStage
 import swave.core.impl.stages.Stage
 import swave.core.util._
 import swave.core._
@@ -122,8 +122,8 @@ private[core] object StreamRunner {
           3 * inputElems.size012 + outputElems.size012 match {
             case 0 /* 0:0 */ ⇒ throw new IllegalStateException // no input and no output?
             case 1 /* 0:1 */ ⇒ stage match {
-              case x: SubSourceStage ⇒ subStreamBoundary(x.in, x, outputElems.head)
-              case _                 ⇒ apply(outputElems.head)
+              case x: SubSpoutStage ⇒ subStreamBoundary(x.in, x, outputElems.head)
+              case _                ⇒ apply(outputElems.head)
             }
             case 2 /* 0:x */ ⇒ outputElems.forall(this)
             case 3 /* 1:0 */ ⇒ stage match {

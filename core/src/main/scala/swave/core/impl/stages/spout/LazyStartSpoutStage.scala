@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package swave.core.impl.stages.source
+package swave.core.impl.stages.spout
 
 import scala.concurrent.duration.Duration
 import scala.util.control.NonFatal
@@ -15,10 +15,10 @@ import swave.core._
 
 // format: OFF
 @StageImpl
-private[core] final class LazyStartSourceStage(onStart: () => Stream[AnyRef], timeout: Duration)
-  extends SourceStage with SignalStashing with PipeElem.Source.Lazy {
+private[core] final class LazyStartSpoutStage(onStart: () => Spout[AnyRef], timeout: Duration)
+  extends SpoutStage with SignalStashing with PipeElem.Source.Lazy {
 
-  def pipeElemType: String = "Stream.lazyStart"
+  def pipeElemType: String = "Spout.lazyStart"
   def pipeElemParams: List[Any] = onStart :: timeout :: Nil
 
   connectOutAndSealWith { (ctx, out) ⇒

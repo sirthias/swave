@@ -22,7 +22,7 @@ final class InjectSpec extends SyncPipeSpec with Inspectors {
   "Inject" in check {
     testSetup
       .input[Int]
-      .output[Stream[Int]]
+      .output[Spout[Int]]
       .fixture(fd ⇒ Gen.listOfN(10, fd.output[Int](TestSetup.Default.nonDroppingOutputScripts)))
       .prop
       .from { (in, out, allSubOuts) ⇒
@@ -38,7 +38,7 @@ final class InjectSpec extends SyncPipeSpec with Inspectors {
           } else sub.drainTo(Drain.ignore)
         }
 
-        in.stream
+        in.spout
           .inject()
           .drainTo(out.drain) shouldTerminate likeThis {
             case Cancelled ⇒ // input can be in any state

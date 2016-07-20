@@ -10,7 +10,7 @@ import scodec.bits.ByteVector
 import swave.core._
 import swave.testkit.Probes._
 
-class FileSourceSpec extends SwaveSpec {
+class FileSpoutSpec extends SwaveSpec {
   import swave.compat.scodec._
   import swave.core.io.files._
 
@@ -40,11 +40,11 @@ class FileSourceSpec extends SwaveSpec {
 
   override def afterTermination(): Unit = Files.delete(testFile)
 
-  "Stream.fromPath must" - {
+  "Spout.fromPath must" - {
 
     "read contents from a file" in {
       val chunkSize = 512
-      Stream.fromPath(testFile, chunkSize)
+      Spout.fromPath(testFile, chunkSize)
         .map(_.decodeUtf8.right.get)
         .drainTo(DrainProbe[String]).get
         .sendRequest(100)
@@ -54,7 +54,7 @@ class FileSourceSpec extends SwaveSpec {
     }
 
     "produce an Error when the file doesn't exist" in {
-      val drain = Stream.fromPath(notExistingFile).drainTo(DrainProbe[ByteVector]).get
+      val drain = Spout.fromPath(notExistingFile).drainTo(DrainProbe[ByteVector]).get
       drain.expectError() shouldBe an[java.nio.file.NoSuchFileException]
       drain.verifyCleanStop()
     }

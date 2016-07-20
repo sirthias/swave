@@ -10,18 +10,18 @@ import scala.annotation.tailrec
 import swave.core.macros.StageImpl
 import swave.core.PipeElem
 import swave.core.impl.Outport
-import swave.core.impl.stages.source.SourceStage
+import swave.core.impl.stages.spout.SpoutStage
 
 @StageImpl
-private[testkit] final class TestStreamStage(
+private[testkit] final class TestSpoutStage(
     val id: Int,
     val elemsIterable: Iterable[AnyRef],
     val termination: Option[Throwable],
-    ctx: TestContext) extends SourceStage with TestStage with PipeElem.Source.Test {
+    ctx: TestContext) extends SpoutStage with TestStage with PipeElem.Source.Test {
 
   private[this] val elems: Iterator[AnyRef] = elemsIterable.iterator
 
-  def pipeElemType: String = "Stream.test"
+  def pipeElemType: String = "Spout.test"
   def pipeElemParams: List[Any] = id :: Nil
 
   override def toString: String = "Input  " + id

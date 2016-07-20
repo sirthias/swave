@@ -6,8 +6,8 @@ package swave.core.impl.stages.inout
 
 import scala.annotation.tailrec
 import scala.concurrent.duration._
-import swave.core.{ PipeElem, Stream }
-import swave.core.impl.stages.source.SubSourceStage
+import swave.core.{ PipeElem, Spout }
+import swave.core.impl.stages.spout.SubSpoutStage
 import swave.core.impl.{ RunContext, Outport, Inport }
 import swave.core.macros._
 import swave.core.util._
@@ -62,7 +62,7 @@ private[core] final class InjectStage(timeout: Duration) extends InOutStage with
       request = (n, from) ⇒ {
         if (from eq out) {
           val s = emitNewSub()
-          s.xEvent(SubSourceStage.EnableSubscriptionTimeout)
+          s.xEvent(SubSpoutStage.EnableSubscriptionTimeout)
           awaitingSubDemandUpstreamGone(s, (n - 1).toLong)
         } else stay()
       },
@@ -98,7 +98,7 @@ private[core] final class InjectStage(timeout: Duration) extends InOutStage with
      *                      or 0, if the buffer is full
      * @param mainRemaining number of elements already requested by downstream but not yet delivered, >= 0
      */
-    def awaitingSubDemand(sub: SubSourceStage, pending: Int, mainRemaining: Long): State = state(
+    def awaitingSubDemand(sub: SubSpoutStage, pending: Int, mainRemaining: Long): State = state(
       request = (n, from) ⇒ {
         @tailrec def rec(nn: Int): State =
           if (buffer.nonEmpty) {
@@ -118,7 +118,7 @@ private[core] final class InjectStage(timeout: Duration) extends InOutStage with
           if (mainRemaining > 0) awaitingSubDemand(emitNewSub(), pending, mainRemaining - 1)
           else noSubAwaitingMainDemand(pending)
         } else if (from eq out) {
-          sub.xEvent(SubSourceStage.EnableSubscriptionTimeout)
+          sub.xEvent(SubSpoutStage.EnableSubscriptionTimeout)
           awaitingSubDemandDownstreamGone(sub, pending)
         }
         else stay()
@@ -130,7 +130,7 @@ private[core] final class InjectStage(timeout: Duration) extends InOutStage with
       },
 
       onComplete = _ => {
-        sub.xEvent(SubSourceStage.EnableSubscriptionTimeout)
+        sub.xEvent(SubSpoutStage.EnableSubscriptionTimeout)
         awaitingSubDemandUpstreamGone(sub, mainRemaining)
       },
       onError = stopErrorSubAndMainF(sub))
@@ -142,7 +142,7 @@ private[core] final class InjectStage(timeout: Duration) extends InOutStage with
      * @param sub           the currently open sub-stream
      * @param mainRemaining number of elements already requested by downstream but not yet delivered, >= 0
      */
-    def awaitingSubDemandUpstreamGone(sub: SubSourceStage, mainRemaining: Long): State = state(
+    def awaitingSubDemandUpstreamGone(sub: SubSpoutStage, mainRemaining: Long): State = state(
       request = (n, from) ⇒ {
         @tailrec def rec(nn: Int): State =
           if (buffer.nonEmpty) {
@@ -176,7 +176,7 @@ private[core] final class InjectStage(timeout: Duration) extends InOutStage with
      * @param pending number of elements already requested from upstream but not yet received (> 0),
      *                or 0, if the buffer is full
      */
-    def awaitingSubDemandDownstreamGone(sub: SubSourceStage, pending: Int): State = state(
+    def awaitingSubDemandDownstreamGone(sub: SubSpoutStage, pending: Int): State = state(
       request = (n, from) ⇒ {
         @tailrec def rec(nn: Int): State =
           if (buffer.nonEmpty) {
@@ -205,7 +205,7 @@ private[core] final class InjectStage(timeout: Duration) extends InOutStage with
      *
      * @param sub the currently open sub-stream
      */
-    def awaitingSubDemandUpAndDownstreamGone(sub: SubSourceStage): State = state(
+    def awaitingSubDemandUpAndDownstreamGone(sub: SubSpoutStage): State = state(
       request = (n, from) ⇒ {
         @tailrec def rec(nn: Int): State =
           if (buffer.nonEmpty) {
@@ -229,7 +229,7 @@ private[core] final class InjectStage(timeout: Duration) extends InOutStage with
      * @param subRemaining  number of elements already requested by sub-stream but not yet delivered, >= 0
      * @param mainRemaining number of elements already requested by downstream but not yet delivered, >= 0
      */
-    def awaitingElem(sub: SubSourceStage, pending: Int, subRemaining: Long, mainRemaining: Long): State = state(
+    def awaitingElem(sub: SubSpoutStage, pending: Int, subRemaining: Long, mainRemaining: Long): State = state(
       request = (n, from) ⇒ {
         if (from eq sub) awaitingElem(sub, pending, subRemaining ⊹ n, mainRemaining)
         else if (from eq out) awaitingElem(sub, pending, subRemaining, mainRemaining ⊹ n)
@@ -239,7 +239,7 @@ private[core] final class InjectStage(timeout: Duration) extends InOutStage with
       cancel = from => {
         if (from eq sub) noSubAwaitingElem(pending, mainRemaining)
         else if (from eq out) {
-          sub.xEvent(SubSourceStage.EnableSubscriptionTimeout)
+          sub.xEvent(SubSpoutStage.EnableSubscriptionTimeout)
           awaitingElemDownstreamGone(sub, pending, subRemaining)
         } else stay()
       },
@@ -265,7 +265,7 @@ private[core] final class InjectStage(timeout: Duration) extends InOutStage with
      * @param pending       number of elements already requested from upstream but not yet received, > 0
      * @param subRemaining  number of elements already requested by sub-stream but not yet delivered, >= 0
      */
-    def awaitingElemDownstreamGone(sub: SubSourceStage, pending: Int, subRemaining: Long): State = state(
+    def awaitingElemDownstreamGone(sub: SubSpoutStage, pending: Int, subRemaining: Long): State = state(
       request = (n, from) ⇒ if (from eq sub) awaitingElemDownstreamGone(sub, pending, subRemaining ⊹ n) else stay(),
       cancel = from => if (from eq sub) stopCancel(in) else stay(),
 
@@ -285,8 +285,8 @@ private[core] final class InjectStage(timeout: Duration) extends InOutStage with
     ///////////////////////// helpers //////////////////////////
 
     def emitNewSub() = {
-      val s = new SubSourceStage(ctx, this, subscriptionTimeout)
-      out.onNext(new Stream(s).asInstanceOf[AnyRef])
+      val s = new SubSpoutStage(ctx, this, subscriptionTimeout)
+      out.onNext(new Spout(s).asInstanceOf[AnyRef])
       s
     }
 
@@ -304,12 +304,12 @@ private[core] final class InjectStage(timeout: Duration) extends InOutStage with
         avail
       } else pend
 
-    def stopCompleteSubAndMainF(s: SubSourceStage)(i: Inport): State = {
+    def stopCompleteSubAndMainF(s: SubSpoutStage)(i: Inport): State = {
       s.onComplete()
       stopComplete(out)
     }
 
-    def stopErrorSubAndMainF(s: SubSourceStage)(e: Throwable, i: Inport): State = {
+    def stopErrorSubAndMainF(s: SubSpoutStage)(e: Throwable, i: Inport): State = {
       s.onError(e)
       stopError(e, out)
     }

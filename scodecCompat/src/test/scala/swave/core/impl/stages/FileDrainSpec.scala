@@ -29,13 +29,13 @@ class FileDrainSpec extends SwaveSpec {
   "Drain.toPath must" - {
 
     "write lines to a file" in withTempPath(create = true) { path ⇒
-      val result = Stream(TestBytes).drainTo(Drain.toPath(path, chunkSize = 512))
+      val result = Spout(TestBytes).drainTo(Drain.toPath(path, chunkSize = 512))
       result.await(1.second) shouldEqual 6006
       verifyFileContents(path, TestLines mkString "")
     }
 
     "create new file if required" in withTempPath(create = false) { path ⇒
-      val result = Stream(TestBytes).drainTo(Drain.toPath(path, chunkSize = 512))
+      val result = Spout(TestBytes).drainTo(Drain.toPath(path, chunkSize = 512))
       result.await(1.second) shouldEqual 6006
       verifyFileContents(path, TestLines mkString "")
     }

@@ -5,7 +5,7 @@
 package swave.testkit.gen
 
 import swave.core._
-import swave.testkit.impl.{ TestDrainStage, TestStage, TestStreamStage }
+import swave.testkit.impl.{ TestDrainStage, TestStage, TestSpoutStage }
 
 import scala.concurrent.Future
 import scala.util.{ Failure, Success }
@@ -47,8 +47,8 @@ object TestFixture {
   }
 }
 
-final class TestInput[T](private[testkit] val stage: TestStreamStage) extends TestFixture {
-  def stream: Stream[T] = new Stream[T](stage)
+final class TestInput[T](private[testkit] val stage: TestSpoutStage) extends TestFixture {
+  def spout: Spout[T] = new Spout[T](stage)
   def produced: Vector[T] = stage.result
   def size: Int = stage.resultSize
   def scriptedSize: Int = stage.scriptedSize

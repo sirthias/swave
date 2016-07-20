@@ -15,7 +15,7 @@ import swave.testkit.impl.TestkitExtension
 import swave.core.impl.stages.Stage
 import swave.core.impl.stages.drain.DrainStage
 import swave.core.impl.{ Inport, Outport }
-import swave.core.impl.stages.source.SourceStage
+import swave.core.impl.stages.spout.SpoutStage
 import swave.core.macros._
 import swave.core.util._
 import swave.core._
@@ -28,22 +28,22 @@ trait Probes {
   def within[T](max: FiniteDuration)(block: ⇒ T)(implicit env: StreamEnv): T =
     deadlineNanos.withValue(System.nanoTime() + max.dilated.toNanos)(block)
 
-  object StreamProbe {
-    def apply[T](implicit env: StreamEnv): StreamProbe[T] = new StreamProbe(TestkitExtension(env))
-    implicit def probe2Stream[T](p: StreamProbe[T]): Stream[T] = new Stream(p.stage)
+  object SpoutProbe {
+    def apply[T](implicit env: StreamEnv): SpoutProbe[T] = new SpoutProbe(TestkitExtension(env))
+    implicit def probe2Spout[T](p: SpoutProbe[T]): Spout[T] = new Spout(p.stage)
   }
 
-  final class StreamProbe[T] private (_ext: TestkitExtension)(implicit env: StreamEnv) extends Probe(_ext) {
+  final class SpoutProbe[T] private (_ext: TestkitExtension)(implicit env: StreamEnv) extends Probe(_ext) {
     private[this] val _totalDemand = new AtomicLong
 
     def totalDemand: Long = _totalDemand.get
 
     // format: OFF
     @StageImpl
-    protected object stage extends SourceStage with PipeElem.Source.Test with ProbeStage {
-      def pipeElemType = "StreamProbe"
+    protected object stage extends SpoutStage with PipeElem.Source.Test with ProbeStage {
+      def pipeElemType = "SpoutProbe"
       def pipeElemParams = Nil
-      override def toString = s"StreamProbe.stage@${identityHash(this)}/$stateName"
+      override def toString = s"SpoutProbe.stage@${identityHash(this)}/$stateName"
 
       connectOutAndSealWith { (ctx, out) ⇒
         ctx.registerForXStart(this)

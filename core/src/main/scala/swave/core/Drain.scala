@@ -18,8 +18,8 @@ final class Drain[-T, +R] private[swave] (private[swave] val outport: Outport, v
 
   def pipeElem: PipeElem = outport.pipeElem
 
-  private[core] def consume(stream: Stream[T]): R = {
-    stream.inport.subscribe()(outport)
+  private[core] def consume(spout: Spout[T]): R = {
+    spout.inport.subscribe()(outport)
     result
   }
 
@@ -83,7 +83,7 @@ object Drain {
 
   def toPublisher[T](fanoutSupport: Boolean = false): Drain[T, Publisher[T]] = {
     if (fanoutSupport) ???
-    val stage = new ToPublisherDrainStage
+    val stage = new PublisherDrainStage
     new Drain(stage, stage.publisher.asInstanceOf[Publisher[T]])
   }
 
@@ -102,7 +102,7 @@ object Drain {
     Pipe[T].fold(zero)(f).to(head) named "Drain.fold"
 
   def fromSubscriber[T](subscriber: Subscriber[T]): Drain[T, Unit] =
-    Drain(new FromSubscriberStage(subscriber.asInstanceOf[Subscriber[AnyRef]]))
+    Drain(new SubscriberDrainStage(subscriber.asInstanceOf[Subscriber[AnyRef]]))
 
   def head[T]: Drain[T, Future[T]] = {
     val promise = Promise[AnyRef]()

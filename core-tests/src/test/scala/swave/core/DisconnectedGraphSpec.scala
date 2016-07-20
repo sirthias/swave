@@ -14,11 +14,11 @@ class DisconnectedGraphSpec extends SwaveSpec {
 
     "work as expected" in {
       val drain = Drain.toPublisher[Int]()
-      val stream = Stream.fromPublisher(drain.result)
+      val spout = Spout.fromPublisher(drain.result)
 
-      Stream(1, 2, 3)
+      Spout(1, 2, 3)
         .map(_ * 2)
-        .via(Pipe.fromDrainAndStream(drain.dropResult, stream))
+        .via(Pipe.fromDrainAndSpout(drain.dropResult, spout))
         .filter(_ < 10)
         .drainTo(DrainProbe[Int]).get
         .sendRequest(5)

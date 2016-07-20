@@ -23,7 +23,7 @@ final class SimpleOpSpec extends SyncPipeSpec with Inspectors {
       .param(Gen.chooseNum(0, 16))
       .prop.from { (in, out, param) ⇒
 
-        in.stream
+        in.spout
           .buffer(param)
           .drainTo(out.drain) shouldTerminate asScripted(in)
 
@@ -38,7 +38,7 @@ final class SimpleOpSpec extends SyncPipeSpec with Inspectors {
       .param(Gen.oneOf(Overflow.DropHead, Overflow.DropTail, Overflow.DropBuffer, Overflow.DropNew))
       .prop.from { (in, out, param) ⇒
 
-        in.stream
+        in.spout
           .buffer(4, param)
           .drainTo(out.drain) shouldTerminate asScripted(in)
       }
@@ -50,7 +50,7 @@ final class SimpleOpSpec extends SyncPipeSpec with Inspectors {
       .output[Int]
       .prop.from { (in, out) ⇒
 
-        in.stream
+        in.spout
           .collect { case x if x < 100 ⇒ x * 2 }
           .drainTo(out.drain) shouldTerminate asScripted(in)
 
@@ -64,7 +64,7 @@ final class SimpleOpSpec extends SyncPipeSpec with Inspectors {
       .output[Vector[Int]]
       .prop.from { (in, out) ⇒
 
-        in.stream
+        in.spout
           .conflateWithSeed(Vector(_))(_ :+ _)
           .drainTo(out.drain) shouldTerminate asScripted(in)
 
@@ -79,7 +79,7 @@ final class SimpleOpSpec extends SyncPipeSpec with Inspectors {
       .output[Int]
       .prop.from { (in, out) ⇒
 
-        in.stream
+        in.spout
           .deduplicate
           .drainTo(out.drain) shouldTerminate asScripted(in)
 
@@ -97,7 +97,7 @@ final class SimpleOpSpec extends SyncPipeSpec with Inspectors {
       .param(Gen.chooseNum(0, 200))
       .prop.from { (in, out, param) ⇒
 
-        in.stream
+        in.spout
           .dropWhile(_ < param)
           .drainTo(out.drain) shouldTerminate asScripted(in)
 
@@ -112,7 +112,7 @@ final class SimpleOpSpec extends SyncPipeSpec with Inspectors {
       .param(Gen.chooseNum(0, 5))
       .prop.from { (in, out, param) ⇒
 
-        in.stream
+        in.spout
           .dropLast(param)
           .drainTo(out.drain) shouldTerminate asScripted(in)
 
@@ -127,7 +127,7 @@ final class SimpleOpSpec extends SyncPipeSpec with Inspectors {
       .param(Gen.chooseNum(0, 5))
       .prop.from { (in, out, param) ⇒
 
-        in.stream
+        in.spout
           .dropLast(param)
           .drainTo(out.drain) shouldTerminate asScripted(in)
 
@@ -142,7 +142,7 @@ final class SimpleOpSpec extends SyncPipeSpec with Inspectors {
       .param(Gen.chooseNum(0, 500))
       .prop.from { (in, out, param) ⇒
 
-        in.stream
+        in.spout
           .filter(_ < param)
           .drainTo(out.drain) shouldTerminate asScripted(in)
 
@@ -156,7 +156,7 @@ final class SimpleOpSpec extends SyncPipeSpec with Inspectors {
       .output[Int]
       .prop.from { (in, out) ⇒
 
-        in.stream
+        in.spout
           .fold(0)(_ + _)
           .drainTo(out.drain) shouldTerminate asScripted(in)
 
@@ -170,7 +170,7 @@ final class SimpleOpSpec extends SyncPipeSpec with Inspectors {
       .output[String]
       .prop.from { (in, out) ⇒
 
-        in.stream
+        in.spout
           .map(_.toString)
           .drainTo(out.drain) shouldTerminate asScripted(in)
 
@@ -185,7 +185,7 @@ final class SimpleOpSpec extends SyncPipeSpec with Inspectors {
       .param(Gen.chooseNum(1, 10))
       .prop.from { (in, out, param) ⇒
 
-        in.stream
+        in.spout
           .grouped(param)
           .drainTo(out.drain) shouldTerminate asScripted(in)
 
@@ -201,7 +201,7 @@ final class SimpleOpSpec extends SyncPipeSpec with Inspectors {
       .prop.from { (in, out, param) ⇒
 
         def pipeline =
-          in.stream
+          in.spout
             .limit(param.toLong)
             .drainTo(out.drain)
 
@@ -222,7 +222,7 @@ final class SimpleOpSpec extends SyncPipeSpec with Inspectors {
       .prop.from { (in, out, param) ⇒
         import TestFixture.State._
 
-        in.stream
+        in.spout
           .take(param.toLong)
           .drainTo(out.drain) shouldTerminate {
             case Cancelled | Completed ⇒ // any input state could end up here
@@ -239,7 +239,7 @@ final class SimpleOpSpec extends SyncPipeSpec with Inspectors {
       .output[Double]
       .prop.from { (in, out) ⇒
 
-        in.stream
+        in.spout
           .scan(4.2)(_ + _)
           .drainTo(out.drain) shouldTerminate asScripted(in)
 

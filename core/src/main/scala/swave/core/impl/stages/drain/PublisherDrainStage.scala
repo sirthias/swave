@@ -16,8 +16,8 @@ import swave.core.util._
 
 // format: OFF
 @StageImpl
-private[core] final class ToPublisherDrainStage extends DrainStage with PipeElem.Drain.Publisher {
-  import ToPublisherDrainStage.SyncSubscription
+private[core] final class PublisherDrainStage extends DrainStage with PipeElem.Drain.Publisher {
+  import PublisherDrainStage.SyncSubscription
 
   def pipeElemType: String = "Drain.toPublisher"
   def pipeElemParams: List[Any] = Nil
@@ -32,7 +32,7 @@ private[core] final class ToPublisherDrainStage extends DrainStage with PipeElem
         RSCompliance.verifyNonNull(subscriber, "Subscriber", "1.9")
         get match {
           case null => if (!compareAndSet(null, subscriber)) subscribe(subscriber)
-          case x: StreamRunner => x.enqueueXEvent(ToPublisherDrainStage.this, subscriber)
+          case x: StreamRunner => x.enqueueXEvent(PublisherDrainStage.this, subscriber)
           case _ => signalError(subscriber, new UnsupportedSecondSubscriptionException)
         }
       }
@@ -123,7 +123,7 @@ private[core] final class ToPublisherDrainStage extends DrainStage with PipeElem
   }
 }
 
-private[core] object ToPublisherDrainStage {
+private[core] object PublisherDrainStage {
 
   private class SyncSubscription extends Subscription {
     var cancelled = false

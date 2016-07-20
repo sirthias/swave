@@ -12,17 +12,17 @@ import com.typesafe.scalalogging.Logger
 import scala.annotation.tailrec
 import swave.core.PipeElem
 import swave.core.impl.Outport
-import swave.core.impl.stages.source.SourceStage
+import swave.core.impl.stages.spout.SpoutStage
 import swave.core.io.Bytes
 import swave.core.io.files.quietClose
 import swave.core.macros._
 
 // format: OFF
 @StageImpl
-private[core] final class FileSourceStage[T](path: Path, _chunkSize: Int)(implicit bytes: Bytes[T])
-  extends SourceStage with PipeElem.Source.File {
+private[core] final class FileSpoutStage[T](path: Path, _chunkSize: Int)(implicit bytes: Bytes[T])
+  extends SpoutStage with PipeElem.Source.File {
 
-  def pipeElemType: String = "Stream.fromPath"
+  def pipeElemType: String = "Spout.fromPath"
   def pipeElemParams: List[Any] = path :: _chunkSize :: Nil
 
   private[this] val log = Logger(getClass)
@@ -42,7 +42,7 @@ private[core] final class FileSourceStage[T](path: Path, _chunkSize: Int)(implic
         var msg = "Couldn't open `{}` for reading: {}"
         var chan: FileChannel = null
         try {
-          chan = FileChannel.open(path, FileSourceStage.Read)
+          chan = FileChannel.open(path, FileSpoutStage.Read)
           msg = "Couldn't read first chunk of `{}`: {}"
           val chunk = readChunk(chan)
           if (chunk.isEmpty) {
@@ -108,6 +108,6 @@ private[core] final class FileSourceStage[T](path: Path, _chunkSize: Int)(implic
   }
 }
 
-private object FileSourceStage {
+private object FileSpoutStage {
   private val Read = java.util.Collections.singleton(java.nio.file.StandardOpenOption.READ)
 }

@@ -72,7 +72,7 @@ Providing users and contributors with proper, in-depth documentation for all fea
 
 Up until this goal is reached here are the most important entry points to the *swave* API:
 
-- Streams are created via the methods on the ``swave.core.Stream`` companion object.
+- Streams are created via the methods on the ``swave.core.Spout`` companion object.
 
 - Most stream operations are defined by the ``swave.core.StreamOps`` trait.
 

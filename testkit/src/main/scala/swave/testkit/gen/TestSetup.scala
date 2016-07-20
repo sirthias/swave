@@ -189,7 +189,7 @@ object TestSetup {
     def inputFromScripts[T](scripts: Gen[InputScript[T]]) =
       scripts map { script ⇒
         val elems = script.elems.asInstanceOf[Iterable[AnyRef]]
-        new TestInput[T](new TestStreamStage(ctx.nextId(), elems, script.termination, ctx))
+        new TestInput[T](new TestSpoutStage(ctx.nextId(), elems, script.termination, ctx))
       }
 
     def output[T](implicit scripts: Gen[OutputScript]) =
@@ -240,8 +240,8 @@ object TestSetup {
             }
             val fixtures = testStages.map(s ⇒ f"${s.id}%3d: ${s.formatLong}".replace("\n", "\n       "))
             val specimens = testStages.map({
-              case x: TestStreamStage ⇒ x.outputElem
-              case x: TestDrainStage  ⇒ x.inputElem
+              case x: TestSpoutStage ⇒ x.outputElem
+              case x: TestDrainStage ⇒ x.inputElem
             }).filter(_ != PipeElem.Unconnected).distinct
             println(
               s"""|Error Context

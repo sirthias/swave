@@ -20,33 +20,33 @@ final class DropWithinSpec extends FreeSpec with StreamEnvShutdown {
 
     "deliver elements after the duration, but not before" in {
       val input = Iterator.from(1)
-      val stream = StreamProbe[Int]
+      val spout = SpoutProbe[Int]
       val drain = DrainProbe[Int]
 
-      stream.dropWithin(100.millis).drainTo(drain) shouldBe a[Success[_]]
+      spout.dropWithin(100.millis).drainTo(drain) shouldBe a[Success[_]]
 
       drain.sendRequest(100)
-      val demand1 = stream.expectRequestAggregated(20.millis)
-      demand1.toInt.times { stream.sendNext(input.next()) }
-      val demand2 = stream.expectRequestAggregated(20.millis)
-      demand2.toInt.times { stream.sendNext(input.next()) }
-      val demand3 = stream.expectRequestAggregated(100.millis)
+      val demand1 = spout.expectRequestAggregated(20.millis)
+      demand1.toInt.times { spout.sendNext(input.next()) }
+      val demand2 = spout.expectRequestAggregated(20.millis)
+      demand2.toInt.times { spout.sendNext(input.next()) }
+      val demand3 = spout.expectRequestAggregated(100.millis)
 
-      stream.expectNoSignal()
-      demand3.toInt.times { stream.sendNext(input.next()) }
+      spout.expectNoSignal()
+      demand3.toInt.times { spout.sendNext(input.next()) }
       ((demand1 + demand2 + 1).toInt to (demand1 + demand2 + demand3).toInt).foreach(drain.expectNext(_))
 
-      stream.sendComplete()
+      spout.sendComplete()
       drain.expectComplete()
     }
 
     "deliver completion even before the duration" in {
-      val stream = StreamProbe[Int]
+      val spout = SpoutProbe[Int]
       val drain = DrainProbe[Int]
 
-      stream.dropWithin(1.second).drainTo(drain) shouldBe a[Success[_]]
+      spout.dropWithin(1.second).drainTo(drain) shouldBe a[Success[_]]
 
-      stream.sendComplete()
+      spout.sendComplete()
       drain.expectComplete()
       drain.verifyCleanStop()
     }

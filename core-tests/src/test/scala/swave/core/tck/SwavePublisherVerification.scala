@@ -20,7 +20,7 @@ abstract class SwavePublisherVerification[T](val testEnv: TestEnvironment, publi
   def this() = this(false)
 
   override def createFailedPublisher(): Publisher[T] =
-    Stream.failing[T](new Exception("Nope")).drainTo(Drain.toPublisher()).get
+    Spout.failing[T](new Exception("Nope")).drainTo(Drain.toPublisher()).get
 
   override def required_spec313_cancelMustMakeThePublisherEventuallyDropAllReferencesToTheSubscriber(): Unit =
     throw new SkipException("Not relevant for publisher w/o fanout support")

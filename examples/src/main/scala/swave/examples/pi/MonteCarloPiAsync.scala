@@ -15,7 +15,7 @@ object MonteCarloPiAsync extends App {
 
   val random = XorShiftRandom()
 
-  Stream.continually(random.nextDouble())
+  Spout.continually(random.nextDouble())
     .grouped(2)
     .map { case x +: y +: Nil ⇒ Point(x, y) }
     .fanOutBroadcast()

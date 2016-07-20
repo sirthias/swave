@@ -27,8 +27,8 @@ final class FlattenSpec extends SyncPipeSpec with Inspectors {
         val allInputs = in :: in.elements.toList
         var expectedResultSize = out.scriptedSize
 
-        in.stream
-          .map(_.stream)
+        in.spout
+          .map(_.spout)
           .flattenConcat()
           .drainTo(out.drain) shouldTerminate likeThis {
             case Cancelled ⇒ // inputs can be in any state

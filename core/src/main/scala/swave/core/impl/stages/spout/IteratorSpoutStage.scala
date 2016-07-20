@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package swave.core.impl.stages.source
+package swave.core.impl.stages.spout
 
 import scala.util.control.NonFatal
 import scala.annotation.tailrec
@@ -12,9 +12,9 @@ import swave.core.impl.Outport
 
 // format: OFF
 @StageImpl
-private[core] final class IteratorStage(iterator: Iterator[AnyRef]) extends SourceStage with PipeElem.Source.Iterator {
+private[core] final class IteratorSpoutStage(iterator: Iterator[AnyRef]) extends SpoutStage with PipeElem.Source.Iterator {
 
-  def pipeElemType: String = "Stream.fromIterator"
+  def pipeElemType: String = "Spout.fromIterator"
   def pipeElemParams: List[Any] = iterator :: Nil
 
   connectOutAndSealWith { (ctx, out) ⇒

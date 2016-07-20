@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package swave.core.impl.stages.source
+package swave.core.impl.stages.spout
 
 import scala.annotation.tailrec
 import swave.core.macros.StageImpl
@@ -11,9 +11,9 @@ import swave.core.impl.Outport
 
 // format: OFF
 @StageImpl
-private[core] final class RepeatStage(element: AnyRef) extends SourceStage with PipeElem.Source.Repeat {
+private[core] final class RepeatSpoutStage(element: AnyRef) extends SpoutStage with PipeElem.Source.Repeat {
 
-  def pipeElemType: String = "Stream.repeat"
+  def pipeElemType: String = "Spout.repeat"
   def pipeElemParams: List[Any] = element :: Nil
 
   connectOutAndSealWith { (ctx, out) ⇒ running(out) }

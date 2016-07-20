@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package swave.core.impl.stages.source
+package swave.core.impl.stages.spout
 
 import java.util.concurrent.atomic.AtomicReference
 import scala.annotation.tailrec
@@ -15,9 +15,9 @@ import swave.core.util._
 
 // format: OFF
 @StageImpl
-private[core] final class SubscriberSourceStage extends SourceStage with PipeElem.Source.Subscriber { stage =>
+private[core] final class SubscriberSpoutStage extends SpoutStage with PipeElem.Source.Subscriber { stage =>
 
-  def pipeElemType: String = "Stream.withSubscriber"
+  def pipeElemType: String = "Spout.withSubscriber"
   def pipeElemParams: List[Any] = Nil
 
   // holds exactly one of these values:

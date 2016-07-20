@@ -13,10 +13,10 @@ class FutureSourceSpec extends SwaveSpec {
 
   implicit val env = StreamEnv()
 
-  "Stream.fromFuture" - {
+  "Spout.fromFuture" - {
 
     "already completed success" in {
-      Stream(Future.successful(42))
+      Spout(Future.successful(42))
         .drainTo(DrainProbe[Int]).get
         .sendRequest(5)
         .expectNext(42)
@@ -25,7 +25,7 @@ class FutureSourceSpec extends SwaveSpec {
     }
 
     "already completed failure" in {
-      Stream(Future.failed(TestError))
+      Spout(Future.failed(TestError))
         .drainTo(DrainProbe[Int]).get
         .expectError(TestError)
         .verifyCleanStop()
@@ -33,7 +33,7 @@ class FutureSourceSpec extends SwaveSpec {
 
     "externally completed (request before completion)" in {
       val promise = Promise[Int]
-      val probe = Stream(promise.future).drainTo(DrainProbe[Int]).get.sendRequest(5)
+      val probe = Spout(promise.future).drainTo(DrainProbe[Int]).get.sendRequest(5)
       Thread.sleep(10)
       promise.success(42)
       probe
@@ -44,7 +44,7 @@ class FutureSourceSpec extends SwaveSpec {
 
     "externally completed (completion before request)" in {
       val promise = Promise[Int]
-      val probe = Stream(promise.future).drainTo(DrainProbe[Int]).get
+      val probe = Spout(promise.future).drainTo(DrainProbe[Int]).get
       Thread.sleep(10)
       promise.success(42)
       probe
@@ -56,7 +56,7 @@ class FutureSourceSpec extends SwaveSpec {
 
     "externally completed with failure" in {
       val promise = Promise[Int]
-      val probe = Stream(promise.future).drainTo(DrainProbe[Int]).get
+      val probe = Spout(promise.future).drainTo(DrainProbe[Int]).get
       Thread.sleep(10)
       promise.failure(TestError)
       probe

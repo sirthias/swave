@@ -15,13 +15,13 @@ final class LazySourceSpec extends SyncPipeSpec with Inspectors {
 
   implicit val integerInput = Gen.chooseNum(0, 999)
 
-  "Stream.lazy" in check {
+  "Spout.lazy" in check {
     testSetup
       .input[Int]
       .output[String]
       .prop.from { (in, out) ⇒
 
-        Stream.lazyStart(() ⇒ in.stream)
+        Spout.lazyStart(() ⇒ in.spout)
           .map(_.toString)
           .drainTo(out.drain) shouldTerminate asScripted(in)
 

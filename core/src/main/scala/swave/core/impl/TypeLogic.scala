@@ -9,7 +9,7 @@ import scala.concurrent.Future
 import scala.util.{ Failure, Success, Try }
 import shapeless._
 import shapeless.ops.hlist.{ Comapped, ToCoproduct }
-import swave.core.{ Stream, StreamOps }
+import swave.core.{ Spout, StreamOps }
 import swave.core.util.FastFuture
 
 object TypeLogic {
@@ -39,8 +39,8 @@ object TypeLogic {
     implicit def apply[H0, H1, T <: HList]: IsHCons2[H0 :: H1 :: T] = null
   }
 
-  @implicitNotFound(msg = "Argument must be an HList of `Stream[_]`")
-  type IsHListOfStream[L <: HList] = Comapped[L, Stream]
+  @implicitNotFound(msg = "Argument must be an HList of `Spout[_]`")
+  type IsHListOfSpout[L <: HList] = Comapped[L, Spout]
 
   sealed abstract class ToTryOrFuture[T] {
     type Out

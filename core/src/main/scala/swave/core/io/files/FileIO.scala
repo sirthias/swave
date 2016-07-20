@@ -11,7 +11,7 @@ import swave.core.io.Bytes
 import swave.core.util.SettingsCompanion
 import swave.core.macros._
 
-object FileIO extends StreamFromFiles with DrainToFiles {
+object FileIO extends SpoutFromFiles with DrainToFiles {
 
   val WriteCreateOptions: Set[StandardOpenOption] = {
     import StandardOpenOption._

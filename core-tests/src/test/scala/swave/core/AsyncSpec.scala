@@ -29,7 +29,7 @@ class AsyncSpec extends SwaveSpec {
 
     "sync base example" in {
       val (1, mapThreadName) =
-        Stream(1, 2, 3)
+        Spout(1, 2, 3)
           .map(_ → threadName)
           .drainTo(Drain.head)
           .await(20.millis)
@@ -39,7 +39,7 @@ class AsyncSpec extends SwaveSpec {
 
     "single default dispatcher" in {
       val piping =
-        Stream.continually(threadName)
+        Spout.continually(threadName)
           .map(_ → threadName)
           .to(Drain.head.async()).seal().get
       val (threadName0, threadName1) = piping.run().await(20.millis)
@@ -49,7 +49,7 @@ class AsyncSpec extends SwaveSpec {
 
     "single non-default dispatcher" in {
       val piping =
-        Stream.continually(threadName)
+        Spout.continually(threadName)
           .map(_ → threadName)
           .to(Drain.head.async("disp0")).seal().get
       val (threadName0, threadName1) = piping.run().await(20.millis)
@@ -59,7 +59,7 @@ class AsyncSpec extends SwaveSpec {
 
     "default async boundary with implicit default tail" in {
       val piping =
-        Stream.continually(threadName)
+        Spout.continually(threadName)
           .async()
           .map(_ → threadName)
           .to(Drain.head).seal().get
@@ -70,7 +70,7 @@ class AsyncSpec extends SwaveSpec {
 
     "default async boundary with explicit default tail" in {
       val piping =
-        Stream.continually(threadName)
+        Spout.continually(threadName)
           .async()
           .map(_ → threadName)
           .to(Drain.head.async()).seal().get
@@ -81,7 +81,7 @@ class AsyncSpec extends SwaveSpec {
 
     "non-default async boundary with implicit default tail" in {
       val piping =
-        Stream.continually(threadName)
+        Spout.continually(threadName)
           .async("disp0")
           .map(_ → threadName)
           .to(Drain.head).seal().get
@@ -93,7 +93,7 @@ class AsyncSpec extends SwaveSpec {
 
     "non-default async boundary with non-default tail" in {
       val piping =
-        Stream.continually(threadName)
+        Spout.continually(threadName)
           .async("disp0")
           .map(_ → threadName)
           .to(Drain.head.async("disp1")).seal().get
@@ -105,7 +105,7 @@ class AsyncSpec extends SwaveSpec {
 
     "2 async boundaries with non-default tail" in {
       val piping =
-        Stream.continually(threadName)
+        Spout.continually(threadName)
           .async("disp0")
           .map(_ → threadName)
           .async("disp1")
@@ -120,7 +120,7 @@ class AsyncSpec extends SwaveSpec {
     }
 
     "conflicting async boundaries" in {
-      Stream.continually(threadName)
+      Spout.continually(threadName)
         .fanOutBroadcast()
         .sub.async("disp0").end
         .sub.async("disp1").end
@@ -130,7 +130,7 @@ class AsyncSpec extends SwaveSpec {
     }
 
     "conflicting async markers" in {
-      Stream.continually(threadName)
+      Spout.continually(threadName)
         .fanOutBroadcast()
         .sub.to(Drain.cancelling.async("disp0"))
         .subContinue
@@ -139,7 +139,7 @@ class AsyncSpec extends SwaveSpec {
     }
 
     "sync sub-stream in async parent stream" in {
-      Stream.from(0)
+      Spout.from(0)
         .inject()
         .map(_ elementAt 1)
         .flattenConcat()
@@ -148,7 +148,7 @@ class AsyncSpec extends SwaveSpec {
     }
 
     "async sub-stream in async parent stream" in {
-      Stream.from(0)
+      Spout.from(0)
         .inject()
         .map(_.async(bufferSize = 0).elementAt(1))
         .flattenConcat()
@@ -157,7 +157,7 @@ class AsyncSpec extends SwaveSpec {
     }
 
     "async sub-stream in sync parent stream" in {
-      Stream.from(0)
+      Spout.from(0)
         .inject()
         .map(_.tee(Drain.ignore.dropResult.async(), eagerCancel = true).elementAt(1))
         .flattenConcat()
@@ -168,7 +168,7 @@ class AsyncSpec extends SwaveSpec {
     }
 
     "conflicting runners in sub-stream setup" in {
-      Stream.from(0)
+      Spout.from(0)
         .inject()
         .map(_.async("disp0").elementAt(1))
         .flattenConcat()
@@ -179,7 +179,7 @@ class AsyncSpec extends SwaveSpec {
     }
 
     "complex example" in {
-      Stream.continually(threadName)
+      Spout.continually(threadName)
         .async()
         .inject()
         .map(_.take(1).map(_ :: threadName :: Nil))

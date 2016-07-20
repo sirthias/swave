@@ -25,11 +25,11 @@ final class Pipe[-A, +B] private (
   def pipeElem: PipeElem = firstStage.pipeElem
 
   def inputAsDrain: Drain[A, Unit] = Drain(firstStage)
-  def outputAsStream: Stream[B] = new Stream(lastStage)
+  def outputAsSpout: Spout[B] = new Spout(lastStage)
 
-  private[core] def transform(stream: Stream[A]): Stream[B] = {
-    stream.inport.subscribe()(firstStage)
-    new Stream[B](lastStage)
+  private[core] def transform(spout: Spout[A]): Spout[B] = {
+    spout.inport.subscribe()(firstStage)
+    new Spout[B](lastStage)
   }
 
   protected def base: Inport = lastStage
@@ -65,8 +65,8 @@ final class Pipe[-A, +B] private (
   }
 
   def toProcessor: Piping[Processor[A @uV, B @uV]] = {
-    val (stream, subscriber) = Stream.withSubscriber[A]
-    stream.via(this).to(Drain.toPublisher()).mapResult(new SubPubProcessor(subscriber, _))
+    val (spout, subscriber) = Spout.withSubscriber[A]
+    spout.via(this).to(Drain.toPublisher()).mapResult(new SubPubProcessor(subscriber, _))
   }
 
   def named(name: String): A =>> B = named(Module.ID(name))
@@ -86,11 +86,11 @@ object Pipe {
     new Pipe(stage, stage)
   }
 
-  def fromDrainAndStream[A, B](drain: Drain[A, Unit], stream: Stream[B]): Pipe[A, B] =
-    new Pipe(drain.outport, stream.inport) named "Pipe.fromDrainAndStream"
+  def fromDrainAndSpout[A, B](drain: Drain[A, Unit], spout: Spout[B]): Pipe[A, B] =
+    new Pipe(drain.outport, spout.inport) named "Pipe.fromDrainAndSpout"
 
   def fromProcessor[A, B](processor: Processor[A, B]): Pipe[A, B] =
-    fromDrainAndStream(Drain.fromSubscriber(processor), Stream.fromPublisher(processor))
+    fromDrainAndSpout(Drain.fromSubscriber(processor), Spout.fromPublisher(processor))
 
   def lazyStart[A, B](onStart: () ⇒ Pipe[A, B], subscriptionTimeout: Duration = Duration.Undefined): Pipe[A, B] = {
     val innerPipeRef = new AtomicReference[Pipe[A, B]]
@@ -101,7 +101,7 @@ object Pipe {
           if (innerPipeRef.compareAndSet(null, placeholder)) {
             val pipe =
               try onStart()
-              catch { case NonFatal(e) ⇒ fromDrainAndStream(Drain.cancelling, Stream.failing(e)) }
+              catch { case NonFatal(e) ⇒ fromDrainAndSpout(Drain.cancelling, Spout.failing(e)) }
             innerPipeRef.set(pipe)
             pipe
           } else innerPipe
@@ -110,8 +110,8 @@ object Pipe {
           innerPipe
         case x ⇒ x
       }
-    fromDrainAndStream(
+    fromDrainAndSpout(
       drain = Drain.lazyStart(() ⇒ innerPipe.inputAsDrain).dropResult, // TODO: remove superfluous intermediate allocations
-      stream = Stream.lazyStart(() ⇒ innerPipe.outputAsStream))
+      spout = Spout.lazyStart(() ⇒ innerPipe.outputAsSpout))
   }
 }

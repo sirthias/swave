@@ -8,7 +8,7 @@ import swave.core.impl.stages.inout.CouplingStage
 
 sealed abstract class Coupling[T] {
   def in: Drain[T, Unit]
-  def out: Stream[T]
+  def out: Spout[T]
 }
 
 object Coupling {
@@ -17,6 +17,6 @@ object Coupling {
     new Coupling[T] {
       private[this] val pipe = new CouplingStage
       val in = Drain[T](pipe)
-      val out = new Stream[T](pipe)
+      val out = new Spout[T](pipe)
     }
 }

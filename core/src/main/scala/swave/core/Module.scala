@@ -95,39 +95,39 @@ object Module {
     import TypeLogic._
     def None: Creation[Output.None] =
       new Creation(())
-    def Top1[T](stream: Stream[T]): Creation[Output.Top1[T]] =
-      new Creation(InportList(stream.inport))
-    def Top[L <: HList](hListOfStreams: L)(implicit ev: IsHListOfStream[L]): Creation[Output.Top[ev.Out]] =
-      new Creation(InportList fromHList hListOfStreams)
-    def Bottom1[T](stream: Stream[T]): Creation[Output.Bottom1[T]] =
-      new Creation(InportList(stream.inport))
-    def Bottom[L <: HList](hListOfStreams: L)(implicit ev: IsHListOfStream[L]): Creation[Output.Bottom[ev.Out]] =
-      new Creation(InportList fromHList hListOfStreams)
-    def Bidi11[T, B](topOutput: Stream[T], bottomOutput: Stream[B]): Creation[Output.Bidi11[T, B]] =
+    def Top1[T](spout: Spout[T]): Creation[Output.Top1[T]] =
+      new Creation(InportList(spout.inport))
+    def Top[L <: HList](hListOfSpouts: L)(implicit ev: IsHListOfSpout[L]): Creation[Output.Top[ev.Out]] =
+      new Creation(InportList fromHList hListOfSpouts)
+    def Bottom1[T](spout: Spout[T]): Creation[Output.Bottom1[T]] =
+      new Creation(InportList(spout.inport))
+    def Bottom[L <: HList](hListOfSpouts: L)(implicit ev: IsHListOfSpout[L]): Creation[Output.Bottom[ev.Out]] =
+      new Creation(InportList fromHList hListOfSpouts)
+    def Bidi11[T, B](topOutput: Spout[T], bottomOutput: Spout[B]): Creation[Output.Bidi11[T, B]] =
       new Creation(topOutput.inport +: bottomOutput.inport +: InportList.empty)
-    def Bidi[T <: HList, B <: HList](top: T, bottom: B)(implicit evT: IsHListOfStream[T], evB: IsHListOfStream[B]): Creation[Output.Bidi[evT.Out, evB.Out]] =
+    def Bidi[T <: HList, B <: HList](top: T, bottom: B)(implicit evT: IsHListOfSpout[T], evB: IsHListOfSpout[B]): Creation[Output.Bidi[evT.Out, evB.Out]] =
       new Creation(InportList.fromHList(top) append InportList.fromHList(bottom))
     def Result[T](result: T): Creation[Output.Result[T]] =
       new Creation(result)
   }
 
   /**
-   * Packages the given [[Stream]] as a [[Module]].
+   * Packages the given [[Spout]] as a [[Module]].
    */
-  def fromStream[T](stream: Stream[T]): Module[Input.None, Output.Bottom1[T]] =
-    ModuleImpl(0, 0)(_ ⇒ InportList(stream.inport))
+  def fromSpout[T](spout: Spout[T]): Module[Input.None, Output.Bottom1[T]] =
+    ModuleImpl(0, 0)(_ ⇒ InportList(spout.inport))
 
   /**
    * Packages the given [[Pipe]] as a [[Module]].
    */
   def fromPipe[A, B](pipe: A =>> B): Forward[A :: HNil, B :: HNil] =
-    ModuleImpl(1, 0)(inports ⇒ InportList(pipe.transform(new Stream(inports.in)).inport))
+    ModuleImpl(1, 0)(inports ⇒ InportList(pipe.transform(new Spout(inports.in)).inport))
 
   /**
    * Packages the given [[Drain]] as a [[Module]].
    */
   def fromDrain[T, R](drain: Drain[T, R]): Module[Input.Top1[T], Output.Result[R]] =
-    ModuleImpl(1, 0)(inports ⇒ drain.consume(new Stream(inports.in)))
+    ModuleImpl(1, 0)(inports ⇒ drain.consume(new Spout(inports.in)))
 
   def apply[I <: Input, O <: Output](implicit c: TypeLogic.Creator[I, O]) = c
 
@@ -147,35 +147,35 @@ object Module {
 
     def from1[A]: From1[A] = new From1
     final class From1[A] private[Forward] {
-      def apply[CR, O <: Output](f: Stream[A] ⇒ CR)(implicit c: CR ⇒ Creation[O], ev: Req[O]): Module[Input.Top1[A], O] =
-        ModuleImpl(1, 0)(ins ⇒ c(f(new Stream(ins.in))).out)
+      def apply[CR, O <: Output](f: Spout[A] ⇒ CR)(implicit c: CR ⇒ Creation[O], ev: Req[O]): Module[Input.Top1[A], O] =
+        ModuleImpl(1, 0)(ins ⇒ c(f(new Spout(ins.in))).out)
     }
 
     def from2[A, B]: From2[A, B] = new From2
     final class From2[A, B] private[Forward] {
-      def apply[CR, O <: Output](f: (Stream[A], Stream[B]) ⇒ CR)(implicit c: CR ⇒ Creation[O], ev: Req[O]): Module[Input.Top[A :: B :: HNil], O] =
-        ModuleImpl(2, 0)(ins ⇒ c(f(new Stream(ins.in), new Stream(ins.tail.in))).out)
+      def apply[CR, O <: Output](f: (Spout[A], Spout[B]) ⇒ CR)(implicit c: CR ⇒ Creation[O], ev: Req[O]): Module[Input.Top[A :: B :: HNil], O] =
+        ModuleImpl(2, 0)(ins ⇒ c(f(new Spout(ins.in), new Spout(ins.tail.in))).out)
     }
 
     def from3[A, B, C]: From3[A, B, C] = new From3
     final class From3[A, B, C] private[Forward] {
-      def apply[CR, O <: Output](f: (Stream[A], Stream[B], Stream[C]) ⇒ CR)(implicit c: CR ⇒ Creation[O], ev: Req[O]): Module[Input.Top[A :: B :: C :: HNil], O] =
-        ModuleImpl(3, 0)(ins ⇒ c(f(new Stream(ins.in), new Stream(ins.tail.in), new Stream(ins.tail.tail.in))).out)
+      def apply[CR, O <: Output](f: (Spout[A], Spout[B], Spout[C]) ⇒ CR)(implicit c: CR ⇒ Creation[O], ev: Req[O]): Module[Input.Top[A :: B :: C :: HNil], O] =
+        ModuleImpl(3, 0)(ins ⇒ c(f(new Spout(ins.in), new Spout(ins.tail.in), new Spout(ins.tail.tail.in))).out)
     }
 
     def from4[A, B, C, D]: From4[A, B, C, D] = new From4
     final class From4[A, B, C, D] private[Forward] {
-      def apply[CR, O <: Output](f: (Stream[A], Stream[B], Stream[C], Stream[D]) ⇒ CR)(implicit c: CR ⇒ Creation[O], ev: Req[O]): Module[Input.Top[A :: B :: C :: D :: HNil], O] =
-        ModuleImpl(4, 0)(ins ⇒ c(f(new Stream(ins.in), new Stream(ins.tail.in), new Stream(ins.tail.tail.in), new Stream(ins.tail.tail.tail.in))).out)
+      def apply[CR, O <: Output](f: (Spout[A], Spout[B], Spout[C], Spout[D]) ⇒ CR)(implicit c: CR ⇒ Creation[O], ev: Req[O]): Module[Input.Top[A :: B :: C :: D :: HNil], O] =
+        ModuleImpl(4, 0)(ins ⇒ c(f(new Spout(ins.in), new Spout(ins.tail.in), new Spout(ins.tail.tail.in), new Spout(ins.tail.tail.tail.in))).out)
     }
   }
 
   type SimpleBidi[IT, IB, OT, OB] = Module[Input.Bidi11[IT, IB], Output.Bidi11[OT, OB]]
 
   object SimpleBidi {
-    def apply[IT, IB, OT, OB](f: (Stream[IT], Stream[IB]) ⇒ (Stream[OT], Stream[OB])): SimpleBidi[IT, IB, OT, OB] =
+    def apply[IT, IB, OT, OB](f: (Spout[IT], Spout[IB]) ⇒ (Spout[OT], Spout[OB])): SimpleBidi[IT, IB, OT, OB] =
       ModuleImpl(1, 1) { inports ⇒
-        val (ot, ob) = f(new Stream(inports.in), new Stream(inports.tail.in))
+        val (ot, ob) = f(new Spout(inports.in), new Spout(inports.tail.in))
         ot.inport +: ob.inport +: InportList.empty
       }
   }
@@ -291,16 +291,16 @@ object Module {
       type InUnified
 
       final def from(f: In ⇒ Creation[O]): Module[I, O] =
-        ModuleImpl(lit, lot)(ins ⇒ f(ins.reverse.toReversedStreamHList.asInstanceOf[In]).out)
+        ModuleImpl(lit, lot)(ins ⇒ f(ins.reverse.toReversedSpoutHList.asInstanceOf[In]).out)
 
-      final def fromBranchOut(f: StreamOps.BranchOut[In, HNil, CNil, InUnified, Stream] ⇒ Creation[O]): Module[I, O] =
-        ModuleImpl(lit, lot)(ins ⇒ f(new StreamOps.BranchOut(ins, InportList.empty, new Stream(_))).out)
+      final def fromBranchOut(f: StreamOps.BranchOut[In, HNil, CNil, InUnified, Spout] ⇒ Creation[O]): Module[I, O] =
+        ModuleImpl(lit, lot)(ins ⇒ f(new StreamOps.BranchOut(ins, InportList.empty, new Spout(_))).out)
     }
 
     object Creator {
       implicit def apply[I <: Input, O <: Output, IT <: HList, IB <: HList, IX <: HList](
         implicit
-        a: Mapped.Aux[I#Top, Stream, IT], b: Mapped.Aux[I#Bottom, Stream, IB], c: Prepend.Aux[IT, IB, IX],
+        a: Mapped.Aux[I#Top, Spout, IT], b: Mapped.Aux[I#Bottom, Spout, IB], c: Prepend.Aux[IT, IB, IX],
         lit: HLen[I#Top], lot: HLen[O#Top], iu: HLub[IX]) =
         new Creator[I, O](lit.value, lot.value) {
           type In = IX
@@ -311,16 +311,16 @@ object Module {
     final class Creation[+O <: Output](val out: Any) extends AnyVal
 
     object Creation {
-      implicit def fromStream[T](stream: Stream[T]): Creation[Output.Bottom1[T]] =
-        new Creation(InportList(stream.inport))
+      implicit def fromSpout[T](spout: Spout[T]): Creation[Output.Bottom1[T]] =
+        new Creation(InportList(spout.inport))
 
-      implicit def fromHList[L <: HList](hlist: L)(implicit ev: IsHListOfStream[L]): Creation[Output.Bottom[ev.Out]] =
+      implicit def fromHList[L <: HList](hlist: L)(implicit ev: IsHListOfSpout[L]): Creation[Output.Bottom[ev.Out]] =
         new Creation(InportList fromHList hlist)
 
-      implicit def fromProduct[P <: Product, L <: HList](product: P)(implicit ev0: ToHList.Aux[P, L], ev1: IsHListOfStream[L]): Creation[Output.Bottom[ev1.Out]] =
+      implicit def fromProduct[P <: Product, L <: HList](product: P)(implicit ev0: ToHList.Aux[P, L], ev1: IsHListOfSpout[L]): Creation[Output.Bottom[ev1.Out]] =
         new Creation(InportList fromHList ev0(product))
 
-      implicit def fromFanIn[L <: HList](fanIn: StreamOps.FanIn[L, _, _, Stream]): Creation[Output.Bottom[L]] =
+      implicit def fromFanIn[L <: HList](fanIn: StreamOps.FanIn[L, _, _, Spout]): Creation[Output.Bottom[L]] =
         new Creation(fanIn.subs)
     }
 

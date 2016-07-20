@@ -22,7 +22,7 @@ abstract class SwaveIdentityProcessorVerification[T](val testEnv: TestEnvironmen
   def this() = this(false)
 
   override def createFailedPublisher(): Publisher[T] =
-    Stream.failing[T](new Exception("Nope")).drainTo(Drain.toPublisher()).get
+    Spout.failing[T](new Exception("Nope")).drainTo(Drain.toPublisher()).get
 
   // Publishers created by swave don't support fanout by default
   override def maxSupportedSubscribers: Long = 1L

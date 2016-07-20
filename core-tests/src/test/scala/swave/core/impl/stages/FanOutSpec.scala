@@ -23,7 +23,7 @@ final class FanOutSpec extends SyncPipeSpec with Inspectors {
       .prop.from { (in, outs) ⇒
         import TestFixture.State._
 
-        in.stream.fanOutBroadcast()
+        in.spout.fanOutBroadcast()
           .subDrains(outs.tail.map(_.drain.dropResult))
           .subContinue
           .drainTo(outs.head.drain)

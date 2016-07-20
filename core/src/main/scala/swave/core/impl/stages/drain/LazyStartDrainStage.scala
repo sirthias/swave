@@ -6,7 +6,7 @@ package swave.core.impl.stages.drain
 
 import scala.concurrent.duration.Duration
 import scala.util.control.NonFatal
-import swave.core.impl.stages.source.SubSourceStage
+import swave.core.impl.stages.spout.SubSpoutStage
 import swave.core.impl.{ Inport, Outport, RunContext }
 import swave.core.macros.StageImpl
 import swave.core.util._
@@ -35,7 +35,7 @@ private[core] final class LazyStartDrainStage(onStart: () => Drain[AnyRef, AnyRe
           d
         } catch { case NonFatal(e) => { funError = e; null } }
       if (funError eq null) {
-        val sub = new SubSourceStage(ctx, this, timeout orElse ctx.env.settings.subscriptionTimeout)
+        val sub = new SubSpoutStage(ctx, this, timeout orElse ctx.env.settings.subscriptionTimeout)
         sub.subscribe()(innerDrain.outport)
         ctx.sealAndStartSubStream(sub)
         running(in, sub)

@@ -2,18 +2,18 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package swave.core.impl.stages.source
+package swave.core.impl.stages.spout
 
 import scala.concurrent.duration.Duration
 import swave.core.{ Cancellable, PipeElem }
 import swave.core.impl.{ Outport, RunContext }
 import swave.core.impl.stages.{ StreamTermination, Stage }
 import swave.core.macros.StageImpl
-import SubSourceStage._
+import SubSpoutStage._
 
 // format: OFF
 @StageImpl
-private[core] final class SubSourceStage(ctx: RunContext, val in: Stage, subscriptionTimeout: Duration) extends SourceStage
+private[core] final class SubSpoutStage(ctx: RunContext, val in: Stage, subscriptionTimeout: Duration) extends SpoutStage
   with PipeElem.Source.Sub {
 
   def pipeElemType: String = "sub"
@@ -89,7 +89,7 @@ private[core] final class SubSourceStage(ctx: RunContext, val in: Stage, subscri
     })
 }
 
-private[core] object SubSourceStage {
+private[core] object SubSpoutStage {
 
   case object EnableSubscriptionTimeout
 }

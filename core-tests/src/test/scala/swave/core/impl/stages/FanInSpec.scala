@@ -26,11 +26,11 @@ final class FanInSpec extends SyncPipeSpec with Inspectors {
       .prop.from { (ins, out) ⇒
         import TestFixture.State._
 
-        val streams = ins.map(_.stream)
+        val spouts = ins.map(_.spout)
         var expectedResultSize = out.scriptedSize
 
-        streams.head
-          .attachAll(streams.tail)
+        spouts.head
+          .attachAll(spouts.tail)
           .fanInConcat
           .drainTo(out.drain) shouldTerminate likeThis {
             case Cancelled ⇒ // inputs can be in any state
@@ -51,11 +51,11 @@ final class FanInSpec extends SyncPipeSpec with Inspectors {
       .prop.from { (ins, out) ⇒
         import TestFixture.State._
 
-        val streams = ins.map(_.stream)
+        val spouts = ins.map(_.spout)
         var expectedResultSize = out.scriptedSize
 
-        streams.head
-          .attachAll(streams.tail)
+        spouts.head
+          .attachAll(spouts.tail)
           .fanInFirstNonEmpty
           .drainTo(out.drain) shouldTerminate likeThis {
             case Cancelled ⇒ // inputs can be in any state
@@ -80,11 +80,11 @@ final class FanInSpec extends SyncPipeSpec with Inspectors {
       .prop.from { (ins, out) ⇒
         import TestFixture.State._
 
-        val streams = ins.map(_.stream)
+        val spouts = ins.map(_.spout)
         var expectedResultSize = out.scriptedSize
 
-        streams.head
-          .attachAll(streams.tail)
+        spouts.head
+          .attachAll(spouts.tail)
           .fanInMerge()
           .drainTo(out.drain) shouldTerminate likeThis {
             case Cancelled ⇒ // inputs can be in any state
@@ -114,9 +114,9 @@ final class FanInSpec extends SyncPipeSpec with Inspectors {
         val inputs = inInt :: inChar :: inDouble :: Nil
         var expectedResultSize = out.scriptedSize
 
-        inInt.stream
-          .attach(inChar.stream)
-          .attach(inDouble.stream)
+        inInt.spout
+          .attach(inChar.spout)
+          .attach(inDouble.spout)
           .fanInToTuple
           .drainTo(out.drain) shouldTerminate likeThis {
             case Cancelled | Completed ⇒ // inputs can be in any state

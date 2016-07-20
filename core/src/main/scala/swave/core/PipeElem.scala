@@ -30,7 +30,7 @@ object PipeElem {
   object Source {
     trait Failing extends Source
     trait File extends Source
-    trait FromPublisher extends Source
+    trait Publisher extends Source
     trait Future extends Source
     trait Iterator extends Source
     trait Lazy extends Source
@@ -49,7 +49,7 @@ object PipeElem {
     trait Cancelling extends Drain
     trait File extends Drain
     trait Foreach extends Drain
-    trait FromSubscriber extends Drain
+    trait Subscriber extends Drain
     trait Head extends Drain
     trait Lazy extends Drain
     trait Publisher extends Drain

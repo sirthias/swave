@@ -74,7 +74,7 @@ private[swave] object AbstractInportList {
       rec(null, underlying)
     }
 
-    def toReversedStreamHList: HList = {
+    def toReversedSpoutHList: HList = {
       @tailrec def rec(current: L, result: HList): HList =
         if (current ne null) {
           rec(current.tail, shapeless.::(current.in, result))
@@ -99,10 +99,10 @@ private[swave] object InportList {
   def fromHList(inports: HList): InportList = {
     @tailrec def rec(remaining: HList, result: InportList): InportList =
       remaining match {
-        case (head: Stream[_]) :: tail ⇒ rec(tail, head.inport +: result)
-        case (head: Inport) :: tail    ⇒ rec(tail, head +: result)
-        case HNil                      ⇒ result.reverse
-        case _                         ⇒ throw new IllegalStateException("Unexpected HList content")
+        case (head: Spout[_]) :: tail ⇒ rec(tail, head.inport +: result)
+        case (head: Inport) :: tail   ⇒ rec(tail, head +: result)
+        case HNil                     ⇒ result.reverse
+        case _                        ⇒ throw new IllegalStateException("Unexpected HList content")
       }
     rec(inports, empty)
   }

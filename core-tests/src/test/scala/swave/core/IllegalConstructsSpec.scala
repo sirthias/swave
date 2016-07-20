@@ -13,7 +13,7 @@ class IllegalConstructsSpec extends FreeSpec {
 
     "illegal switch fanout continue with too few substreams" in {
       illTyped(
-        """Stream(1, 2, 3)
+        """Spout(1, 2, 3)
            .switchIf(_ > 0)
            .sub.end
            .continue""",
@@ -22,7 +22,7 @@ class IllegalConstructsSpec extends FreeSpec {
 
     "illegal switch fanout subContinue with too few substreams" in {
       illTyped(
-        """Stream(1, 2, 3)
+        """Spout(1, 2, 3)
            .switchIf(_ > 0)
            .subContinue""",
         "`subContinue` is only possible with exactly one remaining fan-out sub-stream unconsumed!")
@@ -30,7 +30,7 @@ class IllegalConstructsSpec extends FreeSpec {
 
     "illegal switch fanout sub with too many substreams" in {
       illTyped(
-        """Stream(1, 2, 3)
+        """Spout(1, 2, 3)
            .switchIf(_ > 0)
            .sub.end
            .sub.end
@@ -40,7 +40,7 @@ class IllegalConstructsSpec extends FreeSpec {
 
     "illegal fanout continue with zero unterminated fanin sub-streams" in {
       illTyped(
-        """Stream(1, 2, 3)
+        """Spout(1, 2, 3)
            .fanOutBroadcast()
            .continue""",
         "Continuation is only possible with exactly one open fan-in sub-stream!")
@@ -48,7 +48,7 @@ class IllegalConstructsSpec extends FreeSpec {
 
     "illegal fanout continue with two unterminated fanin sub-streams" in {
       illTyped(
-        """Stream(1, 2, 3)
+        """Spout(1, 2, 3)
            .fanOutBroadcast()
            .sub.end
            .sub.end
@@ -58,7 +58,7 @@ class IllegalConstructsSpec extends FreeSpec {
 
     "illegal zero sub fanin" in {
       illTyped(
-        """Stream(1, 2, 3)
+        """Spout(1, 2, 3)
            .fanOutBroadcast()
            .fanInConcat""",
         "Cannot fan-in here. You need to have at least two open fan-in sub-streams.")
