@@ -21,7 +21,8 @@ final class FlattenSpec extends SyncPipeSpec with Inspectors {
     testSetup
       .fixture(fd ⇒ fd.inputFromIterables(Gen.chooseNum(0, 3).flatMap(Gen.listOfN(_, fd.input[Int]))))
       .output[Int]
-      .prop.from { (in, out) ⇒
+      .param(Gen.chooseNum(1, 3))
+      .prop.from { (in, out, parallelism) ⇒
         import TestFixture.State._
 
         val allInputs = in :: in.elements.toList
@@ -29,7 +30,7 @@ final class FlattenSpec extends SyncPipeSpec with Inspectors {
 
         in.spout
           .map(_.spout)
-          .flattenConcat()
+          .flattenConcat(parallelism)
           .drainTo(out.drain) shouldTerminate likeThis {
             case Cancelled ⇒ // inputs can be in any state
             case Completed ⇒ forAll(allInputs) { _.terminalState shouldBe Completed }

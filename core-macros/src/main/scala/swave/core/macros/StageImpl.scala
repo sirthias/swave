@@ -182,10 +182,10 @@ private[swave] class StageImplMacro(val c: scala.reflect.macros.whitebox.Context
     val StateDef(tree, name, params, body) = sd
     transformTree(stageClass) {
       case `tree` ⇒
-        val StateDefBody(auxDefs, handlers) = transformParamAccess(parameterSet, body)
+        val StateDefBody(requires, auxDefs, handlers) = transformParamAccess(parameterSet, body)
         val stateId = stateHandlers.size + 1
         stateHandlers = stateHandlers.updated(name, StateHandlers(stateId, params, handlers))
-        val state = q"private def ${TermName(name)}(): State = $stateId"
+        val state = q"private def ${TermName(name)}(): State = { ..$requires; $stateId }"
         exblock(state :: auxDefs.map(markPrivate))
       case x @ DefDef(_, _, _, _, _, _) ⇒ x // don't descend into other methods
     }
@@ -451,8 +451,8 @@ private[swave] class StageImplMacro(val c: scala.reflect.macros.whitebox.Context
     def unapply(tree: Tree): Option[StateDef] = {
       def sdb(name: TermName, params: List[ValDef], body: Tree) =
         body match {
-          case StateDefBody(_, _) ⇒ Some(StateDef(tree, name.decodedName.toString, params, body))
-          case _                  ⇒ None
+          case StateDefBody(_, _, _) ⇒ Some(StateDef(tree, name.decodedName.toString, params, body))
+          case _                     ⇒ None
         }
       tree match {
         case q"$mods def $name(..$params) = $body" ⇒ sdb(name, params, body)
@@ -462,13 +462,24 @@ private[swave] class StageImplMacro(val c: scala.reflect.macros.whitebox.Context
     }
   }
 
+  case class StateDefBody(requires: List[Tree], auxDefs: List[DefDef], handlers: List[Tree]) {
+    require(handlers.nonEmpty)
+  }
+
   object StateDefBody {
-    def unapply(tree: Tree): Option[(List[DefDef], List[Tree])] =
+    def unapply(tree: Tree): Option[(List[Tree], List[DefDef], List[Tree])] =
       tree match {
         case q"{ ..$stats; state(..$handlers) }" ⇒
-          val auxDefs = stats.collect { case x @ DefDef(_, _, _, _, _, _) ⇒ x }
-          if (auxDefs.size == stats.size) Some(auxDefs → handlers) else None
-        case q"state(..$handlers)" ⇒ Some(Nil → handlers)
+          val allowedPreTrees = stats.collect {
+            case x @ q"requireState(..${ _ })" ⇒ Left(x)
+            case x @ DefDef(_, _, _, _, _, _)  ⇒ Right(x)
+          }
+          if (allowedPreTrees.size == stats.size) {
+            val requires = allowedPreTrees collect { case Left(x) ⇒ x }
+            val auxDefs = allowedPreTrees collect { case Right(x) ⇒ x }
+            Some((requires, auxDefs, handlers))
+          } else None
+        case q"state(..$handlers)" ⇒ Some((Nil, Nil, handlers))
         case _                     ⇒ None
       }
   }
