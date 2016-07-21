@@ -1,3 +1,16 @@
+Version 0.5-M3 (2016-07-21)
+---------------------------
+
+- Renamed `swave.core.Stream` to `swave.core.Spout`
+- Add `throttle` op, `Spout.lazyStart`, `Spout.fromFuture` and `Drain.lazyStart`
+- Add `swave-akka-compat` and `swave-scodec-compat` modules
+- Add `swave.core.io.files` (file streaming, draining to files)
+- Add basic StreamEnv extension infrastructure
+- Significantly improve testkit probe infrastructure
+- Refactor Module infrastructure
+- Many smaller fixes and improvements
+
+
 Version 0.5-M2 (2016-06-21)
 ---------------------------
 

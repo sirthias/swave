@@ -38,9 +38,9 @@ The library artifacts for *swave* live on `Maven Central`_ and can be tied into 
 
 .. code:: Scala
 
-    libraryDependencies += "io.swave" %% "swave-core" % "0.5-M2"
+    libraryDependencies += "io.swave" %% "swave-core" % "0.5-M3"
 
-The latest released version is **0.5-M2**. Currently it is available only for Scala 2.11.
+The latest released version is **0.5-M3**. Currently it is available only for Scala 2.11.
 
 *swave-core* has the following dependencies that it will transitively pull into your classpath:
 
@@ -72,13 +72,17 @@ Providing users and contributors with proper, in-depth documentation for all fea
 
 Up until this goal is reached here are the most important entry points to the *swave* API:
 
-- Streams are created via the methods on the ``swave.core.Spout`` companion object.
+- The three core types you'll work with most are
+
+  - ``Spout[T]``: An outlet of stream elements, similar to ``akka-stream``'s ``Source``
+  - ``Pipe[A, B]``: A piece of stream pipeline with two open ends, similar to ``akka-stream``'s ``Flow``
+  - ``Drain[T, R]``: An inlet for stream elements, similar to ``akka-stream``'s ``Sink``
+
+- You create instances of the core types mostly via the methods on their companion objects.
 
 - Most stream operations are defined by the ``swave.core.StreamOps`` trait.
 
-- Drains are created via the methods on the ``swave.core.Drain`` companion object.
-
-- Stream instances are not reusable. After creation they can only be started once.
+- ``Spout``, ``Pipe``, ``Drain`` instances are not reusable. After creation they can only be started once.
   If you'd like to run a stream again you need to need to recreate it.
 
 - In order to be able to start a stream you need an implicit ``swave.core.StreamEnv`` instance in scope.

@@ -57,22 +57,32 @@ lazy val noPublishingSettings = Seq(
   publishLocal := (),
   publishArtifact := false)
 
-lazy val releaseSettings = Seq(
-  releaseCrossBuild := false,
-  releasePublishArtifactsAction := PgpKeys.publishSigned.value,
-  releaseProcess := Seq[ReleaseStep](
-    checkSnapshotDependencies,
-    inquireVersions,
-    runClean,
-    runTest,
-    setReleaseVersion,
-    commitReleaseVersion,
-    tagRelease,
-    publishArtifacts,
-    setNextVersion,
-    commitNextVersion,
-    releaseStepCommand("sonatypeReleaseAll"),
-    pushChanges))
+lazy val releaseSettings = {
+  val runCompile = ReleaseStep(
+    action = { st: State =>
+      val extracted = Project.extract(st)
+      val ref = extracted.get(thisProjectRef)
+      extracted.runAggregated(compile in Compile in ref, st)
+    })
+
+  Seq(
+    releaseCrossBuild := false,
+    releasePublishArtifactsAction := PgpKeys.publishSigned.value,
+    releaseProcess := Seq[ReleaseStep](
+      checkSnapshotDependencies,
+      inquireVersions,
+      runClean,
+      runCompile,
+      runTest,
+      setReleaseVersion,
+      commitReleaseVersion,
+      tagRelease,
+      publishArtifacts,
+      setNextVersion,
+      commitNextVersion,
+      releaseStepCommand("sonatypeReleaseAll"),
+      pushChanges))
+}
 
 lazy val commonJavacOptions = Seq(
   "-encoding", "UTF-8",
