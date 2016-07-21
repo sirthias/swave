@@ -7,6 +7,7 @@ package swave.core
 import org.reactivestreams.Publisher
 import scala.annotation.implicitNotFound
 import scala.concurrent.Future
+import scala.util.Try
 
 @implicitNotFound(msg = "Don't know how to create a stream from instances of type ${T}. Maybe you'd like to provide an `implicit Streamable[${T}]`?")
 abstract class Streamable[-T] {
@@ -58,4 +59,11 @@ object Streamable {
       def apply(value: Future[AnyRef]): Spout[AnyRef] = Spout.fromFuture(value)
     }
   implicit def forFuture[T]: Aux[Future[T], T] = future.asInstanceOf[Aux[Future[T], T]]
+
+  private val tryy =
+    new Streamable[Try[AnyRef]] {
+      type Out = AnyRef
+      def apply(value: Try[AnyRef]): Spout[AnyRef] = Spout.fromTry(value)
+    }
+  implicit def forTry[T]: Aux[Try[T], T] = tryy.asInstanceOf[Aux[Try[T], T]]
 }

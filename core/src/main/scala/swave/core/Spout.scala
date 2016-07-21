@@ -7,6 +7,7 @@ package swave.core
 import org.reactivestreams.{ Publisher, Subscriber }
 import scala.annotation.unchecked.{ uncheckedVariance ⇒ uV }
 import scala.collection.generic.CanBuildFrom
+import scala.util.{ Failure, Success, Try }
 import scala.concurrent.Future
 import scala.concurrent.duration.{ Duration, FiniteDuration }
 import shapeless._
@@ -109,6 +110,9 @@ object Spout {
 
   def fromPublisher[T](publisher: Publisher[T]): Spout[T] =
     new Spout(new PublisherSpoutStage(publisher.asInstanceOf[Publisher[AnyRef]]))
+
+  def fromTry[T](value: Try[T]): Spout[T] =
+    (value match { case Success(x) ⇒ one(x); case Failure(e) ⇒ failing(e) }) named "Spout.fromTry"
 
   def iterate[T](start: T)(f: T ⇒ T): Spout[T] =
     fromIterator(Iterator.iterate(start)(f)) named "Spout.iterate"
