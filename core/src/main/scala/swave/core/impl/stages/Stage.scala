@@ -200,8 +200,9 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
 
   @tailrec
   private def _onNext(elem: AnyRef, from: Inport, last: InportStates = null, current: InportStates = _inportState): Unit =
-    if (current ne null) {
-      if (current.in eq from) {
+    if (current.nonEmpty) {
+      val currentIn = current.in
+      if ((from eq null) || (currentIn eq from)) {
         _state = _onNext0(elem, from)
         if (current.tail ne current) { // is `current` still valid, i.e. not cancelled? (tail eq self is special condition)
           val newPending = current.pending - 1
@@ -210,10 +211,10 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
             if (newRemaining > 0) {
               current.pending = _mbs
               current.remaining = newRemaining
-              from.request(_mbs.toLong)
+              currentIn.request(_mbs.toLong)
             } else {
               if (last ne null) last.tail = current.tail else _inportState = current.tail
-              from.request(current.remaining)
+              currentIn.request(current.remaining)
             }
           } else current.pending = newPending
         }
@@ -416,14 +417,29 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
   /////////////////////////////////////// PRIVATE ///////////////////////////////////////
 
   private def interceptionNeeded: Boolean = ((interceptingStates >> _state) & 1) != 0
+  private def fullInterceptions: Boolean = interceptingStates < 0
+
+  private def storeInterception(signal: java.lang.Long, from: Port): Unit =
+    if (fullInterceptions) {
+      if (!buffer.write(signal, from))
+        illegalState(s"Interception buffer overflow on signal $signal($from)'")
+    } else {
+      if (!buffer.write(signal))
+        illegalState(s"Interception buffer overflow on signal $signal()'")
+    }
 
   private def storeInterception(signal: java.lang.Long, arg: AnyRef): Unit =
     if (!buffer.write(signal, arg))
       illegalState(s"Interception buffer overflow on signal $signal($arg)'")
 
-  private def storeInterception(signal: java.lang.Long, arg0: AnyRef, arg1: AnyRef): Unit =
-    if (!buffer.write(signal, arg0, arg1))
-      illegalState(s"Interception buffer overflow on signal $signal($arg0, $arg1)")
+  private def storeInterception(signal: java.lang.Long, arg0: AnyRef, from: Port): Unit =
+    if (fullInterceptions) {
+      if (!buffer.write(signal, arg0, from))
+        illegalState(s"Interception buffer overflow on signal $signal($arg0, $from)")
+    } else {
+      if (!buffer.write(signal, arg0))
+        illegalState(s"Interception buffer overflow on signal $signal($arg0)")
+    }
 
   private def buffer = {
     if (_buffer eq null) {
@@ -435,17 +451,18 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
 
   @tailrec private def handleInterceptions(): Unit =
     if ((_buffer ne null) && _buffer.nonEmpty) {
-      val signal = _buffer.unsafeRead().asInstanceOf[java.lang.Long].intValue()
-      val arg0 = _buffer.unsafeRead()
+      def read() = _buffer.unsafeRead()
+      val signal = read().asInstanceOf[java.lang.Long].intValue()
+      def from() = if (fullInterceptions) read().asInstanceOf[Stage] else null
       signal match {
-        case 0 ⇒ _subscribe(arg0.asInstanceOf[Stage])
-        case 1 ⇒ _request(arg0.asInstanceOf[java.lang.Long].longValue(), _buffer.unsafeRead().asInstanceOf[Stage])
-        case 2 ⇒ _cancel(arg0.asInstanceOf[Stage])
-        case 3 ⇒ _onSubscribe(arg0.asInstanceOf[Stage])
-        case 4 ⇒ _onNext(arg0, _buffer.unsafeRead().asInstanceOf[Stage])
-        case 5 ⇒ _onComplete(arg0.asInstanceOf[Stage])
-        case 6 ⇒ _onError(arg0.asInstanceOf[Throwable], _buffer.unsafeRead().asInstanceOf[Stage])
-        case 7 ⇒ _xEvent(arg0)
+        case 0 ⇒ _subscribe(from())
+        case 1 ⇒ _request(read().asInstanceOf[java.lang.Long].longValue(), from())
+        case 2 ⇒ _cancel(from())
+        case 3 ⇒ _onSubscribe(from())
+        case 4 ⇒ _onNext(read(), from())
+        case 5 ⇒ _onComplete(from())
+        case 6 ⇒ _onError(read().asInstanceOf[Throwable], from())
+        case 7 ⇒ _xEvent(read())
       }
       handleInterceptions()
     } else _intercepting = false

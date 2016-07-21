@@ -11,7 +11,7 @@ import swave.core.macros._
 import swave.core.util._
 
 // format: OFF
-@StageImpl
+@StageImpl(fullInterceptions = true)
 private[core] final class MergeStage(subs: InportList, eagerComplete: Boolean)
   extends FanInStage with PipeElem.FanIn.Concat {
 

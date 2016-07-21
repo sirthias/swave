@@ -7,7 +7,11 @@ package swave.core.macros
 import scala.annotation.{ StaticAnnotation, compileTimeOnly }
 
 @compileTimeOnly("Unresolved @StageImpl")
-private[swave] final class StageImpl(dump: Boolean = false, trace: Boolean = false) extends StaticAnnotation {
+private[swave] final class StageImpl(
+    fullInterceptions: Boolean = false,
+    dump: Boolean = false,
+    trace: Boolean = false) extends StaticAnnotation {
+
   def macroTransform(annottees: Any*): Any = macro StageImplMacro.generateStage
 }
 
@@ -84,6 +88,7 @@ private[swave] class StageImplMacro(val c: scala.reflect.macros.whitebox.Context
   import c.universe._
 
   var stateHandlers = Map.empty[String, StateHandlers]
+  val fullInterceptions: Boolean = annotationFlag("fullInterceptions")
   val debugMode: Boolean = annotationFlag("dump")
   val tracing: Boolean = annotationFlag("trace")
 
@@ -112,7 +117,7 @@ private[swave] class StageImplMacro(val c: scala.reflect.macros.whitebox.Context
     val parameterSet = determineParameterSet(stateParentDefs, stateDefs(sc1))
     val sc2 = stateParentDefs.foldLeft(sc1: Tree)(removeStateParentDef(parameterSet))
     val sc3 = stateDefs(sc2).foldLeft(sc2)(transformStateDef(parameterSet))
-    val sc4 = addMembers(sc3, varMembers(parameterSet), assignInterceptingStates :: stateNameImpl ::: signalHandlersImpl)
+    val sc4 = addMembers(sc3, varMembers(parameterSet), interceptingStates(stageImpl) :: stateNameImpl ::: signalHandlersImpl)
     val sc5 = transformStateCallSites(sc4)
 
     val transformedStageImpl = sc5
@@ -410,10 +415,13 @@ private[swave] class StageImplMacro(val c: scala.reflect.macros.whitebox.Context
       xSealDef, xStartDef, xEventDef)
   }
 
-  def assignInterceptingStates: Tree = {
-    val bitMask = stateHandlers.valuesIterator.foldLeft(0) { (acc, sh) ⇒
+  def interceptingStates(stageImpl: ImplDef): Tree = {
+    if (stateHandlers.size > 31)
+      c.abort(stageImpl.pos, s"A stage implementation must not have more than 31 states! (Here it has ${stateHandlers.size})")
+    var bitMask = stateHandlers.valuesIterator.foldLeft(0) { (acc, sh) ⇒
       if (sh.intercept) acc | (1 << sh.id) else acc
     }
+    if (fullInterceptions) bitMask |= Int.MinValue // the highest bit signals whether we need full interceptions
     q"interceptingStates = $bitMask"
   }
 

@@ -13,7 +13,7 @@ import swave.core.macros.StageImpl
 import swave.core.{ SubscriptionTimeoutException, Cancellable, PipeElem }
 
 // format: OFF
-@StageImpl
+@StageImpl(fullInterceptions = true)
 private[core] final class SubDrainStage(ctx: RunContext, val out: Stage, subscriptionTimeout: Duration) extends DrainStage
   with PipeElem.Drain.Sub {
 

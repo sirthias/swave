@@ -7,7 +7,6 @@ package swave.core.impl.stages.spout
 import scala.concurrent.duration.Duration
 import scala.util.control.NonFatal
 import swave.core.impl.stages.drain.SubDrainStage
-import swave.core.impl.stages.SignalStashing
 import swave.core.impl.{ RunContext, Inport, Outport }
 import swave.core.macros.StageImpl
 import swave.core.util._
@@ -16,13 +15,12 @@ import swave.core._
 // format: OFF
 @StageImpl
 private[core] final class LazyStartSpoutStage(onStart: () => Spout[AnyRef], timeout: Duration)
-  extends SpoutStage with SignalStashing with PipeElem.Source.Lazy {
+  extends SpoutStage with PipeElem.Source.Lazy {
 
   def pipeElemType: String = "Spout.lazyStart"
   def pipeElemParams: List[Any] = onStart :: timeout :: Nil
 
   connectOutAndSealWith { (ctx, out) ⇒
-    configureStash(ctx)
     ctx.registerForXStart(this)
     awaitingXStart(ctx, out)
   }
@@ -34,18 +32,26 @@ private[core] final class LazyStartSpoutStage(onStart: () => Spout[AnyRef], time
       if (funError eq null) {
         val sub = new SubDrainStage(ctx, this, timeout orElse ctx.env.settings.subscriptionTimeout)
         inport.subscribe()(sub)
-        awaitingOnSubscribe(ctx, sub, out)
+        awaitingOnSubscribe(ctx, sub, out, 0L)
       } else stopError(funError, out)
     })
 
-  def awaitingOnSubscribe(ctx: RunContext, in: Inport, out: Outport) = state(
-    request = stashRequest,
-    cancel = stashCancel,
+  def awaitingOnSubscribe(ctx: RunContext, in: Inport, out: Outport, requested: Long): State = state(
+    request = (n, _) => {
+      if (requested < 0) stay()
+      else awaitingOnSubscribe(ctx, in, out, requested ⊹ n)
+    },
+
+    cancel = _ => awaitingOnSubscribe(ctx, in, out, -1),
 
     onSubscribe = _ => {
       ctx.sealAndStartSubStream(in)
-      unstashAll()
-      running(in, out)
+      if (requested != 0) {
+        if (requested > 0) {
+          in.request(requested)
+          running(in, out)
+        } else stopCancel(in)
+      } else running(in, out)
     })
 
   def running(in: Inport, out: Outport) = state(

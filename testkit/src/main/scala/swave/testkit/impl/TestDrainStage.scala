@@ -11,7 +11,7 @@ import swave.core.impl.stages.drain.DrainStage
 import swave.core.impl.{ RunContext, Inport }
 import swave.core.macros._
 
-@StageImpl
+@StageImpl(fullInterceptions = true)
 private[testkit] final class TestDrainStage(
     val id: Int,
     val requestsIterable: Iterable[Long],

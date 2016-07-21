@@ -13,7 +13,7 @@ import swave.core.macros._
 import swave.core.util._
 
 // format: OFF
-@StageImpl
+@StageImpl(fullInterceptions = true)
 private[core] final class InjectStage(timeout: Duration) extends InOutStage with PipeElem.InOut.Inject { stage =>
 
   def pipeElemType: String = "inject"

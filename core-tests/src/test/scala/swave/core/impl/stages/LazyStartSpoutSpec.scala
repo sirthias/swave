@@ -8,7 +8,7 @@ import org.scalacheck.Gen
 import org.scalatest.Inspectors
 import swave.core._
 
-final class LazySourceSpec extends SyncPipeSpec with Inspectors {
+final class LazyStartSpoutSpec extends SyncPipeSpec with Inspectors {
 
   implicit val env = StreamEnv()
   implicit val config = PropertyCheckConfig(minSuccessful = 100)

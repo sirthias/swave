@@ -12,7 +12,7 @@ import swave.core.util._
 import swave.core.impl._
 
 // format: OFF
-@StageImpl
+@StageImpl(fullInterceptions = true)
 private[core] final class FlattenConcatStage(streamable: Streamable.Aux[AnyRef, AnyRef],
                                              parallelism: Int, timeout: Duration)
   extends InOutStage with PipeElem.InOut.FlattenConcat {

@@ -12,7 +12,7 @@ import swave.core.PipeElem
 import swave.core.impl.Outport
 import swave.core.impl.stages.spout.SpoutStage
 
-@StageImpl
+@StageImpl(fullInterceptions = true)
 private[testkit] final class TestSpoutStage(
     val id: Int,
     val elemsIterable: Iterable[AnyRef],
