@@ -105,13 +105,13 @@ lazy val macroParadise =
 
 // core
 val `reactive-streams`     = "org.reactivestreams"        %   "reactive-streams"      % "1.0.0"
-val `jctools-core`         = "org.jctools"                %   "jctools-core"          % "1.2"
+val `jctools-core`         = "org.jctools"                %   "jctools-core"          % "1.2.1"
 val `typesafe-config`      = "com.typesafe"               %   "config"                % "1.3.0"
 val shapeless              = "com.chuusai"                %%  "shapeless"             % "2.3.1"
 val `scala-logging`        = "com.typesafe.scala-logging" %%  "scala-logging"         % "3.4.0"
 
 // *-compat
-val `akka-stream`          = "com.typesafe.akka"          %%  "akka-stream"           % "2.4.7"
+val `akka-stream`          = "com.typesafe.akka"          %%  "akka-stream"           % "2.4.8"
 val `scodec-bits`          = "org.scodec"                 %%  "scodec-bits"           % "1.1.0"
 
 // test
@@ -120,7 +120,7 @@ val scalacheck             = "org.scalacheck"             %%  "scalacheck"      
 val `reactive-streams-tck` = "org.reactivestreams"        %   "reactive-streams-tck"  % "1.0.0"   % "test"
 
 // examples
-val `akka-http-core`       = "com.typesafe.akka"          %%  "akka-http-core"        % "2.4.7"
+val `akka-http-core`       = "com.typesafe.akka"          %%  "akka-http-core"        % "2.4.8"
 val logback                = "ch.qos.logback"             %   "logback-classic"       % "1.1.7"
 
 /////////////////////// PROJECTS /////////////////////////
