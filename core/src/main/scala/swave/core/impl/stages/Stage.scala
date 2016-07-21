@@ -482,31 +482,4 @@ private[swave] object Stage {
   private[stages] class OutportStates(out: Outport, tail: OutportStates,
     var remaining: Long) // requested by this `out` but not yet delivered, i.e. unfulfilled demand
       extends AbstractOutportList[OutportStates](out, tail)
-
-  def discoverGraph(stage: Stage): Set[Stage] = {
-    val discover = new ((Set[PipeElem], PipeElem) ⇒ Set[PipeElem]) {
-      private def _apply(set: Set[PipeElem], pe: PipeElem) = apply(set, pe)
-      @tailrec def apply(set: Set[PipeElem], pe: PipeElem): Set[PipeElem] = {
-        val nextSet = set + pe
-        if (nextSet ne set) {
-          import pe._
-          3 * inputElems.size012 + outputElems.size012 match {
-            case 0 /* 0:0 */ ⇒ throw new IllegalStateException // no input and no output?
-            case 1 /* 0:1 */ ⇒ apply(nextSet, outputElems.head)
-            case 2 /* 0:x */ ⇒ outputElems.foldLeft(nextSet)(this)
-            case 3 /* 1:0 */ ⇒ apply(nextSet, inputElems.head)
-            case 4 /* 1:1 */ ⇒
-              if (nextSet.contains(inputElems.head)) apply(nextSet, outputElems.head)
-              else if (nextSet.contains(outputElems.head)) apply(nextSet, inputElems.head)
-              else { _apply(nextSet, inputElems.head); apply(nextSet, outputElems.head) }
-            case 5 /* 1:x */ ⇒ { _apply(nextSet, inputElems.head); outputElems.foldLeft(nextSet)(this) }
-            case 6 /* x:0 */ ⇒ inputElems.foldLeft(nextSet)(this)
-            case 7 /* x:1 */ ⇒ { inputElems.foldLeft(nextSet)(this); apply(nextSet, outputElems.head) }
-            case 8 /* x:x */ ⇒ { inputElems.foldLeft(nextSet)(this); outputElems.foldLeft(nextSet)(this) }
-          }
-        } else set
-      }
-    }
-    discover(Set.empty, stage.pipeElem).asInstanceOf[Set[Stage]]
-  }
 }

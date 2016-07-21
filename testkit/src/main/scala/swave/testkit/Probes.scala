@@ -227,7 +227,8 @@ trait Probes {
 
     final def verifyCleanStop(): Unit =
       if (stage.isAsync) {
-        val futures: List[(Stage, Future[Unit])] = Stage.discoverGraph(stage.stage).map { stage ⇒
+        val futures: List[(Stage, Future[Unit])] = Graph.explore(stage.stage.pipeElem).map { pe ⇒
+          val stage = pe.asInstanceOf[Stage]
           val p = Promise[Unit]()
           stage.runner.enqueueXEvent(stage, Stage.RegisterStopPromise(p))
           stage → p.future
@@ -244,7 +245,7 @@ trait Probes {
         }
       } else {
         requireState(deadlineNanos.value == 0L, "`verifyCleanStop` wrapped by `within` doesn't make sense for sync runs")
-        Stage.discoverGraph(stage.stage).find(!_.isStopped).foreach(stage ⇒
+        Graph.explore(stage.stage.pipeElem).find(!_.asInstanceOf[Stage].isStopped).foreach(stage ⇒
           throw ExpectationFailedException(s"Stage `$stage` is still running when it shouldn't be."))
       }
 
