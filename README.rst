@@ -95,11 +95,11 @@ Resources
 
 Talk: "swave - Reactive Streams in Scala" presented at `ScalaDays 2016 @ Berlin`_ (Jun 2016)
   | Slides: http://swave.io/scaladays/2016/
-  | Video: <coming>
+  | Video: https://youtu.be/htwmROeki0c
 
 Talk: "swave - A Preview" presented at SCALAR_ (Apr 2016)
   | Slides: http://swave.io/scalar/
-  | Video: https://www.youtube.com/watch?v=0jq0-Ph2gpM
+  | Video: https://youtu.be/0jq0-Ph2gpM
 
 .. _ScalaDays 2016 @ Berlin: http://event.scaladays.org/scaladays-berlin-2016
 .. _SCALAR: http://scalar-conf.com/
