@@ -31,8 +31,19 @@ private[core] final class FoldStage(zero: AnyRef, f: (AnyRef, AnyRef) ⇒ AnyRef
       },
 
       cancel = stopCancelF(in),
-      onComplete = stopCompleteF(out),
+      onComplete = _ => awaitingDemandUpstreamGone(),
       onError = stopErrorF(out))
+
+    /**
+     * Upstream completed, awaiting demand from downstream.
+     */
+    def awaitingDemandUpstreamGone() = state(
+      request = (_, _) ⇒ {
+        out.onNext(zero)
+        stopComplete(out)
+      },
+
+      cancel = stopF)
 
     /**
      * Applying the fold function to all incoming elements.

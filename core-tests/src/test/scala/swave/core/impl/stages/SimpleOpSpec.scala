@@ -155,12 +155,15 @@ final class SimpleOpSpec extends SyncPipeSpec with Inspectors {
       .input[Int]
       .output[Int]
       .prop.from { (in, out) ⇒
+        import TestFixture.State._
 
         in.spout
           .fold(0)(_ + _)
-          .drainTo(out.drain) shouldTerminate asScripted(in)
-
-        if (out.size > 0) out.received shouldEqual List(in.produced.sum)
+          .drainTo(out.drain) shouldTerminate {
+            case Cancelled ⇒ // any input state could end up here
+            case Completed ⇒ out.received shouldEqual List(in.produced.sum)
+            case error     ⇒ in.terminalState shouldBe error
+          }
       }
   }
 
