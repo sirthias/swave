@@ -35,6 +35,11 @@ lazy val commonSettings = Seq(
     .setPreference(PreserveSpaceBeforeArguments, true)
     .setPreference(RewriteArrowSymbols, true))
 
+//// COVERAGE SETTINGS
+coverageEnabled := true
+coverageMinimum := 80
+coverageFailOnMinimum := false
+
 lazy val publishingSettings = Seq(
   useGpg := true,
   publishMavenStyle := true,
