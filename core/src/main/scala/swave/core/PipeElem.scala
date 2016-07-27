@@ -49,11 +49,12 @@ object PipeElem {
     trait Cancelling extends Drain
     trait File extends Drain
     trait Foreach extends Drain
-    trait Subscriber extends Drain
     trait Head extends Drain
+    trait Ignore extends Drain
     trait Lazy extends Drain
     trait Publisher extends Drain
     trait Sub extends Drain
+    trait Subscriber extends Drain
     trait Test extends Drain
   }
 

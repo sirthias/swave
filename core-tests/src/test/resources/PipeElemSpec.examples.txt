@@ -95,7 +95,7 @@ Example 7:
  o  | Drain.head()
     |
     |
-    o {Drain.ignore}
+    o Drain.ignore(List())
 
 Example 8:
  o {Spout.from}

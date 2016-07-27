@@ -109,8 +109,10 @@ object Drain {
   def headOption[T]: Drain[T, Future[Option[T]]] =
     Pipe[T].first.map(Some(_)).nonEmptyOr(Spout.one(None)).to(head) named "Drain.headOption"
 
-  def ignore: Drain[Any, Future[Unit]] =
-    foreach(util.dropFunc) named "Drain.ignore"
+  def ignore: Drain[Any, Future[Unit]] = {
+    val promise = Promise[Unit]()
+    new Drain(new IgnoreDrainStage(promise), promise.future)
+  }
 
   def last[T]: Drain[T, Future[T]] =
     Pipe[T].last.to(head) named "Drain.last"
