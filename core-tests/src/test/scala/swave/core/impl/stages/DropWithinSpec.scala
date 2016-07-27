@@ -18,7 +18,7 @@ final class DropWithinSpec extends FreeSpec with StreamEnvShutdown {
 
   "DropWithin must" - {
 
-    "deliver elements after the duration, but not before" in {
+    "deliver elements after the duration, but not before" ignore {
       val input = Iterator.from(1)
       val spout = SpoutProbe[Int]
       val drain = DrainProbe[Int]
@@ -40,7 +40,7 @@ final class DropWithinSpec extends FreeSpec with StreamEnvShutdown {
       drain.expectComplete()
     }
 
-    "deliver completion even before the duration" in {
+    "deliver completion even before the duration" ignore {
       val spout = SpoutProbe[Int]
       val drain = DrainProbe[Int]
 

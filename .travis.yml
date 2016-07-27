@@ -1,0 +1,11 @@
+language:
+  - scala
+scala:
+  - 2.11.8
+jdk:
+  - oraclejdk8
+script:
+  - sbt clean coverage test coverageReport -Dswave.test.timing.factor=1.05 &&
+    sbt coverageAggregate
+after_success:
+  - sbt coveralls

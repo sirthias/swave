@@ -5,6 +5,14 @@ swave.io
 It attempts to provide all the general-purpose stream construction, stream consumption and stream transformation logic
 that is typically required in applications that work with Reactive-Streams_.
 
+.. image:: https://travis-ci.org/sirthias/swave.svg?branch=master
+    :target: https://travis-ci.org/sirthias/swave
+    :alt: Current build status
+
+.. image:: https://coveralls.io/repos/github/sirthias/swave/badge.svg
+    :target: https://coveralls.io/github/sirthias/swave
+    :alt: Test coverage
+
 .. image:: https://img.shields.io/maven-central/v/io.swave/swave-core_2.11.svg
    :target: https://maven-badges.herokuapp.com/maven-central/io.swave/swave-core_2.11
    :alt: The latest swave artifacts on Maven Central
