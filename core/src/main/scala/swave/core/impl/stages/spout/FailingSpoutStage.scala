@@ -10,7 +10,7 @@ import swave.core.macros.StageImpl
 
 // format: OFF
 @StageImpl
-private[core] final class FailingSpoutStage(error: Throwable) extends SpoutStage with PipeElem.Source.Repeat {
+private[core] final class FailingSpoutStage(error: Throwable) extends SpoutStage with PipeElem.Spout.Repeat {
 
   def pipeElemType: String = "Spout.failing"
   def pipeElemParams: List[Any] = error :: Nil

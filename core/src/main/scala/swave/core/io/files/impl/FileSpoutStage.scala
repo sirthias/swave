@@ -20,7 +20,7 @@ import swave.core.macros._
 // format: OFF
 @StageImpl
 private[core] final class FileSpoutStage[T](path: Path, _chunkSize: Int)(implicit bytes: Bytes[T])
-  extends SpoutStage with PipeElem.Source.File {
+  extends SpoutStage with PipeElem.Spout.File {
 
   def pipeElemType: String = "Spout.fromPath"
   def pipeElemParams: List[Any] = path :: _chunkSize :: Nil

@@ -10,7 +10,7 @@ import swave.core.impl.{ Outport, RunContext }
 import swave.core.impl.stages.Stage
 
 // format: OFF
-private[swave] abstract class SpoutStage extends Stage { this: PipeElem.Source ⇒
+private[swave] abstract class SpoutStage extends Stage { this: PipeElem.Spout ⇒
 
   protected final var _outputPipeElem: PipeElem = PipeElem.Unconnected
 

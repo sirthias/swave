@@ -22,22 +22,22 @@ object PipeElem {
     def pipeElemParams = Nil
   }
 
-  sealed trait Source extends PipeElem {
+  sealed trait Spout extends PipeElem {
     def outputElem: PipeElem
     final def inputElems = Nil
     final def outputElems: List[PipeElem] = outputElem :: Nil
   }
-  object Source {
-    trait Failing extends Source
-    trait File extends Source
-    trait Publisher extends Source
-    trait Future extends Source
-    trait Iterator extends Source
-    trait Lazy extends Source
-    trait Repeat extends Source
-    trait Sub extends Source
-    trait Test extends Source
-    trait Subscriber extends Source
+  object Spout {
+    trait Failing extends Spout
+    trait File extends Spout
+    trait Publisher extends Spout
+    trait Future extends Spout
+    trait Iterator extends Spout
+    trait Lazy extends Spout
+    trait Repeat extends Spout
+    trait Sub extends Spout
+    trait Test extends Spout
+    trait Subscriber extends Spout
   }
 
   sealed trait Drain extends PipeElem {

@@ -15,7 +15,7 @@ import swave.core._
 // format: OFF
 @StageImpl
 private[core] final class LazyStartSpoutStage(onStart: () => Spout[AnyRef], timeout: Duration)
-  extends SpoutStage with PipeElem.Source.Lazy {
+  extends SpoutStage with PipeElem.Spout.Lazy {
 
   def pipeElemType: String = "Spout.lazyStart"
   def pipeElemParams: List[Any] = onStart :: timeout :: Nil

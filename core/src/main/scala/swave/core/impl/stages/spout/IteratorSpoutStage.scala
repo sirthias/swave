@@ -12,7 +12,8 @@ import swave.core.impl.Outport
 
 // format: OFF
 @StageImpl
-private[core] final class IteratorSpoutStage(iterator: Iterator[AnyRef]) extends SpoutStage with PipeElem.Source.Iterator {
+private[core] final class IteratorSpoutStage(iterator: Iterator[AnyRef])
+  extends SpoutStage with PipeElem.Spout.Iterator {
 
   def pipeElemType: String = "Spout.fromIterator"
   def pipeElemParams: List[Any] = iterator :: Nil

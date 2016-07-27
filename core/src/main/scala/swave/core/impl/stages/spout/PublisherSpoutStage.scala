@@ -14,7 +14,7 @@ import swave.core.util._
 // format: OFF
 @StageImpl
 private[core] final class PublisherSpoutStage(publisher: Publisher[AnyRef])
-  extends SpoutStage with PipeElem.Source.Publisher { stage =>
+  extends SpoutStage with PipeElem.Spout.Publisher { stage =>
 
   def pipeElemType: String = "Spout.fromPublisher"
   def pipeElemParams: List[Any] = publisher :: Nil

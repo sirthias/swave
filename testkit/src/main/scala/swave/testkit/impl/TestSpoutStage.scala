@@ -17,7 +17,7 @@ private[testkit] final class TestSpoutStage(
     val id: Int,
     val elemsIterable: Iterable[AnyRef],
     val termination: Option[Throwable],
-    ctx: TestContext) extends SpoutStage with TestStage with PipeElem.Source.Test {
+    ctx: TestContext) extends SpoutStage with TestStage with PipeElem.Spout.Test {
 
   private[this] val elems: Iterator[AnyRef] = elemsIterable.iterator
 

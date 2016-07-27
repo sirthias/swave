@@ -15,7 +15,7 @@ import swave.core.util._
 
 // format: OFF
 @StageImpl
-private[core] final class SubscriberSpoutStage extends SpoutStage with PipeElem.Source.Subscriber { stage =>
+private[core] final class SubscriberSpoutStage extends SpoutStage with PipeElem.Spout.Subscriber { stage =>
 
   def pipeElemType: String = "Spout.withSubscriber"
   def pipeElemParams: List[Any] = Nil

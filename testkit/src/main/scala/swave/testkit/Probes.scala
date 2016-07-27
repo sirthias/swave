@@ -40,7 +40,7 @@ trait Probes {
 
     // format: OFF
     @StageImpl
-    protected object stage extends SpoutStage with PipeElem.Source.Test with ProbeStage {
+    protected object stage extends SpoutStage with PipeElem.Spout.Test with ProbeStage {
       def pipeElemType = "SpoutProbe"
       def pipeElemParams = Nil
       override def toString = s"SpoutProbe.stage@${identityHash(this)}/$stateName"

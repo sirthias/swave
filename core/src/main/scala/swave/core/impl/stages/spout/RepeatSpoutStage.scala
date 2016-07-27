@@ -11,7 +11,7 @@ import swave.core.impl.Outport
 
 // format: OFF
 @StageImpl
-private[core] final class RepeatSpoutStage(element: AnyRef) extends SpoutStage with PipeElem.Source.Repeat {
+private[core] final class RepeatSpoutStage(element: AnyRef) extends SpoutStage with PipeElem.Spout.Repeat {
 
   def pipeElemType: String = "Spout.repeat"
   def pipeElemParams: List[Any] = element :: Nil

@@ -12,7 +12,7 @@ import swave.core.macros.StageImpl
 
 // format: OFF
 @StageImpl
-private[core] final class FutureSpoutStage(future: Future[AnyRef]) extends SpoutStage with PipeElem.Source.Future {
+private[core] final class FutureSpoutStage(future: Future[AnyRef]) extends SpoutStage with PipeElem.Spout.Future {
 
   def pipeElemType: String = "Spout.fromFuture"
   def pipeElemParams: List[Any] = future :: Nil

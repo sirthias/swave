@@ -14,7 +14,7 @@ import SubSpoutStage._
 // format: OFF
 @StageImpl
 private[core] final class SubSpoutStage(ctx: RunContext, val in: Stage, subscriptionTimeout: Duration) extends SpoutStage
-  with PipeElem.Source.Sub {
+  with PipeElem.Spout.Sub {
 
   def pipeElemType: String = "sub"
   def pipeElemParams: List[Any] = in :: subscriptionTimeout :: Nil
