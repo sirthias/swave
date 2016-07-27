@@ -4,7 +4,6 @@
 
 package swave.core
 
-import scala.concurrent.duration.Duration
 import scala.concurrent.Promise
 import swave.core.util._
 
@@ -15,7 +14,7 @@ class SyncSpec extends SwaveSpec {
   "Fully synchronous pipings" - {
 
     "drainTo head" in {
-      Spout(1, 2, 3).drainTo(Drain.head).await(Duration.Zero) shouldEqual 1
+      Spout(1, 2, 3).drainTo(Drain.head).value.get.get shouldEqual 1
     }
 
     "simple produce" in {

@@ -81,12 +81,6 @@ final class Drain[-T, +R] private[swave] (private[swave] val outport: Outport, v
 
 object Drain {
 
-  def toPublisher[T](fanoutSupport: Boolean = false): Drain[T, Publisher[T]] = {
-    if (fanoutSupport) ???
-    val stage = new PublisherDrainStage
-    new Drain(stage, stage.publisher.asInstanceOf[Publisher[T]])
-  }
-
   def cancelling: Drain[Any, Unit] =
     Drain(new CancellingDrainStage)
 
@@ -104,12 +98,16 @@ object Drain {
   def fromSubscriber[T](subscriber: Subscriber[T]): Drain[T, Unit] =
     Drain(new SubscriberDrainStage(subscriber.asInstanceOf[Subscriber[AnyRef]]))
 
+  def generalSeq[M[+_], T](limit: Long)(implicit cbf: CanBuildFrom[M[T], T, M[T]]): Drain[T, Future[M[T]]] =
+    Pipe[T].limit(limit).groupedTo[M](Integer.MAX_VALUE, emitSingleEmpty = true).to(head) named "Drain.seq"
+
   def head[T]: Drain[T, Future[T]] = {
     val promise = Promise[AnyRef]()
     new Drain(new HeadDrainStage(promise), promise.future.asInstanceOf[Future[T]])
   }
 
-  def headOption[T]: Drain[T, Future[Option[T]]] = ???
+  def headOption[T]: Drain[T, Future[Option[T]]] =
+    Pipe[T].first.map(Some(_)).nonEmptyOr(Spout.one(None)).to(head) named "Drain.headOption"
 
   def ignore: Drain[Any, Future[Unit]] =
     foreach(util.dropFunc) named "Drain.ignore"
@@ -135,8 +133,11 @@ object Drain {
   def seq[T](limit: Long): Drain[T, Future[immutable.Seq[T]]] =
     generalSeq[immutable.Seq, T](limit)
 
-  def generalSeq[M[+_], T](limit: Long)(implicit cbf: CanBuildFrom[M[T], T, M[T]]): Drain[T, Future[M[T]]] =
-    Pipe[T].limit(limit).groupedTo[M](Integer.MAX_VALUE, emitSingleEmpty = true).to(head) named "Drain.seq"
+  def toPublisher[T](fanoutSupport: Boolean = false): Drain[T, Publisher[T]] = {
+    if (fanoutSupport) ???
+    val stage = new PublisherDrainStage
+    new Drain(stage, stage.publisher.asInstanceOf[Publisher[T]])
+  }
 
   private[swave] def apply[T](outport: Outport): Drain[T, Unit] = new Drain(outport, ())
 

@@ -64,6 +64,9 @@ final class Spout[+A](private[swave] val inport: Inport) extends AnyVal with Str
   def drainToBlackHole()(implicit env: StreamEnv): Future[Unit] =
     drainTo(Drain.ignore)
 
+  def drainFolding[R](zero: R)(f: (R, A) ⇒ R)(implicit env: StreamEnv): Future[R] =
+    drainTo(Drain.fold(zero)(f))
+
   def named(name: String): Spout[A] = {
     Module.ID(name).markAsInnerExit(inport)
     this
