@@ -94,11 +94,11 @@ private[core] final class BufferBackpressureStage(size: Int) extends InOutStage
    */
   def draining(out: Outport) = state(
     request = (n, _) ⇒ {
-      @tailrec def rec(nn: Int): State =
+      @tailrec def rec(n: Int): State =
         if (buffer.nonEmpty) {
-          if (nn > 0) {
+          if (n > 0) {
             out.onNext(buffer.unsafeRead())
-            rec(nn - 1)
+            rec(n - 1)
           } else stay()
         } else stopComplete(out)
       rec(n)

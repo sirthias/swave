@@ -10,11 +10,11 @@ import swave.core.PipeElem
 import swave.core.impl.stages.Stage
 import swave.core.impl.{ Inport, Outport }
 import swave.core.util._
+import Stage.OutportStates
 
 // format: OFF
 @StageImpl(fullInterceptions = true)
 private[core] final class BroadcastStage(eagerCancel: Boolean) extends FanOutStage with PipeElem.FanOut.Broadcast {
-  import Stage.OutportStates
 
   def pipeElemType: String = "fanOutBroadcast"
   def pipeElemParams: List[Any] = eagerCancel :: Nil

@@ -48,16 +48,16 @@ private[core] final class MergeStage(subs: InportList, eagerComplete: Boolean)
    */
   def running(out: Outport, ins: InportAnyRefList, remaining: Long): State = state(
     request = (n, _) ⇒ {
-      @tailrec def rec(nn: Int): State =
+      @tailrec def rec(n: Int): State =
         if (buffer.nonEmpty) {
-          if (nn > 0) {
+          if (n > 0) {
             val record = buffer.unsafeRead()
             out.onNext(record.value)
             record.value = null
             record.in.request(1)
-            rec(nn - 1)
+            rec(n - 1)
           } else stay()
-        } else running(out, ins, nn.toLong)
+        } else running(out, ins, n.toLong)
 
       if (remaining > 0) running(out, ins, remaining ⊹ n) else rec(n)
     },
@@ -97,11 +97,11 @@ private[core] final class MergeStage(subs: InportList, eagerComplete: Boolean)
    */
   def draining(out: Outport) = state(
     request = (n, _) ⇒ {
-      @tailrec def rec(nn: Int): State =
+      @tailrec def rec(n: Int): State =
         if (buffer.nonEmpty) {
-          if (nn > 0) {
+          if (n > 0) {
             out.onNext(buffer.unsafeRead().value)
-            rec(nn - 1)
+            rec(n - 1)
           } else stay()
         } else stopComplete(out)
       rec(n)

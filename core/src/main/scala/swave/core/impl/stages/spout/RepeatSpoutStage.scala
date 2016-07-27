@@ -20,10 +20,10 @@ private[core] final class RepeatSpoutStage(element: AnyRef) extends SpoutStage w
 
   def running(out: Outport): State = state(
     request = (n, _) ⇒ {
-      @tailrec def rec(nn: Int): State =
-        if (nn > 0) {
+      @tailrec def rec(n: Int): State =
+        if (n > 0) {
           out.onNext(element)
-          rec(nn - 1)
+          rec(n - 1)
         } else stay()
       rec(n)
     },

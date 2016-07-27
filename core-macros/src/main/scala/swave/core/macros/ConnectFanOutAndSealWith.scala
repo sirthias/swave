@@ -18,7 +18,7 @@ private[macros] trait ConnectFanOutAndSealWith {  this: Util =>
     q"""
       initialState(connecting(null, null))
 
-      def connecting(in: Inport, outs: swave.core.impl.stages.Stage.OutportStates): State = state(
+      def connecting(in: Inport, outs: OutportStates): State = state(
         onSubscribe = from ⇒ {
           if (in eq null) {
             _inputPipeElem = from.pipeElem
@@ -27,7 +27,7 @@ private[macros] trait ConnectFanOutAndSealWith {  this: Util =>
         },
 
         subscribe = from ⇒ {
-          @tailrec def rec(outPort: Outport, current: swave.core.impl.stages.Stage.OutportStates): State =
+          @tailrec def rec(outPort: Outport, current: OutportStates): State =
             if (current.nonEmpty) {
               if (current.out ne outPort) rec(outPort, current.tail)
               else illegalState("Double subscribe(" + outPort + ')')
@@ -45,7 +45,7 @@ private[macros] trait ConnectFanOutAndSealWith {  this: Util =>
             if (outs.nonEmpty) {
               configureFrom(c)
               in.xSeal(c)
-              @tailrec def rec(current: swave.core.impl.stages.Stage.OutportStates): Unit =
+              @tailrec def rec(current: OutportStates): Unit =
                 if (current ne null) { current.out.xSeal(c); rec(current.tail) }
               rec(outs)
               val $ctx = c

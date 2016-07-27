@@ -29,13 +29,13 @@ private[core] final class IteratorSpoutStage(iterator: Iterator[AnyRef]) extends
 
   def running(out: Outport) = state(
     request = (n, _) ⇒ {
-      @tailrec def rec(nn: Int): State = {
+      @tailrec def rec(n: Int): State = {
         var iterError: Throwable = null
         val next = try iterator.next() catch { case NonFatal(e) => { iterError = e; null } }
         if (iterError eq null) {
           out.onNext(next)
           if (iterator.hasNext) {
-            if (nn > 1) rec(nn - 1)
+            if (n > 1) rec(n - 1)
             else stay()
           } else stopComplete(out)
         } else stopError(iterError, out)

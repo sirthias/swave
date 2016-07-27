@@ -7,7 +7,6 @@ package swave.core.impl.stages.drain
 import scala.concurrent.duration.Duration
 import scala.util.control.NonFatal
 import swave.core.impl.stages.Stage
-import swave.core.impl.stages.drain.SubDrainStage._
 import swave.core.impl.{ Inport, RunContext }
 import swave.core.macros.StageImpl
 import swave.core.{ SubscriptionTimeoutException, Cancellable, PipeElem }
@@ -16,6 +15,8 @@ import swave.core.{ SubscriptionTimeoutException, Cancellable, PipeElem }
 @StageImpl(fullInterceptions = true)
 private[core] final class SubDrainStage(ctx: RunContext, val out: Stage, subscriptionTimeout: Duration) extends DrainStage
   with PipeElem.Drain.Sub {
+
+  import SubDrainStage._
 
   def pipeElemType: String = "sub"
   def pipeElemParams: List[Any] = out :: subscriptionTimeout :: Nil

@@ -41,7 +41,7 @@ private[core] final class LazyStartDrainStage(onStart: () => Drain[AnyRef, AnyRe
         running(in, sub)
       } else {
         in.cancel()
-        stopError(funError, out)
+        stop(funError)
       }
     })
 

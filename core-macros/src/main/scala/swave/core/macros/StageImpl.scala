@@ -112,7 +112,7 @@ private[swave] class StageImplMacro(val c: scala.reflect.macros.whitebox.Context
   def transformStageImpl(stageImpl: ImplDef, companion: Option[ModuleDef]): c.Expr[Any] = {
     if (stageImpl.isInstanceOf[ClassDefApi] && !stageImpl.mods.hasFlag(Flag.FINAL))
       c.abort(stageImpl.pos, "Stage implementation classes must be final")
-    val sc1 = expandConnectingStates(c.untypecheck(stageImpl))
+    val sc1 = expandConnectingStates(stageImpl)
     val stateParentDefs = sc1.impl.body collect { case StateParentDef(x) ⇒ x }
     val parameterSet = determineParameterSet(stateParentDefs, stateDefs(sc1))
     val sc2 = stateParentDefs.foldLeft(sc1: Tree)(removeStateParentDef(parameterSet))
@@ -147,24 +147,24 @@ private[swave] class StageImplMacro(val c: scala.reflect.macros.whitebox.Context
       }
     }
 
-  type ParameterSet = Map[String, Tree] // parameter -> tpt (type tree)
+  type ParameterSet = Map[TermName, Tree] // parameter -> tpt (type tree)
 
   def determineParameterSet(stateParentDefs: List[StateParentDef], stateDefs: List[StateDef]): ParameterSet = {
     def addParamNames(set: ParameterSet, params: List[ValDef]) =
       params.foldLeft(set) { (set, p) ⇒
-        val name = p.name.decodedName.toString
+        val name = p.name
         set.get(name) match {
           case None ⇒ set.updated(name, p.tpt)
           case Some(tpt) ⇒
-            if (p.tpt.symbol.name.toString != tpt.symbol.name.toString) {
-              c.abort(p.pos, s"State parameter with name $name is already defined with another type")
+            if (p.tpt.toString != tpt.toString) {
+              c.abort(p.pos, s"State definitions show parameter `$name` with two different types: `${p.tpt}` and `$tpt`")
             } else set
         }
       }
     def addStateDefParams(set: ParameterSet, sds: List[StateDef]) =
       sds.foldLeft(set) { (set, sd) ⇒ addParamNames(set, sd.params) }
 
-    val res0 = stateParentDefs.foldLeft(Map.empty[String, Tree]) { (set, spd) ⇒
+    val res0 = stateParentDefs.foldLeft(Map.empty[TermName, Tree]) { (set, spd) ⇒
       addStateDefParams(addParamNames(set, spd.params), spd.defDefs.collect(scala.Function.unlift(StateDef.unapply)))
     }
     addStateDefParams(res0, stateDefs)
@@ -447,9 +447,7 @@ private[swave] class StageImplMacro(val c: scala.reflect.macros.whitebox.Context
     } else List(Ident(TermName("argumentToParameterCountMismatch"))) // trigger error but allow dump of generated code
 
   def transformParamAccess(parameterSet: ParameterSet, t: Tree): Tree =
-    transformTree(t) {
-      case Ident(TermName(n)) if parameterSet contains n ⇒ Ident(TermName("__" + n))
-    }
+    replaceIdents(t, parameterSet map { case (name, _) ⇒ name → TermName("__" + name) })
 
   def trace(s: ⇒ Any) = if (debugMode) c.echo(NoPosition, s.toString)
 

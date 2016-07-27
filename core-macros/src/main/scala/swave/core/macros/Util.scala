@@ -38,19 +38,32 @@ private[macros] trait Util {
     t.transform(tree)
   }
 
-  def replaceIdents(tree: Tree, replacements: (TermName, TermName)*): Tree = {
-    val t = new Transformer {
-      override def transform(tree: Tree): Tree =
-        tree match {
-          case Ident(x) ⇒ replacements.indexWhere(_._1 == x) match {
-            case -1 ⇒ super.transform(tree)
-            case ix ⇒ Ident(replacements(ix)._2)
+  def replaceIdents(tree: Tree, replacements: (TermName, TermName)*): Tree =
+    replaceIdents(tree, replacements.toMap)
+
+  def replaceIdents(tree: Tree, replacements: Map[TermName, TermName]): Tree =
+    new Transformer {
+      var visible = replacements
+      override def transform(tree: Tree): Tree = tree match {
+        case Block(_, _) | DefDef(_, _, _, _, _, _) ⇒
+          val saved = visible
+          val res = super.transform(tree)
+          visible = saved
+          res
+
+        case ValDef(_, name, _, _) ⇒
+          visible -= name
+          super.transform(tree)
+
+        case Ident(name) ⇒
+          visible.get(name.toTermName) match {
+            case Some(repl) ⇒ Ident(repl)
+            case None       ⇒ tree
           }
-          case _ ⇒ super.transform(tree)
-        }
-    }
-    t.transform(tree)
-  }
+
+        case _ ⇒ super.transform(tree)
+      }
+    }.transform(tree)
 
   def markPrivate(dd: Tree): Tree = {
     val DefDef(mods, n, td, vp, tpt, rhs) = dd

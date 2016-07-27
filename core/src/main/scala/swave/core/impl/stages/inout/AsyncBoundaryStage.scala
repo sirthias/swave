@@ -16,39 +16,39 @@ private[core] final class AsyncBoundaryStage(dispatcherId: String) extends InOut
   def pipeElemType: String = "asyncBoundary"
   def pipeElemParams: List[Any] = dispatcherId :: Nil
 
-  connectInOutAndSealWith { (ctx, in, out) ⇒
-    val ins = in.asInstanceOf[Stage]
-    val outs = out.asInstanceOf[Stage]
+  connectInOutAndSealWith { (ctx, inport, outport) ⇒
+    val ins = inport.asInstanceOf[Stage]
+    val outs = outport.asInstanceOf[Stage]
     ctx.registerForRunnerAssignment(ins, dispatcherId)
     ctx.registerForRunnerAssignment(outs) // fallback assignment of default StreamRunner
     running(ins, outs)
   }
 
-  def running(inStage: Stage, outStage: Stage) = state(
+  def running(ins: Stage, outs: Stage) = state(
     intercept = false,
 
     request = (n, _) ⇒ {
-      inStage.runner.enqueueRequest(inStage, n.toLong)
+      ins.runner.enqueueRequest(ins, n.toLong)
       stay()
     },
 
     cancel = _ => {
-      inStage.runner.enqueueCancel(inStage)
+      ins.runner.enqueueCancel(ins)
       stop()
     },
 
     onNext = (elem, _) ⇒ {
-      outStage.runner.enqueueOnNext(outStage, elem)
+      outs.runner.enqueueOnNext(outs, elem)
       stay()
     },
 
     onComplete = _ => {
-      outStage.runner.enqueueOnComplete(outStage)
+      outs.runner.enqueueOnComplete(outs)
       stop()
     },
 
     onError = (error, _) => {
-      outStage.runner.enqueueOnError(outStage, error)
+      outs.runner.enqueueOnError(outs, error)
       stop(error)
     })
 }
