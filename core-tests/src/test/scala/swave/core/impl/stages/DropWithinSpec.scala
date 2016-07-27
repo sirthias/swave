@@ -8,7 +8,7 @@ import scala.util.Success
 import org.scalatest.FreeSpec
 import scala.concurrent.duration._
 import swave.testkit.Probes
-import swave.core.{ StreamEnvShutdown, StreamEnv }
+import swave.core.{ NotOnTravis, StreamEnvShutdown, StreamEnv }
 import swave.core.util._
 import Probes._
 
@@ -18,7 +18,7 @@ final class DropWithinSpec extends FreeSpec with StreamEnvShutdown {
 
   "DropWithin must" - {
 
-    "deliver elements after the duration, but not before" ignore {
+    "deliver elements after the duration, but not before" taggedAs NotOnTravis in {
       val input = Iterator.from(1)
       val spout = SpoutProbe[Int]
       val drain = DrainProbe[Int]
@@ -40,7 +40,7 @@ final class DropWithinSpec extends FreeSpec with StreamEnvShutdown {
       drain.expectComplete()
     }
 
-    "deliver completion even before the duration" ignore {
+    "deliver completion even before the duration" taggedAs NotOnTravis in {
       val spout = SpoutProbe[Int]
       val drain = DrainProbe[Int]
 

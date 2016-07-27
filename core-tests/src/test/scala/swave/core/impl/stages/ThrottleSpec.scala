@@ -22,7 +22,7 @@ final class ThrottleSpec extends SwaveSpec {
 
   "Throttle for single cost elements must" - {
 
-    "work for the happy case" ignore {
+    "work for the happy case" taggedAs NotOnTravis in {
       Spout(1 to 5).throttle(1, 50.millis)
         .drainTo(DrainProbe[Int]).get
         .sendRequest(5)
@@ -31,7 +31,7 @@ final class ThrottleSpec extends SwaveSpec {
         .verifyCleanStop()
     }
 
-    "accept very high rates" ignore {
+    "accept very high rates" taggedAs NotOnTravis in {
       Spout(1 to 5).throttle(1, 1.nanos)
         .drainTo(DrainProbe[Int]).get
         .sendRequest(5)
@@ -40,7 +40,7 @@ final class ThrottleSpec extends SwaveSpec {
         .verifyCleanStop()
     }
 
-    "accept very low rates" ignore {
+    "accept very low rates" taggedAs NotOnTravis in {
       Spout(1 to 5).throttle(1, 100.days, burst = 1)
         .drainTo(DrainProbe[Int]).get
         .sendRequest(5)
@@ -50,7 +50,7 @@ final class ThrottleSpec extends SwaveSpec {
         .verifyCleanStop()
     }
 
-    "emit single element per tick" ignore {
+    "emit single element per tick" taggedAs NotOnTravis in {
       val upstream = SpoutProbe[Int]
       val downstream = DrainProbe[Int]
 
@@ -70,7 +70,7 @@ final class ThrottleSpec extends SwaveSpec {
       downstream.verifyCleanStop()
     }
 
-    "not send downstream if upstream does not emit element" ignore {
+    "not send downstream if upstream does not emit element" taggedAs NotOnTravis in {
       val upstream = SpoutProbe[Int]
       val downstream = DrainProbe[Int]
       upstream.throttle(1, 50.millis).drainTo(downstream) shouldBe a[Success[_]]
@@ -88,14 +88,14 @@ final class ThrottleSpec extends SwaveSpec {
       downstream.verifyCleanStop()
     }
 
-    "cancel when downstream cancels" ignore {
+    "cancel when downstream cancels" taggedAs NotOnTravis in {
       Spout(1 to 10).throttle(1, 50.millis)
         .drainTo(DrainProbe[Int]).get
         .sendCancel()
         .verifyCleanStop()
     }
 
-    "send elements downstream as soon as the time comes" ignore {
+    "send elements downstream as soon as the time comes" taggedAs NotOnTravis in {
       val probe = Spout(1 to 10).throttle(2, 120.millis, burst = 0)
         .drainTo(DrainProbe[Int]).get
         .sendRequest(5)
@@ -108,7 +108,7 @@ final class ThrottleSpec extends SwaveSpec {
         .verifyCleanStop()
     }
 
-    "burst according to maximum if enough time has passed" ignore {
+    "burst according to maximum if enough time has passed" taggedAs NotOnTravis in {
       val upstream = SpoutProbe[Int]
       val downstream = DrainProbe[Int]
       upstream.throttle(1, 50.millis, burst = 5).drainTo(downstream) shouldBe a[Success[_]]
@@ -130,7 +130,7 @@ final class ThrottleSpec extends SwaveSpec {
         .verifyCleanStop()
     }
 
-    "burst some elements if have enough time" ignore {
+    "burst some elements if have enough time" taggedAs NotOnTravis in {
       val upstream = SpoutProbe[Int]
       val downstream = DrainProbe[Int]
       upstream.throttle(1, 50.millis, burst = 5).drainTo(downstream) shouldBe a[Success[_]]
@@ -157,7 +157,7 @@ final class ThrottleSpec extends SwaveSpec {
 
     val random = XorShiftRandom()
 
-    "emit elements according to cost" ignore {
+    "emit elements according to cost" taggedAs NotOnTravis in {
       val list: List[String] = 2.to(8, step = 2).map(random.alphanumericString)(collection.breakOut)
       Spout(list).throttle(2, 100.millis, 0, _.length)
         .drainTo(DrainProbe[String]).get
@@ -173,7 +173,7 @@ final class ThrottleSpec extends SwaveSpec {
         .verifyCleanStop()
     }
 
-    "handle rate calculation function exception" ignore {
+    "handle rate calculation function exception" taggedAs NotOnTravis in {
       Spout(1 to 5).throttle(2, 200.millis, 0, _ ⇒ throw TestError)
         .drainTo(DrainProbe[Int]).get
         .sendRequest(5)

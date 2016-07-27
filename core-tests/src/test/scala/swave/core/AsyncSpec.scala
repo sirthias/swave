@@ -27,7 +27,7 @@ class AsyncSpec extends SwaveSpec {
 
   "Asynchronous pipings" - {
 
-    "sync base example" ignore {
+    "sync base example" taggedAs NotOnTravis in {
       val (1, mapThreadName) =
         Spout(1, 2, 3)
           .map(_ → threadName)
@@ -37,7 +37,7 @@ class AsyncSpec extends SwaveSpec {
       mapThreadName shouldEqual threadName
     }
 
-    "single default dispatcher" ignore {
+    "single default dispatcher" taggedAs NotOnTravis in {
       val piping =
         Spout.continually(threadName)
           .map(_ → threadName)
@@ -47,7 +47,7 @@ class AsyncSpec extends SwaveSpec {
       List(threadName0, threadName1).distinct shouldEqual List("swave-default-1")
     }
 
-    "single non-default dispatcher" ignore {
+    "single non-default dispatcher" taggedAs NotOnTravis in {
       val piping =
         Spout.continually(threadName)
           .map(_ → threadName)
@@ -57,7 +57,7 @@ class AsyncSpec extends SwaveSpec {
       List(threadName0, threadName1).distinct shouldEqual List("swave-disp0-1")
     }
 
-    "default async boundary with implicit default tail" ignore {
+    "default async boundary with implicit default tail" taggedAs NotOnTravis in {
       val piping =
         Spout.continually(threadName)
           .async()
@@ -68,7 +68,7 @@ class AsyncSpec extends SwaveSpec {
       List(threadName0, threadName1).distinct shouldEqual List("swave-default-1")
     }
 
-    "default async boundary with explicit default tail" ignore {
+    "default async boundary with explicit default tail" taggedAs NotOnTravis in {
       val piping =
         Spout.continually(threadName)
           .async()
@@ -79,7 +79,7 @@ class AsyncSpec extends SwaveSpec {
       List(threadName0, threadName1).distinct shouldEqual List("swave-default-1")
     }
 
-    "non-default async boundary with implicit default tail" ignore {
+    "non-default async boundary with implicit default tail" taggedAs NotOnTravis in {
       val piping =
         Spout.continually(threadName)
           .async("disp0")
@@ -91,7 +91,7 @@ class AsyncSpec extends SwaveSpec {
       threadName1 shouldEqual "swave-default-1"
     }
 
-    "non-default async boundary with non-default tail" ignore {
+    "non-default async boundary with non-default tail" taggedAs NotOnTravis in {
       val piping =
         Spout.continually(threadName)
           .async("disp0")
@@ -103,7 +103,7 @@ class AsyncSpec extends SwaveSpec {
       threadName1 shouldEqual "swave-disp1-1"
     }
 
-    "2 async boundaries with non-default tail" ignore {
+    "2 async boundaries with non-default tail" taggedAs NotOnTravis in {
       val piping =
         Spout.continually(threadName)
           .async("disp0")
@@ -119,7 +119,7 @@ class AsyncSpec extends SwaveSpec {
       threadName2 shouldEqual "swave-disp2-1"
     }
 
-    "conflicting async boundaries" ignore {
+    "conflicting async boundaries" taggedAs NotOnTravis in {
       Spout.continually(threadName)
         .fanOutBroadcast()
         .sub.async("disp0").end
@@ -129,7 +129,7 @@ class AsyncSpec extends SwaveSpec {
           "Conflicting dispatcher assignment to async region containing stage 'NopStage': [disp1] vs. [disp0]")
     }
 
-    "conflicting async markers" ignore {
+    "conflicting async markers" taggedAs NotOnTravis in {
       Spout.continually(threadName)
         .fanOutBroadcast()
         .sub.to(Drain.cancelling.async("disp0"))
@@ -138,7 +138,7 @@ class AsyncSpec extends SwaveSpec {
           "Conflicting dispatcher assignment to async region containing stage 'HeadDrainStage': [disp1] vs. [disp0]")
     }
 
-    "sync sub-stream in async parent stream" ignore {
+    "sync sub-stream in async parent stream" taggedAs NotOnTravis in {
       Spout.from(0)
         .inject()
         .map(_ elementAt 1)
@@ -147,7 +147,7 @@ class AsyncSpec extends SwaveSpec {
         .drainTo(Drain.seq(limit = 5).async()).await(50.millis) shouldEqual List(1, 3, 5, 7, 9)
     }
 
-    "async sub-stream in async parent stream" ignore {
+    "async sub-stream in async parent stream" taggedAs NotOnTravis in {
       Spout.from(0)
         .inject()
         .map(_.async(bufferSize = 0).elementAt(1))
@@ -156,7 +156,7 @@ class AsyncSpec extends SwaveSpec {
         .drainTo(Drain.seq(limit = 5).async()).await(50.millis) shouldEqual List(1, 3, 5, 7, 9)
     }
 
-    "async sub-stream in sync parent stream" ignore {
+    "async sub-stream in sync parent stream" taggedAs NotOnTravis in {
       Spout.from(0)
         .inject()
         .map(_.tee(Drain.ignore.dropResult.async(), eagerCancel = true).elementAt(1))
@@ -167,7 +167,7 @@ class AsyncSpec extends SwaveSpec {
             "You can fix this by explicitly marking the parent stream as `async`.")
     }
 
-    "conflicting runners in sub-stream setup" ignore {
+    "conflicting runners in sub-stream setup" taggedAs NotOnTravis in {
       Spout.from(0)
         .inject()
         .map(_.async("disp0").elementAt(1))
@@ -178,7 +178,7 @@ class AsyncSpec extends SwaveSpec {
             "fenced off from its parent stream with explicit async boundaries!")
     }
 
-    "complex example" ignore {
+    "complex example" taggedAs NotOnTravis in {
       Spout.continually(threadName)
         .async()
         .inject()
