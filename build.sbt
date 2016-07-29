@@ -34,8 +34,9 @@ lazy val commonSettings = Seq(
     .setPreference(DoubleIndentClassDeclaration, true)
     .setPreference(PreserveSpaceBeforeArguments, true)
     .setPreference(RewriteArrowSymbols, true),
-  coverageMinimum := 80,
-  coverageFailOnMinimum := false)
+  coverageMinimum := 90,
+  coverageFailOnMinimum := false,
+  coverageExcludedPackages := """swave\.benchmarks\..*;swave\.examples\..*""")
 
 lazy val publishingSettings = Seq(
   useGpg := true,
