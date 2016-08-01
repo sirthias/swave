@@ -13,7 +13,7 @@ import swave.core._
 final class FlattenSpec extends SyncPipeSpec with Inspectors {
 
   implicit val env = StreamEnv()
-  implicit val config = PropertyCheckConfig(minSuccessful = 10000)
+  implicit val config = PropertyCheckConfig(minSuccessful = 1000)
 
   implicit val integerInput = Gen.chooseNum(0, 999)
 

@@ -123,7 +123,8 @@ private[swave] object InportAnyRefList {
   def empty: InportAnyRefList = null
   def apply(in: Inport, tail: InportAnyRefList = empty) = new InportAnyRefList(in, null, tail)
 
-  implicit class InportAnyRefListtOps(private val underlying: InportAnyRefList) extends AnyVal {
+  implicit class InportAnyRefListOps(private val underlying: InportAnyRefList) extends AnyVal {
     def +:(in: Inport): InportAnyRefList = InportAnyRefList(in, underlying)
+    def :+(in: Inport): InportAnyRefList = underlying append InportAnyRefList(in)
   }
 }

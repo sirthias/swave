@@ -121,6 +121,22 @@ private[swave] object ImsiList {
       rec(count, underlying, null)
     }
 
+    /**
+     * Splits this list at the first element that the given `predicate` returns `true` for
+     * and returns this element (along with its tail).
+     * The underlying segment then forms a list holding all dropped elements.
+     */
+    def dropWhile(predicate: L ⇒ Boolean): L = {
+      @tailrec def rec(current: L, last: L): L =
+        if (current.nonEmpty) {
+          if (!predicate(current)) {
+            if (last ne null) last.tail = null
+            current
+          } else rec(current.tail, current)
+        } else null // return empty list
+      rec(underlying, null)
+    }
+
     def toList: List[L] = {
       val buf = ListBuffer.empty[L]
       foreach { node ⇒ buf += node; () }
