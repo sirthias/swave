@@ -37,48 +37,14 @@ private[core] final class FlattenMergeStage(streamable: Streamable.Aux[AnyRef, A
     def awaitingXStart() = state(
       xStart = () => {
         in.request(parallelism.toLong)
-        awaitingSub(InportList.empty, 0)
+        active(InportList.empty, InportAnyRefList.empty, 0)
       })
 
     /**
-     * No subs subscribed, awaiting `onSubscribe` from any sub from the `subscribing` list
+     * Upstream active.
      *
      * @param subscribing subs from which we are awaiting an onSubscribe, may be empty
-     * @param remaining number of elements already requested by downstream but not yet delivered, >= 0
-     */
-    def awaitingSub(subscribing: InportList, remaining: Long): State = {
-      requireState(remaining >= 0)
-      state(
-        onSubscribe = sub ⇒ active(activateSub(sub, subscribing), InportAnyRefList(sub), remaining),
-        request = (n, _) ⇒ awaitingSub(subscribing, remaining ⊹ n),
-
-        cancel = _ ⇒ {
-          cancelAll(subscribing)
-          stopCancel(in)
-        },
-
-        onNext = (elem, from) ⇒ {
-          requireState(from eq in)
-          val sub = subscribeSubDrain(elem)
-          awaitingSub(sub +: subscribing, remaining)
-        },
-
-        onComplete = _ ⇒ {
-          if (subscribing.isEmpty) stopComplete(out)
-          else awaitingSubUpstreamCompleted(out, subscribing, remaining)
-        },
-
-        onError = (e, _) ⇒ {
-          cancelAll(subscribing)
-          stopError(e, out)
-        })
-    }
-
-    /**
-     * Buffer non-empty or at least one sub subscribed, potentially more subscribing.
-     *
-     * @param subscribing subs from which we are awaiting an onSubscribe, may be empty
-     * @param subscribed  active subs, may be empty (but then the buffer must be non-empty)
+     * @param subscribed  active subs, may be empty
      * @param remaining   number of elements already requested by downstream but not yet delivered, >= 0
      */
     def active(subscribing: InportList, subscribed: InportAnyRefList, remaining: Long): State = {
@@ -138,13 +104,10 @@ private[core] final class FlattenMergeStage(streamable: Streamable.Aux[AnyRef, A
               } else removeFrom(current, current.tail)
             }
             val newSubscribed = removeFrom(null, subscribed)
-            if (newSubscribed.nonEmpty || buffer.nonEmpty) active(subscribing, newSubscribed, remaining)
-            else awaitingSub(subscribing, remaining)
+            active(subscribing, newSubscribed, remaining)
           } else {
-            if (subscribed.isEmpty && buffer.isEmpty) {
-              if (subscribing.isEmpty) stopComplete(out)
-              else awaitingSubUpstreamCompleted(out, subscribing, remaining)
-            } else activeUpstreamCompleted(out, subscribing, subscribed, remaining)
+            if (subscribing.isEmpty && subscribed.isEmpty && buffer.isEmpty) stopComplete(out)
+            else activeUpstreamCompleted(out, subscribing, subscribed, remaining)
           }
         },
 
@@ -166,26 +129,11 @@ private[core] final class FlattenMergeStage(streamable: Streamable.Aux[AnyRef, A
   }
 
   /**
-   * Main upstream completed, one sub currently subscribing, no subs subscribed.
-   *
-   * @param out         the active downstream
-   * @param subscribing subs from which we are awaiting an onSubscribe, non-empty
-   * @param remaining   number of elements already requested by downstream but not yet delivered, >= 0
-   */
-  def awaitingSubUpstreamCompleted(out: Outport, subscribing: InportList, remaining: Long): State = {
-    requireState(subscribing.nonEmpty && remaining >= 0)
-    state(
-      onSubscribe = sub ⇒ activeUpstreamCompleted(out, activateSub(sub, subscribing), InportAnyRefList(sub), remaining),
-      request = (n, _) ⇒ awaitingSubUpstreamCompleted(out, subscribing, remaining ⊹ n),
-      cancel = stopCancelF(subscribing))
-  }
-
-  /**
-   * Main upstream completed, at least one sub subscribed, potentially more subscribing.
+   * Main upstream completed.
    *
    * @param out         the active downstream
    * @param subscribing subs from which we are awaiting an onSubscribe, may be empty
-   * @param subscribed  active subs, non-empty
+   * @param subscribed  active subs, ma be empty
    * @param remaining   number of elements already requested by downstream but not yet delivered, >= 0
    */
   def activeUpstreamCompleted(out: Outport, subscribing: InportList, subscribed: InportAnyRefList,
@@ -204,9 +152,8 @@ private[core] final class FlattenMergeStage(streamable: Streamable.Aux[AnyRef, A
               record.in.request(1)
               rec(n - 1)
             } else stay()
-          } else if (subscribed.nonEmpty) activeUpstreamCompleted(out, subscribing, subscribed, n.toLong)
-          else if (subscribing.nonEmpty) awaitingSubUpstreamCompleted(out, subscribing, remaining)
-          else stopComplete(out)
+          } else if (subscribing.isEmpty && subscribed.isEmpty) stopComplete(out)
+          else activeUpstreamCompleted(out, subscribing, subscribed, n.toLong)
 
         if (remaining > 0) {
           requireState(buffer.isEmpty)
@@ -229,9 +176,8 @@ private[core] final class FlattenMergeStage(streamable: Streamable.Aux[AnyRef, A
 
       onComplete = from ⇒ {
         val newSubscribed = subscribed.remove_!(from)
-        if (newSubscribed.nonEmpty) activeUpstreamCompleted(out, subscribing, newSubscribed, remaining)
-        else if (subscribing.nonEmpty) awaitingSubUpstreamCompleted(out, subscribing, remaining)
-        else stopComplete(out)
+        if (subscribing.isEmpty && newSubscribed.isEmpty) stopComplete(out)
+        else activeUpstreamCompleted(out, subscribing, newSubscribed, remaining)
       },
 
       onError = (e, from) ⇒ {
