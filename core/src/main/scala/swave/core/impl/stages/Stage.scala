@@ -6,6 +6,7 @@ package swave.core.impl.stages
 
 import scala.annotation.{ compileTimeOnly, tailrec }
 import scala.concurrent.Promise
+import swave.core.impl.util.{ AbstractOutportList, AbstractInportList }
 import swave.core.{ Module, PipeElem }
 import swave.core.util._
 import swave.core.impl._

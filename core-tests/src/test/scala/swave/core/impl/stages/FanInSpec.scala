@@ -8,7 +8,7 @@ import org.scalacheck.Gen
 import org.scalatest.Inspectors
 import swave.core.StreamEnv
 import swave.testkit.TestError
-import swave.testkit.gen.{ TestInput, TestFixture }
+import swave.testkit.gen.TestFixture
 
 final class FanInSpec extends SyncPipeSpec with Inspectors {
 
@@ -74,8 +74,7 @@ final class FanInSpec extends SyncPipeSpec with Inspectors {
 
   "Merge" in check {
     testSetup
-      .fixture(fd ⇒ Gen.chooseNum(2, 4).flatMap(count ⇒ // we need TestInputs producing non-overlapping Int ranges
-        Gen.sequence[List[TestInput[Int]], TestInput[Int]](List.tabulate(count)(ix ⇒ fd.input(integerInput.map(_ + ix * 1000))))))
+      .fixture(fd ⇒ nonOverlappingIntTestInputs(fd, 2, 4))
       .output[Int]
       .prop.from { (ins, out) ⇒
         import TestFixture.State._

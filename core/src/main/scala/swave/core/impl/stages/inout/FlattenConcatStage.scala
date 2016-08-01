@@ -6,6 +6,7 @@ package swave.core.impl.stages.inout
 
 import scala.concurrent.duration.Duration
 import swave.core.impl.stages.drain.SubDrainStage
+import swave.core.impl.util.InportList
 import swave.core.{ PipeElem, Streamable }
 import swave.core.macros._
 import swave.core.util._
@@ -19,7 +20,7 @@ private[core] final class FlattenConcatStage(streamable: Streamable.Aux[AnyRef, 
 
   import FlattenConcatStage.pendingFromMain
 
-  requireArg(parallelism > 0)
+  requireArg(parallelism > 0, "`parallelism` must be > 0")
 
   def pipeElemType: String = "flattenConcat"
   def pipeElemParams: List[Any] = parallelism :: Nil
@@ -167,7 +168,7 @@ private[core] final class FlattenConcatStage(streamable: Streamable.Aux[AnyRef, 
 
         onError = (e, from) ⇒ {
           if (from ne in) in.cancel()
-          cancelAll(subscribed, from)
+          cancelAll(subscribed, except = from)
           out.onError(e)
           if ((subscribing ne null) && (subscribing ne pendingFromMain)) stopCancel(subscribing) else stop(e)
         })
@@ -262,7 +263,7 @@ private[core] final class FlattenConcatStage(streamable: Streamable.Aux[AnyRef, 
       },
 
       onError = (e, sub) ⇒ {
-        cancelAll(subscribed, sub)
+        cancelAll(subscribed, except = sub)
         out.onError(e)
         if (subscribing ne null) stopCancel(subscribing) else stop(e)
       })

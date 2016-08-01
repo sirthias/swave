@@ -6,6 +6,7 @@ package swave.core.impl
 
 import scala.annotation.tailrec
 import swave.core.impl.stages.inout.NopStage
+import swave.core.impl.util.InportList
 import swave.core.macros._
 import swave.core.{ Piping, Module }
 import Module.TypeLogic._

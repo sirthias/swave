@@ -8,7 +8,7 @@ import scala.annotation.tailrec
 import scala.collection.generic.CanBuildFrom
 import scala.collection.immutable
 import scala.concurrent.duration._
-import scala.concurrent.{ Future, Promise }
+import scala.concurrent.{ ExecutionContext, Future, Promise }
 import org.reactivestreams.{ Publisher, Subscriber }
 import swave.core.impl.TypeLogic.ToFuture
 import swave.core.impl.Outport
@@ -130,7 +130,8 @@ object Drain {
     new Drain(stage, promise.future)
   }
 
-  def parallelForeach[T](parallelism: Int)(f: T ⇒ Unit): Drain[T, Future[Unit]] = ???
+  def parallelForeach[T](parallelism: Int)(f: T ⇒ Unit)(implicit ec: ExecutionContext): Drain[T, Future[Unit]] =
+    Pipe[T].mapAsyncUnordered(parallelism)(x ⇒ Future(f(x))).to(Drain.ignore)
 
   def seq[T](limit: Long): Drain[T, Future[immutable.Seq[T]]] =
     generalSeq[immutable.Seq, T](limit)

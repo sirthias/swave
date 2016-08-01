@@ -7,6 +7,7 @@ package swave.core
 import scala.annotation.{ tailrec, implicitNotFound }
 import scala.collection.generic.CanBuildFrom
 import scala.collection.immutable
+import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.reflect.ClassTag
 import scala.util.Try
@@ -14,9 +15,10 @@ import shapeless._
 import shapeless.ops.nat.ToInt
 import shapeless.ops.hlist.{ ToCoproduct, Tupler, Fill }
 import swave.core.impl.stages.Stage
+import swave.core.impl.util.InportList
 import swave.core.impl.stages.fanin.{ MergeStage, ToProductStage, FirstNonEmptyStage, ConcatStage }
 import swave.core.impl.stages.fanout.{ RoundRobinStage, FirstAvailableStage, BroadcastStage, SwitchStage }
-import swave.core.impl.{ ModuleImpl, InportList, TypeLogic, Inport }
+import swave.core.impl.{ ModuleImpl, TypeLogic, Inport }
 import swave.core.impl.stages.inout._
 import swave.core.util._
 import swave.core.macros._
@@ -125,7 +127,10 @@ trait StreamOps[A] extends Any { self ⇒
     ev: Streamable.Aux[A, B]): Repr[B] =
     append(new FlattenConcatStage(ev.asInstanceOf[Streamable.Aux[AnyRef, AnyRef]], parallelism, subscriptionTimeout))
 
-  final def flattenMerge[B](parallelism: Int)(implicit ev: Streamable[B]): Repr[ev.Out] = ???
+  final def flattenMerge[B](parallelism: Int, subscriptionTimeout: Duration = Duration.Undefined)(
+    implicit
+    ev: Streamable.Aux[A, B]): Repr[B] =
+    append(new FlattenMergeStage(ev.asInstanceOf[Streamable.Aux[AnyRef, AnyRef]], parallelism, subscriptionTimeout))
 
   final def fold[B](zero: B)(f: (B, A) ⇒ B): Repr[B] =
     append(new FoldStage(zero.asInstanceOf[AnyRef], f.asInstanceOf[(AnyRef, AnyRef) ⇒ AnyRef]))
@@ -169,6 +174,12 @@ trait StreamOps[A] extends Any { self ⇒
 
   final def map[B](f: A ⇒ B): Repr[B] =
     append(new MapStage(f.asInstanceOf[AnyRef ⇒ AnyRef]))
+
+  final def mapAsync[B](parallelism: Int)(f: A ⇒ Future[B]): Repr[B] =
+    map(a ⇒ () ⇒ f(a)).flattenConcat(parallelism)
+
+  final def mapAsyncUnordered[B](parallelism: Int)(f: A ⇒ Future[B]): Repr[B] =
+    map(a ⇒ () ⇒ f(a)).flattenMerge(parallelism)
 
   final def merge[B >: A](other: Spout[B], eagerComplete: Boolean = false): Repr[B] =
     attach(other).fanInMerge(eagerComplete)

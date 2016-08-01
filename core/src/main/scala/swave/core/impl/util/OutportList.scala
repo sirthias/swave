@@ -2,9 +2,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package swave.core.impl
+package swave.core.impl.util
 
 import scala.annotation.tailrec
+import swave.core.impl.Outport
 import swave.core.util.ImsiList
 
 private[swave] abstract class AbstractOutportList[L >: Null <: AbstractOutportList[L]](

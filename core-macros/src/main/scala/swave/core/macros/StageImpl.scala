@@ -236,7 +236,7 @@ private[swave] class StageImplMacro(val c: scala.reflect.macros.whitebox.Context
       val theMatch = q"stay() match { case ..$cases }"
       if (tracing) {
         val res = freshName("res")
-        q"""println(this + ${Literal(Constant(": entering " + signal))})
+        q"""println(this + ${Literal(Constant(s": entering `$signal`"))})
             val $res = $theMatch
             println(this + ${Literal(Constant(s": exiting `$signal` with new state `"))} + stateName($res) + "`")
             $res
@@ -444,7 +444,10 @@ private[swave] class StageImplMacro(val c: scala.reflect.macros.whitebox.Context
             case _ ⇒ q"${TermName(n)}=$expr" :: Nil
           }
       }
-    } else List(Ident(TermName("argumentToParameterCountMismatch"))) // trigger error but allow dump of generated code
+    } else {
+      // trigger error but allow dump of generated code
+      List(Ident(TermName(s"argumentToParameterCountMismatchInLine${pos.line}")))
+    }
 
   def transformParamAccess(parameterSet: ParameterSet, t: Tree): Tree =
     replaceIdents(t, parameterSet map { case (name, _) ⇒ name → TermName("__" + name) })

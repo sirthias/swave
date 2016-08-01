@@ -7,8 +7,9 @@ package swave.core.impl.stages.fanin
 import scala.annotation.compileTimeOnly
 import scala.collection.mutable.ListBuffer
 import swave.core.PipeElem
+import swave.core.impl.util.InportList
 import swave.core.impl.stages.Stage
-import swave.core.impl.{ Outport, RunContext, InportList }
+import swave.core.impl.{ Outport, RunContext }
 
 // format: OFF
 private[core] abstract class FanInStage extends Stage { this: PipeElem.FanIn =>

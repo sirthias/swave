@@ -4,6 +4,7 @@
 
 package swave.testkit
 
+import org.scalacheck.Gen
 import swave.testkit.gen._
 
 trait TestGeneration {
@@ -39,4 +40,11 @@ trait TestGeneration {
 
   def scriptedElementCount(in: TestInput[_], out: TestOutput[_]): Int =
     math.min(in.scriptedSize, out.scriptedSize)
+
+  private val baseIntegerInput = Gen.chooseNum(0, 999)
+  def nonOverlappingIntTestInputs(fd: TestSetup.FixtureDef, minCount: Int, maxCount: Int): Gen[List[TestInput[Int]]] =
+    Gen.chooseNum(2, 4).flatMap(count ⇒ {
+      val list = List.tabulate(count)(ix ⇒ fd.input(baseIntegerInput.map(_ + ix * 1000)))
+      Gen.sequence[List[TestInput[Int]], TestInput[Int]](list)
+    })
 }

@@ -4,6 +4,8 @@
 
 package swave.core
 
+import swave.core.impl.util.InportList
+
 import scala.annotation.implicitNotFound
 import shapeless.ops.product.ToHList
 import shapeless.ops.hlist.Prepend

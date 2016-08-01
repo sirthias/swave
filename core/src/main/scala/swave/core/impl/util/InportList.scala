@@ -2,12 +2,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package swave.core.impl
+package swave.core.impl.util
 
 import scala.annotation.tailrec
 import shapeless._
-import swave.core.util.ImsiList
 import swave.core._
+import swave.core.impl.Inport
+import swave.core.util.ImsiList
 
 private[swave] abstract class AbstractInportList[L >: Null <: AbstractInportList[L]](
   final val in: Inport,
@@ -120,9 +121,9 @@ private[swave] final class InportAnyRefList(in: Inport, var value: AnyRef, tail:
 
 private[swave] object InportAnyRefList {
   def empty: InportAnyRefList = null
-  def apply(in: Inport, value: AnyRef, tail: InportAnyRefList = empty) = new InportAnyRefList(in, value, tail)
+  def apply(in: Inport, tail: InportAnyRefList = empty) = new InportAnyRefList(in, null, tail)
 
   implicit class InportAnyRefListtOps(private val underlying: InportAnyRefList) extends AnyVal {
-    def prepend(in: Inport, value: AnyRef): InportAnyRefList = new InportAnyRefList(in, value, underlying)
+    def +:(in: Inport): InportAnyRefList = InportAnyRefList(in, underlying)
   }
 }

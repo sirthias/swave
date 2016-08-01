@@ -11,7 +11,8 @@ import scala.util.{ Failure, Success, Try }
 import scala.concurrent.Future
 import scala.concurrent.duration.{ Duration, FiniteDuration }
 import shapeless._
-import swave.core.impl.{ ModuleImpl, InportList, TypeLogic, Inport }
+import swave.core.impl.util.InportList
+import swave.core.impl.{ ModuleImpl, TypeLogic, Inport }
 import swave.core.impl.stages.Stage
 import swave.core.impl.stages.spout._
 

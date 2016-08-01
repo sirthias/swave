@@ -6,6 +6,7 @@ package swave.core
 
 import java.util.concurrent.atomic.AtomicReference
 import org.reactivestreams.Processor
+import swave.core.impl.util.InportList
 import scala.util.control.NonFatal
 import scala.annotation.tailrec
 import scala.concurrent.duration.Duration

@@ -66,4 +66,10 @@ object Streamable {
       def apply(value: Try[AnyRef]): Spout[AnyRef] = Spout.fromTry(value)
     }
   implicit def forTry[T]: Aux[Try[T], T] = tryy.asInstanceOf[Aux[Try[T], T]]
+
+  implicit def lazyStreamable[T](implicit ev: Streamable[T]): Aux[() ⇒ T, ev.Out] =
+    new Streamable[() ⇒ T] {
+      type Out = ev.Out
+      def apply(f: () ⇒ T) = ev(f())
+    }
 }

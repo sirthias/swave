@@ -6,7 +6,8 @@ package swave.core.impl.stages.fanin
 
 import scala.annotation.tailrec
 import swave.core.PipeElem
-import swave.core.impl.{ InportAnyRefList, InportList, Outport }
+import swave.core.impl.util.{ InportAnyRefList, InportList }
+import swave.core.impl.Outport
 import swave.core.macros._
 import swave.core.util._
 
@@ -20,6 +21,7 @@ private[core] final class MergeStage(subs: InportList, eagerComplete: Boolean)
   def pipeElemType: String = "fanInMerge"
   def pipeElemParams: List[Any] = Nil
 
+  // stores (sub, elem) records in the order they arrived so we can dispatch them quickly when they are requested
   private[this] val buffer: RingBuffer[InportAnyRefList] = new RingBuffer(roundUpToNextPowerOf2(subs.size))
 
   connectFanInAndSealWith(subs) { (ctx, out) ⇒
@@ -35,7 +37,7 @@ private[core] final class MergeStage(subs: InportList, eagerComplete: Boolean)
       @tailrec def rec(rest: InportList, result: InportAnyRefList): InportAnyRefList =
         if (rest.nonEmpty) {
           rest.in.request(1)
-          rec(rest.tail, result.prepend(rest.in, null))
+          rec(rest.tail, rest.in +: result)
         } else result
 
       running(out, rec(subs, InportAnyRefList.empty), 0)
@@ -59,7 +61,10 @@ private[core] final class MergeStage(subs: InportList, eagerComplete: Boolean)
           } else stay()
         } else running(out, ins, n.toLong)
 
-      if (remaining > 0) running(out, ins, remaining ⊹ n) else rec(n)
+      if (remaining > 0) {
+        requireState(buffer.isEmpty)
+        running(out, ins, remaining ⊹ n)
+      } else rec(n)
     },
 
     cancel = stopCancelF(ins),
@@ -83,7 +88,7 @@ private[core] final class MergeStage(subs: InportList, eagerComplete: Boolean)
 
     onComplete = from ⇒ {
       if (eagerComplete || ins.tail.isEmpty) {
-        cancelAll(ins, from)
+        cancelAll(ins, except = from)
         if (buffer.isEmpty) stopComplete(out) else draining(out)
       } else running(out, ins remove_! from, remaining)
     },

@@ -6,7 +6,8 @@ package swave.core.impl.stages.fanin
 
 import scala.annotation.tailrec
 import swave.core.PipeElem
-import swave.core.impl.{ InportList, Outport }
+import swave.core.impl.util.InportList
+import swave.core.impl.Outport
 import swave.core.macros._
 import swave.core.util._
 
