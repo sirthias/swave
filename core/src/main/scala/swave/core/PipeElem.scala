@@ -36,8 +36,10 @@ object PipeElem {
     trait Lazy extends Spout
     trait Repeat extends Spout
     trait Sub extends Spout
-    trait Test extends Spout
     trait Subscriber extends Spout
+    trait Test extends Spout
+    trait Unfold extends Spout
+    trait UnfoldAsync extends Spout
   }
 
   sealed trait Drain extends PipeElem {

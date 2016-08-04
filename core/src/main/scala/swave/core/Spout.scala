@@ -131,10 +131,10 @@ object Spout {
     new Spout(new RepeatSpoutStage(element.asInstanceOf[AnyRef]))
 
   def tick[T](value: T, interval: FiniteDuration): Spout[T] =
-    tick(value, Duration.Zero, interval)
+    tick(value, 1, interval)
 
-  def tick[T](value: T, initialDelay: FiniteDuration, interval: FiniteDuration): Spout[T] =
-    ???
+  def tick[T](value: T, elements: Int, per: FiniteDuration): Spout[T] =
+    repeat(value).throttle(elements, per)
 
   /**
    * A `Spout` that unfolds a "state" instance of type `S` into
@@ -144,25 +144,25 @@ object Spout {
    *
    * {{{
    *   Spout.unfold(0 → 1) {
-   *    case (a, b) if b > 1000000 ⇒ Spout.Unfolding.FinalElem(a)
-   *    case (a, b) ⇒ Spout.Unfolding.Iteration(a, b → (a + b))
+   *    case (a, b) if b > 1000000 ⇒ Spout.Unfolding.EmitFinal(a)
+   *    case (a, b) ⇒ Spout.Unfolding.Emit(a, b → (a + b))
    *   }
    * }}}
    */
   def unfold[S, T](s: S)(f: S ⇒ Unfolding[S, T]): Spout[T] =
-    ???
+    new Spout(new UnfoldSpoutStage(s.asInstanceOf[AnyRef], f.asInstanceOf[AnyRef ⇒ Unfolding[AnyRef, AnyRef]]))
 
   /**
    * Same as [[unfold]], but asynchronous.
    */
   def unfoldAsync[S, T](s: S)(f: S ⇒ Future[Unfolding[S, T]]): Spout[T] =
-    ???
+    new Spout(new UnfoldAsyncSpoutStage(s.asInstanceOf[AnyRef], f.asInstanceOf[AnyRef ⇒ Future[Unfolding[AnyRef, AnyRef]]]))
 
   sealed abstract class Unfolding[+S, +T]
   object Unfolding {
-    final case class Iteration[S, T](elem: T, next: S) extends Unfolding[S, T]
-    final case class FinalElem[T](elem: T) extends Unfolding[Nothing, T]
-    case object Done extends Unfolding[Nothing, Nothing]
+    final case class Emit[S, T](elem: T, next: S) extends Unfolding[S, T]
+    final case class EmitFinal[T](elem: T) extends Unfolding[Nothing, T]
+    case object Complete extends Unfolding[Nothing, Nothing]
   }
 
   private val wrap: Inport ⇒ Spout[_] = new Spout(_)

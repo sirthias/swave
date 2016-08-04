@@ -10,10 +10,24 @@ import org.scalatest._
 import swave.core.util._
 
 abstract class SwaveSpec extends FreeSpec with StreamEnvShutdown {
+  type Timeout = SwaveSpec.Timeout
+  def Timeout = SwaveSpec.Timeout
 
-  def produce[T](expected: T*): Matcher[Spout[T]] = produceSeq(expected)
-  def produceSeq[T](expected: Seq[T]): Matcher[Spout[T]] =
-    equal(expected).matcher[Seq[T]].compose(_.drainTo(Drain.seq(100)).await(Duration.Zero))
+  def produce[T](expected: T*)(implicit timeout: Timeout = Timeout()): Matcher[Spout[T]] = produceSeq(expected)
+  def produceSeq[T](expected: Seq[T])(implicit timeout: Timeout = Timeout()): Matcher[Spout[T]] =
+    equal(expected).matcher[Seq[T]].compose(_.drainTo(Drain.seq(100)).await(timeout.duration))
+  def produceError[T](expected: Throwable)(implicit timeout: Timeout = Timeout()): Matcher[Spout[T]] =
+    equal(expected).matcher[Throwable].compose(_.drainTo(Drain.ignore).failed.await(timeout.duration))
+
+  def timed[U](block: ⇒ U): FiniteDuration = {
+    val start = System.nanoTime()
+    block
+    (System.nanoTime() - start).nanos
+  }
+}
+
+object SwaveSpec {
+  final case class Timeout(duration: FiniteDuration = Duration.Zero)
 }
 
 trait StreamEnvShutdown extends Matchers with Inside with BeforeAndAfterAll { this: Suite ⇒
