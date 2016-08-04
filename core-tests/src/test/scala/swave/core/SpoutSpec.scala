@@ -70,7 +70,7 @@ class SpoutSpec extends SwaveSpec {
       }
     }
 
-    "Spout.tick" in {
+    "Spout.tick" taggedAs NotOnTravis in {
       timed {
         implicit val timeout = Timeout(1.second)
         Spout.tick('a, elements = 4, per = 1.second).take(3) should produce('a, 'a, 'a)
