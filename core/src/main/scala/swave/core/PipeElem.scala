@@ -78,6 +78,7 @@ object PipeElem {
     trait DropLast extends InOut
     trait DropWhile extends InOut
     trait DropWithin extends InOut
+    trait Expand extends InOut
     trait Filter extends InOut
     trait FlattenConcat extends InOut
     trait FlattenMerge extends InOut

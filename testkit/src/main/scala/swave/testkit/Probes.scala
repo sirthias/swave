@@ -100,13 +100,27 @@ trait Probes {
     }
     // format: ON
 
-    def sendNext(first: T, more: T*): Unit = sendNext(first +: more)
-    def sendNext(values: Seq[T]): Unit = runOrEnqueue(values.map(Signal.OnNext): _*)
-    def sendComplete(): Unit = runOrEnqueue(Signal.OnComplete)
-    def sendError(e: Throwable): Unit = runOrEnqueue(Signal.OnError(e))
+    private var consumedDemand = 0L
 
-    def expectRequest(): Long = expect { case Signal.Request(n) ⇒ n }
-    def expectRequest(n: Long): Unit = expectSignal(Signal.Request(n))
+    def sendNext(first: T, more: T*): this.type = sendNext(first +: more)
+    def sendNext(values: Seq[T]): this.type = {
+      if (consumedDemand < values.size) expectRequest()
+      rawSendNext(values)
+    }
+    def rawSendNext(first: T, more: T*): this.type = rawSendNext(first +: more)
+    def rawSendNext(values: Seq[T]): this.type = {
+      consumedDemand -= values.size
+      runOrEnqueue(values.map(Signal.OnNext): _*)
+    }
+    def sendComplete(): this.type = runOrEnqueue(Signal.OnComplete)
+    def sendError(e: Throwable): this.type = runOrEnqueue(Signal.OnError(e))
+
+    def expectRequest(): Long = expect { case Signal.Request(n) ⇒ { consumedDemand += n; n } }
+    def expectRequest(n: Long): this.type = {
+      expectSignal(Signal.Request(n))
+      consumedDemand += n
+      this
+    }
 
     /**
      * Aggregates all request signals arriving within the given time period.
@@ -121,7 +135,7 @@ trait Probes {
       within(max)(rec(0L))
     }
 
-    def expectCancel(): Unit = expectSignal(Signal.Cancel)
+    def expectCancel(): this.type = expectSignal(Signal.Cancel)
   }
 
   object DrainProbe {
@@ -184,11 +198,21 @@ trait Probes {
     def sendRequest(n: Long): this.type = { runOrEnqueue(Signal.Request(n)); this }
     def sendCancel(): this.type = { runOrEnqueue(Signal.Cancel); this }
 
-    def expectNext(): Any = expect { case Signal.OnNext(x) ⇒ x }
+    def expectNext(): T = expect { case Signal.OnNext(x) ⇒ x.asInstanceOf[T] }
     def expectNext(elems: T*): this.type = { elems.foreach(x ⇒ expectSignal(Signal.OnNext(x))); this }
     def expectComplete(): this.type = { expectSignal(Signal.OnComplete); this }
     def expectError(): Throwable = expect { case Signal.OnError(x) ⇒ x }
     def expectError(e: Throwable): this.type = { expectSignal(Signal.OnError(e)); this }
+
+    def requestExpectNext(): T = {
+      sendRequest(1)
+      expectNext()
+    }
+
+    def requestExpectNext(first: T, more: T*): this.type = {
+      sendRequest(more.size.toLong + 1)
+      expectNext(first +: more: _*)
+    }
 
     def receiveElementsWithin(time: FiniteDuration, maxElems: Int = Int.MaxValue): List[T] =
       receiveSignalsWhile(maxTotalTime = time, maxSignals = maxElems) { case Signal.OnNext(elem) ⇒ elem.asInstanceOf[T] }
@@ -213,8 +237,8 @@ trait Probes {
         result
       }
 
-    final def expectSignal(expected: Signal): Unit = expectSignal(Some(expected))
-    final def expectSignal(expected: Option[Signal]): Unit = verifyEquals(expectSignal(), expected)
+    final def expectSignal(expected: Signal): this.type = expectSignal(Some(expected))
+    final def expectSignal(expected: Option[Signal]): this.type = verifyEquals(expectSignal(), expected)
 
     final def expect[T](pf: PartialFunction[Signal, T]): T =
       expectSignal() match {
@@ -289,19 +313,23 @@ trait Probes {
 
     protected def stage: ProbeStage
 
-    protected final def runOrEnqueue(signals: Signal*): Unit =
+    protected final def runOrEnqueue(signals: Signal*): this.type = {
       signals.foreach {
         if (stage.isSync) stage.onSignal
         else stage.streamRunner.scheduleEvent(stage.stage, Duration.Zero, _)
       }
+      this
+    }
 
     protected final def peekSignal(): Option[Signal] = {
       nextSignal = expectSignal()
       nextSignal
     }
 
-    private def verifyEquals(received: Option[Signal], expected: Option[Any]): Unit =
+    private def verifyEquals(received: Option[Signal], expected: Option[Any]): this.type = {
       if (received != expected) throw ExpectationFailedException(received, expected)
+      this
+    }
 
     private def withinTimeoutNanos: Long =
       if (deadlineNanos.value == 0L) singleExpectDefaultDilatedNanos

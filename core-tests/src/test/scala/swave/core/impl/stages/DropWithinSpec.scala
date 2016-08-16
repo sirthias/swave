@@ -27,13 +27,13 @@ final class DropWithinSpec extends FreeSpec with StreamEnvShutdown {
 
       drain.sendRequest(100)
       val demand1 = spout.expectRequestAggregated(20.millis)
-      demand1.toInt.times { spout.sendNext(input.next()) }
+      demand1.toInt.times { spout.rawSendNext(input.next()) }
       val demand2 = spout.expectRequestAggregated(20.millis)
-      demand2.toInt.times { spout.sendNext(input.next()) }
+      demand2.toInt.times { spout.rawSendNext(input.next()) }
       val demand3 = spout.expectRequestAggregated(100.millis)
 
       spout.expectNoSignal()
-      demand3.toInt.times { spout.sendNext(input.next()) }
+      demand3.toInt.times { spout.rawSendNext(input.next()) }
       ((demand1 + demand2 + 1).toInt to (demand1 + demand2 + demand3).toInt).foreach(drain.expectNext(_))
 
       spout.sendComplete()

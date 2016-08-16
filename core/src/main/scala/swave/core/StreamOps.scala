@@ -99,7 +99,14 @@ trait StreamOps[A] extends Any { self ⇒
   final def elementAt(index: Long): Repr[A] =
     via(Pipe[A] drop index take 1 named "elementAt")
 
-  final def expand[B](seed: A ⇒ B)(extrapolate: B ⇒ B): Repr[B] = ???
+  final def expand(): Repr[A] =
+    expand(Iterator.continually(_))
+
+  final def expand[B](extrapolate: A ⇒ Iterator[B]): Repr[B] =
+    expand(Iterator.empty, extrapolate)
+
+  final def expand[B](zero: Iterator[B], extrapolate: A ⇒ Iterator[B]): Repr[B] =
+    append(new ExpandStage(zero.asInstanceOf[Iterator[AnyRef]], extrapolate.asInstanceOf[AnyRef ⇒ Iterator[AnyRef]]))
 
   final def fanOutBroadcast(eagerCancel: Boolean = false): FanOut[A, HNil, CNil, Nothing, Repr] =
     new FanOut(append(new BroadcastStage(eagerCancel)).base, InportList.empty, wrap)
