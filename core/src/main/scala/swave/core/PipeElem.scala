@@ -83,6 +83,7 @@ object PipeElem {
     trait FlattenConcat extends InOut
     trait FlattenMerge extends InOut
     trait Fold extends InOut
+    trait GroupBy extends InOut
     trait Grouped extends InOut
     trait Inject extends InOut
     trait Limit extends InOut

@@ -113,15 +113,14 @@ private[core] final class InjectStage(timeout: Duration) extends InOutStage with
         else stay()
       },
 
-      cancel = from => {
-        if (from eq sub) {
+      cancel = {
+        case x if x eq sub =>
           if (mainRemaining > 0) awaitingSubDemand(emitNewSub(), pending, mainRemaining - 1)
           else noSubAwaitingMainDemand(pending)
-        } else if (from eq out) {
+        case x if x eq out =>
           sub.xEvent(SubSpoutStage.EnableSubscriptionTimeout)
           awaitingSubDemandDownstreamGone(sub, pending)
-        }
-        else stay()
+        case _ => stay()
       },
 
       onNext = (elem, _) ⇒ {
@@ -160,12 +159,12 @@ private[core] final class InjectStage(timeout: Duration) extends InOutStage with
         else stay()
       },
 
-      cancel = from => {
-        if (from eq sub) {
+      cancel = {
+        case x if x eq sub =>
           if (mainRemaining > 0) awaitingSubDemandUpstreamGone(emitNewSub(), mainRemaining - 1)
           else noSubAwaitingMainDemandUpstreamGone()
-        } else if (from eq out) awaitingSubDemandUpAndDownstreamGone(sub)
-        else stay()
+        case x if x eq out => awaitingSubDemandUpAndDownstreamGone(sub)
+        case _ => stay()
       })
 
     /**
@@ -236,12 +235,12 @@ private[core] final class InjectStage(timeout: Duration) extends InOutStage with
         else stay()
       },
 
-      cancel = from => {
-        if (from eq sub) noSubAwaitingElem(pending, mainRemaining)
-        else if (from eq out) {
+      cancel = {
+        case x if x eq sub => noSubAwaitingElem(pending, mainRemaining)
+        case x if x eq out =>
           sub.xEvent(SubSpoutStage.EnableSubscriptionTimeout)
           awaitingElemDownstreamGone(sub, pending, subRemaining)
-        } else stay()
+        case _ => stay()
       },
 
       onNext = (elem, _) ⇒ {

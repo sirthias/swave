@@ -13,11 +13,11 @@ import SubSpoutStage._
 
 // format: OFF
 @StageImpl
-private[core] final class SubSpoutStage(ctx: RunContext, val in: Stage, subscriptionTimeout: Duration) extends SpoutStage
+private[core] class SubSpoutStage(ctx: RunContext, val in: Stage, subscriptionTimeout: Duration) extends SpoutStage
   with PipeElem.Spout.Sub {
 
-  def pipeElemType: String = "sub"
-  def pipeElemParams: List[Any] = in :: subscriptionTimeout :: Nil
+  final def pipeElemType: String = "sub"
+  final def pipeElemParams: List[Any] = in :: subscriptionTimeout :: Nil
 
   initialState(awaitingSubscribe(StreamTermination.None, null))
 

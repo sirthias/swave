@@ -4,15 +4,15 @@
 
 package swave.core.impl.stages
 
+import scala.collection.mutable.ListBuffer
+import scala.util.Failure
 import org.scalacheck.Gen
-import org.scalatest.Inspectors
+import org.scalatest.{ Inside, Inspectors }
 import swave.core._
 import swave.testkit.TestError
-import swave.testkit.gen.{ TestSetup, TestOutput, TestFixture }
+import swave.testkit.gen.{ TestFixture, TestOutput, TestSetup }
 
-import scala.collection.mutable.ListBuffer
-
-final class InjectSpec extends SyncPipeSpec with Inspectors {
+final class InjectSpec extends SyncPipeSpec with Inspectors with Inside {
 
   implicit val env = StreamEnv()
   implicit val config = PropertyCheckConfig(minSuccessful = 1000)
@@ -34,7 +34,10 @@ final class InjectSpec extends SyncPipeSpec with Inspectors {
           if (iter.hasNext) {
             val subOut = iter.next()
             subOuts += subOut
-            sub.drainTo(subOut.drain)
+            inside(sub.drainTo(subOut.drain).value) {
+              case Some(Failure(e)) ⇒ e shouldEqual TestError
+              case _                ⇒ // ok here
+            }
           } else sub.drainTo(Drain.ignore)
         }
 

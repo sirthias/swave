@@ -142,7 +142,25 @@ trait StreamOps[A] extends Any { self ⇒
   final def fold[B](zero: B)(f: (B, A) ⇒ B): Repr[B] =
     append(new FoldStage(zero.asInstanceOf[AnyRef], f.asInstanceOf[(AnyRef, AnyRef) ⇒ AnyRef]))
 
-  final def groupBy[K](maxSubstreams: Int, f: A ⇒ K): Repr[Spout[A]] = ???
+  /**
+   * @param maxSubstreams the maximum number of sub-streams allowed. Exceeding this limit causes to stream to be
+   *                      completed with an [[IllegalStateException]].
+   * @param reopenCancelledSubs if `true` cancellation of a sub-stream will trigger a new sub-stream for the respective
+   *                            key to be emitted to the downstream (whenever a respective element arrives),
+   *                            if `false` all elements that are keyed to a cancelled sub-stream will simply be dropped
+   * @param eagerComplete if `true` the cancellation of the (main) downstream will immediately be propagated to upstream
+   *                      and all sub-stream will be completed,
+   *                      if `false` the cancellation of the (main) downstream will keep the stream running, but
+   *                      cause all elements keyed to not yet open sub-streams to be dropped.
+   * @param subscriptionTimeout the time within which a sub-stream needs to be suscribed to in order to not be
+   *                            automatically cancelled.
+   * @param f the key function. Must not return `null` for any element. Otherwise the stream is completed with a
+   *          [[RuntimeException]].
+   */
+  final def groupBy[K](maxSubstreams: Int, reopenCancelledSubs: Boolean = false, eagerComplete: Boolean = false,
+    subscriptionTimeout: Duration = Duration.Undefined)(f: A ⇒ K): Repr[Spout[A]] =
+    append(new GroupByStage(maxSubstreams, reopenCancelledSubs, eagerComplete, subscriptionTimeout,
+      f.asInstanceOf[AnyRef ⇒ AnyRef]))
 
   final def grouped(groupSize: Int, emitSingleEmpty: Boolean = false): Repr[immutable.Seq[A]] =
     groupedTo[immutable.Seq](groupSize, emitSingleEmpty)
