@@ -79,7 +79,7 @@ private[core] final class ThrottleStage(cost: Int, per: FiniteDuration, burst: I
       onError = (e, _) => { timer.cancel(); stopError(e, out) },
 
       xEvent = {
-        case StreamRunner.Timeout =>
+        case StreamRunner.Timeout(_) =>
           out.onNext(currentElem)
           in.request(1)
           awaitingElement(remaining - 1)
@@ -110,7 +110,7 @@ private[core] final class ThrottleStage(cost: Int, per: FiniteDuration, burst: I
       cancel = _ => { timer.cancel(); stop() },
 
       xEvent = {
-        case StreamRunner.Timeout =>
+        case StreamRunner.Timeout(_) =>
           out.onNext(currentElem)
           stopComplete(out)
       })

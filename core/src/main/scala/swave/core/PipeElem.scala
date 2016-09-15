@@ -85,6 +85,7 @@ object PipeElem {
     trait Fold extends InOut
     trait GroupBy extends InOut
     trait Grouped extends InOut
+    trait GroupedWithin extends InOut
     trait Inject extends InOut
     trait Limit extends InOut
     trait Map extends InOut

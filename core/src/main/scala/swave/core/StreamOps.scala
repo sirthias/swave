@@ -168,7 +168,17 @@ trait StreamOps[A] extends Any { self ⇒
   final def groupedTo[M[+_]](groupSize: Int, emitSingleEmpty: Boolean = false)(implicit cbf: CanBuildFrom[M[A], A, M[A]]): Repr[M[A]] =
     append(new GroupedStage(groupSize, emitSingleEmpty, cbf.apply().asInstanceOf[scala.collection.mutable.Builder[Any, AnyRef]]))
 
-  final def groupedWithin(n: Int, d: FiniteDuration): Repr[immutable.Seq[A]] = ???
+  /**
+   * Groups incoming elements received within the given `duration` into [[Vector]] instances that have at least one and
+   * at most `maxSize` elements. A group is emitted when `maxSize` has been reached or the `duration` since the last
+   * emit has expired. If no elements are received within the `duration` then nothing is emitted at time expiration,
+   * but the next incoming element will be emitted immediately after reception as part of a single-element group.
+   *
+   * @param maxSize the maximum size of the emitted Vector instances, must be > 0
+   * @param duration the time period over which to aggregate, must be > 0
+   */
+  final def groupedWithin(maxSize: Int, duration: FiniteDuration): Repr[Vector[A]] =
+    append(new GroupedWithinStage(maxSize, duration))
 
   def identity: Repr[A]
 

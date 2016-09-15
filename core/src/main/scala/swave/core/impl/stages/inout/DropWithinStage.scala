@@ -55,7 +55,7 @@ private[core] final class DropWithinStage(duration: FiniteDuration) extends InOu
         stopError(e, out)
       },
 
-      xEvent = { case StreamRunner.Timeout => draining() })
+      xEvent = { case StreamRunner.Timeout(_) => draining() })
 
     /**
      * Simply forwarding elements from upstream to downstream.
@@ -69,7 +69,7 @@ private[core] final class DropWithinStage(duration: FiniteDuration) extends InOu
       onComplete = stopCompleteF(out),
       onError = stopErrorF(out),
 
-      xEvent = { case StreamRunner.Timeout => stay() })
+      xEvent = { case StreamRunner.Timeout(_) => stay() })
 
     awaitingXStart()
   }

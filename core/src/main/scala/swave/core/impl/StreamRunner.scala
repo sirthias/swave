@@ -70,8 +70,17 @@ private[core] final class StreamRunner(_throughput: Int, _log: Logger, _dispatch
     }
   }
 
-  def scheduleEvent(target: Stage, delay: FiniteDuration, ev: AnyRef): Cancellable = {
-    val msg = new Message.XEvent(target, ev, this)
+  def scheduleEvent(target: Stage, delay: FiniteDuration, ev: AnyRef): Cancellable =
+    scheduleXEvent(delay, new Message.XEvent(target, ev, this))
+
+  def scheduleTimeout(target: Stage, delay: FiniteDuration): Cancellable = {
+    val msg = new Message.XEvent(target, null, this)
+    val timer = scheduleXEvent(delay, msg)
+    msg.ev = Timeout(timer)
+    timer
+  }
+
+  private def scheduleXEvent(delay: FiniteDuration, msg: Message.XEvent): Cancellable =
     if (delay > Duration.Zero) {
       // we can run the event Runnable directly on the scheduler thread since
       // all it does is enqueueing the event on the runner's dispatcher
@@ -80,17 +89,13 @@ private[core] final class StreamRunner(_throughput: Int, _log: Logger, _dispatch
       msg.run()
       Cancellable.Inactive
     }
-  }
-
-  def scheduleTimeout(target: Stage, delay: FiniteDuration): Cancellable =
-    scheduleEvent(target, delay, StreamRunner.Timeout)
 
   override def toString = dispatcher.name + '@' + Integer.toHexString(System.identityHashCode(this))
 }
 
 private[core] object StreamRunner {
 
-  case object Timeout
+  final case class Timeout(timer: Cancellable)
 
   protected sealed abstract class Message(val id: Int, val target: Stage)
   protected object Message {
@@ -102,7 +107,8 @@ private[core] object StreamRunner {
     final class OnComplete(target: Stage, val from: Inport) extends Message(5, target)
     final class OnError(target: Stage, val error: Throwable, val from: Inport) extends Message(6, target)
     final class XStart(target: Stage) extends Message(7, target)
-    final class XEvent(target: Stage, val ev: AnyRef, runner: StreamRunner) extends Message(8, target) with Runnable {
+    final class XEvent(target: Stage, @volatile private[StreamRunner] var ev: AnyRef, runner: StreamRunner)
+        extends Message(8, target) with Runnable {
       def run() = runner.enqueue(this)
     }
   }
