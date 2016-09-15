@@ -79,6 +79,7 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
   private[this] var _inportState: InportStates = _
   private[this] var _buffer: ResizableRingBuffer[AnyRef] = _
   private[this] var _stopPromise: Promise[Unit] = _
+  private[this] var _lastSubscribed: Outport = _ // needed by `_request` when `fullInterceptions` is off
 
   /**
    * The [[StreamRunner]] that is assigned to the given stage.
@@ -112,6 +113,7 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
     if (!_intercepting) {
       _intercepting = interceptionNeeded
       _subscribe(from)
+      _lastSubscribed = from // if `fullInterceptions` is off then we have only one downstream which we remember here
       handleInterceptions()
     } else storeInterception(Statics._0L, from)
 
@@ -135,7 +137,8 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
   private def _request(n: Long, from: Outport): Unit = {
     val count =
       if (n > _mbs) {
-        from.asInstanceOf[Stage].updateInportState(this, n)
+        val effectiveFrom = if (from ne null) from else _lastSubscribed
+        effectiveFrom.asInstanceOf[Stage].updateInportState(this, n)
         _mbs
       } else n.toInt
     _state = _request0(count, from)
