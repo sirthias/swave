@@ -337,6 +337,10 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
       case _              ⇒ illegalState(s"Unexpected xEvent($ev)")
     }
 
+  final def enqueueXEvent(ev: AnyRef): Unit =
+    if (runner ne null) runner.enqueueXEvent(this, ev)
+    else xEvent(ev)
+
   /////////////////////////////////////// STATE DESIGNATOR ///////////////////////////////////////
 
   @compileTimeOnly("`state(...) can only be used as the single implementation expression of a 'State Def'!")

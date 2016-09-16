@@ -21,53 +21,54 @@ private[core] class SubSpoutStage(ctx: RunContext, val in: Stage, subscriptionTi
 
   initialState(awaitingSubscribe(StreamTermination.None, null))
 
-  def awaitingSubscribe(termination: StreamTermination, timer: Cancellable): State = state(
+  def awaitingSubscribe(term: StreamTermination, timer: Cancellable): State = state(
     subscribe = from ⇒ {
       if (timer ne null) timer.cancel()
       _outputPipeElem = from.pipeElem
       from.onSubscribe()
-      ready(from, termination)
+      ready(from, term)
     },
 
-    onComplete = _ => awaitingSubscribe(StreamTermination.Completed, timer),
-    onError = (e, _) => awaitingSubscribe(StreamTermination.Error(e), timer),
+    onComplete = _ => awaitingSubscribe(term transitionTo StreamTermination.Completed, timer),
+    onError = (e, _) => awaitingSubscribe(term transitionTo StreamTermination.Error(e), timer),
 
     xEvent = {
       case EnableSubscriptionTimeout if timer eq null =>
         val t = ctx.scheduleSubscriptionTimeout(this, subscriptionTimeout)
-        awaitingSubscribe(termination, t)
+        awaitingSubscribe(term, t)
       case RunContext.SubscriptionTimeout =>
         stopCancel(in)
     })
 
-  def ready(out: Outport, termination: StreamTermination): State = state(
+  def ready(out: Outport, term: StreamTermination): State = state(
     xSeal = subCtx ⇒ {
       ctx.attach(subCtx)
       configureFrom(ctx)
       out.xSeal(ctx)
-      termination match {
-        case StreamTermination.None => running(out)
-        case _ =>
-          ctx.registerForXStart(this)
-          awaitingXStart(out, termination)
-      }
+      if (term != StreamTermination.None) {
+        ctx.registerForXStart(this)
+        awaitingXStart(out, term)
+      } else running(out)
     },
 
-    onComplete = _ => ready(out, StreamTermination.Completed),
-    onError = (e, _) => ready(out, StreamTermination.Error(e)),
+    onComplete = _ => ready(out, term transitionTo StreamTermination.Completed),
+    onError = (e, _) => ready(out, term transitionTo StreamTermination.Error(e)),
 
     xEvent = {
       case EnableSubscriptionTimeout => stay() // ignore
       case RunContext.SubscriptionTimeout => stay() // ignore
     })
 
-  def awaitingXStart(out: Outport, termination: StreamTermination) = state(
+  def awaitingXStart(out: Outport, termination: StreamTermination): State = state(
     xStart = () => {
       termination match {
         case StreamTermination.Error(e) => stopError(e, out)
         case _ => stopComplete(out)
       }
     },
+
+    onComplete = _ => stay(),
+    onError = (e, _) => stay(),
 
     xEvent = {
       case EnableSubscriptionTimeout => stay() // ignore

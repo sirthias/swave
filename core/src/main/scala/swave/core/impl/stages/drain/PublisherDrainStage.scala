@@ -59,12 +59,12 @@ private[core] final class PublisherDrainStage extends DrainStage with PipeElem.D
       rec()
     })
 
-  def awaitingSubscriber(in: Inport, termination: StreamTermination): State = state(
-    onComplete = _ => awaitingSubscriber(in, StreamTermination.Completed),
-    onError = (e, _) => awaitingSubscriber(in, StreamTermination.Error(e)),
+  def awaitingSubscriber(in: Inport, term: StreamTermination): State = state(
+    onComplete = _ => awaitingSubscriber(in, term transitionTo StreamTermination.Completed),
+    onError = (e, _) => awaitingSubscriber(in, term transitionTo StreamTermination.Error(e)),
 
     xEvent = { case sub: Subscriber[_] =>
-      termination match {
+      term match {
         case StreamTermination.None =>
           becomeRunning(in, sub)
 

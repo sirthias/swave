@@ -15,6 +15,7 @@ import swave.core.impl.util.InportList
 import swave.core.impl.{ ModuleImpl, TypeLogic, Inport }
 import swave.core.impl.stages.Stage
 import swave.core.impl.stages.spout._
+import swave.core.util._
 
 final class Spout[+A](private[swave] val inport: Inport) extends AnyVal with StreamOps[A @uV] {
   type Repr[T] = Spout[T]
@@ -85,6 +86,7 @@ object Spout {
     new Spout[T](stage) → stage.subscriber.asInstanceOf[Subscriber[T]]
   }
 
+  // CAUTION: call-by-name argument might be executed from another thread if the stream is asynchronous!
   def continually[T](elem: ⇒ T): Spout[T] =
     fromIterator(Iterator.continually(elem)) named "Spout.continually"
 
@@ -106,6 +108,7 @@ object Spout {
   def fromIterable[T](iterable: Iterable[T]): Spout[T] =
     fromIterator(iterable.iterator) named "Spout.fromIterable"
 
+  // CAUTION: `iterator` might be drained from another thread if the stream is asynchronous!
   def fromIterator[T](iterator: Iterator[T]): Spout[T] =
     new Spout(new IteratorSpoutStage(iterator.asInstanceOf[Iterator[AnyRef]]))
 
@@ -118,6 +121,7 @@ object Spout {
   def fromTry[T](value: Try[T]): Spout[T] =
     (value match { case Success(x) ⇒ one(x); case Failure(e) ⇒ failing(e) }) named "Spout.fromTry"
 
+  // CAUTION: `f` might be called from another thread if the stream is asynchronous!
   def iterate[T](start: T)(f: T ⇒ T): Spout[T] =
     fromIterator(Iterator.iterate(start)(f)) named "Spout.iterate"
 
@@ -126,6 +130,11 @@ object Spout {
 
   def one[T](element: T): Spout[T] =
     fromIterator(Iterator.single(element)) named "Spout.one"
+
+  def push[T](initialBufferSize: Int, maxBufferSize: Int, growByInitialSize: Boolean = false,
+    notifyOnDequeued: (PushSpout[T], Int) ⇒ Unit = dropFunc2,
+    notifyOnCancel: PushSpout[T] ⇒ Unit = dropFunc): PushSpout[T] =
+    PushSpout(initialBufferSize, maxBufferSize, growByInitialSize, notifyOnDequeued, notifyOnCancel)
 
   def repeat[T](element: T): Spout[T] =
     new Spout(new RepeatSpoutStage(element.asInstanceOf[AnyRef]))
@@ -148,12 +157,16 @@ object Spout {
    *    case (a, b) ⇒ Spout.Unfolding.Emit(a, b → (a + b))
    *   }
    * }}}
+   *
+   * CAUTION: `f` might be called from another thread if the stream is asynchronous!
    */
   def unfold[S, T](s: S)(f: S ⇒ Unfolding[S, T]): Spout[T] =
     new Spout(new UnfoldSpoutStage(s.asInstanceOf[AnyRef], f.asInstanceOf[AnyRef ⇒ Unfolding[AnyRef, AnyRef]]))
 
   /**
    * Same as [[unfold]], but asynchronous.
+   *
+   * CAUTION: `f` will be called from another thread!
    */
   def unfoldAsync[S, T](s: S)(f: S ⇒ Future[Unfolding[S, T]]): Spout[T] =
     new Spout(new UnfoldAsyncSpoutStage(s.asInstanceOf[AnyRef], f.asInstanceOf[AnyRef ⇒ Future[Unfolding[AnyRef, AnyRef]]]))

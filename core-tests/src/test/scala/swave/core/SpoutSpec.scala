@@ -14,6 +14,27 @@ class SpoutSpec extends SwaveSpec {
 
   "Spouts should work as expected" - {
 
+    "Spout.push" - {
+
+      "Simple push" in {
+        val spout = Spout.push[Int](4, 16)
+        spout.offerMany(1 to 20) shouldEqual 16
+        spout.complete()
+        spout.spout should produce(1 to 16: _*)
+      }
+
+      "Simple push from notification handler" in {
+        val iter = Iterator.from(0)
+        var cancelNotified = false
+        val spout = Spout.push[Int](4, 16,
+          notifyOnDequeued = (ps, _) ⇒ ps offer iter.next(),
+          notifyOnCancel = _ ⇒ cancelNotified = true)
+        spout.offer(iter.next())
+        spout take 20 should produce(0 to 19: _*)
+        cancelNotified shouldBe true
+      }
+    }
+
     "Spout.unfold" - {
 
       "EmitFinal" in {

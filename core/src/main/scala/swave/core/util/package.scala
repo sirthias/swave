@@ -19,6 +19,7 @@ package object util {
   def identityHash(obj: AnyRef): String = Integer.toHexString(System.identityHashCode(obj))
 
   val dropFunc: Any ⇒ Unit = _ ⇒ ()
+  val dropFunc2: (Any, Any) ⇒ Unit = (_, _) ⇒ ()
 
   val oneIntFunc: Any ⇒ Int = _ ⇒ 1
 
