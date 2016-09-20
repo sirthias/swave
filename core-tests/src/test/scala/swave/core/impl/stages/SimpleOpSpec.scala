@@ -95,14 +95,14 @@ final class SimpleOpSpec extends SyncPipeSpec with Inspectors {
     testSetup
       .input[Int]
       .output[Int]
-      .param(Gen.chooseNum(0, 200))
+      .param(Gen.chooseNum(0, 5))
       .prop.from { (in, out, param) ⇒
 
         in.spout
-          .dropWhile(_ < param)
+          .drop(param.toLong)
           .drainTo(out.drain) shouldTerminate asScripted(in)
 
-        out.received shouldEqual in.produced.dropWhile(_ < param).take(out.scriptedSize)
+        out.received shouldEqual in.produced.slice(param, param + out.scriptedSize)
       }
   }
 
@@ -125,14 +125,14 @@ final class SimpleOpSpec extends SyncPipeSpec with Inspectors {
     testSetup
       .input[Int]
       .output[Int]
-      .param(Gen.chooseNum(0, 5))
+      .param(Gen.chooseNum(0, 200))
       .prop.from { (in, out, param) ⇒
 
         in.spout
-          .dropLast(param)
+          .dropWhile(_ < param)
           .drainTo(out.drain) shouldTerminate asScripted(in)
 
-        out.received shouldEqual in.produced.dropRight(param).take(out.scriptedSize)
+        out.received shouldEqual in.produced.dropWhile(_ < param).take(out.scriptedSize)
       }
   }
 
@@ -294,7 +294,7 @@ final class SimpleOpSpec extends SyncPipeSpec with Inspectors {
             case error                 ⇒ in.terminalState shouldBe error
           }
 
-        out.received shouldEqual in.produced.takeWhile(_ < param).take(out.size)
+        out.received shouldEqual in.produced.takeWhile(_ < param).take(out.scriptedSize)
       }
   }
 
