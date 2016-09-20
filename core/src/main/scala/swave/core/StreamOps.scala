@@ -94,7 +94,7 @@ trait StreamOps[A] extends Any { self ⇒
     append(new DropWithinStage(d))
 
   final def duplicate: Repr[A] =
-    via(Pipe[A].map(x ⇒ x :: x :: Nil).flattenConcat() named "duplicate")
+    via(Pipe[A] multiply 2 named "duplicate")
 
   final def elementAt(index: Long): Repr[A] =
     via(Pipe[A] drop index take 1 named "elementAt")
@@ -229,7 +229,8 @@ trait StreamOps[A] extends Any { self ⇒
       .attach(other.map(Right[A, B]))
       .fanInToSum[Either[A, B]]()
 
-  final def multiply(factor: Int): Repr[A] = ???
+  final def multiply(factor: Int): Repr[A] =
+    via(Pipe[A].map(x ⇒ Iterator.fill(factor)(x)).flattenConcat() named "multiply")
 
   final def nonEmptyOr[B >: A](other: Spout[B]): Repr[B] =
     attach(other).fanInFirstNonEmpty
