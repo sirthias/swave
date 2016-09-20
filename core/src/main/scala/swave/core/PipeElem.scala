@@ -36,6 +36,7 @@ object PipeElem {
     trait Lazy extends Spout
     trait Push extends Spout
     trait Repeat extends Spout
+    trait RingBuffer extends Spout
     trait Sub extends Spout
     trait Subscriber extends Spout
     trait Test extends Spout

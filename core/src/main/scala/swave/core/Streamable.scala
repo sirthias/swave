@@ -8,6 +8,7 @@ import org.reactivestreams.Publisher
 import scala.annotation.implicitNotFound
 import scala.concurrent.Future
 import scala.util.Try
+import swave.core.util.RingBuffer
 
 @implicitNotFound(msg = "Don't know how to create a stream from instances of type ${T}. Maybe you'd like to provide an `implicit Streamable[${T}]`?")
 abstract class Streamable[-T] {
@@ -52,6 +53,13 @@ object Streamable {
       def apply(value: Publisher[AnyRef]): Spout[AnyRef] = Spout.fromPublisher(value)
     }
   implicit def forPublisher[T]: Aux[Publisher[T], T] = publisher.asInstanceOf[Aux[Publisher[T], T]]
+
+  private val ringBuffer =
+    new Streamable[RingBuffer[AnyRef]] {
+      type Out = AnyRef
+      def apply(value: RingBuffer[AnyRef]): Spout[AnyRef] = Spout.fromRingBuffer(value)
+    }
+  implicit def forRingBuffer[T]: Aux[RingBuffer[T], T] = ringBuffer.asInstanceOf[Aux[RingBuffer[T], T]]
 
   private val future =
     new Streamable[Future[AnyRef]] {

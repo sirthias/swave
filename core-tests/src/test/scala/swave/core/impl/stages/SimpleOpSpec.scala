@@ -260,6 +260,25 @@ final class SimpleOpSpec extends SyncPipeSpec with Inspectors {
       }
   }
 
+  "TakeLast" in check {
+    testSetup
+      .input[Int]
+      .output[Int]
+      .param(Gen.chooseNum(0, 10))
+      .prop.from { (in, out, param) ⇒
+        import TestFixture.State._
+
+        in.spout
+          .takeLast(param)
+          .drainTo(out.drain) shouldTerminate {
+            case Cancelled | Completed ⇒ // any input state could end up here
+            case error                 ⇒ in.terminalState shouldBe error
+          }
+
+        out.received shouldEqual in.produced.takeRight(param).take(out.size)
+      }
+  }
+
   "Scan" in check {
     testSetup
       .input[Int]

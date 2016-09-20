@@ -10,7 +10,7 @@ import swave.core.macros._
  * A mutable RingBuffer with a fixed capacity.
  * The `cap` must be a positive power of two.
  */
-private[swave] final class RingBuffer[T <: AnyRef](cap: Int) {
+private[swave] final class RingBuffer[T](cap: Int) {
   requireArg(isPowerOf2(cap) && cap > 0) // automatically implies cap <= 0x40000000
 
   private[this] val array = new Array[AnyRef](cap)
@@ -67,7 +67,7 @@ private[swave] final class RingBuffer[T <: AnyRef](cap: Int) {
    * Writes the given value into the buffer without any buffer overflow protection.
    */
   def unsafeWrite(value: T): Unit = {
-    array(writeIx & mask) = value
+    array(writeIx & mask) = value.asInstanceOf[AnyRef]
     writeIx += 1
   }
 

@@ -304,7 +304,17 @@ trait StreamOps[A] extends Any { self ⇒
   final def take(count: Long): Repr[A] =
     append(new TakeStage(count))
 
-  final def takeLast(n: Long): Repr[A] = ???
+  final def takeLast(n: Int): Repr[A] = {
+    val pipe =
+      if (n > 0) {
+        Pipe[A].fold(new RingBuffer[A](roundUpToNextPowerOf2(n))) { (buf, elem) ⇒
+          if (buf.size == n) buf.unsafeDropHead()
+          buf.unsafeWrite(elem)
+          buf
+        }.flattenConcat()
+      } else Pipe[A].drop(Long.MaxValue)
+    via(pipe named "takeLast")
+  }
 
   final def takeWhile(predicate: A ⇒ Boolean): Repr[A] = ???
 

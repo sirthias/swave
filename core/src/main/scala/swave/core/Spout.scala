@@ -118,6 +118,10 @@ object Spout {
   def fromPublisher[T](publisher: Publisher[T]): Spout[T] =
     new Spout(new PublisherSpoutStage(publisher.asInstanceOf[Publisher[AnyRef]]))
 
+  // CAUTION: [[RingBuffer]] is not thread-safe, so don't try to apply concurrent updates if the stream is async!
+  def fromRingBuffer[T](buffer: RingBuffer[T]): Spout[T] =
+    new Spout(new RingBufferSpoutStage(buffer.asInstanceOf[RingBuffer[AnyRef]]))
+
   def fromTry[T](value: Try[T]): Spout[T] =
     (value match { case Success(x) ⇒ one(x); case Failure(e) ⇒ failing(e) }) named "Spout.fromTry"
 
