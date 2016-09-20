@@ -97,6 +97,7 @@ object PipeElem {
     trait OnStart extends InOut
     trait Scan extends InOut
     trait Take extends InOut
+    trait TakeWhile extends InOut
     trait Throttle extends InOut
   }
 

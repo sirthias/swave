@@ -316,7 +316,8 @@ trait StreamOps[A] extends Any { self ⇒
     via(pipe named "takeLast")
   }
 
-  final def takeWhile(predicate: A ⇒ Boolean): Repr[A] = ???
+  final def takeWhile(predicate: A ⇒ Boolean): Repr[A] =
+    append(new TakeWhileStage(predicate.asInstanceOf[Any ⇒ Boolean]))
 
   final def takeWithin(d: FiniteDuration): Repr[A] = ???
 
