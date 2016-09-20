@@ -4,26 +4,25 @@
 
 package swave.core.impl.stages
 
+import scala.concurrent.duration._
 import scala.util.Success
 import org.scalatest.FreeSpec
-import scala.concurrent.duration._
-import swave.testkit.Probes
-import swave.core.{ NotOnTravis, StreamEnvShutdown, StreamEnv }
 import swave.core.util._
-import Probes._
+import swave.core.{ NotOnTravis, StreamEnv, StreamEnvShutdown }
+import swave.testkit.Probes._
 
-final class DropWithinSpec extends FreeSpec with StreamEnvShutdown {
+final class TakeWithinSpec extends FreeSpec with StreamEnvShutdown {
 
   implicit val env = StreamEnv()
 
-  "DropWithin must" - {
+  "TakeWithin must" - {
 
-    "deliver elements after the duration, but not before" taggedAs NotOnTravis in {
+    "deliver elements before the timeout, but not after" taggedAs NotOnTravis in {
       val input = Iterator.from(1)
       val spout = SpoutProbe[Int]
       val drain = DrainProbe[Int]
 
-      spout.dropWithin(100.millis).drainTo(drain) shouldBe a[Success[_]]
+      spout.takeWithin(100.millis).drainTo(drain) shouldBe a[Success[_]]
 
       drain.sendRequest(100)
       val demand1 = spout.expectRequestAggregated(20.millis).toInt
@@ -33,8 +32,8 @@ final class DropWithinSpec extends FreeSpec with StreamEnvShutdown {
       val demand3 = spout.expectRequestAggregated(100.millis).toInt
 
       spout.expectNoSignal()
-      demand3.times { spout.rawSendNext(input.next()) }
-      ((demand1 + demand2 + 1) to (demand1 + demand2 + demand3)).foreach(drain.expectNext(_))
+      demand3.toInt.times { spout.rawSendNext(input.next()) }
+      (1 to (demand1 + demand2)).foreach(drain.expectNext(_))
 
       spout.sendComplete()
       drain.expectComplete()
@@ -44,7 +43,7 @@ final class DropWithinSpec extends FreeSpec with StreamEnvShutdown {
       val spout = SpoutProbe[Int]
       val drain = DrainProbe[Int]
 
-      spout.dropWithin(1.second).drainTo(drain) shouldBe a[Success[_]]
+      spout.takeWithin(1.second).drainTo(drain) shouldBe a[Success[_]]
 
       spout.sendComplete()
       drain.expectComplete()

@@ -319,7 +319,8 @@ trait StreamOps[A] extends Any { self ⇒
   final def takeWhile(predicate: A ⇒ Boolean): Repr[A] =
     append(new TakeWhileStage(predicate.asInstanceOf[Any ⇒ Boolean]))
 
-  final def takeWithin(d: FiniteDuration): Repr[A] = ???
+  final def takeWithin(d: FiniteDuration): Repr[A] =
+    append(new TakeWithinStage(d))
 
   final def tee(drain: Drain[A, Unit], eagerCancel: Boolean = false): Repr[A] =
     via(Pipe[A].fanOutBroadcast(eagerCancel).sub.to(drain).subContinue named "tee")
