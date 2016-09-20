@@ -191,9 +191,11 @@ trait StreamOps[A] extends Any { self ⇒
   final def interleave[B >: A](other: Spout[B], segmentSize: Int, eagerComplete: Boolean): Repr[B] =
     attach(other).fanInInterleave(segmentSize, eagerComplete)
 
-  final def intersperse[B >: A](inject: B): Repr[B] = ???
+  final def intersperse[B >: A](inject: B): Repr[B] =
+    intersperse(null.asInstanceOf[B], inject, null.asInstanceOf[B])
 
-  final def intersperse[B >: A](start: B, inject: B, end: B): Repr[B] = ???
+  final def intersperse[B >: A](start: B, inject: B, end: B): Repr[B] =
+    append(new IntersperseStage(start.asInstanceOf[AnyRef], inject.asInstanceOf[AnyRef], end.asInstanceOf[AnyRef]))
 
   final def last: Repr[A] =
     takeLast(1)

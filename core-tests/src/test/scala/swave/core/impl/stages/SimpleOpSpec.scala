@@ -15,6 +15,7 @@ final class SimpleOpSpec extends SyncPipeSpec with Inspectors {
   implicit val config = PropertyCheckConfig(minSuccessful = 1000)
 
   implicit val integerInput = Gen.chooseNum(0, 999)
+  implicit val stringInput = Gen.listOfN(3, Gen.alphaNumChar).map(_.mkString)
 
   "BufferBackpressure" in check {
     testSetup
@@ -193,6 +194,29 @@ final class SimpleOpSpec extends SyncPipeSpec with Inspectors {
           .drainTo(out.drain) shouldTerminate asScripted(in)
 
         out.received shouldEqual in.produced.grouped(param).take(out.size).toList
+      }
+  }
+
+  "Intersperse" in check {
+    testSetup
+      .input[String]
+      .output[String]
+      .param(Gen.option(implicitly[Gen[String]]))
+      .param(Gen.option(implicitly[Gen[String]]))
+      .prop
+      .from { (in, out, start, end) ⇒
+
+        in.spout
+          .intersperse(start.orNull, ",", end.orNull)
+          .drainTo(out.drain) shouldTerminate asScripted(in)
+
+        val receivedStr = out.received.mkString
+        val producedStr = in.produced.take(out.size).mkString(start getOrElse "", ",", end getOrElse "")
+        if (out.terminalState == TestFixture.State.Completed) {
+          receivedStr shouldEqual producedStr
+        } else {
+          producedStr should startWith(receivedStr)
+        }
       }
   }
 
