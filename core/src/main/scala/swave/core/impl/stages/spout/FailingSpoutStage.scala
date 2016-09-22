@@ -10,16 +10,23 @@ import swave.core.macros.StageImpl
 
 // format: OFF
 @StageImpl
-private[core] final class FailingSpoutStage(error: Throwable) extends SpoutStage with PipeElem.Spout.Repeat {
+private[core] final class FailingSpoutStage(error: Throwable, eager: Boolean)
+  extends SpoutStage with PipeElem.Spout.Failing {
 
   def pipeElemType: String = "Spout.failing"
   def pipeElemParams: List[Any] = error :: Nil
 
   connectOutAndSealWith { (ctx, out) ⇒
-    ctx.registerForXStart(this)
-    awaitingXStart(out)
+    if (eager) {
+      ctx.registerForXStart(this)
+      awaitingXStart(out)
+    } else awaitingRequest(out)
   }
 
   def awaitingXStart(out: Outport) = state(
     xStart = () => stopError(error, out))
+
+  def awaitingRequest(out: Outport) = state(
+    request = (_, _) => stopError(error, out),
+    cancel = _ => stop())
 }

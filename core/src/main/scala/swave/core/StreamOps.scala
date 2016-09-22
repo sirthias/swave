@@ -4,21 +4,21 @@
 
 package swave.core
 
-import scala.annotation.{ tailrec, implicitNotFound }
+import scala.annotation.{ implicitNotFound, tailrec }
 import scala.collection.generic.CanBuildFrom
 import scala.collection.immutable
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.reflect.ClassTag
-import scala.util.Try
+import scala.util.{ Failure, Success, Try }
 import shapeless._
 import shapeless.ops.nat.ToInt
-import shapeless.ops.hlist.{ ToCoproduct, Tupler, Fill }
+import shapeless.ops.hlist.{ Fill, ToCoproduct, Tupler }
 import swave.core.impl.stages.Stage
 import swave.core.impl.util.InportList
-import swave.core.impl.stages.fanin.{ MergeStage, ToProductStage, FirstNonEmptyStage, ConcatStage }
-import swave.core.impl.stages.fanout.{ RoundRobinStage, FirstAvailableStage, BroadcastStage, SwitchStage }
-import swave.core.impl.{ ModuleImpl, TypeLogic, Inport }
+import swave.core.impl.stages.fanin.{ ConcatStage, FirstNonEmptyStage, MergeStage, ToProductStage }
+import swave.core.impl.stages.fanout.{ BroadcastStage, FirstAvailableStage, RoundRobinStage, SwitchStage }
+import swave.core.impl.{ Inport, ModuleImpl, TypeLogic }
 import swave.core.impl.stages.inout._
 import swave.core.util._
 import swave.core.macros._
@@ -270,9 +270,14 @@ trait StreamOps[A] extends Any { self ⇒
 
   final def prefixAndTail(n: Int): Repr[(immutable.Seq[A], Spout[A])] = ???
 
-  final def recover[B >: A](pf: PartialFunction[Throwable, B]): Repr[B] = ???
+  final def recover[B >: A](pf: PartialFunction[Throwable, B]): Repr[B] =
+    via(Pipe[A].recoverWith[B](1)(pf.andThen(Spout.one)) named "recover")
 
-  final def recoverToTry: Repr[Try[A]] = ???
+  final def recoverToTry: Repr[Try[A]] =
+    via(Pipe[A].map(Success(_)).recover { case e: Throwable ⇒ Failure(e) } named "recoverToTry")
+
+  final def recoverWith[B >: A](maxRecoveries: Long, subscriptionTimeout: Duration = Duration.Undefined)(pf: PartialFunction[Throwable, Spout[B]]): Repr[B] =
+    append(new RecoverWithStage(maxRecoveries, subscriptionTimeout, pf.asInstanceOf[PartialFunction[Throwable, Spout[AnyRef]]]))
 
   final def reduce[B >: A](f: (B, B) ⇒ B): Repr[B] = ???
 

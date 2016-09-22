@@ -1,0 +1,85 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+package swave.core.impl.stages.inout
+
+import scala.util.control.NonFatal
+import scala.concurrent.duration.Duration
+import swave.core.impl.stages.drain.SubDrainStage
+import swave.core.impl.{ Inport, Outport, RunContext }
+import swave.core.{ PipeElem, Spout }
+import swave.core.macros._
+import swave.core.util._
+
+// format: OFF
+@StageImpl(fullInterceptions = true)
+private[core] final class RecoverWithStage(maxRecoveries: Long, subscriptionTimeout: Duration,
+                                           pf: PartialFunction[Throwable, Spout[AnyRef]])
+  extends InOutStage with PipeElem.InOut.RecoverWith {
+
+  import RecoverWithStage._
+
+  requireArg(maxRecoveries >= 0)
+
+  def pipeElemType: String = "recoverWith"
+  def pipeElemParams: List[Any] = maxRecoveries :: subscriptionTimeout :: pf :: Nil
+
+  connectInOutAndSealWith { (ctx, in, out) ⇒
+    active(ctx, in, out, 0L, maxRecoveries, subscriptionTimeout orElse ctx.env.settings.subscriptionTimeout)
+  }
+
+  def active(ctx: RunContext, in: Inport, out: Outport, remaining: Long, recoveriesLeft: Long,
+             timeout: Duration): State = state(
+    request = (n, _) => {
+      in.request(n.toLong)
+      active(ctx, in, out, remaining ⊹ n, recoveriesLeft, timeout)
+    },
+
+    cancel = stopCancelF(in),
+
+    onNext = (elem, from) => {
+      requireState(from eq in)
+      out.onNext(elem)
+      active(ctx, in, out, remaining - 1, recoveriesLeft, timeout)
+    },
+
+    onComplete = from => {
+      requireState(from eq in)
+      stopComplete(out)
+    },
+
+    onError = (e, from) => {
+      requireState(from eq in)
+      if (recoveriesLeft > 0) {
+        var funError: Throwable = null
+        val spout =
+          try pf.asInstanceOf[PartialFunction[Throwable, AnyRef]].applyOrElse(e, YieldNull)
+          catch { case NonFatal(e) => { funError = e; null } }
+        if (funError eq null) {
+          if (spout ne null) {
+            val sub = new SubDrainStage(ctx, this, subscriptionTimeout)
+            spout.asInstanceOf[Spout[AnyRef]].inport.subscribe()(sub)
+            awaitingSubOnSubscribe(ctx, sub, out, remaining, recoveriesLeft - 1, timeout)
+          } else stopError(e, out)
+        } else stopError(funError, out)
+      } else stopError(e, out)
+    })
+
+  def awaitingSubOnSubscribe(ctx: RunContext, sub: SubDrainStage, out: Outport, remaining: Long, recoveriesLeft: Long,
+                             timeout: Duration): State = state(
+    onSubscribe = from ⇒ {
+      requireState(from eq sub)
+      sub.sealAndStart()
+      if (remaining > 0) sub.request(remaining)
+      active(ctx, sub, out, remaining, recoveriesLeft, timeout)
+    },
+
+    request = (n, _) => awaitingSubOnSubscribe(ctx, sub, out, remaining ⊹ n, recoveriesLeft, timeout),
+    cancel = stopCancelF(sub))
+}
+
+private[core] object RecoverWithStage {
+
+  private val YieldNull: AnyRef => AnyRef = _ => null
+}

@@ -96,8 +96,8 @@ object Spout {
   def emptyFrom[T](future: Future[Unit]): Spout[T] =
     fromFuture(future).drop(1).named("Spout.emptyFrom").asInstanceOf[Spout[T]]
 
-  def failing[T](cause: Throwable): Spout[T] =
-    new Spout(new FailingSpoutStage(cause))
+  def failing[T](cause: Throwable, eager: Boolean = true): Spout[T] =
+    new Spout(new FailingSpoutStage(cause, eager))
 
   def from(start: Int, step: Int = 1): Spout[Int] =
     fromIterator(Iterator.from(start, step)) named "Spout.from"
@@ -133,7 +133,7 @@ object Spout {
     new Spout(new LazyStartSpoutStage(onStart.asInstanceOf[() ⇒ Spout[AnyRef]], subscriptionTimeout))
 
   def one[T](element: T): Spout[T] =
-    fromIterator(Iterator.single(element)) named "Spout.one"
+    fromIterator(Iterator single element) named "Spout.one"
 
   def push[T](initialBufferSize: Int, maxBufferSize: Int, growByInitialSize: Boolean = false,
     notifyOnDequeued: (PushSpout[T], Int) ⇒ Unit = dropFunc2,
