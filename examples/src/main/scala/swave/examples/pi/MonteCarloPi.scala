@@ -22,7 +22,7 @@ object MonteCarloPi extends App {
     .fanInMerge()
     .scan(State(0, 0)) { _ withNextSample _ }
     .drop(1)
-    .inject()
+    .inject
     .map(_ drop 999999 take 1)
     .flattenConcat()
     .map(state ⇒ f"After ${state.totalSamples}%,10d samples π is approximated as ${state.π}%.6f")
