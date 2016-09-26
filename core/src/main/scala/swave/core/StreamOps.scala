@@ -177,7 +177,10 @@ trait StreamOps[A] extends Any { self ⇒
     append(new GroupedWithinStage(maxSize, duration))
 
   final def headAndTail: Repr[(A, Spout[A])] =
-    via(Pipe[A].prefixAndTail(1).map { case (prefix, tail) ⇒ prefix.head → tail } named "headAndTail")
+    via(Pipe[A].prefixAndTail(1).map {
+      case (prefix, tail) ⇒
+        if (prefix.isEmpty) throw new NoSuchElementException("head of empty stream") else prefix.head → tail
+    } named "headAndTail")
 
   def identity: Repr[A]
 
@@ -267,7 +270,8 @@ trait StreamOps[A] extends Any { self ⇒
       case StreamEvent.OnError(cause) ⇒ callback(Some(cause))
     }
 
-  final def prefixAndTail(n: Int): Repr[(immutable.Seq[A], Spout[A])] = ???
+  final def prefixAndTail(n: Int): Repr[(immutable.Seq[A], Spout[A])] =
+    append(new PrefixAndTailStage(n))
 
   final def recover[B >: A](pf: PartialFunction[Throwable, B]): Repr[B] =
     via(Pipe[A].recoverWith[B](1)(pf.andThen(Spout.one)) named "recover")

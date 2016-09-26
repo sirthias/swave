@@ -6,7 +6,8 @@ package swave.core.impl.stages
 
 import org.scalacheck.Gen
 import org.scalatest.Inspectors
-import swave.core.{ StreamLimitExceeded, Overflow, StreamEnv }
+import swave.core.{ Overflow, StreamEnv, StreamLimitExceeded }
+import swave.testkit.TestError
 import swave.testkit.gen.TestFixture
 
 final class SimpleOpSpec extends SyncPipeSpec with Inspectors {
@@ -168,20 +169,6 @@ final class SimpleOpSpec extends SyncPipeSpec with Inspectors {
       }
   }
 
-  "Map" in check {
-    testSetup
-      .input[Int]
-      .output[String]
-      .prop.from { (in, out) ⇒
-
-        in.spout
-          .map(_.toString)
-          .drainTo(out.drain) shouldTerminate asScripted(in)
-
-        out.received shouldEqual in.produced.take(out.scriptedSize).map(_.toString)
-      }
-  }
-
   "Grouped" in check {
     testSetup
       .input[Int]
@@ -241,6 +228,59 @@ final class SimpleOpSpec extends SyncPipeSpec with Inspectors {
       }
   }
 
+  "Map" in check {
+    testSetup
+      .input[Int]
+      .output[String]
+      .prop.from { (in, out) ⇒
+
+        in.spout
+          .map(_.toString)
+          .drainTo(out.drain) shouldTerminate asScripted(in)
+
+        out.received shouldEqual in.produced.take(out.scriptedSize).map(_.toString)
+      }
+  }
+
+  "Reduce" in check {
+    testSetup
+      .input[Int]
+      .output[Int]
+      .prop.from { (in, out) ⇒
+        import TestFixture.State._
+
+        in.spout
+          .reduce(_ + _)
+          .drainTo(out.drain) shouldTerminate {
+            case Cancelled ⇒ // input can be in any state
+            case Completed ⇒
+              if (in.terminalState == Error(TestError)) sys.error(s"Input error didn't propagate to stream output")
+              else in.scriptedSize should not be (0)
+            case Error(_: NoSuchElementException) ⇒ in.scriptedSize shouldEqual 0
+            case x @ Error(e)                     ⇒ in.terminalState shouldEqual x
+          }
+
+        if (out.terminalState == TestFixture.State.Completed)
+          out.received shouldEqual in.produced.sum :: Nil
+      }
+  }
+
+  "Scan" in check {
+    testSetup
+      .input[Int]
+      .output[Double]
+      .prop.from { (in, out) ⇒
+
+        in.spout
+          .scan(4.2)(_ + _)
+          .drainTo(out.drain) shouldTerminate asScripted(in)
+
+        val expected = in.produced.scanLeft(4.2)(_ + _).take(out.scriptedSize)
+        if (in.scriptedError.isEmpty) out.received shouldEqual expected
+        else out.received shouldEqual expected.take(out.received.size)
+      }
+  }
+
   "Take" in check {
     testSetup
       .input[Int]
@@ -295,22 +335,6 @@ final class SimpleOpSpec extends SyncPipeSpec with Inspectors {
           }
 
         out.received shouldEqual in.produced.takeWhile(_ < param).take(out.scriptedSize)
-      }
-  }
-
-  "Scan" in check {
-    testSetup
-      .input[Int]
-      .output[Double]
-      .prop.from { (in, out) ⇒
-
-        in.spout
-          .scan(4.2)(_ + _)
-          .drainTo(out.drain) shouldTerminate asScripted(in)
-
-        val expected = in.produced.scanLeft(4.2)(_ + _).take(out.scriptedSize)
-        if (in.scriptedError.isEmpty) out.received shouldEqual expected
-        else out.received shouldEqual expected.take(out.received.size)
       }
   }
 }

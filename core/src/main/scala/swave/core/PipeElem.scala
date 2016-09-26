@@ -96,6 +96,7 @@ object PipeElem {
     trait OnEvent extends InOut
     trait OnStart extends InOut
     trait RecoverWith extends InOut
+    trait PrefixAndTail extends InOut
     trait Scan extends InOut
     trait Take extends InOut
     trait TakeWhile extends InOut
