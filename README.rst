@@ -46,9 +46,9 @@ The library artifacts for *swave* live on `Maven Central`_ and can be tied into 
 
 .. code:: Scala
 
-    libraryDependencies += "io.swave" %% "swave-core" % "0.5-M3"
+    libraryDependencies += "io.swave" %% "swave-core" % "0.5-M4"
 
-The latest released version is **0.5-M3**. Currently it is available only for Scala 2.11.
+The latest released version is **0.5-M4**. Currently it is available only for Scala 2.11.
 
 *swave-core* has the following dependencies that it will transitively pull into your classpath:
 

@@ -1,3 +1,16 @@
+Version 0.5-M4 (2016-09-26)
+---------------------------
+
+- Added operation implementations for:
+  delay, expand, flattenMerge, groupBy, groupedWithin, headAndTail, intersperse, mapAsync, mapAsyncUnordered, multiply,
+  prefixAndTail, recover, recoverToTry, recoverWith, reduce, takeLast, takeWhile, takeWithin, withCompletionTimeout,
+  withIdleTimeout, withInitialTimeout
+- Implement `PushSpout`, closes #13
+- Implement `Spout.tick`, `Spout.unfold` and `Spout.unfoldAsync`
+- Implement `Drain.headOption`
+- Many smaller fixes and improvements
+
+
 Version 0.5-M3 (2016-07-21)
 ---------------------------
 
