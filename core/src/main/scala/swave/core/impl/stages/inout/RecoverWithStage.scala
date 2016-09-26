@@ -5,7 +5,6 @@
 package swave.core.impl.stages.inout
 
 import scala.util.control.NonFatal
-import scala.concurrent.duration.Duration
 import swave.core.impl.stages.drain.SubDrainStage
 import swave.core.impl.{ Inport, Outport, RunContext }
 import swave.core.{ PipeElem, Spout }
@@ -14,8 +13,7 @@ import swave.core.util._
 
 // format: OFF
 @StageImpl(fullInterceptions = true)
-private[core] final class RecoverWithStage(maxRecoveries: Long, subscriptionTimeout: Duration,
-                                           pf: PartialFunction[Throwable, Spout[AnyRef]])
+private[core] final class RecoverWithStage(maxRecoveries: Long, pf: PartialFunction[Throwable, Spout[AnyRef]])
   extends InOutStage with PipeElem.InOut.RecoverWith {
 
   import RecoverWithStage._
@@ -23,17 +21,16 @@ private[core] final class RecoverWithStage(maxRecoveries: Long, subscriptionTime
   requireArg(maxRecoveries >= 0)
 
   def pipeElemType: String = "recoverWith"
-  def pipeElemParams: List[Any] = maxRecoveries :: subscriptionTimeout :: pf :: Nil
+  def pipeElemParams: List[Any] = maxRecoveries :: pf :: Nil
 
   connectInOutAndSealWith { (ctx, in, out) ⇒
-    active(ctx, in, out, 0L, maxRecoveries, subscriptionTimeout orElse ctx.env.settings.subscriptionTimeout)
+    active(ctx, in, out, 0L, maxRecoveries)
   }
 
-  def active(ctx: RunContext, in: Inport, out: Outport, remaining: Long, recoveriesLeft: Long,
-             timeout: Duration): State = state(
+  def active(ctx: RunContext, in: Inport, out: Outport, remaining: Long, recoveriesLeft: Long): State = state(
     request = (n, _) => {
       in.request(n.toLong)
-      active(ctx, in, out, remaining ⊹ n, recoveriesLeft, timeout)
+      active(ctx, in, out, remaining ⊹ n, recoveriesLeft)
     },
 
     cancel = stopCancelF(in),
@@ -41,7 +38,7 @@ private[core] final class RecoverWithStage(maxRecoveries: Long, subscriptionTime
     onNext = (elem, from) => {
       requireState(from eq in)
       out.onNext(elem)
-      active(ctx, in, out, remaining - 1, recoveriesLeft, timeout)
+      active(ctx, in, out, remaining - 1, recoveriesLeft)
     },
 
     onComplete = from => {
@@ -58,24 +55,24 @@ private[core] final class RecoverWithStage(maxRecoveries: Long, subscriptionTime
           catch { case NonFatal(e) => { funError = e; null } }
         if (funError eq null) {
           if (spout ne null) {
-            val sub = new SubDrainStage(ctx, this, subscriptionTimeout)
+            val sub = new SubDrainStage(ctx, this)
             spout.asInstanceOf[Spout[AnyRef]].inport.subscribe()(sub)
-            awaitingSubOnSubscribe(ctx, sub, out, remaining, recoveriesLeft - 1, timeout)
+            awaitingSubOnSubscribe(ctx, sub, out, remaining, recoveriesLeft - 1)
           } else stopError(e, out)
         } else stopError(funError, out)
       } else stopError(e, out)
     })
 
-  def awaitingSubOnSubscribe(ctx: RunContext, sub: SubDrainStage, out: Outport, remaining: Long, recoveriesLeft: Long,
-                             timeout: Duration): State = state(
+  def awaitingSubOnSubscribe(ctx: RunContext, sub: SubDrainStage, out: Outport, remaining: Long,
+                             recoveriesLeft: Long): State = state(
     onSubscribe = from ⇒ {
       requireState(from eq sub)
       sub.sealAndStart()
       if (remaining > 0) sub.request(remaining)
-      active(ctx, sub, out, remaining, recoveriesLeft, timeout)
+      active(ctx, sub, out, remaining, recoveriesLeft)
     },
 
-    request = (n, _) => awaitingSubOnSubscribe(ctx, sub, out, remaining ⊹ n, recoveriesLeft, timeout),
+    request = (n, _) => awaitingSubOnSubscribe(ctx, sub, out, remaining ⊹ n, recoveriesLeft),
     cancel = stopCancelF(sub))
 }
 

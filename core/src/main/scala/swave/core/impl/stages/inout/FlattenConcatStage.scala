@@ -4,7 +4,6 @@
 
 package swave.core.impl.stages.inout
 
-import scala.concurrent.duration.Duration
 import swave.core.impl.stages.drain.SubDrainStage
 import swave.core.impl.util.InportAnyRefList
 import swave.core.{ PipeElem, Streamable }
@@ -14,8 +13,7 @@ import swave.core.impl._
 
 // format: OFF
 @StageImpl(fullInterceptions = true)
-private[core] final class FlattenConcatStage(streamable: Streamable.Aux[AnyRef, AnyRef],
-                                             parallelism: Int, timeout: Duration)
+private[core] final class FlattenConcatStage(streamable: Streamable.Aux[AnyRef, AnyRef], parallelism: Int)
   extends InOutStage with PipeElem.InOut.FlattenConcat {
 
   requireArg(parallelism > 0, "`parallelism` must be > 0")
@@ -25,10 +23,10 @@ private[core] final class FlattenConcatStage(streamable: Streamable.Aux[AnyRef, 
 
   connectInOutAndSealWith { (ctx, in, out) ⇒
     ctx.registerForXStart(this)
-    running(ctx, in, out, timeout orElse ctx.env.settings.subscriptionTimeout)
+    running(ctx, in, out)
   }
 
-  def running(ctx: RunContext, in: Inport, out: Outport, subscriptionTimeout: Duration) = {
+  def running(ctx: RunContext, in: Inport, out: Outport) = {
 
     def awaitingXStart() = state(
       xStart = () => {
@@ -94,7 +92,7 @@ private[core] final class FlattenConcatStage(streamable: Streamable.Aux[AnyRef, 
     }
 
     def subscribeSubDrain(elem: AnyRef): SubDrainStage = {
-      val sub = new SubDrainStage(ctx, this, subscriptionTimeout)
+      val sub = new SubDrainStage(ctx, this)
       streamable(elem).inport.subscribe()(sub)
       sub
     }

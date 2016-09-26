@@ -129,15 +129,15 @@ trait StreamOps[A] extends Any { self ⇒
   final def first: Repr[A] =
     via(Pipe[A] take 1 named "first")
 
-  final def flattenConcat[B](parallelism: Int = 1, subscriptionTimeout: Duration = Duration.Undefined)(
+  final def flattenConcat[B](parallelism: Int = 1)(
     implicit
     ev: Streamable.Aux[A, B]): Repr[B] =
-    append(new FlattenConcatStage(ev.asInstanceOf[Streamable.Aux[AnyRef, AnyRef]], parallelism, subscriptionTimeout))
+    append(new FlattenConcatStage(ev.asInstanceOf[Streamable.Aux[AnyRef, AnyRef]], parallelism))
 
-  final def flattenMerge[B](parallelism: Int, subscriptionTimeout: Duration = Duration.Undefined)(
+  final def flattenMerge[B](parallelism: Int)(
     implicit
     ev: Streamable.Aux[A, B]): Repr[B] =
-    append(new FlattenMergeStage(ev.asInstanceOf[Streamable.Aux[AnyRef, AnyRef]], parallelism, subscriptionTimeout))
+    append(new FlattenMergeStage(ev.asInstanceOf[Streamable.Aux[AnyRef, AnyRef]], parallelism))
 
   final def fold[B](zero: B)(f: (B, A) ⇒ B): Repr[B] =
     append(new FoldStage(zero.asInstanceOf[AnyRef], f.asInstanceOf[(AnyRef, AnyRef) ⇒ AnyRef]))
@@ -152,15 +152,11 @@ trait StreamOps[A] extends Any { self ⇒
    *                      and all sub-stream will be completed,
    *                      if `false` the cancellation of the (main) downstream will keep the stream running, but
    *                      cause all elements keyed to not yet open sub-streams to be dropped.
-   * @param subscriptionTimeout the time within which a sub-stream needs to be suscribed to in order to not be
-   *                            automatically cancelled.
    * @param f the key function. Must not return `null` for any element. Otherwise the stream is completed with a
    *          [[RuntimeException]].
    */
-  final def groupBy[K](maxSubstreams: Int, reopenCancelledSubs: Boolean = false, eagerComplete: Boolean = false,
-    subscriptionTimeout: Duration = Duration.Undefined)(f: A ⇒ K): Repr[Spout[A]] =
-    append(new GroupByStage(maxSubstreams, reopenCancelledSubs, eagerComplete, subscriptionTimeout,
-      f.asInstanceOf[AnyRef ⇒ AnyRef]))
+  final def groupBy[K](maxSubstreams: Int, reopenCancelledSubs: Boolean = false, eagerComplete: Boolean = false)(f: A ⇒ K): Repr[Spout[A]] =
+    append(new GroupByStage(maxSubstreams, reopenCancelledSubs, eagerComplete, f.asInstanceOf[AnyRef ⇒ AnyRef]))
 
   final def grouped(groupSize: Int, emitSingleEmpty: Boolean = false): Repr[immutable.Seq[A]] =
     groupedTo[immutable.Seq](groupSize, emitSingleEmpty)
@@ -180,13 +176,16 @@ trait StreamOps[A] extends Any { self ⇒
   final def groupedWithin(maxSize: Int, duration: FiniteDuration): Repr[Vector[A]] =
     append(new GroupedWithinStage(maxSize, duration))
 
+  final def headAndTail: Repr[(A, Spout[A])] =
+    via(Pipe[A].prefixAndTail(1).map { case (prefix, tail) ⇒ prefix.head → tail } named "headAndTail")
+
   def identity: Repr[A]
 
   final def ignoreElements: Repr[A] =
     filter(_ ⇒ false)
 
-  final def inject(subscriptionTimeout: Duration = Duration.Undefined): Repr[Spout[A]] =
-    append(new InjectStage(subscriptionTimeout))
+  final def inject: Repr[Spout[A]] =
+    append(new InjectStage)
 
   final def interleave[B >: A](other: Spout[B], segmentSize: Int, eagerComplete: Boolean): Repr[B] =
     attach(other).fanInInterleave(segmentSize, eagerComplete)
@@ -276,10 +275,11 @@ trait StreamOps[A] extends Any { self ⇒
   final def recoverToTry: Repr[Try[A]] =
     via(Pipe[A].map(Success(_)).recover { case e: Throwable ⇒ Failure(e) } named "recoverToTry")
 
-  final def recoverWith[B >: A](maxRecoveries: Long, subscriptionTimeout: Duration = Duration.Undefined)(pf: PartialFunction[Throwable, Spout[B]]): Repr[B] =
-    append(new RecoverWithStage(maxRecoveries, subscriptionTimeout, pf.asInstanceOf[PartialFunction[Throwable, Spout[AnyRef]]]))
+  final def recoverWith[B >: A](maxRecoveries: Long)(pf: PartialFunction[Throwable, Spout[B]]): Repr[B] =
+    append(new RecoverWithStage(maxRecoveries, pf.asInstanceOf[PartialFunction[Throwable, Spout[AnyRef]]]))
 
-  final def reduce[B >: A](f: (B, B) ⇒ B): Repr[B] = ???
+  final def reduce[B >: A](f: (B, B) ⇒ B): Repr[B] =
+    via(Pipe[B].headAndTail.map { case (head, tail) ⇒ tail.fold(head)(f) }.flattenConcat() named "reduce")
 
   final def sample(d: FiniteDuration): Repr[A] = ???
 

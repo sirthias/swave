@@ -4,7 +4,6 @@
 
 package swave.core.impl.stages.spout
 
-import scala.concurrent.duration.Duration
 import scala.util.control.NonFatal
 import swave.core.impl.stages.drain.SubDrainStage
 import swave.core.impl.{ RunContext, Inport, Outport }
@@ -14,11 +13,11 @@ import swave.core._
 
 // format: OFF
 @StageImpl
-private[core] final class LazyStartSpoutStage(onStart: () => Spout[AnyRef], timeout: Duration)
+private[core] final class LazyStartSpoutStage(onStart: () => Spout[AnyRef])
   extends SpoutStage with PipeElem.Spout.Lazy {
 
   def pipeElemType: String = "Spout.lazyStart"
-  def pipeElemParams: List[Any] = onStart :: timeout :: Nil
+  def pipeElemParams: List[Any] = onStart :: Nil
 
   connectOutAndSealWith { (ctx, out) ⇒
     ctx.registerForXStart(this)
@@ -30,7 +29,7 @@ private[core] final class LazyStartSpoutStage(onStart: () => Spout[AnyRef], time
       var funError: Throwable = null
       val inport = try onStart().inport catch { case NonFatal(e) => { funError = e; null } }
       if (funError eq null) {
-        val sub = new SubDrainStage(ctx, this, timeout orElse ctx.env.settings.subscriptionTimeout)
+        val sub = new SubDrainStage(ctx, this)
         inport.subscribe()(sub)
         awaitingOnSubscribe(ctx, sub, out, 0L)
       } else stopError(funError, out)

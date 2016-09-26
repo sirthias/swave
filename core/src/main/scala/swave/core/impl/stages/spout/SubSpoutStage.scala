@@ -4,7 +4,6 @@
 
 package swave.core.impl.stages.spout
 
-import scala.concurrent.duration.Duration
 import swave.core.{ Cancellable, PipeElem }
 import swave.core.impl.{ Outport, RunContext }
 import swave.core.impl.stages.{ StreamTermination, Stage }
@@ -13,11 +12,11 @@ import SubSpoutStage._
 
 // format: OFF
 @StageImpl
-private[core] class SubSpoutStage(ctx: RunContext, val in: Stage, subscriptionTimeout: Duration) extends SpoutStage
+private[core] class SubSpoutStage(ctx: RunContext, val in: Stage) extends SpoutStage
   with PipeElem.Spout.Sub {
 
   final def pipeElemType: String = "sub"
-  final def pipeElemParams: List[Any] = in :: subscriptionTimeout :: Nil
+  final def pipeElemParams: List[Any] = in :: Nil
 
   initialState(awaitingSubscribe(StreamTermination.None, null))
 
@@ -34,7 +33,7 @@ private[core] class SubSpoutStage(ctx: RunContext, val in: Stage, subscriptionTi
 
     xEvent = {
       case EnableSubscriptionTimeout if timer eq null =>
-        val t = ctx.scheduleSubscriptionTimeout(this, subscriptionTimeout)
+        val t = ctx.scheduleSubscriptionTimeout(this, ctx.env.settings.subscriptionTimeout)
         awaitingSubscribe(term, t)
       case RunContext.SubscriptionTimeout =>
         stopCancel(in)

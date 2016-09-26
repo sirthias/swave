@@ -5,7 +5,6 @@
 package swave.core.impl.stages.inout
 
 import scala.annotation.tailrec
-import scala.concurrent.duration._
 import swave.core.{ PipeElem, Spout }
 import swave.core.impl.stages.spout.SubSpoutStage
 import swave.core.impl.{ RunContext, Outport, Inport }
@@ -14,7 +13,7 @@ import swave.core.util._
 
 // format: OFF
 @StageImpl(fullInterceptions = true)
-private[core] final class InjectStage(timeout: Duration) extends InOutStage with PipeElem.InOut.Inject { stage =>
+private[core] final class InjectStage extends InOutStage with PipeElem.InOut.Inject { stage =>
 
   def pipeElemType: String = "inject"
   def pipeElemParams: List[Any] = Nil
@@ -23,10 +22,10 @@ private[core] final class InjectStage(timeout: Duration) extends InOutStage with
 
   connectInOutAndSealWith { (ctx, in, out) ⇒
     ctx.registerForXStart(this)
-    running(ctx, in, out, timeout orElse ctx.env.settings.subscriptionTimeout)
+    running(ctx, in, out)
   }
 
-  def running(ctx: RunContext, in: Inport, out: Outport, subscriptionTimeout: Duration) = {
+  def running(ctx: RunContext, in: Inport, out: Outport) = {
 
     def awaitingXStart() = state(
       xStart = () => {
@@ -284,7 +283,7 @@ private[core] final class InjectStage(timeout: Duration) extends InOutStage with
     ///////////////////////// helpers //////////////////////////
 
     def emitNewSub() = {
-      val s = new SubSpoutStage(ctx, this, subscriptionTimeout)
+      val s = new SubSpoutStage(ctx, this)
       out.onNext(new Spout(s).asInstanceOf[AnyRef])
       s
     }

@@ -5,7 +5,6 @@
 package swave.core.impl.stages.inout
 
 import scala.annotation.tailrec
-import scala.concurrent.duration.Duration
 import swave.core.impl.util.{ InportAnyRefList, InportList }
 import swave.core.impl.stages.drain.SubDrainStage
 import swave.core.{ PipeElem, Streamable }
@@ -15,24 +14,23 @@ import swave.core.impl._
 
 // format: OFF
 @StageImpl(fullInterceptions = true)
-private[core] final class FlattenMergeStage(streamable: Streamable.Aux[AnyRef, AnyRef],
-                                             parallelism: Int, timeout: Duration)
+private[core] final class FlattenMergeStage(streamable: Streamable.Aux[AnyRef, AnyRef], parallelism: Int)
   extends InOutStage with PipeElem.InOut.FlattenMerge {
 
   requireArg(parallelism > 0, "`parallelism` must be > 0")
 
   def pipeElemType: String = "flattenMerge"
-  def pipeElemParams: List[Any] = parallelism :: timeout :: Nil
+  def pipeElemParams: List[Any] = parallelism :: Nil
 
   // stores (sub, elem) records in the order they arrived so we can dispatch them quickly when they are requested
   private[this] val buffer: RingBuffer[InportAnyRefList] = new RingBuffer(roundUpToNextPowerOf2(parallelism))
 
   connectInOutAndSealWith { (ctx, in, out) ⇒
     ctx.registerForXStart(this)
-    running(ctx, in, out, timeout orElse ctx.env.settings.subscriptionTimeout)
+    running(ctx, in, out)
   }
 
-  def running(ctx: RunContext, in: Inport, out: Outport, subscriptionTimeout: Duration) = {
+  def running(ctx: RunContext, in: Inport, out: Outport) = {
 
     def awaitingXStart() = state(
       xStart = () => {
@@ -120,7 +118,7 @@ private[core] final class FlattenMergeStage(streamable: Streamable.Aux[AnyRef, A
     }
 
     def subscribeSubDrain(elem: AnyRef): SubDrainStage = {
-      val sub = new SubDrainStage(ctx, this, subscriptionTimeout)
+      val sub = new SubDrainStage(ctx, this)
       streamable(elem).inport.subscribe()(sub)
       sub
     }

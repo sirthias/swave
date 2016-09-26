@@ -42,7 +42,7 @@ final class InjectSpec extends SyncPipeSpec with Inspectors with Inside {
         }
 
         in.spout
-          .inject()
+          .inject
           .drainTo(out.drain) shouldTerminate likeThis {
             case Cancelled ⇒ // input can be in any state
 

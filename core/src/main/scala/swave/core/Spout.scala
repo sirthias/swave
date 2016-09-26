@@ -9,7 +9,7 @@ import scala.annotation.unchecked.{ uncheckedVariance ⇒ uV }
 import scala.collection.generic.CanBuildFrom
 import scala.util.{ Failure, Success, Try }
 import scala.concurrent.Future
-import scala.concurrent.duration.{ Duration, FiniteDuration }
+import scala.concurrent.duration.FiniteDuration
 import shapeless._
 import swave.core.impl.util.InportList
 import swave.core.impl.{ ModuleImpl, TypeLogic, Inport }
@@ -129,8 +129,8 @@ object Spout {
   def iterate[T](start: T)(f: T ⇒ T): Spout[T] =
     fromIterator(Iterator.iterate(start)(f)) named "Spout.iterate"
 
-  def lazyStart[T](onStart: () ⇒ Spout[T], subscriptionTimeout: Duration = Duration.Undefined): Spout[T] =
-    new Spout(new LazyStartSpoutStage(onStart.asInstanceOf[() ⇒ Spout[AnyRef]], subscriptionTimeout))
+  def lazyStart[T](onStart: () ⇒ Spout[T]): Spout[T] =
+    new Spout(new LazyStartSpoutStage(onStart.asInstanceOf[() ⇒ Spout[AnyRef]]))
 
   def one[T](element: T): Spout[T] =
     fromIterator(Iterator single element) named "Spout.one"

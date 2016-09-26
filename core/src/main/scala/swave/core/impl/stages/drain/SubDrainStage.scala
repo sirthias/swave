@@ -4,7 +4,6 @@
 
 package swave.core.impl.stages.drain
 
-import scala.concurrent.duration.Duration
 import scala.util.control.NonFatal
 import swave.core.impl.stages.Stage
 import swave.core.impl.{ Inport, RunContext }
@@ -13,13 +12,13 @@ import swave.core.{ SubscriptionTimeoutException, Cancellable, PipeElem }
 
 // format: OFF
 @StageImpl(fullInterceptions = true)
-private[core] final class SubDrainStage(ctx: RunContext, val out: Stage, subscriptionTimeout: Duration) extends DrainStage
+private[core] final class SubDrainStage(ctx: RunContext, val out: Stage) extends DrainStage
   with PipeElem.Drain.Sub {
 
   import SubDrainStage._
 
   def pipeElemType: String = "sub"
-  def pipeElemParams: List[Any] = out :: subscriptionTimeout :: Nil
+  def pipeElemParams: List[Any] = out :: Nil
 
   initialState(awaitingOnSubscribe(false, null))
 
@@ -41,10 +40,10 @@ private[core] final class SubDrainStage(ctx: RunContext, val out: Stage, subscri
 
     xEvent = {
       case EnableSubscriptionTimeout if timer eq null =>
-        val t = ctx.scheduleSubscriptionTimeout(this, subscriptionTimeout)
+        val t = ctx.scheduleSubscriptionTimeout(this, ctx.env.settings.subscriptionTimeout)
         awaitingOnSubscribe(cancelled, t)
       case RunContext.SubscriptionTimeout =>
-        val msg = s"Subscription attempt from SubDrainStage timed out after $subscriptionTimeout"
+        val msg = s"Subscription attempt from SubDrainStage timed out after ${ctx.env.settings.subscriptionTimeout}"
         stopError(new SubscriptionTimeoutException(msg), out)
     })
 

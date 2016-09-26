@@ -9,7 +9,6 @@ import org.reactivestreams.Processor
 import swave.core.impl.util.InportList
 import scala.util.control.NonFatal
 import scala.annotation.tailrec
-import scala.concurrent.duration.Duration
 import scala.annotation.unchecked.{ uncheckedVariance ⇒ uV }
 import shapeless._
 import swave.core.impl.rs.SubPubProcessor
@@ -93,7 +92,7 @@ object Pipe {
   def fromProcessor[A, B](processor: Processor[A, B]): Pipe[A, B] =
     fromDrainAndSpout(Drain.fromSubscriber(processor), Spout.fromPublisher(processor))
 
-  def lazyStart[A, B](onStart: () ⇒ Pipe[A, B], subscriptionTimeout: Duration = Duration.Undefined): Pipe[A, B] = {
+  def lazyStart[A, B](onStart: () ⇒ Pipe[A, B]): Pipe[A, B] = {
     val innerPipeRef = new AtomicReference[Pipe[A, B]]
     val placeholder = Pipe[A].asInstanceOf[Pipe[A, B]]
     @tailrec def innerPipe: Pipe[A, B] =

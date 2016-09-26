@@ -7,7 +7,6 @@ package swave.core
 import scala.annotation.tailrec
 import scala.collection.generic.CanBuildFrom
 import scala.collection.immutable
-import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future, Promise }
 import org.reactivestreams.{ Publisher, Subscriber }
 import swave.core.impl.TypeLogic.ToFuture
@@ -120,13 +119,10 @@ object Drain {
   def lastOption[T]: Drain[T, Future[Option[T]]] =
     Pipe[T].last.to(headOption) named "Drain.lastOption"
 
-  def lazyStart[T, R](
-    onStart: () ⇒ Drain[T, R],
-    subscriptionTimeout: Duration = Duration.Undefined)(implicit tf: ToFuture[R]): Drain[T, Future[tf.Out]] = {
+  def lazyStart[T, R](onStart: () ⇒ Drain[T, R])(implicit tf: ToFuture[R]): Drain[T, Future[tf.Out]] = {
     val promise = Promise[tf.Out]()
     val rawOnStart = onStart.asInstanceOf[() ⇒ Drain[AnyRef, AnyRef]]
-    val stage = new LazyStartDrainStage(rawOnStart, subscriptionTimeout,
-      { x ⇒ promise.completeWith(tf(x.asInstanceOf[R])); () })
+    val stage = new LazyStartDrainStage(rawOnStart, { x ⇒ promise.completeWith(tf(x.asInstanceOf[R])); () })
     new Drain(stage, promise.future)
   }
 

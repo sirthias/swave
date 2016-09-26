@@ -6,7 +6,6 @@ package swave.core.impl.stages.inout
 
 import java.util.function.BiConsumer
 import scala.util.control.NonFatal
-import scala.concurrent.duration._
 import swave.core.impl.stages.Stage
 import swave.core.impl.stages.spout.SubSpoutStage
 import swave.core.impl.{ Inport, Outport, RunContext }
@@ -18,22 +17,22 @@ import GroupByStage.Sub
 // format: OFF
 @StageImpl(fullInterceptions = true)
 private[core] final class GroupByStage(maxSubstreams: Int, reopenCancelledSubs: Boolean, eagerComplete: Boolean,
-                                       timeout: Duration, keyFun: AnyRef ⇒ AnyRef)
+                                       keyFun: AnyRef ⇒ AnyRef)
   extends InOutStage with PipeElem.InOut.GroupBy { stage =>
 
   require(maxSubstreams > 0, "`maxSubStreams` must be > 0")
 
   def pipeElemType: String = "groupBy"
-  def pipeElemParams: List[Any] = maxSubstreams :: reopenCancelledSubs :: eagerComplete :: timeout :: keyFun :: Nil
+  def pipeElemParams: List[Any] = maxSubstreams :: reopenCancelledSubs :: eagerComplete :: keyFun :: Nil
 
   private[this] val subMap = new java.util.HashMap[Any, Sub]()
 
   connectInOutAndSealWith { (ctx, in, out) ⇒
     ctx.registerForXStart(this)
-    running(ctx, in, out, timeout orElse ctx.env.settings.subscriptionTimeout)
+    running(ctx, in, out)
   }
 
-  def running(ctx: RunContext, in: Inport, out: Outport, subscriptionTimeout: Duration) = {
+  def running(ctx: RunContext, in: Inport, out: Outport) = {
 
     def awaitingXStart() = state(
       xStart = () => {
@@ -405,7 +404,7 @@ private[core] final class GroupByStage(maxSubstreams: Int, reopenCancelledSubs: 
     }
 
     def createAndRegisterNewSub(key: AnyRef): Sub = {
-      val sub = new Sub(key, ctx, this, subscriptionTimeout)
+      val sub = new Sub(key, ctx, this)
       subMap.put(key, sub)
       sub
     }
@@ -467,8 +466,7 @@ private[core] final class GroupByStage(maxSubstreams: Int, reopenCancelledSubs: 
 
 private object GroupByStage {
 
-  private final class Sub(var key: AnyRef, _ctx: RunContext, _in: Stage, _subscriptionTimeout: Duration)
-    extends SubSpoutStage(_ctx, _in, _subscriptionTimeout) {
+  private final class Sub(var key: AnyRef, _ctx: RunContext, _in: Stage) extends SubSpoutStage(_ctx, _in) {
 
     var remaining = 0L // the number of elements already requested by this sub but not yet delivered to it
 

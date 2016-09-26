@@ -79,7 +79,7 @@ class SyncSpec extends SwaveSpec {
 
     "inject" in {
       Spout(1 to 10)
-        .inject()
+        .inject
         .map(_ elementAt 1)
         .flattenConcat() should produce(2, 4, 6, 8, 10)
     }
