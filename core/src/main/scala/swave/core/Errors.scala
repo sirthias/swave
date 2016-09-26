@@ -15,4 +15,6 @@ final class IllegalReuseException(msg: String) extends RuntimeException(msg)
 
 final class SubscriptionTimeoutException(msg: String) extends RuntimeException(msg)
 
+final class StreamTimeoutException(msg: String) extends RuntimeException(msg)
+
 final class UnsupportedSecondSubscriptionException extends RuntimeException

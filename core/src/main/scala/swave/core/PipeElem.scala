@@ -76,6 +76,7 @@ object PipeElem {
     trait Conflate extends InOut
     trait Coupling extends InOut
     trait Deduplicate extends InOut
+    trait Delay extends InOut
     trait Drop extends InOut
     trait DropLast extends InOut
     trait DropWhile extends InOut
@@ -102,6 +103,9 @@ object PipeElem {
     trait TakeWhile extends InOut
     trait TakeWithin extends InOut
     trait Throttle extends InOut
+    trait WithIdleTimeout extends InOut
+    trait WithInitialTimeout extends InOut
+    trait WithCompletionTimeout extends InOut
   }
 
   sealed trait FanIn extends PipeElem {

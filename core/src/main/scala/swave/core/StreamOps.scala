@@ -77,10 +77,16 @@ trait StreamOps[A] extends Any { self ⇒
   final def deduplicate: Repr[A] =
     append(new DeduplicateStage)
 
+  final def delay(f: A ⇒ FiniteDuration): Repr[A] =
+    append(new DelayStage(f.asInstanceOf[AnyRef ⇒ FiniteDuration]))
+
   final def drop(n: Long): Repr[A] = {
     requireArg(n >= 0)
     if (n > 0) append(new DropStage(n)) else identity
   }
+
+  final def dropAll: Repr[A] =
+    via(Pipe[A] drop Long.MaxValue named "dropAll")
 
   final def dropLast(n: Int): Repr[A] = {
     requireArg(n >= 0)
@@ -184,9 +190,6 @@ trait StreamOps[A] extends Any { self ⇒
 
   def identity: Repr[A]
 
-  final def ignoreElements: Repr[A] =
-    filter(_ ⇒ false)
-
   final def inject: Repr[Spout[A]] =
     append(new InjectStage)
 
@@ -204,6 +207,8 @@ trait StreamOps[A] extends Any { self ⇒
 
   final def limit(maxElements: Long): Repr[A] =
     limitWeighted(maxElements, _ ⇒ 1)
+
+  final def limitIdleTime(timeout: FiniteDuration): Repr[A] = ???
 
   final def limitWeighted(max: Long, cost: A ⇒ Long): Repr[A] =
     append(new LimitStage(max, cost.asInstanceOf[AnyRef ⇒ Long]))
@@ -337,10 +342,22 @@ trait StreamOps[A] extends Any { self ⇒
   final def throttle(elements: Int, per: FiniteDuration, burst: Int = 1): Repr[A] =
     throttle(elements, per, burst, oneIntFunc)
 
-  def throttle(cost: Int, per: FiniteDuration, burst: Int, costFn: A ⇒ Int): Repr[A] =
+  final def throttle(cost: Int, per: FiniteDuration, burst: Int, costFn: A ⇒ Int): Repr[A] =
     append(new ThrottleStage(cost, per, burst, costFn.asInstanceOf[AnyRef ⇒ Int]))
 
   def via[B](pipe: A =>> B): Repr[B]
+
+  // timeout = time after demand signalling for element or previous element, whatever happened later
+  final def withIdleTimeout(timeout: FiniteDuration): Repr[A] =
+    append(new WithIdleTimeoutStage(timeout))
+
+  // timeout = time after demand signalling for first element
+  final def withInitialTimeout(timeout: FiniteDuration): Repr[A] =
+    append(new WithInitialTimeoutStage(timeout))
+
+  // timeout = time after demand signalling for first element
+  final def withCompletionTimeout(timeout: FiniteDuration): Repr[A] =
+    append(new WithCompletionTimeoutStage(timeout))
 
   final def zip[B](other: Spout[B]): Repr[(A, B)] = {
     val moduleID = Module.ID("zip")
