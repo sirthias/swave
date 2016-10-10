@@ -1,49 +1,14 @@
-*.class
-*.log
+# Only put project-/build-tool-specific things here!
+# Everything specific to your particular dev machine
+# (like OS- or IDE-related artifacts) should go into
+# a personal, global .gitignore file!
+# (See https://help.github.com/articles/ignoring-files/ for details)
 
-# SBT
-test-output/
-.cache/
-.history/
-.lib/
-dist/*
-target/
-lib_managed/
-src_managed/
-project/boot/
-project/plugins/project/
-.sbtrc
-
-# IDEA
-.idea/
-*.iml
-*.ipr
-*.iws
-out/
-
-# Scala-IDE
-.scala_dependencies
-.worksheet
-.cache
-.classpath
-.project
-.settings
-.target/
-
-# ENSIME
-.ensime
-.ensime_lucene
-
-# SUBLIME
-*.sublime-project
-*.sublime-workspace
-
-# Mac
-.DS_Store
-
-# Other
-*.pyc
-.*.swp
-\#*#
-*~
-.#*
+lib_managed
+target
+project/boot
+project/build/target
+project/plugins/lib_managed
+project/plugins/src_managed
+project/plugins/target
+project/plugins/project/build.properties
