@@ -6,9 +6,10 @@ package swave.core.impl.stages.fanout
 
 import swave.core.PipeElem
 
-private[core] final class SwitchStage(branchCount: Int, f: AnyRef ⇒ Int, eagerCancel: Boolean) extends FanOutStage
+private[core] final class SwitchStage(branchCount: Int, f: AnyRef ⇒ Int, eagerCancel: Boolean)
+    extends FanOutStage
     with PipeElem.FanOut.Switch {
 
-  def pipeElemType: String = "fanOutSwitch"
+  def pipeElemType: String      = "fanOutSwitch"
   def pipeElemParams: List[Any] = eagerCancel :: Nil
 }

@@ -44,9 +44,11 @@ class FileSpoutSpec extends SwaveSpec {
 
     "read contents from a file" in {
       val chunkSize = 512
-      Spout.fromPath(testFile, chunkSize)
+      Spout
+        .fromPath(testFile, chunkSize)
         .map(_.decodeUtf8.right.get)
-        .drainTo(DrainProbe[String]).get
+        .drainTo(DrainProbe[String])
+        .get
         .sendRequest(100)
         .expectNext(TestText.grouped(chunkSize).toList: _*)
         .expectComplete()

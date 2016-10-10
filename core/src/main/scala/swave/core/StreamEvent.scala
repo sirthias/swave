@@ -6,13 +6,13 @@ package swave.core
 
 sealed abstract class StreamEvent[+T]
 object StreamEvent {
-  sealed abstract class UpEvent extends StreamEvent[Nothing]
+  sealed abstract class UpEvent       extends StreamEvent[Nothing]
   sealed abstract class DownEvent[+T] extends StreamEvent[T]
 
   final case class Request(elements: Int) extends UpEvent
-  case object Cancel extends UpEvent
+  case object Cancel                      extends UpEvent
 
-  final case class OnNext[T](value: T) extends DownEvent[T]
-  case object OnComplete extends DownEvent[Nothing]
+  final case class OnNext[T](value: T)       extends DownEvent[T]
+  case object OnComplete                     extends DownEvent[Nothing]
   final case class OnError(cause: Throwable) extends DownEvent[Nothing]
 }

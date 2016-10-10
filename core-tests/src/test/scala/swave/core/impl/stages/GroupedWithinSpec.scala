@@ -12,10 +12,10 @@ import swave.core._
 import swave.testkit.Probes._
 
 /**
- * Almost directly transcribed from akka-stream's FlowGroupedWithinSpec which carries this copyright:
- *
- *    Copyright (C) 2015-2016 Lightbend Inc. <http://www.lightbend.com>
- */
+  * Almost directly transcribed from akka-stream's FlowGroupedWithinSpec which carries this copyright:
+  *
+  *    Copyright (C) 2015-2016 Lightbend Inc. <http://www.lightbend.com>
+  */
 final class GroupedWithinSpec extends FreeSpec with StreamEnvShutdown {
 
   implicit val env = StreamEnv()
@@ -87,7 +87,7 @@ final class GroupedWithinSpec extends FreeSpec with StreamEnvShutdown {
       drain.sendRequest(3)
       drain.expectNoSignal(150.millis)
       spout.sendNext(1, 2, 3)
-      drain.expectNext(Seq(1)) // the kicker
+      drain.expectNext(Seq(1))    // the kicker
       drain.expectNext(Seq(2, 3)) // the kicker
       drain.expectNoSignal(150.millis)
       drain.sendRequest(1)

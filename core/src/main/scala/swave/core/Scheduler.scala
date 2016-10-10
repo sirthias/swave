@@ -5,7 +5,7 @@
 package swave.core
 
 import scala.concurrent.ExecutionContext
-import scala.concurrent.duration.{ Duration, FiniteDuration }
+import scala.concurrent.duration.{Duration, FiniteDuration}
 import com.typesafe.config.Config
 import swave.core.macros._
 import swave.core.util._
@@ -17,13 +17,15 @@ trait Scheduler {
   final def schedule(interval: FiniteDuration)(body: ⇒ Unit)(implicit ec: ExecutionContext): Cancellable =
     schedule(Duration.Zero, interval)(body)
 
-  final def schedule(initialDelay: FiniteDuration, interval: FiniteDuration)(body: ⇒ Unit)(implicit ec: ExecutionContext): Cancellable =
+  final def schedule(initialDelay: FiniteDuration, interval: FiniteDuration)(body: ⇒ Unit)(
+      implicit ec: ExecutionContext): Cancellable =
     schedule(initialDelay, interval, Runnable(body))
 
   final def schedule(interval: FiniteDuration, r: Runnable)(implicit ec: ExecutionContext): Cancellable =
     schedule(Duration.Zero, interval, r)
 
-  def schedule(initialDelay: FiniteDuration, interval: FiniteDuration, r: Runnable)(implicit ec: ExecutionContext): Cancellable
+  def schedule(initialDelay: FiniteDuration, interval: FiniteDuration, r: Runnable)(
+      implicit ec: ExecutionContext): Cancellable
 
   final def scheduleOnce(delay: FiniteDuration)(body: ⇒ Unit)(implicit ec: ExecutionContext): Cancellable =
     scheduleOnce(delay, Runnable(body))
@@ -40,8 +42,6 @@ object Scheduler {
 
   object Settings extends SettingsCompanion[Settings]("swave.core.scheduler") {
     def fromSubConfig(c: Config): Settings =
-      Settings(
-        tickDuration = c getFiniteDuration "tick-duration",
-        ticksPerWheel = c getInt "ticks-per-wheel")
+      Settings(tickDuration = c getFiniteDuration "tick-duration", ticksPerWheel = c getInt "ticks-per-wheel")
   }
 }

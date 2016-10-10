@@ -10,9 +10,8 @@ import swave.core._
 import swave.core.impl.Inport
 import swave.core.util.ImsiList
 
-private[swave] abstract class AbstractInportList[L >: Null <: AbstractInportList[L]](
-  final val in: Inport,
-  tail: L) extends ImsiList[L](tail)
+private[swave] abstract class AbstractInportList[L >: Null <: AbstractInportList[L]](final val in: Inport, tail: L)
+    extends ImsiList[L](tail)
 
 private[swave] object AbstractInportList {
   implicit class InportListOps[L >: Null <: AbstractInportList[L]](private val underlying: L) extends AnyVal {
@@ -88,7 +87,7 @@ private[swave] object AbstractInportList {
 private[swave] final class InportList(in: Inport, tail: InportList) extends AbstractInportList[InportList](in, tail)
 
 private[swave] object InportList {
-  def empty: InportList = null
+  def empty: InportList                           = null
   def apply(in: Inport, tail: InportList = empty) = new InportList(in, tail)
 
   def fill(n: Int, in: ⇒ Inport): InportList = {
@@ -117,10 +116,10 @@ private[swave] object InportList {
 }
 
 private[swave] final class InportAnyRefList(in: Inport, var value: AnyRef, tail: InportAnyRefList)
-  extends AbstractInportList[InportAnyRefList](in, tail)
+    extends AbstractInportList[InportAnyRefList](in, tail)
 
 private[swave] object InportAnyRefList {
-  def empty: InportAnyRefList = null
+  def empty: InportAnyRefList                           = null
   def apply(in: Inport, tail: InportAnyRefList = empty) = new InportAnyRefList(in, null, tail)
 
   implicit class InportAnyRefListOps(private val underlying: InportAnyRefList) extends AnyVal {

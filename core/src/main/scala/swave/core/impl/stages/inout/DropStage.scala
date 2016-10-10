@@ -5,7 +5,7 @@
 package swave.core.impl.stages.inout
 
 import swave.core.PipeElem
-import swave.core.impl.{ Outport, Inport }
+import swave.core.impl.{Inport, Outport}
 import swave.core.macros._
 
 // format: OFF
@@ -31,10 +31,10 @@ private[core] final class DropStage(count: Long) extends InOutStage with PipeEle
       })
 
     /**
-     * Waiting for elements from upstream to drop.
-     *
-     * @param remaining number of elems still to drop, >0
-     */
+      * Waiting for elements from upstream to drop.
+      *
+      * @param remaining number of elems still to drop, >0
+      */
     def dropping(remaining: Long): State = state(
       request = requestF(in),
       cancel = stopCancelF(in),
@@ -43,8 +43,8 @@ private[core] final class DropStage(count: Long) extends InOutStage with PipeEle
       onError = stopErrorF(out))
 
     /**
-     * Simply forwarding elements from upstream to downstream.
-     */
+      * Simply forwarding elements from upstream to downstream.
+      */
     def draining() = state(
       intercept = false,
 

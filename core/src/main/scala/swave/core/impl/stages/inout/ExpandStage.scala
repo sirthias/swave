@@ -7,7 +7,7 @@ package swave.core.impl.stages.inout
 import scala.annotation.tailrec
 import scala.util.control.NonFatal
 import swave.core.PipeElem
-import swave.core.impl.{ Inport, Outport }
+import swave.core.impl.{Inport, Outport}
 import swave.core.macros._
 import swave.core.util._
 
@@ -25,9 +25,9 @@ private[core] final class ExpandStage(zero: Iterator[AnyRef], extrapolate: AnyRe
   }
 
   /**
-   * @param in  the active upstream
-   * @param out the active downstream
-   */
+    * @param in  the active upstream
+    * @param out the active downstream
+    */
   def awaitingXStart(in: Inport, out: Outport) = state(
     xStart = () => {
       in.request(1)
@@ -36,12 +36,12 @@ private[core] final class ExpandStage(zero: Iterator[AnyRef], extrapolate: AnyRe
     })
 
   /**
-   * Last expansion iterator completed. Awaiting next element from upstream.
-   *
-   * @param in        the active upstream
-   * @param out       the active downstream
-   * @param remaining number of elements already requested by downstream but not yet delivered, >= 0
-   */
+    * Last expansion iterator completed. Awaiting next element from upstream.
+    *
+    * @param in        the active upstream
+    * @param out       the active downstream
+    * @param remaining number of elements already requested by downstream but not yet delivered, >= 0
+    */
   def awaitingElem(in: Inport, out: Outport, remaining: Long): State = {
     requireState(remaining >= 0)
     state(
@@ -64,13 +64,13 @@ private[core] final class ExpandStage(zero: Iterator[AnyRef], extrapolate: AnyRe
   }
 
   /**
-   * Fresh (i.e. unpulled) expansion iterator available.
-   * Awaiting demand from downstream.
-   *
-   * @param in        the active upstream
-   * @param out       the active downstream
-   * @param iterator  the expansion iterator, non-empty
-   */
+    * Fresh (i.e. unpulled) expansion iterator available.
+    * Awaiting demand from downstream.
+    *
+    * @param in        the active upstream
+    * @param out       the active downstream
+    * @param iterator  the expansion iterator, non-empty
+    */
   def awaitingDemand(in: Inport, out: Outport, iterator: Iterator[AnyRef]): State = {
     requireState(iterator.hasNext)
     state(
@@ -85,13 +85,13 @@ private[core] final class ExpandStage(zero: Iterator[AnyRef], extrapolate: AnyRe
   }
 
   /**
-   * Expansion iterator active and already pulled from at least once.
-   * No unfulfilled demand from downstream.
-   *
-   * @param in        the active upstream
-   * @param out       the active downstream
-   * @param iterator  the expansion iterator, non-empty
-   */
+    * Expansion iterator active and already pulled from at least once.
+    * No unfulfilled demand from downstream.
+    *
+    * @param in        the active upstream
+    * @param out       the active downstream
+    * @param iterator  the expansion iterator, non-empty
+    */
   def expanding(in: Inport, out: Outport, iterator: Iterator[AnyRef]): State = {
     requireState(iterator.hasNext)
     state(
@@ -110,13 +110,13 @@ private[core] final class ExpandStage(zero: Iterator[AnyRef], extrapolate: AnyRe
   }
 
   /**
-   * Upstream already completed.
-   * Awaiting demand from downstream to emit first element from fresh (i.e. unpulled) expansion iterator
-   * before completing.
-   *
-   * @param out       the active downstream
-   * @param iterator  the expansion iterator, non-empty
-   */
+    * Upstream already completed.
+    * Awaiting demand from downstream to emit first element from fresh (i.e. unpulled) expansion iterator
+    * before completing.
+    *
+    * @param out       the active downstream
+    * @param iterator  the expansion iterator, non-empty
+    */
   def drainingFinalElem(out: Outport, iterator: Iterator[AnyRef]): State = {
     requireState(iterator.hasNext)
     state(

@@ -4,14 +4,14 @@
 
 package swave.core
 
-import scala.util.{ Failure, Success, Try }
+import scala.util.{Failure, Success, Try}
 import scala.util.control.NonFatal
-import swave.core.impl.{ Port, TypeLogic, RunContext }
+import swave.core.impl.{Port, RunContext, TypeLogic}
 
 /**
- * A [[Piping]] represents a system or network of connected pipes in which all inlet and outlets
- * have been properly connected and which is therefore ready to be started.
- */
+  * A [[Piping]] represents a system or network of connected pipes in which all inlet and outlets
+  * have been properly connected and which is therefore ready to be started.
+  */
 final class Piping[A] private[core] (port: Port, val result: A) {
 
   def pipeElem: PipeElem = port.pipeElem

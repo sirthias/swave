@@ -4,7 +4,7 @@
 
 package swave.core
 
-import com.typesafe.config.{ Config, ConfigFactory }
+import com.typesafe.config.{Config, ConfigFactory}
 import swave.core.io.files.FileIO
 import scala.concurrent.Future
 import scala.concurrent.duration._
@@ -40,15 +40,14 @@ abstract class StreamEnv private[core] {
 
 object StreamEnv {
 
-  final case class Settings(
-      throughput: Int,
-      maxBatchSize: Int,
-      logConfigOnStart: Boolean,
-      subscriptionTimeout: Duration,
-      dispatcherSettings: Dispatchers.Settings,
-      schedulerSettings: Scheduler.Settings,
-      fileIOSettings: FileIO.Settings,
-      extensionSettings: Extension.Settings) {
+  final case class Settings(throughput: Int,
+                            maxBatchSize: Int,
+                            logConfigOnStart: Boolean,
+                            subscriptionTimeout: Duration,
+                            dispatcherSettings: Dispatchers.Settings,
+                            schedulerSettings: Scheduler.Settings,
+                            fileIOSettings: FileIO.Settings,
+                            extensionSettings: Extension.Settings) {
 
     requireArg(throughput > 0, "`throughput` must be > 0")
     requireArg(0 < maxBatchSize && maxBatchSize <= 1024 * 1024, "`maxBatchSize` must be > 0 and <= 1M")
@@ -66,12 +65,11 @@ object StreamEnv {
         extensionSettings = Extension.Settings fromSubConfig c.getConfig("extensions"))
   }
 
-  def apply(
-    name: String = "default",
-    config: Option[Config] = None,
-    settings: Option[Settings] = None,
-    classLoader: Option[ClassLoader] = None): StreamEnv = {
-    val cl = classLoader getOrElse getClass.getClassLoader
+  def apply(name: String = "default",
+            config: Option[Config] = None,
+            settings: Option[Settings] = None,
+            classLoader: Option[ClassLoader] = None): StreamEnv = {
+    val cl   = classLoader getOrElse getClass.getClassLoader
     val conf = config getOrElse ConfigFactory.empty withFallback ConfigFactory.load(cl)
     val sets = settings getOrElse Settings(conf)
     new StreamEnvImpl(name, conf, sets, cl)

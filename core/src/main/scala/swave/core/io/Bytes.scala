@@ -6,18 +6,18 @@ package swave.core.io
 
 import java.io.OutputStream
 import java.nio.ByteBuffer
-import java.nio.charset.{ Charset, CharacterCodingException }
+import java.nio.charset.{CharacterCodingException, Charset}
 import scala.collection.GenTraversableOnce
 import swave.core.util._
 
 /**
- * Typeclass qualifying `T` as a type holding one or more bytes.
- *
- * Used as an abstraction across popular "byte holder types" like
- * `akka.util.ByteString` or `scodec.bits.ByteVector`.
- *
- * API surface is modelled after `scodec.bits.ByteVector`.
- */
+  * Typeclass qualifying `T` as a type holding one or more bytes.
+  *
+  * Used as an abstraction across popular "byte holder types" like
+  * `akka.util.ByteString` or `scodec.bits.ByteVector`.
+  *
+  * API surface is modelled after `scodec.bits.ByteVector`.
+  */
 trait Bytes[T] {
 
   ///////////////// CONSTRUCTION ///////////////////
@@ -88,10 +88,10 @@ object Bytes {
       if (s <= Int.MaxValue) Some(s.toInt) else None
     }
 
-    def isEmpty(implicit b: Bytes[T]): Boolean = size == 0
+    def isEmpty(implicit b: Bytes[T]): Boolean  = size == 0
     def nonEmpty(implicit b: Bytes[T]): Boolean = size != 0
 
-    def get(ix: Long)(implicit b: Bytes[T]): Byte = apply(ix)
+    def get(ix: Long)(implicit b: Bytes[T]): Byte   = apply(ix)
     def apply(ix: Long)(implicit b: Bytes[T]): Byte = b.byteAt(value, ix)
 
     def lift(ix: Long)(implicit b: Bytes[T]): Option[Byte] = {
@@ -101,40 +101,40 @@ object Bytes {
 
     def update(ix: Long, byte: Byte)(implicit b: Bytes[T]): T = b.update(value, ix, byte)
     def insert(ix: Long, byte: Byte)(implicit b: Bytes[T]): T = (take(ix) :+ byte) ++ drop(ix)
-    def splice(ix: Long, other: T)(implicit b: Bytes[T]): T = take(ix) ++ other ++ drop(ix)
-    def patch(ix: Long, other: T)(implicit b: Bytes[T]): T = take(ix) ++ other ++ drop(ix + other.size)
+    def splice(ix: Long, other: T)(implicit b: Bytes[T]): T   = take(ix) ++ other ++ drop(ix)
+    def patch(ix: Long, other: T)(implicit b: Bytes[T]): T    = take(ix) ++ other ++ drop(ix + other.size)
 
-    def ++(other: T)(implicit b: Bytes[T]): T = b.concat(value, other)
+    def ++(other: T)(implicit b: Bytes[T]): T   = b.concat(value, other)
     def +:(byte: Byte)(implicit b: Bytes[T]): T = b.concat(byte, value)
     def :+(byte: Byte)(implicit b: Bytes[T]): T = b.concat(value, byte)
 
-    def drop(n: Long)(implicit b: Bytes[T]): T = b.drop(value, n)
+    def drop(n: Long)(implicit b: Bytes[T]): T      = b.drop(value, n)
     def dropRight(n: Long)(implicit b: Bytes[T]): T = take(size - n.max(0))
-    def take(n: Long)(implicit b: Bytes[T]): T = b.take(value, n)
+    def take(n: Long)(implicit b: Bytes[T]): T      = b.take(value, n)
     def takeRight(n: Long)(implicit b: Bytes[T]): T = drop(size - n.max(0))
 
-    def splitAt(n: Long)(implicit b: Bytes[T]): (T, T) = (take(n), drop(n))
+    def splitAt(n: Long)(implicit b: Bytes[T]): (T, T)             = (take(n), drop(n))
     def slice(startIx: Long, endIx: Long)(implicit b: Bytes[T]): T = drop(startIx).take(endIx - startIx)
 
-    def foldLeft[A](z: A)(f: (A, Byte) ⇒ A)(implicit b: Bytes[T]): A = b.foldLeft(value, z, f)
+    def foldLeft[A](z: A)(f: (A, Byte) ⇒ A)(implicit b: Bytes[T]): A  = b.foldLeft(value, z, f)
     def foldRight[A](z: A)(f: (Byte, A) ⇒ A)(implicit b: Bytes[T]): A = b.foldRight(value, z, f)
 
     def foreach(f: Byte ⇒ Unit)(implicit b: Bytes[T]): Unit = b.foreach(value, f)
 
     def startsWith(other: T)(implicit b: Bytes[T]): Boolean = take(other.size) == other
-    def endsWith(other: T)(implicit b: Bytes[T]): Boolean = takeRight(other.size) == b
+    def endsWith(other: T)(implicit b: Bytes[T]): Boolean   = takeRight(other.size) == b
 
-    def indexOfSlice(slice: T)(implicit b: Bytes[T]): Long = indexOfSlice(slice, 0)
+    def indexOfSlice(slice: T)(implicit b: Bytes[T]): Long                = indexOfSlice(slice, 0)
     def indexOfSlice(slice: T, startIx: Long)(implicit b: Bytes[T]): Long = b.indexOfSlice(value, slice, startIx)
 
     def containsSlice(slice: T)(implicit b: Bytes[T]): Boolean = indexOfSlice(slice) >= 0
 
-    def head(implicit b: Bytes[T]): Byte = apply(0)
+    def head(implicit b: Bytes[T]): Byte               = apply(0)
     def headOption(implicit b: Bytes[T]): Option[Byte] = lift(0)
 
-    def tail(implicit b: Bytes[T]): T = drop(1)
-    def init(implicit b: Bytes[T]): T = dropRight(1)
-    def last(implicit b: Bytes[T]): Byte = apply(size - 1)
+    def tail(implicit b: Bytes[T]): T                  = drop(1)
+    def init(implicit b: Bytes[T]): T                  = dropRight(1)
+    def last(implicit b: Bytes[T]): Byte               = apply(size - 1)
     def lastOption(implicit b: Bytes[T]): Option[Byte] = lift(size - 1)
 
     def padRight(n: Long)(implicit b: Bytes[T]): T =
@@ -148,20 +148,20 @@ object Bytes {
     def reverse(implicit b: Bytes[T]): T = b.reverse(value)
     def compact(implicit b: Bytes[T]): T = b.compact(value)
 
-    def toArray(implicit b: Bytes[T]): Array[Byte] = b.toArray(value)
+    def toArray(implicit b: Bytes[T]): Array[Byte]                            = b.toArray(value)
     def copyToArray(xs: Array[Byte], offset: Int)(implicit b: Bytes[T]): Unit = b.copyToArray(value, xs, offset)
     def copyToArray(sourceOffset: Long, xs: Array[Byte], destOffset: Int, len: Int)(implicit b: Bytes[T]): Unit =
       b.copyToArray(value, sourceOffset, xs, destOffset, len)
 
     def copyToOutputStream(s: OutputStream)(implicit b: Bytes[T]): Unit = b.copyToOutputStream(value, s)
-    def toByteBuffer(implicit b: Bytes[T]): ByteBuffer = b.toByteBuffer(value)
+    def toByteBuffer(implicit b: Bytes[T]): ByteBuffer                  = b.toByteBuffer(value)
 
     def toIndexedSeq(implicit b: Bytes[T]): IndexedSeq[Byte] = b.toIndexedSeq(value)
-    def toSeq(implicit b: Bytes[T]): Seq[Byte] = toIndexedSeq
+    def toSeq(implicit b: Bytes[T]): Seq[Byte]               = toIndexedSeq
 
     def decodeString(charset: Charset)(implicit b: Bytes[T]): Either[CharacterCodingException, String] =
       b.decodeString(value, charset)
-    def decodeUtf8(implicit b: Bytes[T]): Either[CharacterCodingException, String] = decodeString(UTF8)
+    def decodeUtf8(implicit b: Bytes[T]): Either[CharacterCodingException, String]  = decodeString(UTF8)
     def decodeAscii(implicit b: Bytes[T]): Either[CharacterCodingException, String] = decodeString(ASCII)
   }
 

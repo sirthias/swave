@@ -7,7 +7,7 @@ package swave.core.impl.stages.fanout
 import scala.annotation.compileTimeOnly
 import scala.collection.mutable.ListBuffer
 import swave.core.PipeElem
-import swave.core.impl.{ Inport, RunContext }
+import swave.core.impl.{Inport, RunContext}
 import swave.core.impl.stages.Stage
 import swave.core.impl.stages.Stage.OutportStates
 

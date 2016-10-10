@@ -10,7 +10,9 @@ import scala.concurrent.Future
 import scala.util.Try
 import swave.core.util.RingBuffer
 
-@implicitNotFound(msg = "Don't know how to create a stream from instances of type ${T}. Maybe you'd like to provide an `implicit Streamable[${T}]`?")
+@implicitNotFound(
+  msg =
+    "Don't know how to create a stream from instances of type ${T}. Maybe you'd like to provide an `implicit Streamable[${T}]`?")
 abstract class Streamable[-T] {
   type Out
   def apply(value: T): Spout[Out]

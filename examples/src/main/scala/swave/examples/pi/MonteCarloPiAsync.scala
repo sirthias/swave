@@ -15,12 +15,19 @@ object MonteCarloPiAsync extends App {
 
   val random = XorShiftRandom()
 
-  Spout.continually(random.nextDouble())
+  Spout
+    .continually(random.nextDouble())
     .grouped(2)
     .map { case x +: y +: Nil ⇒ Point(x, y) }
     .fanOutBroadcast()
-      .sub.filter(_.isInner).map(_ => InnerSample).end
-      .sub.filterNot(_.isInner).map(_ => OuterSample).end
+    .sub
+    .filter(_.isInner)
+    .map(_ => InnerSample)
+    .end
+    .sub
+    .filterNot(_.isInner)
+    .map(_ => OuterSample)
+    .end
     .fanInMerge()
     .async()
     .scan(State(0, 0)) { _ withNextSample _ }
@@ -34,7 +41,7 @@ object MonteCarloPiAsync extends App {
     .onComplete {
       case Success(_) =>
         val time = System.currentTimeMillis() - env.startTime
-        println(f"Done. Total time: $time%,6d ms, Throughput: ${30000.0/time}%.3fM samples/sec\n")
+        println(f"Done. Total time: $time%,6d ms, Throughput: ${30000.0 / time}%.3fM samples/sec\n")
         env.shutdown()
 
       case Failure(e) => println(e)

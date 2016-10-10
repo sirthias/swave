@@ -4,15 +4,15 @@
 
 package swave.core.macros
 
-private[macros] trait ConnectOutAndSealWith {  this: Util =>
+private[macros] trait ConnectOutAndSealWith { this: Util =>
   val c: scala.reflect.macros.whitebox.Context
   import c.universe._
 
   def connectOutAndSealWith(f: Tree): List[Tree] = unblock {
     val q"($ctx0: $_, $out0: $_) => $block0" = f
-    val ctx = freshName("ctx")
-    val out = freshName("out")
-    val block = replaceIdents(block0, ctx0 -> ctx, out0 -> out)
+    val ctx                                  = freshName("ctx")
+    val out                                  = freshName("out")
+    val block                                = replaceIdents(block0, ctx0 -> ctx, out0 -> out)
 
     q"""
       initialState(awaitingSubscribe())

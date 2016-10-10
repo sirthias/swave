@@ -4,7 +4,7 @@
 
 package swave.core.impl
 
-import scala.concurrent.duration.{ FiniteDuration, Duration }
+import scala.concurrent.duration.{Duration, FiniteDuration}
 import swave.core.impl.stages.Stage
 import swave.core.impl.StreamRunner._
 import swave.core.macros._
@@ -12,15 +12,15 @@ import swave.core.util._
 import swave.core._
 
 /**
- * A `RunContext` instance keeps all the contextual information required for the start of a *single* connected stream
- * network. This does not include embedded or enclosing sub-streams (streams of streams).
- *
- * CAUTION: If the run is async, do not mutate anymore after the sealing phase is over!
- */
+  * A `RunContext` instance keeps all the contextual information required for the start of a *single* connected stream
+  * network. This does not include embedded or enclosing sub-streams (streams of streams).
+  *
+  * CAUTION: If the run is async, do not mutate anymore after the sealing phase is over!
+  */
 private[swave] final class RunContext(val port: Port)(implicit val env: StreamEnv) {
   import RunContext._
-  private var data = new Data
-  private var isAsyncRun = false
+  private var data               = new Data
+  private var isAsyncRun         = false
   private var parent: RunContext = _
 
   private def isSubContext = parent ne null
@@ -36,25 +36,25 @@ private[swave] final class RunContext(val port: Port)(implicit val env: StreamEn
   }
 
   /**
-   * Registers a stage for assignment of a [[StreamRunner]] with the given `dispatcherId`.
-   * If the `dispatcherId` is empty the default dispatcher will be assigned
-   * if no other non-default assignment has previously been made.
-   */
+    * Registers a stage for assignment of a [[StreamRunner]] with the given `dispatcherId`.
+    * If the `dispatcherId` is empty the default dispatcher will be assigned
+    * if no other non-default assignment has previously been made.
+    */
   def registerForRunnerAssignment(stage: Stage, dispatcherId: String = ""): Unit =
     data.needRunner = StageDispatcherIdListMap(stage, dispatcherId, data.needRunner)
 
   /**
-   * Registers the stage for receiving `xStart` signals.
-   */
+    * Registers the stage for receiving `xStart` signals.
+    */
   def registerForXStart(stage: Stage): Unit = data.needXStart ::= stage
 
   /**
-   * Registers the stage for receiving `xEvent(RunContext.PostRun)` signals.
-   * This method is also available from within the `xEvent` event handler,
-   * which can re-register its stage to receive this event once more.
-   *
-   * Note: This event is only available for synchronous runs!
-   */
+    * Registers the stage for receiving `xEvent(RunContext.PostRun)` signals.
+    * This method is also available from within the `xEvent` event handler,
+    * which can re-register its stage to receive this event once more.
+    *
+    * Note: This event is only available for synchronous runs!
+    */
   def registerForPostRunEvent(stage: Stage): Unit = data.needPostRun ::= stage
 
   def scheduleSubscriptionTimeout(stage: Stage, delay: Duration): Cancellable =
@@ -65,7 +65,7 @@ private[swave] final class RunContext(val port: Port)(implicit val env: StreamEn
         } else {
           val timer =
             new Cancellable with Runnable {
-              def run() = stage.xEvent(SubscriptionTimeout)
+              def run()       = stage.xEvent(SubscriptionTimeout)
               def stillActive = data.cleanup contains stage
               def cancel() = {
                 val x = data.cleanup.remove(this)
@@ -122,14 +122,14 @@ private[swave] object RunContext {
   case object SubscriptionTimeout
 
   private val dispatchAsyncXStart: Stage ⇒ Unit = stage ⇒ stage.runner.enqueueXStart(stage)
-  private val dispatchXStart: Stage ⇒ Unit = _.xStart()
-  private val dispatchPostRun: Stage ⇒ Unit = _.xEvent(PostRun)
-  private val dispatchCleanup: Runnable ⇒ Unit = _.run()
+  private val dispatchXStart: Stage ⇒ Unit      = _.xStart()
+  private val dispatchPostRun: Stage ⇒ Unit     = _.xEvent(PostRun)
+  private val dispatchCleanup: Runnable ⇒ Unit  = _.run()
 
   private class Data {
-    var needRunner = StageDispatcherIdListMap.empty
-    var needXStart = List.empty[Stage]
+    var needRunner  = StageDispatcherIdListMap.empty
+    var needXStart  = List.empty[Stage]
     var needPostRun = List.empty[Stage]
-    var cleanup = List.empty[Runnable]
+    var cleanup     = List.empty[Runnable]
   }
 }

@@ -5,8 +5,8 @@
 package swave.core.impl.stages.inout
 
 import scala.util.control.NonFatal
-import swave.core.{ StreamLimitExceeded, PipeElem }
-import swave.core.impl.{ Outport, Inport }
+import swave.core.{PipeElem, StreamLimitExceeded}
+import swave.core.impl.{Inport, Outport}
 import swave.core.macros._
 
 // format: OFF
@@ -21,10 +21,10 @@ private[core] final class LimitStage(max: Long, cost: AnyRef ⇒ Long) extends I
   connectInOutAndSealWith { (ctx, in, out) ⇒ running(in, out, max) }
 
   /**
-   * @param in        the active upstream
-   * @param out       the active downstream
-   * @param remaining max number of elements still allowed before completion, >= 0
-   */
+    * @param in        the active upstream
+    * @param out       the active downstream
+    * @param remaining max number of elements still allowed before completion, >= 0
+    */
   def running(in: Inport, out: Outport, remaining: Long): State = state(
     request = requestF(in),
     cancel = stopCancelF(in),

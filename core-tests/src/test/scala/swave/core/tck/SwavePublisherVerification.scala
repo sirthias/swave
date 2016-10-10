@@ -5,17 +5,20 @@
 package swave.core.tck
 
 import org.reactivestreams.Publisher
-import org.reactivestreams.tck.{ PublisherVerification, TestEnvironment }
+import org.reactivestreams.tck.{PublisherVerification, TestEnvironment}
 import org.scalatest.testng.TestNGSuiteLike
 import org.testng.SkipException
 import swave.core._
 
 abstract class SwavePublisherVerification[T](val testEnv: TestEnvironment, publisherShutdownTimeout: Long)
     extends PublisherVerification[T](testEnv, publisherShutdownTimeout)
-    with TestNGSuiteLike with StreamEnvShutdown {
+    with TestNGSuiteLike
+    with StreamEnvShutdown {
 
   def this(printlnDebug: Boolean) =
-    this(new TestEnvironment(Timeouts.defaultTimeout.toMillis, printlnDebug), Timeouts.publisherShutdownTimeout.toMillis)
+    this(
+      new TestEnvironment(Timeouts.defaultTimeout.toMillis, printlnDebug),
+      Timeouts.publisherShutdownTimeout.toMillis)
 
   def this() = this(false)
 

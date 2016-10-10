@@ -5,7 +5,7 @@
 package swave.core.graph.impl
 
 import scala.collection.mutable
-import swave.core.graph.{ Digraph, Glyph }
+import swave.core.graph.{Digraph, Glyph}
 import swave.core.util._
 
 private[graph] object Infrastructure {
@@ -17,21 +17,22 @@ private[graph] object Infrastructure {
     val succs = new mutable.ArrayBuffer[Node]
 
     def isSingle = preds.isEmpty && succs.isEmpty
-    def isRoot = preds.isEmpty
-    def isLeaf = succs.isEmpty
-    def isInOut = preds.size == 1 && succs.size == 1
-    def isFanIn = preds.size > 1
+    def isRoot   = preds.isEmpty
+    def isLeaf   = succs.isEmpty
+    def isInOut  = preds.size == 1 && succs.size == 1
+    def isFanIn  = preds.size > 1
     def isFanOut = succs.size > 1
 
-    var isHidden = false
-    var desCount = -1
-    var inDegree = -1
+    var isHidden     = false
+    var desCount     = -1
+    var inDegree     = -1
     var xRank: XRank = _
-    val glyphs = new mutable.ArrayBuffer[Glyph]
-    var attributes = List.empty[AnyRef]
+    val glyphs       = new mutable.ArrayBuffer[Glyph]
+    var attributes   = List.empty[AnyRef]
 
     override def toString =
-      s"Node(vertex=$vertex, id=$id, rankGroup=${if (xRank != null && xRank.group != null) xRank.group.groupId else "null"}, " +
+      s"Node(vertex=$vertex, id=$id, rankGroup=${if (xRank != null && xRank.group != null) xRank.group.groupId
+      else "null"}, " +
         s"attrs=${attributes.mkString("[", ",", "]")}, " +
         s"preds=${preds.map(_.id).mkString("[", ",", "]")}, " +
         s"succs=${succs.map(_.id).mkString("[", ",", "]")}" + (if (isHidden) ", hidden)" else ")")
@@ -50,12 +51,13 @@ private[graph] object Infrastructure {
 
   final class XRank(val id: Int) {
     var group: XRankGroup = _
-    var level = -1 // smaller values -> lay out to the left, higher values -> lay out to the right
-    var preds = List.empty[XRank]
-    var succs = List.empty[XRank]
+    var level             = -1 // smaller values -> lay out to the left, higher values -> lay out to the right
+    var preds             = List.empty[XRank]
+    var succs             = List.empty[XRank]
 
-    override def toString = s"XRank(id=$id, group=${group.groupId}, level=$level, " +
-      s"preds=[${preds.map(_.id).mkString(",")}], succs=[${succs.map(_.id).mkString(",")}])"
+    override def toString =
+      s"XRank(id=$id, group=${group.groupId}, level=$level, " +
+        s"preds=[${preds.map(_.id).mkString(",")}], succs=[${succs.map(_.id).mkString(",")}])"
   }
 
   final class XRankGroup(var groupId: Int) {
@@ -67,15 +69,15 @@ private[graph] object Infrastructure {
   type EdgeAttrs = Map[Edge, Digraph.EdgeAttributes]
 
   implicit class RichEdgeAttrs(val underlying: EdgeAttrs) extends AnyVal {
-    def get(edge: Edge): Digraph.EdgeAttributes = underlying.getOrElse(edge, 0)
-    def has(edge: Edge, attrs: Digraph.EdgeAttributes): Boolean = (get(edge) & attrs) != 0
+    def get(edge: Edge): Digraph.EdgeAttributes                   = underlying.getOrElse(edge, 0)
+    def has(edge: Edge, attrs: Digraph.EdgeAttributes): Boolean   = (get(edge) & attrs) != 0
     def add(edge: Edge, attrs: Digraph.EdgeAttributes): EdgeAttrs = underlying.updated(edge, get(edge) | attrs)
     def move(sourceEdge: Edge, targetEdges: List[Edge], filter: Int = Digraph.EdgeAttributes.All): EdgeAttrs =
       underlying.get(sourceEdge) match {
         case None ⇒ underlying
         case Some(flags) ⇒
           val filtered = flags & filter
-          val map = if (filtered != 0) targetEdges.foldLeft(underlying)(_ add (_, filtered)) else underlying
+          val map      = if (filtered != 0) targetEdges.foldLeft(underlying)(_ add (_, filtered)) else underlying
           map - sourceEdge
       }
 

@@ -7,14 +7,14 @@ package swave.core.impl.stages
 import scala.collection.mutable.ListBuffer
 import scala.util.Failure
 import org.scalacheck.Gen
-import org.scalatest.{ Inside, Inspectors }
+import org.scalatest.{Inside, Inspectors}
 import swave.core._
 import swave.testkit.TestError
-import swave.testkit.gen.{ TestFixture, TestOutput, TestSetup }
+import swave.testkit.gen.{TestFixture, TestOutput, TestSetup}
 
 final class GroupBySpec extends SyncPipeSpec with Inspectors with Inside {
 
-  implicit val env = StreamEnv()
+  implicit val env    = StreamEnv()
   implicit val config = PropertyCheckConfig(minSuccessful = 1000)
 
   implicit val integerInput = Gen.chooseNum(0, 999)
@@ -30,7 +30,7 @@ final class GroupBySpec extends SyncPipeSpec with Inspectors with Inside {
       .from { (in, out, allSubOuts, reopenCancelledSubs, eagerCancel) ⇒
         import TestFixture.State._
 
-        val iter = allSubOuts.iterator
+        val iter    = allSubOuts.iterator
         val subOuts = ListBuffer.empty[TestOutput[Int]]
         out.appendElemHandler { sub ⇒
           if (iter.hasNext) {
@@ -48,30 +48,30 @@ final class GroupBySpec extends SyncPipeSpec with Inspectors with Inside {
         in.spout
           .groupBy(maxSubstreams = 256, reopenCancelledSubs, eagerCancel)(_ % 8)
           .drainTo(out.drain) shouldTerminate likeThis {
-            case Cancelled ⇒ // input can be in any state
-              forAll(subOuts) {
-                _.terminalState should (be(Cancelled) or be(Completed) or be(Error(TestError)))
-              }
+          case Cancelled ⇒ // input can be in any state
+            forAll(subOuts) {
+              _.terminalState should (be(Cancelled) or be(Completed) or be(Error(TestError)))
+            }
 
-            case Completed if subOuts.nonEmpty ⇒
-              forAll(subOuts) {
-                _.terminalState should (be(Cancelled) or be(Completed))
-              }
+          case Completed if subOuts.nonEmpty ⇒
+            forAll(subOuts) {
+              _.terminalState should (be(Cancelled) or be(Completed))
+            }
 
-            case Completed ⇒ in.scriptedSize shouldBe 0
+          case Completed ⇒ in.scriptedSize shouldBe 0
 
-            case error @ Error(TestError) ⇒
-              forAll(subOuts) {
-                _.terminalState should (be(Cancelled) or be(error))
-              }
-              in.terminalState should (be(Cancelled) or be(error))
-          }
+          case error @ Error(TestError) ⇒
+            forAll(subOuts) {
+              _.terminalState should (be(Cancelled) or be(error))
+            }
+            in.terminalState should (be(Cancelled) or be(error))
+        }
 
         val subResults = subOuts.map(_.received).filter(_.nonEmpty).groupBy(_.head % 8)
-        val expected = in.produced.groupBy(_ % 8)
+        val expected   = in.produced.groupBy(_                                     % 8)
         val received =
-          if (reopenCancelledSubs) subResults.map { case (key, seqs) ⇒ key → seqs.flatten }
-          else subResults.map { case (key, seqs) ⇒ key → seqs.head }
+          if (reopenCancelledSubs) subResults.map { case (key, seqs) ⇒ key → seqs.flatten } else
+            subResults.map { case (key, seqs)                        ⇒ key → seqs.head }
         forAll(received) {
           case (key, receivedValues) ⇒
             receivedValues shouldEqual expected(key).take(receivedValues.size)

@@ -7,8 +7,8 @@ package swave.core
 import scala.annotation.tailrec
 import scala.collection.generic.CanBuildFrom
 import scala.collection.immutable
-import scala.concurrent.{ ExecutionContext, Future, Promise }
-import org.reactivestreams.{ Publisher, Subscriber }
+import scala.concurrent.{ExecutionContext, Future, Promise}
+import org.reactivestreams.{Publisher, Subscriber}
 import swave.core.impl.TypeLogic.ToFuture
 import swave.core.impl.Outport
 import swave.core.impl.stages.drain._
@@ -37,14 +37,14 @@ final class Drain[-T, +R] private[swave] (private[swave] val outport: Outport, v
   }
 
   /**
-   * Marks all primary drains in the graph behind this drain's `outport` as
-   * "to be run on the dispatcher with the given id".
-   * If the `dispatcherId` is empty the default dispatcher will be assigned
-   * if no other non-default assignment has previously been made.
-   *
-   * Note that the graph behind this drain's `outport` must not contain any explicit async boundaries!
-   * Otherwise an [[IllegalStateException]] will be thrown.
-   */
+    * Marks all primary drains in the graph behind this drain's `outport` as
+    * "to be run on the dispatcher with the given id".
+    * If the `dispatcherId` is empty the default dispatcher will be assigned
+    * if no other non-default assignment has previously been made.
+    *
+    * Note that the graph behind this drain's `outport` must not contain any explicit async boundaries!
+    * Otherwise an [[IllegalStateException]] will be thrown.
+    */
   def async(dispatcherId: String = ""): Drain[T, R] =
     outport match {
       case stage: DrainStage ⇒
@@ -53,7 +53,7 @@ final class Drain[-T, +R] private[swave] (private[swave] val outport: Outport, v
 
       case x: PipeElem ⇒
         val assign = new (PipeElem ⇒ Unit) {
-          var visited = Set.empty[PipeElem]
+          var visited                    = Set.empty[PipeElem]
           def _apply(pe: PipeElem): Unit = apply(pe)
           @tailrec def apply(pe: PipeElem): Unit =
             if (!visited.contains(pe)) {
@@ -68,8 +68,9 @@ final class Drain[-T, +R] private[swave] (private[swave] val outport: Outport, v
               }
             }
           def fail() =
-            throw new IllegalAsyncBoundaryException(s"Cannot assign dispatcher '$dispatcherId' to drain '$this'. " +
-              "The drain's graph contains at least one explicit async boundary.")
+            throw new IllegalAsyncBoundaryException(
+              s"Cannot assign dispatcher '$dispatcherId' to drain '$this'. " +
+                "The drain's graph contains at least one explicit async boundary.")
         }
         assign(x)
         this
@@ -97,7 +98,7 @@ object Drain {
   def fromSubscriber[T](subscriber: Subscriber[T]): Drain[T, Unit] =
     Drain(new SubscriberDrainStage(subscriber.asInstanceOf[Subscriber[AnyRef]]))
 
-  def generalSeq[M[+_], T](limit: Long)(implicit cbf: CanBuildFrom[M[T], T, M[T]]): Drain[T, Future[M[T]]] =
+  def generalSeq[M[+ _], T](limit: Long)(implicit cbf: CanBuildFrom[M[T], T, M[T]]): Drain[T, Future[M[T]]] =
     Pipe[T].limit(limit).groupedTo[M](Integer.MAX_VALUE, emitSingleEmpty = true).to(head) named "Drain.seq"
 
   def head[T]: Drain[T, Future[T]] = {
@@ -120,9 +121,11 @@ object Drain {
     Pipe[T].last.to(headOption) named "Drain.lastOption"
 
   def lazyStart[T, R](onStart: () ⇒ Drain[T, R])(implicit tf: ToFuture[R]): Drain[T, Future[tf.Out]] = {
-    val promise = Promise[tf.Out]()
+    val promise    = Promise[tf.Out]()
     val rawOnStart = onStart.asInstanceOf[() ⇒ Drain[AnyRef, AnyRef]]
-    val stage = new LazyStartDrainStage(rawOnStart, { x ⇒ promise.completeWith(tf(x.asInstanceOf[R])); () })
+    val stage = new LazyStartDrainStage(rawOnStart, { x ⇒
+      promise.completeWith(tf(x.asInstanceOf[R])); ()
+    })
     new Drain(stage, promise.future)
   }
 

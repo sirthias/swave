@@ -6,7 +6,7 @@ package swave.core.impl.stages.inout
 
 import scala.annotation.tailrec
 import swave.core.PipeElem
-import swave.core.impl.{ Outport, Inport }
+import swave.core.impl.{Inport, Outport}
 import swave.core.macros._
 import swave.core.util._
 
@@ -28,9 +28,9 @@ private[core] final class BufferBackpressureStage(size: Int) extends InOutStage
   }
 
   /**
-   * @param in  the active upstream
-   * @param out the active downstream
-   */
+    * @param in  the active upstream
+    * @param out the active downstream
+    */
   def awaitingXStart(in: Inport, out: Outport) = state(
     xStart = () => {
       in.request(size.toLong)
@@ -38,15 +38,15 @@ private[core] final class BufferBackpressureStage(size: Int) extends InOutStage
     })
 
   /**
-   * Upstream and downstream active.
-   * We always have `buffer.available` elements pending from upstream,
-   * i.e. we are trying to always have the buffer filled.
-   *
-   * @param in        the active upstream
-   * @param out       the active downstream
-   * @param pending   number of elements already requested from upstream but not yet received, >= 0
-   * @param remaining number of elements already requested by downstream but not yet delivered, >= 0
-   */
+    * Upstream and downstream active.
+    * We always have `buffer.available` elements pending from upstream,
+    * i.e. we are trying to always have the buffer filled.
+    *
+    * @param in        the active upstream
+    * @param out       the active downstream
+    * @param pending   number of elements already requested from upstream but not yet received, >= 0
+    * @param remaining number of elements already requested by downstream but not yet delivered, >= 0
+    */
   def running(in: Inport, out: Outport, pending: Long, remaining: Long): State = {
 
     @tailrec def handleDemand(pend: Long, rem: Long): State =
@@ -88,10 +88,10 @@ private[core] final class BufferBackpressureStage(size: Int) extends InOutStage
   }
 
   /**
-   * Upstream completed, downstream active and buffer non-empty.
-   *
-   * @param out the active downstream
-   */
+    * Upstream completed, downstream active and buffer non-empty.
+    *
+    * @param out the active downstream
+    */
   def draining(out: Outport) = state(
     request = (n, _) ⇒ {
       @tailrec def rec(n: Int): State =

@@ -6,7 +6,7 @@ package swave.core.io
 
 import java.io.File
 import java.nio.channels.FileChannel
-import java.nio.file.{ FileSystems, Path }
+import java.nio.file.{FileSystems, Path}
 import scala.util.control.NonFatal
 import swave.core._
 
@@ -16,7 +16,8 @@ package object files {
   implicit class RichDrain(val underlying: Drain.type) extends AnyVal with DrainToFiles
 
   private[io] def quietClose(channel: FileChannel): Unit =
-    try channel.close() catch { case NonFatal(_) ⇒ }
+    try channel.close()
+    catch { case NonFatal(_) ⇒ }
 
   lazy val userHomePath: Path = FileSystems.getDefault.getPath(System getProperty "user.home")
 

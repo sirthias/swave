@@ -24,7 +24,7 @@ private[macros] trait Util {
 
   def transformTree(tree: Tree)(pf: PartialFunction[Tree, Tree]): Tree = {
     val t = new Transformer with (Tree ⇒ Tree) {
-      def apply(tree: Tree) = super.transform(tree)
+      def apply(tree: Tree)              = super.transform(tree)
       override def transform(tree: Tree) = pf.applyOrElse(tree, this)
       private val fm: Tree ⇒ List[Tree] = {
         case Block(stats, ExpandBlockMarker) ⇒ stats
@@ -47,7 +47,7 @@ private[macros] trait Util {
       override def transform(tree: Tree): Tree = tree match {
         case Block(_, _) | DefDef(_, _, _, _, _, _) ⇒
           val saved = visible
-          val res = super.transform(tree)
+          val res   = super.transform(tree)
           visible = saved
           res
 

@@ -22,10 +22,10 @@ private[core] final class ConcatStage(subs: InportList) extends FanInStage with 
   connectFanInAndSealWith(subs) { (ctx, out) ⇒ running(out, subs, 0) }
 
   /**
-   * @param out     the active downstream
-   * @param ins     the active upstreams
-   * @param pending number of elements requested from upstream but not yet received, >= 0
-   */
+    * @param out     the active downstream
+    * @param ins     the active upstreams
+    * @param pending number of elements requested from upstream but not yet received, >= 0
+    */
   def running(out: Outport, ins: InportList, pending: Long): State = state(
     request = (n, _) ⇒ {
       ins.in.request(n.toLong)

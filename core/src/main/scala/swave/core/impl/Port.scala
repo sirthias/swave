@@ -4,7 +4,7 @@
 
 package swave.core.impl
 
-import swave.core.{ Module, PipeElem }
+import swave.core.{Module, PipeElem}
 
 private[swave] sealed trait Port {
   def pipeElem: PipeElem

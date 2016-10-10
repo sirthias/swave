@@ -6,7 +6,7 @@ package swave.core.graph.impl
 
 import scala.annotation.tailrec
 import scala.util.control.NoStackTrace
-import scala.collection.immutable.{ BitSet, VectorBuilder }
+import scala.collection.immutable.{BitSet, VectorBuilder}
 import scala.collection.mutable
 import swave.core.graph.Digraph
 import swave.core.macros._
@@ -19,13 +19,13 @@ private[graph] object MiscLogic {
   // direct connections from a fan-X origin to a fan-X target trip up certain bits in the downstream analysis
   // so we inject synthetic nodes whose rendering is later suppressed
   def injectSyntheticNodes[V](graph: GraphData[V]): GraphData[V] = {
-    var nodes = graph.nodes
+    var nodes     = graph.nodes
     var edgeAttrs = graph.edgeAttrs
 
     for (origin ← graph.nodes.withFilter(n ⇒ n.isFanIn || n.isFanOut)) {
       origin.succs.foreachWithIndex { (target, succIx) ⇒
         if (target.isFanIn || target.isFanOut) {
-          val vertex = origin.vertex // the vertex of the synthetic node doesn't appear anywhere, so we just use this one
+          val vertex        = origin.vertex // the vertex of the synthetic node doesn't appear anywhere, so we just use this one
           val syntheticNode = new Node(nodes.size, vertex)
           syntheticNode.isHidden = true
           origin.succs(succIx) = syntheticNode
@@ -44,8 +44,8 @@ private[graph] object MiscLogic {
   // fusing merges the origin node of the edge into the target node (the origin node is linked out but not removed)
   def fuseNodes[V](graph: GraphData[V]): GraphData[V] = {
     var nodesToRemove = new mutable.BitSet
-    var edgeAttrs = graph.edgeAttrs
-    var rootNodes = graph.rootNodes
+    var edgeAttrs     = graph.edgeAttrs
+    var rootNodes     = graph.rootNodes
 
     for ((edge, flags) ← graph.edgeAttrs) {
       if ((flags & Digraph.EdgeAttributes.Fusable) != 0) {
@@ -83,10 +83,10 @@ private[graph] object MiscLogic {
         builder += root
         val succs = if (root.succs.size > 1) root.succs.sortBy(-descendantCount(_)) else root.succs
         val newRemainingRoots = // prepend all succs to the remainingRoot that have zero unvisited predecessors
-          succs.foldLeft(remainingRoots.tail) { (acc, succ) ⇒
-            succ.inDegree = (if (succ.inDegree == -1) succ.preds.size else succ.inDegree) - 1
-            if (succ.inDegree == 0) succ :: acc else acc
-          }
+        succs.foldLeft(remainingRoots.tail) { (acc, succ) ⇒
+          succ.inDegree = (if (succ.inDegree == -1) succ.preds.size else succ.inDegree) - 1
+          if (succ.inDegree == 0) succ :: acc else acc
+        }
         rec(newRemainingRoots)
       }
 
@@ -123,16 +123,17 @@ private[graph] object MiscLogic {
   }
 
   val descendantCount: Node ⇒ Int = {
-    val bitSet = new mutable.BitSet
+    val bitSet     = new mutable.BitSet
     val treeMarker = markTree(bitSet, _.succs)
-    node ⇒ {
-      if (node.desCount == -1) node.desCount = {
-        bitSet.clear()
-        treeMarker(node)
-        bitSet.size
+    node ⇒
+      {
+        if (node.desCount == -1) node.desCount = {
+          bitSet.clear()
+          treeMarker(node)
+          bitSet.size
+        }
+        node.desCount
       }
-      node.desCount
-    }
   }
 
   def findCycle(rootNodes: Seq[Node]): Option[Edge] = {
@@ -193,20 +194,22 @@ private[graph] object MiscLogic {
     }
 
   /**
-   * Discovers a node region that is "fenced off" from the rest of the graph by the given boundaries.
-   *
-   * If the region is sound, i.e. it's impossible to reach an entry node from above or an exit node from below
-   * without previously crossing a boundary, the method returns a bitset marking all region nodes.
-   * If the region is unsound the method returns an empty BitSet.
-   */
+    * Discovers a node region that is "fenced off" from the rest of the graph by the given boundaries.
+    *
+    * If the region is sound, i.e. it's impossible to reach an entry node from above or an exit node from below
+    * without previously crossing a boundary, the method returns a bitset marking all region nodes.
+    * If the region is unsound the method returns an empty BitSet.
+    */
   def discoverRegion(boundaries: Seq[Digraph.RegionBoundary[Node]]): BitSet = {
-    val result = new mutable.BitSet
+    val result     = new mutable.BitSet
     val entriesSet = new mutable.BitSet
-    val exitsSet = new mutable.BitSet
+    val exitsSet   = new mutable.BitSet
     boundaries.foreach { b1 ⇒
       if (b1.isEntry) entriesSet += b1.vertex.id else exitsSet += b1.vertex.id
       boundaries.foreach { b2 ⇒
-        requireArg(b1 == b2 || b1.vertex != b2.vertex || b1.isInner && b2.isInner, s"Inconsistent RegionBoundaries: $b1 and $b2")
+        requireArg(
+          b1 == b2 || b1.vertex != b2.vertex || b1.isInner && b2.isInner,
+          s"Inconsistent RegionBoundaries: $b1 and $b2")
       }
     }
 
@@ -219,7 +222,8 @@ private[graph] object MiscLogic {
               remaining.head.preds.foldLeft(remaining.tail) { (acc, p) ⇒
                 def pIsOuterEntry = Digraph.RegionBoundary(p, isEntry = true, isInner = false)
                 if (result.contains(p.id) || (entriesSet.contains(p.id) && boundaries.contains(pIsOuterEntry))) acc
-                else if (exitsSet contains p.id) throw UnsoundRegion else p :: acc
+                else if (exitsSet contains p.id) throw UnsoundRegion
+                else p :: acc
               }
             } else remaining.tail
           val tail2 =
@@ -227,7 +231,8 @@ private[graph] object MiscLogic {
               remaining.head.succs.foldLeft(tail1) { (acc, s) ⇒
                 def sIsOuterExit = Digraph.RegionBoundary(s, isEntry = false, isInner = false)
                 if (result.contains(s.id) || (exitsSet.contains(s.id) && boundaries.contains(sIsOuterExit))) acc
-                else if (entriesSet contains s.id) throw UnsoundRegion else s :: acc
+                else if (entriesSet contains s.id) throw UnsoundRegion
+                else s :: acc
               }
             } else tail1
           rec(tail2)

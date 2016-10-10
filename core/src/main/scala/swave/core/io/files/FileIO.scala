@@ -5,7 +5,7 @@
 package swave.core.io.files
 
 import java.io.File
-import java.nio.file.{ Files, Path, StandardOpenOption }
+import java.nio.file.{Files, Path, StandardOpenOption}
 import com.typesafe.config.Config
 import swave.core.io.Bytes
 import swave.core.util.SettingsCompanion
@@ -18,9 +18,7 @@ object FileIO extends SpoutFromFiles with DrainToFiles {
     Set(CREATE, TRUNCATE_EXISTING, WRITE)
   }
 
-  final case class Settings(
-      defaultFileReadingChunkSize: Int,
-      defaultFileWritingChunkSize: Int) {
+  final case class Settings(defaultFileReadingChunkSize: Int, defaultFileWritingChunkSize: Int) {
     requireArg(defaultFileReadingChunkSize > 0, "`defaultFileChunkSize` must be > 0")
     requireArg(defaultFileWritingChunkSize >= 0, "`defaultFileWritingChunkSize` must be >= 0")
   }
@@ -33,7 +31,7 @@ object FileIO extends SpoutFromFiles with DrainToFiles {
   }
 
   def writeFile[T: Bytes](fileName: String, data: T): Unit = writeFile(resolveFileSystemPath(fileName), data)
-  def writeFile[T: Bytes](file: File, data: T): Unit = writeFile(file.toPath, data)
+  def writeFile[T: Bytes](file: File, data: T): Unit       = writeFile(file.toPath, data)
   def writeFile[T: Bytes](path: Path, data: T, options: StandardOpenOption*): Unit = {
     implicit def decorator(value: T): Bytes.Decorator[T] = Bytes.decorator(value)
     Files.write(path, data.toArray, options: _*)
@@ -41,7 +39,7 @@ object FileIO extends SpoutFromFiles with DrainToFiles {
   }
 
   def readFile[T: Bytes](fileName: String): T = readFile(resolveFileSystemPath(fileName))
-  def readFile[T: Bytes](file: File): T = readFile(file.toPath)
-  def readFile[T: Bytes](path: Path): T = implicitly[Bytes[T]].apply(Files.readAllBytes(path))
+  def readFile[T: Bytes](file: File): T       = readFile(file.toPath)
+  def readFile[T: Bytes](path: Path): T       = implicitly[Bytes[T]].apply(Files.readAllBytes(path))
 
 }

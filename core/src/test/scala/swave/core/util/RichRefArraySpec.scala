@@ -6,7 +6,7 @@ package swave.core.util
 
 import org.scalacheck.Gen
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import org.scalatest.{ FreeSpec, Matchers }
+import org.scalatest.{FreeSpec, Matchers}
 
 class RichRefArraySpec extends FreeSpec with Matchers with GeneratorDrivenPropertyChecks {
 
@@ -17,7 +17,7 @@ class RichRefArraySpec extends FreeSpec with Matchers with GeneratorDrivenProper
       val arrayWithIndex =
         for {
           arr ← stringArrays
-          ix ← Gen.chooseNum(0, arr.length + 1)
+          ix  ← Gen.chooseNum(0, arr.length + 1)
         } yield arr.map(Symbol(_)) → ix
 
       forAll(arrayWithIndex) {

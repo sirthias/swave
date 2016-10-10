@@ -4,10 +4,10 @@
 
 package swave.compat
 
-import scala.concurrent.{ Promise, Future }
+import scala.concurrent.{Future, Promise}
 import _root_.akka.NotUsed
 import _root_.akka.stream.Materializer
-import _root_.akka.stream.scaladsl.{ Keep, Flow, Sink, Source }
+import _root_.akka.stream.scaladsl.{Flow, Keep, Sink, Source}
 import swave.compat.akka.impl.ByteStringBytes
 import swave.core.impl.Inport
 import swave.core._
@@ -18,7 +18,7 @@ package object akka {
 
     def toSpoutAndMatFuture(implicit m: Materializer): (Spout[T], Future[Mat]) = {
       val matPromise = Promise[Mat]()
-      val spout = toSpoutWithMatCapture(matPromise)
+      val spout      = toSpoutWithMatCapture(matPromise)
       spout → matPromise.future
     }
 
@@ -27,7 +27,7 @@ package object akka {
 
     def toSpoutWithMatCapture(matPromise: Promise[Mat])(implicit m: Materializer): Spout[T] = {
       val (spout, subscriber) = Spout.withSubscriber[T]
-      val runnableGraph = underlying.to(Sink.fromSubscriber(subscriber))
+      val runnableGraph       = underlying.to(Sink.fromSubscriber(subscriber))
       spout.onStart { () ⇒
         val mat = runnableGraph.run()
         if (matPromise ne null) matPromise.success(mat)
@@ -40,7 +40,7 @@ package object akka {
 
     def toPipeAndMatFuture(implicit m: Materializer): (Pipe[A, B], Future[Mat]) = {
       val matPromise = Promise[Mat]()
-      val pipe = toPipeWithMatCapture(matPromise)
+      val pipe       = toPipeWithMatCapture(matPromise)
       pipe → matPromise.future
     }
 
@@ -48,7 +48,7 @@ package object akka {
       toPipeWithMatCapture(null)
 
     def toPipeWithMatCapture(matPromise: Promise[Mat])(implicit m: Materializer): Pipe[A, B] = {
-      val drain = Drain.toPublisher[A]()
+      val drain               = Drain.toPublisher[A]()
       val (spout, subscriber) = Spout.withSubscriber[B]
       val runnableGraph =
         Source.fromPublisher(drain.result).viaMat(underlying)(Keep.right).to(Sink.fromSubscriber(subscriber))
@@ -63,9 +63,9 @@ package object akka {
   implicit class RichSink[T, Mat](val underlying: Sink[T, Mat]) extends AnyVal {
 
     def toDrain(implicit m: Materializer): Drain[T, Future[Mat]] = {
-      val drain = Drain.toPublisher[T]()
+      val drain         = Drain.toPublisher[T]()
       val runnableGraph = Source.fromPublisher(drain.result).toMat(underlying)(Keep.right)
-      val matPromise = Promise[Mat]()
+      val matPromise    = Promise[Mat]()
       Pipe[T].onStart { () ⇒
         val mat = runnableGraph.run()
         matPromise.success(mat)
@@ -87,7 +87,7 @@ package object akka {
 
     def toAkkaSink(implicit env: StreamEnv): Sink[T, R] = {
       val (spout, subscriber) = Spout.withSubscriber[T]
-      val piping = spout.to(underlying)
+      val piping              = spout.to(underlying)
       Sink.fromSubscriber(subscriber).mapMaterializedValue { _ ⇒
         piping.run().get // provoke exception on start error
       }
@@ -102,7 +102,7 @@ package akka {
   class RichSpout[T](val underlying: Inport) extends AnyVal {
 
     def toAkkaSource(implicit env: StreamEnv): Source[T, NotUsed] = {
-      val drain = Drain.toPublisher[T]()
+      val drain  = Drain.toPublisher[T]()
       val piping = new Spout(underlying).to(drain)
       Source.fromPublisher(drain.result).mapMaterializedValue { notUsed ⇒
         piping.run().get // provoke exception on start error

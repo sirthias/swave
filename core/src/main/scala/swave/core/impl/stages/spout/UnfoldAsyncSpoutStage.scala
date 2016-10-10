@@ -5,11 +5,11 @@
 package swave.core.impl.stages.spout
 
 import scala.concurrent.Future
-import scala.util.{ Failure, Success }
+import scala.util.{Failure, Success}
 import scala.util.control.NonFatal
 import swave.core.PipeElem
 import swave.core.Spout.Unfolding
-import swave.core.impl.{ CallingThreadExecutionContext, Outport }
+import swave.core.impl.{CallingThreadExecutionContext, Outport}
 import swave.core.macros._
 import swave.core.util._
 
@@ -27,21 +27,21 @@ private[core] final class UnfoldAsyncSpoutStage(zero: AnyRef, f: AnyRef => Futur
   }
 
   /**
-   * Active with no demand from downstream.
-   *
-   * @param out the active downstream
-   * @param s   the current unfolding state
-   */
+    * Active with no demand from downstream.
+    *
+    * @param out the active downstream
+    * @param s   the current unfolding state
+    */
   def awaitingDemand(out: Outport, s: AnyRef): State = state(
     request = (n, _) ⇒ handleDemand(out, s, n.toLong),
     cancel = stopF)
 
   /**
-   * Active with pending demand from downstream and a future onCompletion handler scheduled.
-   *
-   * @param out       the active downstream
-   * @param remaining number of elements already requested by downstream but not yet delivered, > 0
-   */
+    * Active with pending demand from downstream and a future onCompletion handler scheduled.
+    *
+    * @param out       the active downstream
+    * @param remaining number of elements already requested by downstream but not yet delivered, > 0
+    */
   def awaitingUnfolding(out: Outport, remaining: Long): State = {
     requireState(remaining > 0)
     state(

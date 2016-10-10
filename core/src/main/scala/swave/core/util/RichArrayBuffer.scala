@@ -10,7 +10,7 @@ import scala.collection.mutable
 final class RichArrayBuffer[A](val underlying: mutable.ArrayBuffer[A]) extends AnyVal {
 
   def inplaceSortBy[B](f: A ⇒ B)(implicit ord: Ordering[B]): Unit = {
-    val buf = underlying.asInstanceOf[mutable.ArrayBuffer[AnyRef]]
+    val buf   = underlying.asInstanceOf[mutable.ArrayBuffer[AnyRef]]
     val array = buf.toArray
     java.util.Arrays.sort(array, ord.on(f).asInstanceOf[Ordering[AnyRef]])
     buf.clear()

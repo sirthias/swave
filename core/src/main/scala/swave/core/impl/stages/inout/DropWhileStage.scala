@@ -6,7 +6,7 @@ package swave.core.impl.stages.inout
 
 import scala.util.control.NonFatal
 import swave.core.PipeElem
-import swave.core.impl.{ Inport, Outport }
+import swave.core.impl.{Inport, Outport}
 import swave.core.macros.StageImpl
 
 // format: OFF
@@ -21,8 +21,8 @@ private[core] final class DropWhileStage(predicate: Any ⇒ Boolean) extends InO
   def running(in: Inport, out: Outport) = {
 
     /**
-     * Dropping elements until predicate returns true.
-     */
+      * Dropping elements until predicate returns true.
+      */
     def dropping(): State = state(
       request = requestF(in),
       cancel = stopCancelF(in),
@@ -48,8 +48,8 @@ private[core] final class DropWhileStage(predicate: Any ⇒ Boolean) extends InO
       onError = stopErrorF(out))
 
     /**
-     * Simply forwarding elements from upstream to downstream.
-     */
+      * Simply forwarding elements from upstream to downstream.
+      */
     def draining() = state(
       intercept = false,
 

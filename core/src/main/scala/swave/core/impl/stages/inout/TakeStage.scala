@@ -5,7 +5,7 @@
 package swave.core.impl.stages.inout
 
 import swave.core.PipeElem
-import swave.core.impl.{ Outport, Inport }
+import swave.core.impl.{Inport, Outport}
 import swave.core.macros._
 
 // format: OFF
@@ -25,9 +25,9 @@ private[core] final class TakeStage(count: Long) extends InOutStage with PipeEle
   }
 
   /**
-   * @param in  the active upstream
-   * @param out the active downstream
-   */
+    * @param in  the active upstream
+    * @param out the active downstream
+    */
   def awaitingXStart(in: Inport, out: Outport) = state(
     xStart = () => {
       in.cancel()
@@ -35,10 +35,10 @@ private[core] final class TakeStage(count: Long) extends InOutStage with PipeEle
     })
 
   /**
-   * @param in        the active upstream
-   * @param out       the active downstream
-   * @param remaining max number of elements still allowed before completion, > 0
-   */
+    * @param in        the active upstream
+    * @param out       the active downstream
+    * @param remaining max number of elements still allowed before completion, > 0
+    */
   def running(in: Inport, out: Outport, remaining: Long): State = state(
     request = (n, _) ⇒ {
       in.request(math.min(n.toLong, remaining))

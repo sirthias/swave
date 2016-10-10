@@ -6,7 +6,7 @@ package swave.core.graph.impl
 
 import scala.annotation.tailrec
 import scala.collection.mutable
-import swave.core.graph.{ Digraph, Glyph }
+import swave.core.graph.{Digraph, Glyph}
 import swave.core.macros._
 import swave.core.util._
 import Digraph.EdgeAttributes.Reversed
@@ -25,7 +25,8 @@ private[graph] object GlyphLayout {
       import current._
 
       def groupLanes(node: Node): List[Lane] =
-        lanes.withFilter(ln ⇒ ln.target != current && ln.rank.group == node.xRank.group)
+        lanes
+          .withFilter(ln ⇒ ln.target != current && ln.rank.group == node.xRank.group)
           .map(identityFunc)(collection.breakOut)
 
       def emitLine(mainGlyphs: Glyph*): Unit =
@@ -80,15 +81,15 @@ private[graph] object GlyphLayout {
             }
 
           @tailrec def rec(lane: Int, remainingPreds: Int, succIx: Int): Unit = {
-            def hadIns = remainingPreds < preds.size
-            def lastIn = remainingPreds == 1
-            def insCompleted = remainingPreds == 0
-            def hadOuts = succIx > 0
-            def lastOut = succIx == succs.size - 1
+            def hadIns        = remainingPreds < preds.size
+            def lastIn        = remainingPreds == 1
+            def insCompleted  = remainingPreds == 0
+            def hadOuts       = succIx > 0
+            def lastOut       = succIx == succs.size - 1
             def outsCompleted = succIx == succs.size
-            def laneInstance = { val s = succs(succIx); new Lane(s, s.xRank, edgeAttrs.has(current → s, Reversed)) }
-            val hasIn = lane < lanes.size && lanes(lane).target == current
-            val hasOut = succIx < succs.size && laneMatch(succs(succIx), lane, hasIn || hadIns)
+            def laneInstance  = { val s = succs(succIx); new Lane(s, s.xRank, edgeAttrs.has(current → s, Reversed)) }
+            val hasIn         = lane < lanes.size && lanes(lane).target == current
+            val hasOut        = succIx < succs.size && laneMatch(succs(succIx), lane, hasIn || hadIns)
 
             if (hasIn && hasOut) {
               lanes(lane) = laneInstance
@@ -96,14 +97,18 @@ private[graph] object GlyphLayout {
               rec(lane + 1, remainingPreds - 1, succIx + 1)
             } else if (hasIn && !hasOut) {
               lanes.remove(lane)
-              glyphs += (if (lastIn && outsCompleted) CORNER_BR else if (!hadIns && !hadOuts) NODE_CORNER_BL else TEE_B)
+              glyphs += (if (lastIn && outsCompleted) CORNER_BR
+                         else if (!hadIns && !hadOuts) NODE_CORNER_BL
+                         else TEE_B)
               rec(lane, remainingPreds - 1, succIx)
             } else if (!hasIn && hasOut) {
               lanes.insert(lane, laneInstance)
-              glyphs += (if (lastOut && insCompleted) CORNER_TR else if (!hadIns && !hadOuts) NODE_CORNER_TL else TEE_T)
+              glyphs += (if (lastOut && insCompleted) CORNER_TR
+                         else if (!hadIns && !hadOuts) NODE_CORNER_TL
+                         else TEE_T)
               rec(lane + 1, remainingPreds, succIx + 1)
             } else if (lane < lanes.size) {
-              def lineV = if (lanes(lane).isReversedEdge) LINE_V_REV else LINE_V
+              def lineV    = if (lanes(lane).isReversedEdge) LINE_V_REV else LINE_V
               def crossing = if (lanes(lane).isReversedEdge) CROSSING_REV else CROSSING
               glyphs += (if (!hadIns && !hadOuts || insCompleted && outsCompleted) lineV else crossing)
               rec(lane + 1, remainingPreds, succIx)

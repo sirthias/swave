@@ -4,9 +4,9 @@
 
 package swave.core.tck
 
-import java.util.concurrent.{ TimeUnit, Executors, ExecutorService }
+import java.util.concurrent.{ExecutorService, Executors, TimeUnit}
 import org.reactivestreams.Publisher
-import org.reactivestreams.tck.{ IdentityProcessorVerification, TestEnvironment }
+import org.reactivestreams.tck.{IdentityProcessorVerification, TestEnvironment}
 import org.scalatest.testng.TestNGSuiteLike
 import org.testng.SkipException
 import org.testng.annotations.AfterClass
@@ -14,10 +14,13 @@ import swave.core._
 
 abstract class SwaveIdentityProcessorVerification[T](val testEnv: TestEnvironment, publisherShutdownTimeout: Long)
     extends IdentityProcessorVerification[T](testEnv, publisherShutdownTimeout)
-    with TestNGSuiteLike with StreamEnvShutdown {
+    with TestNGSuiteLike
+    with StreamEnvShutdown {
 
   def this(printlnDebug: Boolean) =
-    this(new TestEnvironment(Timeouts.defaultTimeout.toMillis, printlnDebug), Timeouts.publisherShutdownTimeout.toMillis)
+    this(
+      new TestEnvironment(Timeouts.defaultTimeout.toMillis, printlnDebug),
+      Timeouts.publisherShutdownTimeout.toMillis)
 
   def this() = this(false)
 

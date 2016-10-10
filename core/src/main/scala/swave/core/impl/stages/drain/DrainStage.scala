@@ -5,8 +5,8 @@
 package swave.core.impl.stages.drain
 
 import scala.annotation.compileTimeOnly
-import swave.core.{ IllegalAsyncBoundaryException, PipeElem }
-import swave.core.impl.{ RunContext, Inport }
+import swave.core.{IllegalAsyncBoundaryException, PipeElem}
+import swave.core.impl.{Inport, RunContext}
 import swave.core.impl.stages.Stage
 
 // format: OFF

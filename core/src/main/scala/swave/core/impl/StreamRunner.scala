@@ -74,7 +74,7 @@ private[core] final class StreamRunner(_throughput: Int, _log: Logger, _dispatch
     scheduleXEvent(delay, new Message.XEvent(target, ev, this))
 
   def scheduleTimeout(target: Stage, delay: FiniteDuration): Cancellable = {
-    val msg = new Message.XEvent(target, null, this)
+    val msg   = new Message.XEvent(target, null, this)
     val timer = scheduleXEvent(delay, msg)
     msg.ev = Timeout(timer)
     timer
@@ -99,22 +99,23 @@ private[core] object StreamRunner {
 
   protected sealed abstract class Message(val id: Int, val target: Stage)
   protected object Message {
-    final class Subscribe(target: Stage, val from: Outport) extends Message(0, target)
-    final class Request(target: Stage, val n: Long, val from: Outport) extends Message(1, target)
-    final class Cancel(target: Stage, val from: Outport) extends Message(2, target)
-    final class OnSubscribe(target: Stage, val from: Inport) extends Message(3, target)
-    final class OnNext(target: Stage, val elem: AnyRef, val from: Inport) extends Message(4, target)
-    final class OnComplete(target: Stage, val from: Inport) extends Message(5, target)
+    final class Subscribe(target: Stage, val from: Outport)                    extends Message(0, target)
+    final class Request(target: Stage, val n: Long, val from: Outport)         extends Message(1, target)
+    final class Cancel(target: Stage, val from: Outport)                       extends Message(2, target)
+    final class OnSubscribe(target: Stage, val from: Inport)                   extends Message(3, target)
+    final class OnNext(target: Stage, val elem: AnyRef, val from: Inport)      extends Message(4, target)
+    final class OnComplete(target: Stage, val from: Inport)                    extends Message(5, target)
     final class OnError(target: Stage, val error: Throwable, val from: Inport) extends Message(6, target)
-    final class XStart(target: Stage) extends Message(7, target)
+    final class XStart(target: Stage)                                          extends Message(7, target)
     final class XEvent(target: Stage, @volatile private[StreamRunner] var ev: AnyRef, runner: StreamRunner)
-        extends Message(8, target) with Runnable {
+        extends Message(8, target)
+        with Runnable {
       def run() = runner.enqueue(this)
     }
   }
 
-  private final class AssignToRegion(val runner: StreamRunner, isDefault: Boolean,
-      ovrride: Boolean = false) extends (PipeElem ⇒ Boolean) {
+  private final class AssignToRegion(val runner: StreamRunner, isDefault: Boolean, ovrride: Boolean = false)
+      extends (PipeElem ⇒ Boolean) {
     def _apply(pe: PipeElem): Boolean = apply(pe)
     @tailrec def apply(pe: PipeElem): Boolean =
       pe match {
@@ -127,15 +128,17 @@ private[core] object StreamRunner {
           import pe._
           3 * inputElems.size012 + outputElems.size012 match {
             case 0 /* 0:0 */ ⇒ throw new IllegalStateException // no input and no output?
-            case 1 /* 0:1 */ ⇒ stage match {
-              case x: SubSpoutStage ⇒ subStreamBoundary(x.in, x, outputElems.head)
-              case _                ⇒ apply(outputElems.head)
-            }
+            case 1 /* 0:1 */ ⇒
+              stage match {
+                case x: SubSpoutStage ⇒ subStreamBoundary(x.in, x, outputElems.head)
+                case _                ⇒ apply(outputElems.head)
+              }
             case 2 /* 0:x */ ⇒ outputElems.forall(this)
-            case 3 /* 1:0 */ ⇒ stage match {
-              case x: SubDrainStage ⇒ subStreamBoundary(x.out, x, inputElems.head)
-              case _                ⇒ apply(inputElems.head)
-            }
+            case 3 /* 1:0 */ ⇒
+              stage match {
+                case x: SubDrainStage ⇒ subStreamBoundary(x.out, x, inputElems.head)
+                case _                ⇒ apply(inputElems.head)
+              }
             case 4 /* 1:1 */ ⇒ _apply(inputElems.head) && apply(outputElems.head)
             case 5 /* 1:x */ ⇒ _apply(inputElems.head) && outputElems.forall(this)
             case 6 /* x:0 */ ⇒ inputElems.forall(this)
@@ -152,12 +155,15 @@ private[core] object StreamRunner {
             // if we have a default runner assignment for the sub-stream move it onto the same runner as the parent
             new AssignToRegion(parent.runner, isDefault = false, ovrride = true).apply(subStream.pipeElem)
             false // break out of the outer assignment loop
-          } else throw new IllegalAsyncBoundaryException(
-            "An asynchronous sub-stream with a non-default dispatcher assignment (in this case `" +
-              runner.dispatcher.name + "`) must be fenced off from its parent stream with explicit async boundaries!")
+          } else
+            throw new IllegalAsyncBoundaryException(
+              "An asynchronous sub-stream with a non-default dispatcher assignment (in this case `" +
+                runner.dispatcher.name + "`) must be fenced off from its parent stream with explicit async boundaries!")
         } else apply(next) // parent and sub-stream port are on the same runner (as required!)
-      } else throw new IllegalAsyncBoundaryException("A synchronous parent stream must not contain " +
-        "an async sub-stream. You can fix this by explicitly marking the parent stream as `async`.")
+      } else
+        throw new IllegalAsyncBoundaryException(
+          "A synchronous parent stream must not contain " +
+            "an async sub-stream. You can fix this by explicitly marking the parent stream as `async`.")
   }
 
   def assignRunners(needRunner: StageDispatcherIdListMap)(implicit env: StreamEnv): Unit = {
@@ -171,8 +177,9 @@ private[core] object StreamRunner {
         if (dispatcherId.nonEmpty) {
           val assign = createAssign(env.dispatchers(dispatcherId), isDefault = false)
           if (stage.runner ne null) {
-            throw new IllegalAsyncBoundaryException("Conflicting dispatcher assignment to async region containing stage " +
-              s"'${stage.getClass.getSimpleName}': [${assign.runner.dispatcher.name}] vs. [${stage.runner.dispatcher.name}]")
+            throw new IllegalAsyncBoundaryException(
+              "Conflicting dispatcher assignment to async region containing stage " +
+                s"'${stage.getClass.getSimpleName}': [${assign.runner.dispatcher.name}] vs. [${stage.runner.dispatcher.name}]")
           } else assign(stage.asInstanceOf[PipeElem])
           assignNonDefaults(tail, defaultAssignments)
         } else assignNonDefaults(tail, stage :: defaultAssignments)
@@ -187,18 +194,16 @@ private[core] object StreamRunner {
     }
   }
 
-  final class StageDispatcherIdListMap(
-    val stage: Stage,
-    val dispatcherId: String,
-    tail: StageDispatcherIdListMap) extends ImsiList[StageDispatcherIdListMap](tail)
+  final class StageDispatcherIdListMap(val stage: Stage, val dispatcherId: String, tail: StageDispatcherIdListMap)
+      extends ImsiList[StageDispatcherIdListMap](tail)
   object StageDispatcherIdListMap {
     def empty: StageDispatcherIdListMap = null
     def apply(stage: Stage, dispatcherId: String, tail: StageDispatcherIdListMap) =
       new StageDispatcherIdListMap(stage, dispatcherId, tail)
   }
 
-  final class StageStageList(val stage0: Stage, val stage1: Stage,
-    tail: StageStageList) extends ImsiList[StageStageList](tail)
+  final class StageStageList(val stage0: Stage, val stage1: Stage, tail: StageStageList)
+      extends ImsiList[StageStageList](tail)
   object StageStageList {
     def empty: StageStageList = null
     def apply(stage0: Stage, stage1: Stage, tail: StageStageList) =

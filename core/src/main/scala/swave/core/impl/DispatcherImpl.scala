@@ -4,7 +4,7 @@
 
 package swave.core.impl
 
-import java.util.concurrent.atomic.{ AtomicLong, AtomicReference }
+import java.util.concurrent.atomic.{AtomicLong, AtomicReference}
 import java.util.concurrent.locks.LockSupport
 import java.util.concurrent._
 import org.slf4j.LoggerFactory
@@ -18,7 +18,7 @@ private[impl] final class DispatcherImpl(val settings: Dispatcher.Settings, crea
     extends Dispatcher {
   import DispatcherImpl._
 
-  private[this] val log = Logger(LoggerFactory getLogger s"dispatcher-$name")
+  private[this] val log   = Logger(LoggerFactory getLogger s"dispatcher-$name")
   private[this] val state = new AtomicReference[State]
 
   def name: String = settings.name
@@ -44,8 +44,8 @@ private[impl] final class DispatcherImpl(val settings: Dispatcher.Settings, crea
     }
 
   /**
-   * Triggers a shutdown and returns a function that allows for verification of the shutdown completion.
-   */
+    * Triggers a shutdown and returns a function that allows for verification of the shutdown completion.
+    */
   @tailrec def shutdown(): () ⇒ Boolean =
     state.get match {
       case null ⇒
@@ -75,9 +75,9 @@ private[core] object DispatcherImpl {
   import ThreadPoolConfig._
 
   private abstract class State
-  private case object Creating extends State
+  private case object Creating                                       extends State
   private final case class Running(executorService: ExecutorService) extends State
-  private final case class Terminated(result: () ⇒ Boolean) extends State
+  private final case class Terminated(result: () ⇒ Boolean)          extends State
 
   def apply(settings: Dispatcher.Settings): DispatcherImpl = {
     def scaledPoolSize(size: Size): Int =
@@ -96,11 +96,17 @@ private[core] object DispatcherImpl {
             }
           }
 
-        case Dispatcher.Settings(name, ThreadPool(corePoolSize, maxPoolSize, keepAlive, allowCoreTimeout, prestart, daemonic)) ⇒
+        case Dispatcher
+              .Settings(name, ThreadPool(corePoolSize, maxPoolSize, keepAlive, allowCoreTimeout, prestart, daemonic)) ⇒
           new AtomicLong with ThreadFactory with (() ⇒ ExecutorService) {
             def apply() = {
-              val executor = new ThreadPoolExecutor(scaledPoolSize(corePoolSize), scaledPoolSize(maxPoolSize),
-                keepAlive.toNanos, TimeUnit.NANOSECONDS, new LinkedBlockingQueue[Runnable], this)
+              val executor = new ThreadPoolExecutor(
+                scaledPoolSize(corePoolSize),
+                scaledPoolSize(maxPoolSize),
+                keepAlive.toNanos,
+                TimeUnit.NANOSECONDS,
+                new LinkedBlockingQueue[Runnable],
+                this)
               executor.allowCoreThreadTimeOut(allowCoreTimeout)
               prestart match {
                 case Prestart.Off   ⇒ // default

@@ -5,7 +5,7 @@
 package swave.core.util
 
 import org.scalacheck.Gen
-import org.scalatest.{ Matchers, FreeSpec }
+import org.scalatest.{FreeSpec, Matchers}
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
 class RichListSpec extends FreeSpec with Matchers with GeneratorDrivenPropertyChecks {

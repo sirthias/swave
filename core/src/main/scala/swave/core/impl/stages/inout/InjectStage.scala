@@ -5,9 +5,9 @@
 package swave.core.impl.stages.inout
 
 import scala.annotation.tailrec
-import swave.core.{ PipeElem, Spout }
+import swave.core.{PipeElem, Spout}
 import swave.core.impl.stages.spout.SubSpoutStage
-import swave.core.impl.{ RunContext, Outport, Inport }
+import swave.core.impl.{Inport, Outport, RunContext}
 import swave.core.macros._
 import swave.core.util._
 
@@ -35,12 +35,12 @@ private[core] final class InjectStage extends InOutStage with PipeElem.InOut.Inj
       })
 
     /**
-     * Buffer non-empty, no sub-stream open.
-     * Waiting for the next request from the main downstream.
-     *
-     * @param pending number of elements already requested from upstream but not yet received (> 0)
-     *                or 0, if the buffer is full
-     */
+      * Buffer non-empty, no sub-stream open.
+      * Waiting for the next request from the main downstream.
+      *
+      * @param pending number of elements already requested from upstream but not yet received (> 0)
+      *                or 0, if the buffer is full
+      */
     def noSubAwaitingMainDemand(pending: Int): State = state(
       request = (n, from) ⇒ if (from eq out) awaitingSubDemand(emitNewSub(), pending, (n - 1).toLong) else stay(),
       cancel = from => if (from eq out) stopCancel(in) else stay(),
@@ -54,9 +54,9 @@ private[core] final class InjectStage extends InOutStage with PipeElem.InOut.Inj
       onError = stopErrorF(out))
 
     /**
-     * Buffer non-empty, upstream already completed, no sub-stream open.
-     * Waiting for the next request from the main downstream.
-     */
+      * Buffer non-empty, upstream already completed, no sub-stream open.
+      * Waiting for the next request from the main downstream.
+      */
     def noSubAwaitingMainDemandUpstreamGone(): State = state(
       request = (n, from) ⇒ {
         if (from eq out) {
@@ -69,12 +69,12 @@ private[core] final class InjectStage extends InOutStage with PipeElem.InOut.Inj
       cancel = from => if (from eq out) stopCancel(in) else stay())
 
     /**
-     * Buffer empty, no sub-stream open, demand signalled to upstream.
-     * Waiting for the next element from upstream.
-     *
-     * @param pending       number of elements already requested from upstream but not yet received, > 0
-     * @param mainRemaining number of elements already requested by downstream but not yet delivered, >= 0
-     */
+      * Buffer empty, no sub-stream open, demand signalled to upstream.
+      * Waiting for the next element from upstream.
+      *
+      * @param pending       number of elements already requested from upstream but not yet received, > 0
+      * @param mainRemaining number of elements already requested by downstream but not yet delivered, >= 0
+      */
     def noSubAwaitingElem(pending: Int, mainRemaining: Long): State = state(
       request = (n, from) ⇒ if (from eq out) noSubAwaitingElem(pending, mainRemaining ⊹ n) else stay(),
       cancel = from => if (from eq out) stopCancel(in) else stay(),
@@ -89,14 +89,14 @@ private[core] final class InjectStage extends InOutStage with PipeElem.InOut.Inj
       onError = stopErrorF(out))
 
     /**
-     * Buffer non-empty, sub-stream open.
-     * Waiting for the next request from the sub-stream.
-     *
-     * @param sub           the currently open sub-stream
-     * @param pending       number of elements already requested from upstream but not yet received (> 0),
-     *                      or 0, if the buffer is full
-     * @param mainRemaining number of elements already requested by downstream but not yet delivered, >= 0
-     */
+      * Buffer non-empty, sub-stream open.
+      * Waiting for the next request from the sub-stream.
+      *
+      * @param sub           the currently open sub-stream
+      * @param pending       number of elements already requested from upstream but not yet received (> 0),
+      *                      or 0, if the buffer is full
+      * @param mainRemaining number of elements already requested by downstream but not yet delivered, >= 0
+      */
     def awaitingSubDemand(sub: SubSpoutStage, pending: Int, mainRemaining: Long): State = state(
       request = (n, from) ⇒ {
         @tailrec def rec(nn: Int): State =
@@ -134,12 +134,12 @@ private[core] final class InjectStage extends InOutStage with PipeElem.InOut.Inj
       onError = stopErrorSubAndMainF(sub))
 
     /**
-     * Buffer non-empty, sub-stream open, upstream already completed.
-     * Waiting for the next request from the sub-stream.
-     *
-     * @param sub           the currently open sub-stream
-     * @param mainRemaining number of elements already requested by downstream but not yet delivered, >= 0
-     */
+      * Buffer non-empty, sub-stream open, upstream already completed.
+      * Waiting for the next request from the sub-stream.
+      *
+      * @param sub           the currently open sub-stream
+      * @param mainRemaining number of elements already requested by downstream but not yet delivered, >= 0
+      */
     def awaitingSubDemandUpstreamGone(sub: SubSpoutStage, mainRemaining: Long): State = state(
       request = (n, from) ⇒ {
         @tailrec def rec(nn: Int): State =
@@ -167,13 +167,13 @@ private[core] final class InjectStage extends InOutStage with PipeElem.InOut.Inj
       })
 
     /**
-     * Buffer non-empty, sub-stream open, main downstream already cancelled.
-     * Waiting for the next request from the sub-stream.
-     *
-     * @param sub     the currently open sub-stream
-     * @param pending number of elements already requested from upstream but not yet received (> 0),
-     *                or 0, if the buffer is full
-     */
+      * Buffer non-empty, sub-stream open, main downstream already cancelled.
+      * Waiting for the next request from the sub-stream.
+      *
+      * @param sub     the currently open sub-stream
+      * @param pending number of elements already requested from upstream but not yet received (> 0),
+      *                or 0, if the buffer is full
+      */
     def awaitingSubDemandDownstreamGone(sub: SubSpoutStage, pending: Int): State = state(
       request = (n, from) ⇒ {
         @tailrec def rec(nn: Int): State =
@@ -198,11 +198,11 @@ private[core] final class InjectStage extends InOutStage with PipeElem.InOut.Inj
       onError = stopErrorF(sub))
 
     /**
-     * Buffer non-empty, sub-stream open, upstream already completed, main downstream already cancelled.
-     * Waiting for the next request from the sub-stream.
-     *
-     * @param sub the currently open sub-stream
-     */
+      * Buffer non-empty, sub-stream open, upstream already completed, main downstream already cancelled.
+      * Waiting for the next request from the sub-stream.
+      *
+      * @param sub the currently open sub-stream
+      */
     def awaitingSubDemandUpAndDownstreamGone(sub: SubSpoutStage): State = state(
       request = (n, from) ⇒ {
         @tailrec def rec(nn: Int): State =
@@ -219,14 +219,14 @@ private[core] final class InjectStage extends InOutStage with PipeElem.InOut.Inj
       cancel = from => if (from eq sub) stopCancel(in) else stay())
 
     /**
-     * Buffer empty, sub-stream open, demand signalled to upstream.
-     * Waiting for the next element from upstream.
-     *
-     * @param sub           the currently open sub-stream
-     * @param pending       number of elements already requested from upstream but not yet received, > 0
-     * @param subRemaining  number of elements already requested by sub-stream but not yet delivered, >= 0
-     * @param mainRemaining number of elements already requested by downstream but not yet delivered, >= 0
-     */
+      * Buffer empty, sub-stream open, demand signalled to upstream.
+      * Waiting for the next element from upstream.
+      *
+      * @param sub           the currently open sub-stream
+      * @param pending       number of elements already requested from upstream but not yet received, > 0
+      * @param subRemaining  number of elements already requested by sub-stream but not yet delivered, >= 0
+      * @param mainRemaining number of elements already requested by downstream but not yet delivered, >= 0
+      */
     def awaitingElem(sub: SubSpoutStage, pending: Int, subRemaining: Long, mainRemaining: Long): State = state(
       request = (n, from) ⇒ {
         if (from eq sub) awaitingElem(sub, pending, subRemaining ⊹ n, mainRemaining)
@@ -256,13 +256,13 @@ private[core] final class InjectStage extends InOutStage with PipeElem.InOut.Inj
       onError = stopErrorSubAndMainF(sub))
 
     /**
-     * Buffer empty, sub-stream open, main downstream cancelled, demand signalled to upstream.
-     * Waiting for the next element from upstream.
-     *
-     * @param sub           the currently open sub-stream
-     * @param pending       number of elements already requested from upstream but not yet received, > 0
-     * @param subRemaining  number of elements already requested by sub-stream but not yet delivered, >= 0
-     */
+      * Buffer empty, sub-stream open, main downstream cancelled, demand signalled to upstream.
+      * Waiting for the next element from upstream.
+      *
+      * @param sub           the currently open sub-stream
+      * @param pending       number of elements already requested from upstream but not yet received, > 0
+      * @param subRemaining  number of elements already requested by sub-stream but not yet delivered, >= 0
+      */
     def awaitingElemDownstreamGone(sub: SubSpoutStage, pending: Int, subRemaining: Long): State = state(
       request = (n, from) ⇒ if (from eq sub) awaitingElemDownstreamGone(sub, pending, subRemaining ⊹ n) else stay(),
       cancel = from => if (from eq sub) stopCancel(in) else stay(),

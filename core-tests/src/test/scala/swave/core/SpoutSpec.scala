@@ -24,9 +24,11 @@ class SpoutSpec extends SwaveSpec {
       }
 
       "Simple push from notification handler" in {
-        val iter = Iterator.from(0)
+        val iter           = Iterator.from(0)
         var cancelNotified = false
-        val spout = Spout.push[Int](4, 16,
+        val spout = Spout.push[Int](
+          4,
+          16,
           notifyOnDequeued = (ps, _) ⇒ ps offer iter.next(),
           notifyOnCancel = _ ⇒ cancelNotified = true)
         spout.offer(iter.next())

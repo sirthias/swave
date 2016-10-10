@@ -6,7 +6,7 @@ package swave.core.impl.stages.inout
 
 import scala.util.control.NonFatal
 import swave.core.PipeElem
-import swave.core.impl.{ Outport, Inport }
+import swave.core.impl.{Inport, Outport}
 import swave.core.macros.StageImpl
 
 // format: OFF
@@ -22,8 +22,8 @@ private[core] final class FoldStage(zero: AnyRef, f: (AnyRef, AnyRef) ⇒ AnyRef
   def running(in: Inport, out: Outport) = {
 
     /**
-     * Waiting for a request from downstream.
-     */
+      * Waiting for a request from downstream.
+      */
     def awaitingDemand() = state(
       request = (_, _) ⇒ {
         in.request(Long.MaxValue)
@@ -35,8 +35,8 @@ private[core] final class FoldStage(zero: AnyRef, f: (AnyRef, AnyRef) ⇒ AnyRef
       onError = stopErrorF(out))
 
     /**
-     * Upstream completed, awaiting demand from downstream.
-     */
+      * Upstream completed, awaiting demand from downstream.
+      */
     def awaitingDemandUpstreamGone() = state(
       request = (_, _) ⇒ {
         out.onNext(zero)
@@ -46,10 +46,10 @@ private[core] final class FoldStage(zero: AnyRef, f: (AnyRef, AnyRef) ⇒ AnyRef
       cancel = stopF)
 
     /**
-     * Applying the fold function to all incoming elements.
-     *
-     * @param acc the current fold state
-     */
+      * Applying the fold function to all incoming elements.
+      *
+      * @param acc the current fold state
+      */
     def folding(acc: AnyRef): State = state(
       request = (_, _) ⇒ stay(),
       cancel = stopCancelF(in),

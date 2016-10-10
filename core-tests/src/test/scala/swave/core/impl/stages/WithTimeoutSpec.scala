@@ -27,18 +27,17 @@ final class WithTimeoutSpec extends SwaveSpec {
     implicit val testTimeout = Timeout(1.second)
 
     "be transparent if upstream rate is sufficient" taggedAs NotOnTravis in {
-      Spout.fromIterable(1 to 10)
-        .throttle(1, per = 50.millis)
-        .withIdleTimeout(100.millis) should produceSeq(1 to 10)
+      Spout.fromIterable(1 to 10).throttle(1, per = 50.millis).withIdleTimeout(100.millis) should produceSeq(1 to 10)
     }
 
     "fail with StreamTimeoutException if upstream rate is insufficient" taggedAs NotOnTravis in {
-      Spout.fromIterable(1 to 10)
+      Spout
+        .fromIterable(1 to 10)
         .delay(x ⇒ if (x == 3) 200.millis else Duration.Zero)
         .withIdleTimeout(100.millis) should produceErrorLike {
-          case x: StreamTimeoutException ⇒
-            x.getMessage shouldEqual "No elements passed in the last 100 milliseconds"
-        }
+        case x: StreamTimeoutException ⇒
+          x.getMessage shouldEqual "No elements passed in the last 100 milliseconds"
+      }
     }
   }
 
@@ -46,18 +45,20 @@ final class WithTimeoutSpec extends SwaveSpec {
     implicit val testTimeout = Timeout(1.second)
 
     "be transparent if first element arrives quickly enough" taggedAs NotOnTravis in {
-      Spout.fromIterable(1 to 10)
+      Spout
+        .fromIterable(1 to 10)
         .delay(x ⇒ if (x == 3) 200.millis else Duration.Zero)
         .withInitialTimeout(100.millis) should produceSeq(1 to 10)
     }
 
     "fail with StreamTimeoutException if first element is overly delayed" taggedAs NotOnTravis in {
-      Spout.fromIterable(1 to 10)
+      Spout
+        .fromIterable(1 to 10)
         .delay(x ⇒ if (x == 1) 200.millis else Duration.Zero)
         .withInitialTimeout(100.millis) should produceErrorLike {
-          case x: StreamTimeoutException ⇒
-            x.getMessage shouldEqual "The first element was not received within 100 milliseconds"
-        }
+        case x: StreamTimeoutException ⇒
+          x.getMessage shouldEqual "The first element was not received within 100 milliseconds"
+      }
     }
   }
 
@@ -65,17 +66,17 @@ final class WithTimeoutSpec extends SwaveSpec {
     implicit val testTimeout = Timeout(1.second)
 
     "be transparent if stream completes quickly enough" taggedAs NotOnTravis in {
-      Spout.fromIterable(1 to 10)
-        .withCompletionTimeout(100.millis) should produceSeq(1 to 10)
+      Spout.fromIterable(1 to 10).withCompletionTimeout(100.millis) should produceSeq(1 to 10)
     }
 
     "fail with StreamTimeoutException if stream doesn't complete within timeout" taggedAs NotOnTravis in {
-      Spout.fromIterable(1 to 10)
+      Spout
+        .fromIterable(1 to 10)
         .throttle(1, per = 20.millis)
         .withCompletionTimeout(100.millis) should produceErrorLike {
-          case x: StreamTimeoutException ⇒
-            x.getMessage shouldEqual "The stream was not completed within 100 milliseconds"
-        }
+        case x: StreamTimeoutException ⇒
+          x.getMessage shouldEqual "The stream was not completed within 100 milliseconds"
+      }
     }
   }
 

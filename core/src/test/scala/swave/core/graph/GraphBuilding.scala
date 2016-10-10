@@ -10,9 +10,9 @@ object GraphBuilding {
   import Dsl._
   import DslImpl._
 
-  def input(text: String): Input = new InputImpl(new NodeImpl(text))
+  def input(text: String): Input          = new InputImpl(new NodeImpl(text))
   def fanOut(text: String): FanOut[Input] = new FanOutImpl[Input](new NodeImpl(text), Nil, new InputImpl(_))
-  def coupling(text: String): Coupling = new CouplingImpl(text)
+  def coupling(text: String): Coupling    = new CouplingImpl(text)
 
   object Dsl {
     sealed abstract class Node {
@@ -42,7 +42,7 @@ object GraphBuilding {
     }
 
     sealed abstract class Input extends Ops {
-      type To = Digraph[Node]
+      type To   = Digraph[Node]
       type Repr = Input
       def toDigraph: To
     }
@@ -61,7 +61,7 @@ object GraphBuilding {
       def subDrains(drains: String*): this.type
 
       sealed abstract class SubOps extends Ops {
-        type To = FanOut.this.type
+        type To   = FanOut.this.type
         type Repr = SubOps
         def end: FanOut[FRepr]
       }
@@ -74,7 +74,7 @@ object GraphBuilding {
     import Dsl._
 
     class NodeImpl(val value: String) extends Node {
-      var inputs: List[NodeImpl] = Nil
+      var inputs: List[NodeImpl]  = Nil
       var outputs: List[NodeImpl] = Nil
       def addOutput(other: NodeImpl): Unit = {
         other.inputs :+= this
@@ -94,11 +94,11 @@ object GraphBuilding {
         node.addOutput(next)
         new InputImpl(next)
       }
-      def attach(other: Input) = new FanInImpl[Input](node :: impl(other).node :: Nil, new InputImpl(_))
+      def attach(other: Input)     = new FanInImpl[Input](node :: impl(other).node :: Nil, new InputImpl(_))
       def attachLeft(other: Input) = new FanInImpl[Input](impl(other).node :: node :: Nil, new InputImpl(_))
-      def fanOut(fanOut: String) = new FanOutImpl[Input](impl(next(fanOut)).node, Nil, new InputImpl(_))
-      def to(drain: String) = next(drain).toDigraph
-      def to(coupling: Coupling) = append(coupling.asInstanceOf[CouplingImpl]).toDigraph
+      def fanOut(fanOut: String)   = new FanOutImpl[Input](impl(next(fanOut)).node, Nil, new InputImpl(_))
+      def to(drain: String)        = next(drain).toDigraph
+      def to(coupling: Coupling)   = append(coupling.asInstanceOf[CouplingImpl]).toDigraph
       def toDigraph = {
         import Digraph.EdgeAttributes._
         val graph = Digraph[Node](node :: Nil, _.asInstanceOf[NodeImpl].inputs, _.asInstanceOf[NodeImpl].outputs)
@@ -124,7 +124,8 @@ object GraphBuilding {
       }
     }
 
-    final class FanOutImpl[FRepr](base: NodeImpl, inputs: List[NodeImpl], wrap: NodeImpl ⇒ FRepr) extends FanOut[FRepr] {
+    final class FanOutImpl[FRepr](base: NodeImpl, inputs: List[NodeImpl], wrap: NodeImpl ⇒ FRepr)
+        extends FanOut[FRepr] {
       def attach(other: Input) = new FanOutImpl(base, inputs :+ impl(other).node, wrap)
       def fanIn(text: String): FRepr = {
         val node = new NodeImpl(text)
@@ -155,9 +156,10 @@ object GraphBuilding {
           node.addOutput(next)
           new SubOpsImpl(next)
         }
-        def attach(other: Input) = new FanInImpl[SubOps](node :: impl(other).node :: Nil, new SubOpsImpl(_))
+        def attach(other: Input)     = new FanInImpl[SubOps](node :: impl(other).node :: Nil, new SubOpsImpl(_))
         def attachLeft(other: Input) = new FanInImpl[SubOps](impl(other).node :: node :: Nil, new SubOpsImpl(_))
-        def fanOut(fanOut: String) = new FanOutImpl[SubOps](next(fanOut).asInstanceOf[SubOpsImpl].node, Nil, new SubOpsImpl(_))
+        def fanOut(fanOut: String) =
+          new FanOutImpl[SubOps](next(fanOut).asInstanceOf[SubOpsImpl].node, Nil, new SubOpsImpl(_))
         def to(drain: String): To = {
           next(drain)
           FanOutImpl.this

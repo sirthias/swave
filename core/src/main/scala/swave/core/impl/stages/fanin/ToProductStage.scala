@@ -43,8 +43,8 @@ private[core] final class ToProductStage(val pipeElemType: String,
   }
 
   /**
-   * @param out the active downstream
-   */
+    * @param out the active downstream
+    */
   def awaitingXStart(out: Outport) = state(
     xStart = () => {
       requestNext()
@@ -52,13 +52,13 @@ private[core] final class ToProductStage(val pipeElemType: String,
     })
 
   /**
-   * Awaiting one element from all upstreams to complete a product.
-   *
-   * @param out           the active downstream
-   * @param pendingMask   bitmask holding a 1-bit for every input which we haven't received the current element from, > 0
-   * @param completedMask bitmask holding a 1-bit for every input which has already completed, >= 0
-   * @param remaining     number of elements already requested by downstream but not yet delivered, >= 0
-   */
+    * Awaiting one element from all upstreams to complete a product.
+    *
+    * @param out           the active downstream
+    * @param pendingMask   bitmask holding a 1-bit for every input which we haven't received the current element from, > 0
+    * @param completedMask bitmask holding a 1-bit for every input which has already completed, >= 0
+    * @param remaining     number of elements already requested by downstream but not yet delivered, >= 0
+    */
   def collectingMembers(out: Outport, pendingMask: Long, completedMask: Long, remaining: Long): State = state(
     request = (n, _) ⇒ collectingMembers(out, pendingMask, completedMask, remaining ⊹ n),
 
@@ -100,11 +100,11 @@ private[core] final class ToProductStage(val pipeElemType: String,
     })
 
   /**
-   * All members for one product present. Awaiting demand from downstream.
-   *
-   * @param out           the active downstream
-   * @param completedMask bitmask holding a 1-bit for every input which has already completed, >= 0
-   */
+    * All members for one product present. Awaiting demand from downstream.
+    *
+    * @param out           the active downstream
+    * @param completedMask bitmask holding a 1-bit for every input which has already completed, >= 0
+    */
   def awaitingDemand(out: Outport, completedMask: Long): State = state(
     request = (n, _) ⇒ {
       out.onNext(f(members))

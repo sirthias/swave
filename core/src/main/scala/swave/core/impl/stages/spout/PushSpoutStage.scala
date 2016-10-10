@@ -69,10 +69,10 @@ private[core] final class PushSpoutStage(queue: MpscChunkedArrayQueue[AnyRef], n
   def running(out: Outport): State = {
 
     /**
-     * Downstream active. No completion received yet.
-     *
-     * @param remaining number of elements already requested by downstream but not yet delivered, >= 0
-     */
+      * Downstream active. No completion received yet.
+      *
+      * @param remaining number of elements already requested by downstream but not yet delivered, >= 0
+      */
     def active(remaining: Long): State = state(
       request = (n, _) ⇒ active(dispatch(remaining ⊹ n)),
 
@@ -88,8 +88,8 @@ private[core] final class PushSpoutStage(queue: MpscChunkedArrayQueue[AnyRef], n
       })
 
     /**
-     * Downstream active. Manual completion received, queue non-empty.
-     */
+      * Downstream active. Manual completion received, queue non-empty.
+      */
     def draining(): State = state(
       request = (n, _) ⇒ if (dispatch(n.toLong) > 0 || queue.isEmpty) stopComplete(out) else stay(),
 

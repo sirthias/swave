@@ -4,7 +4,7 @@
 
 package swave.core.impl.stages
 
-import java.nio.file.{ Path, Files }
+import java.nio.file.{Files, Path}
 import scala.concurrent.duration._
 import scodec.bits.ByteVector
 import swave.core.util._
@@ -44,7 +44,8 @@ class FileDrainSpec extends SwaveSpec {
   private def withTempPath(create: Boolean)(block: Path ⇒ Unit): Unit = {
     val targetFile = Files.createTempFile("file-sink", ".tmp")
     if (!create) Files.delete(targetFile)
-    try block(targetFile) finally Files.delete(targetFile)
+    try block(targetFile)
+    finally Files.delete(targetFile)
   }
 
   private def verifyFileContents(path: Path, contents: String): Unit = {

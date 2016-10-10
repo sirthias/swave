@@ -4,21 +4,21 @@
 
 package swave.core
 
-import scala.annotation.{ implicitNotFound, tailrec }
+import scala.annotation.{implicitNotFound, tailrec}
 import scala.collection.generic.CanBuildFrom
 import scala.collection.immutable
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.reflect.ClassTag
-import scala.util.{ Failure, Success, Try }
+import scala.util.{Failure, Success, Try}
 import shapeless._
 import shapeless.ops.nat.ToInt
-import shapeless.ops.hlist.{ Fill, ToCoproduct, Tupler }
+import shapeless.ops.hlist.{Fill, ToCoproduct, Tupler}
 import swave.core.impl.stages.Stage
 import swave.core.impl.util.InportList
-import swave.core.impl.stages.fanin.{ ConcatStage, FirstNonEmptyStage, MergeStage, ToProductStage }
-import swave.core.impl.stages.fanout.{ BroadcastStage, FirstAvailableStage, RoundRobinStage, SwitchStage }
-import swave.core.impl.{ Inport, ModuleImpl, TypeLogic }
+import swave.core.impl.stages.fanin.{ConcatStage, FirstNonEmptyStage, MergeStage, ToProductStage}
+import swave.core.impl.stages.fanout.{BroadcastStage, FirstAvailableStage, RoundRobinStage, SwitchStage}
+import swave.core.impl.{Inport, ModuleImpl, TypeLogic}
 import swave.core.impl.stages.inout._
 import swave.core.util._
 import swave.core.macros._
@@ -39,11 +39,12 @@ trait StreamOps[A] extends Any { self ⇒
   final def attach[T, O](sub: Spout[T])(implicit ev: Lub[A, T, O]): FanIn[A :: T :: HNil, A :+: T :+: CNil, O, Repr] =
     new FanIn(InportList(base) :+ sub.inport, wrap)
 
-  final def attach[L <: HList](branchOut: BranchOut[L, _, _, _, Spout])(implicit
-    u: HLub[A :: L],
-    tc: ToCoproduct[L]): FanIn[A :: L, A :+: tc.Out, u.Out, Repr] = new FanIn(base +: branchOut.subs, wrap)
+  final def attach[L <: HList](branchOut: BranchOut[L, _, _, _, Spout])(
+      implicit u: HLub[A :: L],
+      tc: ToCoproduct[L]): FanIn[A :: L, A :+: tc.Out, u.Out, Repr] = new FanIn(base +: branchOut.subs, wrap)
 
-  final def attach[L <: HList, C <: Coproduct, FO, O](fanIn: FanIn[L, C, FO, Spout])(implicit ev: Lub[A, FO, O]): FanIn[A :: L, A :+: C, O, Repr] =
+  final def attach[L <: HList, C <: Coproduct, FO, O](fanIn: FanIn[L, C, FO, Spout])(
+      implicit ev: Lub[A, FO, O]): FanIn[A :: L, A :+: C, O, Repr] =
     new FanIn(base +: fanIn.subs, wrap)
 
   final def attachAll[S, Sup >: A](subs: Traversable[S])(implicit ev: Streamable.Aux[S, Sup]): FanIn0[Sup, Repr] = {
@@ -51,10 +52,13 @@ trait StreamOps[A] extends Any { self ⇒
     new FanIn0(InportList(base) :++ subs, wrap)
   }
 
-  final def attachLeft[T, O](sub: Spout[T])(implicit ev: Lub[A, T, O]): FanIn[T :: A :: HNil, T :+: A :+: CNil, O, Repr] =
+  final def attachLeft[T, O](sub: Spout[T])(
+      implicit ev: Lub[A, T, O]): FanIn[T :: A :: HNil, T :+: A :+: CNil, O, Repr] =
     new FanIn(base +: InportList(sub.inport), wrap)
 
-  final def attachN[T, O](n: Nat, fo: FanOut[T, _, _, _, Spout])(implicit f: Fill[n.N, T], ti: ToInt[n.N], lub: Lub[A, T, O]): FanIn[A :: f.Out, CNil, O, Repr] =
+  final def attachN[T, O](n: Nat, fo: FanOut[T, _, _, _, Spout])(implicit f: Fill[n.N, T],
+                                                                 ti: ToInt[n.N],
+                                                                 lub: Lub[A, T, O]): FanIn[A :: f.Out, CNil, O, Repr] =
     new FanIn(base +: InportList.fill(ti(), attachNop(fo.base)), wrap)
 
   final def buffer(size: Int, overflowStrategy: Overflow = Overflow.Backpressure): Repr[A] = {
@@ -135,50 +139,52 @@ trait StreamOps[A] extends Any { self ⇒
   final def first: Repr[A] =
     via(Pipe[A] take 1 named "first")
 
-  final def flattenConcat[B](parallelism: Int = 1)(
-    implicit
-    ev: Streamable.Aux[A, B]): Repr[B] =
+  final def flattenConcat[B](parallelism: Int = 1)(implicit ev: Streamable.Aux[A, B]): Repr[B] =
     append(new FlattenConcatStage(ev.asInstanceOf[Streamable.Aux[AnyRef, AnyRef]], parallelism))
 
-  final def flattenMerge[B](parallelism: Int)(
-    implicit
-    ev: Streamable.Aux[A, B]): Repr[B] =
+  final def flattenMerge[B](parallelism: Int)(implicit ev: Streamable.Aux[A, B]): Repr[B] =
     append(new FlattenMergeStage(ev.asInstanceOf[Streamable.Aux[AnyRef, AnyRef]], parallelism))
 
   final def fold[B](zero: B)(f: (B, A) ⇒ B): Repr[B] =
     append(new FoldStage(zero.asInstanceOf[AnyRef], f.asInstanceOf[(AnyRef, AnyRef) ⇒ AnyRef]))
 
   /**
-   * @param maxSubstreams the maximum number of sub-streams allowed. Exceeding this limit causes to stream to be
-   *                      completed with an [[IllegalStateException]].
-   * @param reopenCancelledSubs if `true` cancellation of a sub-stream will trigger a new sub-stream for the respective
-   *                            key to be emitted to the downstream (whenever a respective element arrives),
-   *                            if `false` all elements that are keyed to a cancelled sub-stream will simply be dropped
-   * @param eagerComplete if `true` the cancellation of the (main) downstream will immediately be propagated to upstream
-   *                      and all sub-stream will be completed,
-   *                      if `false` the cancellation of the (main) downstream will keep the stream running, but
-   *                      cause all elements keyed to not yet open sub-streams to be dropped.
-   * @param f the key function. Must not return `null` for any element. Otherwise the stream is completed with a
-   *          [[RuntimeException]].
-   */
-  final def groupBy[K](maxSubstreams: Int, reopenCancelledSubs: Boolean = false, eagerComplete: Boolean = false)(f: A ⇒ K): Repr[Spout[A]] =
+    * @param maxSubstreams the maximum number of sub-streams allowed. Exceeding this limit causes to stream to be
+    *                      completed with an [[IllegalStateException]].
+    * @param reopenCancelledSubs if `true` cancellation of a sub-stream will trigger a new sub-stream for the respective
+    *                            key to be emitted to the downstream (whenever a respective element arrives),
+    *                            if `false` all elements that are keyed to a cancelled sub-stream will simply be dropped
+    * @param eagerComplete if `true` the cancellation of the (main) downstream will immediately be propagated to upstream
+    *                      and all sub-stream will be completed,
+    *                      if `false` the cancellation of the (main) downstream will keep the stream running, but
+    *                      cause all elements keyed to not yet open sub-streams to be dropped.
+    * @param f the key function. Must not return `null` for any element. Otherwise the stream is completed with a
+    *          [[RuntimeException]].
+    */
+  final def groupBy[K](maxSubstreams: Int, reopenCancelledSubs: Boolean = false, eagerComplete: Boolean = false)(
+      f: A ⇒ K): Repr[Spout[A]] =
     append(new GroupByStage(maxSubstreams, reopenCancelledSubs, eagerComplete, f.asInstanceOf[AnyRef ⇒ AnyRef]))
 
   final def grouped(groupSize: Int, emitSingleEmpty: Boolean = false): Repr[immutable.Seq[A]] =
     groupedTo[immutable.Seq](groupSize, emitSingleEmpty)
 
-  final def groupedTo[M[+_]](groupSize: Int, emitSingleEmpty: Boolean = false)(implicit cbf: CanBuildFrom[M[A], A, M[A]]): Repr[M[A]] =
-    append(new GroupedStage(groupSize, emitSingleEmpty, cbf.apply().asInstanceOf[scala.collection.mutable.Builder[Any, AnyRef]]))
+  final def groupedTo[M[+ _]](groupSize: Int, emitSingleEmpty: Boolean = false)(
+      implicit cbf: CanBuildFrom[M[A], A, M[A]]): Repr[M[A]] =
+    append(
+      new GroupedStage(
+        groupSize,
+        emitSingleEmpty,
+        cbf.apply().asInstanceOf[scala.collection.mutable.Builder[Any, AnyRef]]))
 
   /**
-   * Groups incoming elements received within the given `duration` into [[Vector]] instances that have at least one and
-   * at most `maxSize` elements. A group is emitted when `maxSize` has been reached or the `duration` since the last
-   * emit has expired. If no elements are received within the `duration` then nothing is emitted at time expiration,
-   * but the next incoming element will be emitted immediately after reception as part of a single-element group.
-   *
-   * @param maxSize the maximum size of the emitted Vector instances, must be > 0
-   * @param duration the time period over which to aggregate, must be > 0
-   */
+    * Groups incoming elements received within the given `duration` into [[Vector]] instances that have at least one and
+    * at most `maxSize` elements. A group is emitted when `maxSize` has been reached or the `duration` since the last
+    * emit has expired. If no elements are received within the `duration` then nothing is emitted at time expiration,
+    * but the next incoming element will be emitted immediately after reception as part of a single-element group.
+    *
+    * @param maxSize the maximum size of the emitted Vector instances, must be > 0
+    * @param duration the time period over which to aggregate, must be > 0
+    */
   final def groupedWithin(maxSize: Int, duration: FiniteDuration): Repr[Vector[A]] =
     append(new GroupedWithinStage(maxSize, duration))
 
@@ -232,9 +238,7 @@ trait StreamOps[A] extends Any { self ⇒
     attach(other).fanInMergeSorted(eagerComplete)
 
   final def mergeToEither[B](other: Spout[B]): Repr[Either[A, B]] =
-    map(Left[A, B])
-      .attach(other.map(Right[A, B]))
-      .fanInToSum[Either[A, B]]()
+    map(Left[A, B]).attach(other.map(Right[A, B])).fanInToSum[Either[A, B]]()
 
   final def multiply(factor: Int): Repr[A] =
     via(Pipe[A].map(x ⇒ Iterator.fill(factor)(x)).flattenConcat() named "multiply")
@@ -300,19 +304,24 @@ trait StreamOps[A] extends Any { self ⇒
 
   final def split(f: A ⇒ Split.Command): Repr[Spout[A]] = ???
 
-  final def switch(n: Nat, eagerCancel: Boolean = false)(f: A ⇒ Int)(implicit ti: ToInt[n.N], fl: Fill[n.N, A]): BranchOut[fl.Out, HNil, CNil, Nothing, Repr] =
+  final def switch(n: Nat, eagerCancel: Boolean = false)(
+      f: A ⇒ Int)(implicit ti: ToInt[n.N], fl: Fill[n.N, A]): BranchOut[fl.Out, HNil, CNil, Nothing, Repr] =
     switch[n.N](f, eagerCancel)
 
-  final def switch[N <: Nat](f: A ⇒ Int)(implicit ti: ToInt[N], fl: Fill[N, A]): BranchOut[fl.Out, HNil, CNil, Nothing, Repr] =
+  final def switch[N <: Nat](f: A ⇒ Int)(implicit ti: ToInt[N],
+                                         fl: Fill[N, A]): BranchOut[fl.Out, HNil, CNil, Nothing, Repr] =
     switch[N](f, eagerCancel = false)
 
-  final def switch[N <: Nat](f: A ⇒ Int, eagerCancel: Boolean)(implicit ti: ToInt[N], fl: Fill[N, A]): BranchOut[fl.Out, HNil, CNil, Nothing, Repr] = {
+  final def switch[N <: Nat](f: A ⇒ Int, eagerCancel: Boolean)(
+      implicit ti: ToInt[N],
+      fl: Fill[N, A]): BranchOut[fl.Out, HNil, CNil, Nothing, Repr] = {
     val branchCount = ti()
-    val base = append(new SwitchStage(branchCount, f.asInstanceOf[AnyRef ⇒ Int], eagerCancel)).base
+    val base        = append(new SwitchStage(branchCount, f.asInstanceOf[AnyRef ⇒ Int], eagerCancel)).base
     new BranchOut(InportList.fill(branchCount, attachNop(base)), InportList.empty, wrap)
   }
 
-  final def switchIf(p: A ⇒ Boolean, eagerCancel: Boolean = false): BranchOut[A :: A :: HNil, HNil, CNil, Nothing, Repr] =
+  final def switchIf(p: A ⇒ Boolean,
+                     eagerCancel: Boolean = false): BranchOut[A :: A :: HNil, HNil, CNil, Nothing, Repr] =
     switch(2, eagerCancel)(x ⇒ if (p(x)) 1 else 0)
 
   final def take(count: Long): Repr[A] =
@@ -321,11 +330,13 @@ trait StreamOps[A] extends Any { self ⇒
   final def takeLast(n: Int): Repr[A] = {
     val pipe =
       if (n > 0) {
-        Pipe[A].fold(new RingBuffer[A](roundUpToNextPowerOf2(n))) { (buf, elem) ⇒
-          if (buf.size == n) buf.unsafeDropHead()
-          buf.unsafeWrite(elem)
-          buf
-        }.flattenConcat()
+        Pipe[A]
+          .fold(new RingBuffer[A](roundUpToNextPowerOf2(n))) { (buf, elem) ⇒
+            if (buf.size == n) buf.unsafeDropHead()
+            buf.unsafeWrite(elem)
+            buf
+          }
+          .flattenConcat()
       } else Pipe[A].drop(Long.MaxValue)
     via(pipe named "takeLast")
   }
@@ -374,11 +385,11 @@ object StreamOps {
   }
 
   /**
-   * Homogeneous fan-in, where all fan-in streams have the same type.
-   *
-   * @tparam Sup  super-type of all fan-in sub-streams
-   * @tparam Repr underlying representation
-   */
+    * Homogeneous fan-in, where all fan-in streams have the same type.
+    *
+    * @tparam Sup  super-type of all fan-in sub-streams
+    * @tparam Repr underlying representation
+    */
   final class FanIn0[Sup, Repr[_]] private[StreamOps] (subs: InportList, rawWrap: Inport ⇒ Repr[_]) {
 
     def attach[S >: Sup](sub: Spout[S]): FanIn0[S, Repr] =
@@ -392,40 +403,43 @@ object StreamOps {
       new FanIn0(this.subs :++ subs, rawWrap)
     }
 
-    def fanInConcat: Repr[Sup] = wrap(new ConcatStage(subs))
-    def fanInFirstNonEmpty: Repr[Sup] = wrap(new FirstNonEmptyStage(subs))
-    def fanInInterleave(segmentSize: Int, eagerComplete: Boolean): Repr[Sup] = ???
-    def fanInMerge(eagerComplete: Boolean = false): Repr[Sup] = wrap(new MergeStage(subs, eagerComplete))
+    def fanInConcat: Repr[Sup]                                                                   = wrap(new ConcatStage(subs))
+    def fanInFirstNonEmpty: Repr[Sup]                                                            = wrap(new FirstNonEmptyStage(subs))
+    def fanInInterleave(segmentSize: Int, eagerComplete: Boolean): Repr[Sup]                     = ???
+    def fanInMerge(eagerComplete: Boolean = false): Repr[Sup]                                    = wrap(new MergeStage(subs, eagerComplete))
     def fanInMergeSorted(eagerComplete: Boolean = false)(implicit ord: Ordering[Sup]): Repr[Sup] = ???
 
     private def wrap[T](in: Inport): Repr[T] = rawWrap(in).asInstanceOf[Repr[T]]
   }
 
   /**
-   * Heterogeneous fan-in, where the fan-in streams have potentially differing types.
-   *
-   * @tparam L    element types of all unterminated fan-in sub-streams as an HList
-   * @tparam C    element types of all unterminated fan-in sub-streams as a Coproduct
-   * @tparam Sup  super-type of all unterminated fan-in sub-streams
-   * @tparam Repr underlying representation
-   */
+    * Heterogeneous fan-in, where the fan-in streams have potentially differing types.
+    *
+    * @tparam L    element types of all unterminated fan-in sub-streams as an HList
+    * @tparam C    element types of all unterminated fan-in sub-streams as a Coproduct
+    * @tparam Sup  super-type of all unterminated fan-in sub-streams
+    * @tparam Repr underlying representation
+    */
   sealed class FanIn[L <: HList, C <: Coproduct, Sup, Repr[_]] private[core] (
-      private[core] val subs: InportList, protected val rawWrap: Inport ⇒ Repr[_]) {
+      private[core] val subs: InportList,
+      protected val rawWrap: Inport ⇒ Repr[_]) {
 
     type FI[LL <: HList, CC <: Coproduct, S] <: FanIn[LL, CC, S, Repr]
 
     protected def copy[LL <: HList, CC <: Coproduct, S](subs: InportList): FI[LL, CC, S] =
       new FanIn(subs, rawWrap).asInstanceOf[FI[LL, CC, S]]
 
-    final def attach[T, Sup2, P <: HList, Q <: Coproduct](sub: Spout[T])(implicit
-      ev0: Lub[Sup, T, Sup2],
-      ev1: ops.hlist.Prepend.Aux[L, T :: HNil, P], ev2: ops.coproduct.Prepend.Aux[C, T :+: CNil, Q]): FI[P, Q, Sup2] =
+    final def attach[T, Sup2, P <: HList, Q <: Coproduct](sub: Spout[T])(
+        implicit ev0: Lub[Sup, T, Sup2],
+        ev1: ops.hlist.Prepend.Aux[L, T :: HNil, P],
+        ev2: ops.coproduct.Prepend.Aux[C, T :+: CNil, Q]): FI[P, Q, Sup2] =
       copy(subs :+ sub.inport)
 
     final def attachLeft[T, Sup2](sub: Spout[T])(implicit ev: Lub[Sup, T, Sup2]): FI[T :: L, T :+: C, Sup2] =
       copy(sub.inport +: subs)
 
-    final def attachAll[S, Sup2 >: Sup](subs: Traversable[S])(implicit ev: Streamable.Aux[S, Sup2]): FanIn0[Sup2, Repr] = {
+    final def attachAll[S, Sup2 >: Sup](subs: Traversable[S])(
+        implicit ev: Streamable.Aux[S, Sup2]): FanIn0[Sup2, Repr] = {
       requireArg(subs.nonEmpty)
       new FanIn0(this.subs :++ subs, rawWrap)
     }
@@ -438,7 +452,8 @@ object StreamOps {
       ???
     final def fanInMerge(eagerComplete: Boolean = false)(implicit ev: FanInReq[L]): Repr[Sup] =
       wrap(new MergeStage(subs, eagerComplete))
-    final def fanInMergeSorted(eagerComplete: Boolean = false)(implicit ev: FanInReq[L], ord: Ordering[Sup]): Repr[Sup] =
+    final def fanInMergeSorted(eagerComplete: Boolean = false)(implicit ev: FanInReq[L],
+                                                               ord: Ordering[Sup]): Repr[Sup] =
       ???
 
     final def fanInToTuple(implicit ev: FanInReq[L], t: Tuplable[L]): Repr[t.Out] =
@@ -453,8 +468,7 @@ object StreamOps {
       fanInToCoproduct(eagerComplete).asInstanceOf[StreamOps[C]].map(c ⇒ gen from c).asInstanceOf[Repr[T]]
 
     def fromFanInVia[P <: HList, R, Out](joined: Module.TypeLogic.Joined[L, P, R])(
-      implicit
-      vr: ViaResult[P, Piping[R], Repr, Out]): Out = {
+        implicit vr: ViaResult[P, Piping[R], Repr, Out]): Out = {
       val out = ModuleImpl(joined.module)(subs)
       val result = vr.id match {
         case 0 ⇒ new Piping(subs.in, out)
@@ -471,16 +485,18 @@ object StreamOps {
   }
 
   /**
-   * Open fan-out, where all fan-out sub streams have the same type and there can be arbitrarily many of them.
-   *
-   * @tparam A    type coming in from upstream
-   * @tparam L    element types of all unterminated fan-in sub-streams as an HList
-   * @tparam C    element types of all unterminated fan-in sub-streams as a Coproduct
-   * @tparam Sup  super-type of all unterminated fan-in sub-streams
-   * @tparam Repr underlying representation
-   */
-  final class FanOut[A, L <: HList, C <: Coproduct, Sup, Repr[_]] private[core] (
-      private[core] val base: Inport, _subs: InportList, _wrap: Inport ⇒ Repr[_]) extends FanIn[L, C, Sup, Repr](_subs, _wrap) {
+    * Open fan-out, where all fan-out sub streams have the same type and there can be arbitrarily many of them.
+    *
+    * @tparam A    type coming in from upstream
+    * @tparam L    element types of all unterminated fan-in sub-streams as an HList
+    * @tparam C    element types of all unterminated fan-in sub-streams as a Coproduct
+    * @tparam Sup  super-type of all unterminated fan-in sub-streams
+    * @tparam Repr underlying representation
+    */
+  final class FanOut[A, L <: HList, C <: Coproduct, Sup, Repr[_]] private[core] (private[core] val base: Inport,
+                                                                                 _subs: InportList,
+                                                                                 _wrap: Inport ⇒ Repr[_])
+      extends FanIn[L, C, Sup, Repr](_subs, _wrap) {
 
     type FI[LL <: HList, CC <: Coproduct, S] = FanOut[A, LL, CC, S, Repr]
 
@@ -506,18 +522,20 @@ object StreamOps {
   }
 
   /**
-   * Closed fan-out, where the number of fan-out sub streams and their (potentially differing) types are predefined.
-   *
-   * @tparam A    element types of the still unconsumed fan-out sub-streams as an HList
-   * @tparam L    element types of all unterminated fan-in sub-streams as an HList
-   * @tparam C    element types of all unterminated fan-in sub-streams as a Coproduct
-   * @tparam Sup  super-type of all unterminated fan-in sub-streams
-   * @tparam Repr underlying representation
-   */
-  final class BranchOut[A <: HList, L <: HList, C <: Coproduct, Sup, Repr[_]] private[core] (
-      ins: InportList, _subs: InportList, _wrap: Inport ⇒ Repr[_]) extends FanIn[L, C, Sup, Repr](_subs, _wrap) {
+    * Closed fan-out, where the number of fan-out sub streams and their (potentially differing) types are predefined.
+    *
+    * @tparam A    element types of the still unconsumed fan-out sub-streams as an HList
+    * @tparam L    element types of all unterminated fan-in sub-streams as an HList
+    * @tparam C    element types of all unterminated fan-in sub-streams as a Coproduct
+    * @tparam Sup  super-type of all unterminated fan-in sub-streams
+    * @tparam Repr underlying representation
+    */
+  final class BranchOut[A <: HList, L <: HList, C <: Coproduct, Sup, Repr[_]] private[core] (ins: InportList,
+                                                                                             _subs: InportList,
+                                                                                             _wrap: Inport ⇒ Repr[_])
+      extends FanIn[L, C, Sup, Repr](_subs, _wrap) {
 
-    type FI[LL <: HList, CC <: Coproduct, S] = BranchOut[A, LL, CC, S, Repr]
+    type FI[LL <: HList, CC <: Coproduct, S]                   = BranchOut[A, LL, CC, S, Repr]
     private type ViaBranchOut[LL <: HList, CC <: Coproduct, S] = BranchOut[LL, HNil, CNil, Nothing, Repr]
 
     override protected def copy[LL <: HList, CC <: Coproduct, S](subs: InportList): FI[LL, CC, S] =
@@ -542,14 +560,16 @@ object StreamOps {
   }
 
   /**
-   * The operations underneath a fan/branch-out sub.
-   */
+    * The operations underneath a fan/branch-out sub.
+    */
   final class SubStreamOps[A, L <: HList, C <: Coproduct, Sup, FRepr[_], F <: FanIn[L, C, Sup, FRepr]] private[core] (
-      fo: F, spout: Spout[A]) extends StreamOps[A] {
+      fo: F,
+      spout: Spout[A])
+      extends StreamOps[A] {
     type Repr[X] = SubStreamOps[X, L, C, Sup, FRepr, F]
 
-    protected def base: Inport = spout.inport
-    protected def wrap: Inport ⇒ Repr[_] = in ⇒ new SubStreamOps(fo, new Spout(in))
+    protected def base: Inport                     = spout.inport
+    protected def wrap: Inport ⇒ Repr[_]           = in ⇒ new SubStreamOps(fo, new Spout(in))
     protected def append[B](stage: Stage): Repr[B] = new SubStreamOps(fo, spout.append(stage))
 
     def identity: Repr[A] = this
@@ -562,8 +582,7 @@ object StreamOps {
     def via[B](pipe: A =>> B): Repr[B] = new SubStreamOps(fo, spout via pipe)
 
     def via[P <: HList, R, Out](joined: Module.TypeLogic.Joined[A :: HNil, P, R])(
-      implicit
-      vr: TypeLogic.ViaResult[P, F, Repr, Out]): Out = {
+        implicit vr: TypeLogic.ViaResult[P, F, Repr, Out]): Out = {
       val out = ModuleImpl(joined.module)(InportList(spout.inport))
       val result = vr.id match {
         case 0 ⇒ fo
@@ -573,8 +592,10 @@ object StreamOps {
       result.asInstanceOf[Out]
     }
 
-    def end[Sup2, P <: HList, Q <: Coproduct](implicit ev0: Lub[Sup, A, Sup2], ev1: ops.hlist.Prepend.Aux[L, A :: HNil, P],
-      ev2: ops.coproduct.Prepend.Aux[C, A :+: CNil, Q]): F#FI[P, Q, Sup2] = fo.attach(spout).asInstanceOf[F#FI[P, Q, Sup2]]
+    def end[Sup2, P <: HList, Q <: Coproduct](implicit ev0: Lub[Sup, A, Sup2],
+                                              ev1: ops.hlist.Prepend.Aux[L, A :: HNil, P],
+                                              ev2: ops.coproduct.Prepend.Aux[C, A :+: CNil, Q]): F#FI[P, Q, Sup2] =
+      fo.attach(spout).asInstanceOf[F#FI[P, Q, Sup2]]
   }
 
   @implicitNotFound(msg = "Cannot fan-in here. You need to have at least two open fan-in sub-streams.")
@@ -589,15 +610,18 @@ object StreamOps {
   @implicitNotFound(msg = "Cannot convert `${L}` into a tuple.")
   private type Tuplable[L <: HList] = Tupler[L]
 
-  @implicitNotFound(msg = "Illegal substream definition! All available fan-out sub-streams have already been consumed.")
+  @implicitNotFound(
+    msg = "Illegal substream definition! All available fan-out sub-streams have already been consumed.")
   private type SubReq[L <: HList] = IsHCons[L]
 
   @implicitNotFound(msg = "`subContinue` is only possible with exactly one remaining fan-out sub-stream unconsumed!")
   private type SubContinueReq0[L <: HList] = IsSingle[L]
-  @implicitNotFound(msg = "`subContinue` is only possible without any previous fan-in sub-streams! Here you have: ${L}.")
+  @implicitNotFound(
+    msg = "`subContinue` is only possible without any previous fan-in sub-streams! Here you have: ${L}.")
   private type SubContinueReq1[L <: HList] = IsHNil[L]
 
-  @implicitNotFound(msg = "Cannot continue stream definition here! You still have at least one unconsumed fan-out sub-stream.")
+  @implicitNotFound(
+    msg = "Cannot continue stream definition here! You still have at least one unconsumed fan-out sub-stream.")
   private type ContinueReq0[L <: HList] = IsHNil[L]
   @implicitNotFound(msg = "Continuation is only possible with exactly one open fan-in sub-stream!")
   private type ContinueReq1[L <: HList] = IsSingle[L]

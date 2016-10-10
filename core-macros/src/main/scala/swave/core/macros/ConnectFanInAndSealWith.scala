@@ -10,10 +10,10 @@ private[macros] trait ConnectFanInAndSealWith { this: Util =>
 
   def connectFanInAndSealWith(subs0: Tree, f: Tree): List[Tree] = unblock {
     val q"($ctx0: $_, $out0: $_) => $block0" = f
-    val ctx = freshName("ctx")
-    val out = freshName("out")
-    val subs = freshName("subs")
-    val block = replaceIdents(block0, ctx0 -> ctx, out0 -> out)
+    val ctx                                  = freshName("ctx")
+    val out                                  = freshName("out")
+    val subs                                 = freshName("subs")
+    val block                                = replaceIdents(block0, ctx0 -> ctx, out0 -> out)
 
     q"""
       val $subs = $subs0

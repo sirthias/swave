@@ -8,6 +8,6 @@ import swave.core.PipeElem
 
 private[core] final class RoundRobinStage(eagerCancel: Boolean) extends FanOutStage with PipeElem.FanOut.RoundRobin {
 
-  def pipeElemType: String = "fanOutRoundRobin"
+  def pipeElemType: String      = "fanOutRoundRobin"
   def pipeElemParams: List[Any] = eagerCancel :: Nil
 }

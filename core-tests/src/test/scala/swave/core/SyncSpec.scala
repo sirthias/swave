@@ -29,7 +29,12 @@ class SyncSpec extends SwaveSpec {
       val c = Coupling[Int]
       Spout(1, 2, 3)
         .concat(c.out)
-        .fanOutBroadcast().sub.first.buffer(1).map(_ + 3).to(c.in)
+        .fanOutBroadcast()
+        .sub
+        .first
+        .buffer(1)
+        .map(_ + 3)
+        .to(c.in)
         .subContinue should produce(1, 2, 3, 4)
     }
 
@@ -38,15 +43,25 @@ class SyncSpec extends SwaveSpec {
 
       Spout(1, 2, 3)
         .fanOutBroadcast()
-        .sub.buffer(4).map(_.toString).end
-        .sub.buffer(4).map(_ * 2.0).end
-        .sub.to(Drain.ignore.dropResult) // just for fun
-        .sub.drop(2).concat(Spout(List(4, 5))).end
+        .sub
+        .buffer(4)
+        .map(_.toString)
+        .end
+        .sub
+        .buffer(4)
+        .map(_ * 2.0)
+        .end
+        .sub
+        .to(Drain.ignore.dropResult) // just for fun
+        .sub
+        .drop(2)
+        .concat(Spout(List(4, 5)))
+        .end
         .attach(Spout.repeat(true))
         .fanInToProduct[Foo] should produce(
-          Foo("1", 2.0, 3, b = true),
-          Foo("2", 4.0, 4, b = true),
-          Foo("3", 6.0, 5, b = true))
+        Foo("1", 2.0, 3, b = true),
+        Foo("2", 4.0, 4, b = true),
+        Foo("3", 6.0, 5, b = true))
     }
 
     "fanout to drain" in {
@@ -56,11 +71,7 @@ class SyncSpec extends SwaveSpec {
     }
 
     "double direct fanout" in {
-      Spout(1, 2, 3)
-        .fanOutBroadcast()
-        .sub.end
-        .sub.end
-        .fanInMerge() should produce(1, 1, 2, 2, 3, 3)
+      Spout(1, 2, 3).fanOutBroadcast().sub.end.sub.end.fanInMerge() should produce(1, 1, 2, 2, 3, 3)
     }
 
     "standalone pipes" in {
@@ -69,19 +80,17 @@ class SyncSpec extends SwaveSpec {
     }
 
     "simple modules" in {
-      val foo = Module.Forward.from2[Int, String] { (a, b) ⇒ a.attachN(2, b.fanOutBroadcast()) } named "foo"
-      Spout(1, 2, 3)
-        .attach(Spout("x", "y", "z"))
-        .fromFanInVia(foo)
-        .fanInToTuple
-        .map(_.toString) should produce("(1,x,x)", "(2,y,y)", "(3,z,z)")
+      val foo = Module.Forward.from2[Int, String] { (a, b) ⇒
+        a.attachN(2, b.fanOutBroadcast())
+      } named "foo"
+      Spout(1, 2, 3).attach(Spout("x", "y", "z")).fromFanInVia(foo).fanInToTuple.map(_.toString) should produce(
+        "(1,x,x)",
+        "(2,y,y)",
+        "(3,z,z)")
     }
 
     "inject" in {
-      Spout(1 to 10)
-        .inject
-        .map(_ elementAt 1)
-        .flattenConcat() should produce(2, 4, 6, 8, 10)
+      Spout(1 to 10).inject.map(_ elementAt 1).flattenConcat() should produce(2, 4, 6, 8, 10)
     }
   }
 }

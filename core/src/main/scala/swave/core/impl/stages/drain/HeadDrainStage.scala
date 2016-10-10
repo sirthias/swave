@@ -23,8 +23,8 @@ private[core] final class HeadDrainStage(headPromise: Promise[AnyRef]) extends D
   }
 
   /**
-   * @param in the active upstream
-   */
+    * @param in the active upstream
+    */
   def awaitingXStart(in: Inport) = state(
     xStart = () => {
       in.request(1)
@@ -32,8 +32,8 @@ private[core] final class HeadDrainStage(headPromise: Promise[AnyRef]) extends D
     })
 
   /**
-   * @param in the active upstream
-   */
+    * @param in the active upstream
+    */
   def receiveOne(in: Inport) = state(
     onNext = (elem, _) ⇒ {
       headPromise.success(elem)

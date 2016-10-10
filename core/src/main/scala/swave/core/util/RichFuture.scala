@@ -6,7 +6,7 @@ package swave.core.util
 
 import java.util.concurrent.TimeoutException
 import scala.concurrent.duration._
-import scala.concurrent.{ Await, Promise, Future }
+import scala.concurrent.{Await, Future, Promise}
 import swave.core.StreamEnv
 
 final class RichFuture[T](val underlying: Future[T]) extends AnyVal {

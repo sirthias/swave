@@ -4,7 +4,7 @@
 
 package swave.core.impl.stages.spout
 
-import org.reactivestreams.{ Subscriber, Subscription, Publisher }
+import org.reactivestreams.{Publisher, Subscriber, Subscription}
 import swave.core.PipeElem
 import swave.core.impl.Outport
 import swave.core.impl.rs.RSCompliance

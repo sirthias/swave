@@ -6,7 +6,7 @@ package swave.core.impl.stages.inout
 
 import scala.util.control.NonFatal
 import swave.core.PipeElem
-import swave.core.impl.{ Inport, Outport }
+import swave.core.impl.{Inport, Outport}
 import swave.core.macros.StageImpl
 import swave.core.util._
 
@@ -32,10 +32,10 @@ private[core] final class ConflateStage(lift: AnyRef => AnyRef, aggregate: (AnyR
       })
 
     /**
-     * Forwarding elements from upstream to downstream as long as there is demand from downstream.
-     *
-     * @param remaining number of elements already requested by downstream but not yet delivered, >= 0
-     */
+      * Forwarding elements from upstream to downstream as long as there is demand from downstream.
+      *
+      * @param remaining number of elements already requested by downstream but not yet delivered, >= 0
+      */
     def forwarding(remaining: Long): State = state(
       request = (n, _) ⇒ forwarding(remaining ⊹ n),
       cancel = stopCancelF(in),
@@ -58,10 +58,10 @@ private[core] final class ConflateStage(lift: AnyRef => AnyRef, aggregate: (AnyR
       onError = stopErrorF(out))
 
     /**
-     * No demand from downstream. Aggregating elements from upstream.
-     *
-     * @param acc the current accumulator value
-     */
+      * No demand from downstream. Aggregating elements from upstream.
+      *
+      * @param acc the current accumulator value
+      */
     def conflating(acc: AnyRef): State = state(
       request = (n, _) ⇒ {
         out.onNext(acc)

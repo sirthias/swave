@@ -8,21 +8,21 @@ import akka.NotUsed
 import scala.util.{Failure, Success}
 import swave.core.util.XorShiftRandom
 import akka.actor.ActorSystem
-import akka.stream.{ActorMaterializerSettings, FlowShape, ActorMaterializer}
+import akka.stream.{ActorMaterializer, ActorMaterializerSettings, FlowShape}
 import akka.stream.scaladsl._
 
 object AkkaPi extends App {
   implicit val system = ActorSystem("AkkaPi")
   import system.dispatcher
 
-  private val settings = ActorMaterializerSettings(system)
-    .withSyncProcessingLimit(Int.MaxValue)
-    .withInputBuffer(256, 256)
+  private val settings =
+    ActorMaterializerSettings(system).withSyncProcessingLimit(Int.MaxValue).withInputBuffer(256, 256)
   implicit val materializer = ActorMaterializer(settings)
 
   val random = XorShiftRandom()
 
-  Source.fromIterator(() ⇒ Iterator.continually(random.nextDouble()))
+  Source
+    .fromIterator(() ⇒ Iterator.continually(random.nextDouble()))
     .grouped(2)
     .map { case x +: y +: Nil ⇒ Point(x, y) }
     .via(broadcastFilterMerge)
@@ -37,7 +37,7 @@ object AkkaPi extends App {
     .onComplete {
       case Success(_) =>
         val time = System.currentTimeMillis() - system.startTime
-        println(f"Done. Total time: $time%,6d ms, Throughput: ${30000.0/time}%.3fM samples/sec\n")
+        println(f"Done. Total time: $time%,6d ms, Throughput: ${30000.0 / time}%.3fM samples/sec\n")
         system.terminate()
 
       case Failure(e) => println(e)
@@ -51,10 +51,10 @@ object AkkaPi extends App {
     Flow.fromGraph(GraphDSL.create() { implicit b =>
       import GraphDSL.Implicits._
 
-      val broadcast = b.add(Broadcast[Point](2)) // split one upstream into 2 downstreams
+      val broadcast   = b.add(Broadcast[Point](2)) // split one upstream into 2 downstreams
       val filterInner = b.add(Flow[Point].filter(_.isInner).map(_ => InnerSample))
       val filterOuter = b.add(Flow[Point].filterNot(_.isInner).map(_ => OuterSample))
-      val merge = b.add(Merge[Sample](2)) // merge 2 upstreams into one downstream
+      val merge       = b.add(Merge[Sample](2)) // merge 2 upstreams into one downstream
 
       broadcast.out(0) ~> filterInner ~> merge.in(0)
       broadcast.out(1) ~> filterOuter ~> merge.in(1)

@@ -5,8 +5,8 @@
 package swave.core.impl.stages.inout
 
 import scala.annotation.tailrec
-import swave.core.{ Overflow, PipeElem }
-import swave.core.impl.{ Inport, Outport }
+import swave.core.{Overflow, PipeElem}
+import swave.core.impl.{Inport, Outport}
 import swave.core.macros._
 import swave.core.util._
 
@@ -28,9 +28,9 @@ private[core] final class BufferDroppingStage(size: Int, overflowStrategy: Overf
   }
 
   /**
-   * @param in  the active upstream
-   * @param out the active downstream
-   */
+    * @param in  the active upstream
+    * @param out the active downstream
+    */
   def awaitingXStart(in: Inport, out: Outport) = state(
     xStart = () => {
       in.request(Long.MaxValue)
@@ -38,12 +38,12 @@ private[core] final class BufferDroppingStage(size: Int, overflowStrategy: Overf
     })
 
   /**
-   * Upstream and downstream active.
-   *
-   * @param in        the active upstream
-   * @param out       the active downstream
-   * @param remaining number of elements already requested by downstream but not yet delivered, >= 0
-   */
+    * Upstream and downstream active.
+    *
+    * @param in        the active upstream
+    * @param out       the active downstream
+    * @param remaining number of elements already requested by downstream but not yet delivered, >= 0
+    */
   def running(in: Inport, out: Outport, remaining: Long): State = {
 
     @tailrec def handleDemand(rem: Long): State =
@@ -82,10 +82,10 @@ private[core] final class BufferDroppingStage(size: Int, overflowStrategy: Overf
   }
 
   /**
-   * Upstream completed, downstream active and buffer non-empty.
-   *
-   * @param out the active downstream
-   */
+    * Upstream completed, downstream active and buffer non-empty.
+    *
+    * @param out the active downstream
+    */
   def draining(out: Outport) = state(
     request = (n, _) ⇒ {
       @tailrec def rec(n: Int): State =

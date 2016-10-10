@@ -5,9 +5,9 @@
 package swave.core.impl.stages.spout
 
 import scala.concurrent.Future
-import scala.util.{ Failure, Success }
+import scala.util.{Failure, Success}
 import swave.core.PipeElem
-import swave.core.impl.{ CallingThreadExecutionContext, Outport }
+import swave.core.impl.{CallingThreadExecutionContext, Outport}
 import swave.core.macros.StageImpl
 
 // format: OFF

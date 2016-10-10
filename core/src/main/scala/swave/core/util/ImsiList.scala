@@ -9,15 +9,15 @@ import scala.collection.mutable.ListBuffer
 import swave.core.macros._
 
 /**
- * Intrusive, mutable, single-linked list.
- */
-private[swave] abstract class ImsiList[L >: Null <: ImsiList[L]]( final var tail: L)
+  * Intrusive, mutable, single-linked list.
+  */
+private[swave] abstract class ImsiList[L >: Null <: ImsiList[L]](final var tail: L)
 
 private[swave] object ImsiList {
 
   implicit class ImsiListOps[L >: Null <: ImsiList[L]](private val underlying: L) extends AnyVal {
 
-    def isEmpty: Boolean = underlying eq null
+    def isEmpty: Boolean  = underlying eq null
     def nonEmpty: Boolean = underlying ne null
 
     def size: Int = {
@@ -78,10 +78,10 @@ private[swave] object ImsiList {
     }
 
     /**
-     * Partitions the list into two disjunct lists.
-     * The first one contains all nodes that DO satisfy the given predicate
-     * and the second one all nodes that DO NOT satisfy the predicate.
-     */
+      * Partitions the list into two disjunct lists.
+      * The first one contains all nodes that DO satisfy the given predicate
+      * and the second one all nodes that DO NOT satisfy the predicate.
+      */
     def partition(f: L ⇒ Boolean): (L, L) = {
       @tailrec def rec(current: L, a: L, lastA: L, b: L, lastB: L): (L, L) =
         if (current ne null) {
@@ -103,11 +103,11 @@ private[swave] object ImsiList {
     }
 
     /**
-     * Splits this list after `count` elements and returns the head of the trailing segment.
-     * The underlying segment then forms a list holding `count` elements.
-     * Throws an `IllegalArgumentException` if `count == 0 || count > size`.
-     * (`underlying.isEmpty` requires special treatment in any case!)
-     */
+      * Splits this list after `count` elements and returns the head of the trailing segment.
+      * The underlying segment then forms a list holding `count` elements.
+      * Throws an `IllegalArgumentException` if `count == 0 || count > size`.
+      * (`underlying.isEmpty` requires special treatment in any case!)
+      */
     def drop(count: Int): L = {
       @tailrec def rec(remaining: Int, current: L, last: L): L =
         if (remaining == 0) {
@@ -122,10 +122,10 @@ private[swave] object ImsiList {
     }
 
     /**
-     * Splits this list at the first element that the given `predicate` returns `true` for
-     * and returns this element (along with its tail).
-     * The underlying segment then forms a list holding all dropped elements.
-     */
+      * Splits this list at the first element that the given `predicate` returns `true` for
+      * and returns this element (along with its tail).
+      * The underlying segment then forms a list holding all dropped elements.
+      */
     def dropWhile(predicate: L ⇒ Boolean): L = {
       @tailrec def rec(current: L, last: L): L =
         if (current.nonEmpty) {
@@ -139,7 +139,9 @@ private[swave] object ImsiList {
 
     def toList: List[L] = {
       val buf = ListBuffer.empty[L]
-      foreach { node ⇒ buf += node; () }
+      foreach { node ⇒
+        buf += node; ()
+      }
       buf.toList
     }
   }

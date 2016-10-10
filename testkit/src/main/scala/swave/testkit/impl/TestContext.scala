@@ -11,12 +11,11 @@ import swave.core.util._
 import swave.testkit.gen.TestSetup
 import TestSetup.AsyncScheduling
 
-private[testkit] final class TestContext(
-    val runNr: Int,
-    val asyncRate: Double,
-    val asyncScheduling: AsyncScheduling,
-    random: XorShiftRandom,
-    tracing: Boolean) {
+private[testkit] final class TestContext(val runNr: Int,
+                                         val asyncRate: Double,
+                                         val asyncScheduling: AsyncScheduling,
+                                         random: XorShiftRandom,
+                                         tracing: Boolean) {
 
   import TestContext._
 
@@ -49,7 +48,9 @@ private[testkit] final class TestContext(
     if (hasSchedulings) {
       val snapshot: Array[ResizableRingBuffer[Task]] = schedulings.toArray
 
-      def runSnapshots() = snapshot foreach { buf ⇒ runTasks(buf, buf.size) }
+      def runSnapshots() = snapshot foreach { buf ⇒
+        runTasks(buf, buf.size)
+      }
 
       @tailrec def runTasks(buf: ResizableRingBuffer[Task], count: Int): Unit =
         if (count > 0) {

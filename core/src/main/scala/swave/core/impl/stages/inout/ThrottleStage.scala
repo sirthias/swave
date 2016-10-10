@@ -6,8 +6,8 @@ package swave.core.impl.stages.inout
 
 import scala.util.control.NonFatal
 import scala.concurrent.duration._
-import swave.core.{ Cancellable, PipeElem }
-import swave.core.impl.{ StreamRunner, Inport, Outport }
+import swave.core.{Cancellable, PipeElem}
+import swave.core.impl.{Inport, Outport, StreamRunner}
 import swave.core.macros._
 import swave.core.util._
 
@@ -43,10 +43,10 @@ private[core] final class ThrottleStage(cost: Int, per: FiniteDuration, burst: I
       })
 
     /**
-     * Awaiting arrival of the next element from upstream.
-     *
-     * @param remaining number of elements already requested by downstream but not yet delivered, >= 0
-     */
+      * Awaiting arrival of the next element from upstream.
+      *
+      * @param remaining number of elements already requested by downstream but not yet delivered, >= 0
+      */
     def awaitingElement(remaining: Long): State = state(
       request = (n, _) => awaitingElement(remaining ⊹ n),
       cancel = stopCancelF(in),
@@ -55,10 +55,10 @@ private[core] final class ThrottleStage(cost: Int, per: FiniteDuration, burst: I
       onError = (e, _) => stopError(e, out))
 
     /**
-     * One element buffered, awaiting demand from downstream.
-     *
-     * @param currentElem the buffered element
-     */
+      * One element buffered, awaiting demand from downstream.
+      *
+      * @param currentElem the buffered element
+      */
     def awaitingDemand(currentElem: AnyRef) = state(
       request = (n, _) => processElement(currentElem, n.toLong),
       cancel = stopCancelF(in),
@@ -66,12 +66,12 @@ private[core] final class ThrottleStage(cost: Int, per: FiniteDuration, burst: I
       onError = (e, _) => stopError(e, out))
 
     /**
-     * One element buffered, awaiting timeout event from scheduler.
-     *
-     * @param timer the active timer
-     * @param currentElem the buffered element
-     * @param remaining number of elements already requested by downstream but not yet delivered, > 0
-     */
+      * One element buffered, awaiting timeout event from scheduler.
+      *
+      * @param timer the active timer
+      * @param currentElem the buffered element
+      * @param remaining number of elements already requested by downstream but not yet delivered, > 0
+      */
     def awaitingTimeout(timer: Cancellable, currentElem: AnyRef, remaining: Long): State = state(
       request = (n, _) => awaitingTimeout(timer, currentElem, remaining ⊹ n),
       cancel = _ => { timer.cancel(); stopCancel(in) },
@@ -86,10 +86,10 @@ private[core] final class ThrottleStage(cost: Int, per: FiniteDuration, burst: I
       })
 
     /**
-     * Upstream already completed, one element buffered, awaiting demand from downstream.
-     *
-     * @param currentElem the buffered element
-     */
+      * Upstream already completed, one element buffered, awaiting demand from downstream.
+      *
+      * @param currentElem the buffered element
+      */
     def upstreamCompletedAwaitingDemand(currentElem: AnyRef) = state(
       request = (_, _) => {
         out.onNext(currentElem)
@@ -99,12 +99,12 @@ private[core] final class ThrottleStage(cost: Int, per: FiniteDuration, burst: I
       cancel = stopF)
 
     /**
-     * Upstream already completed, demand from downstream present, one element buffered,
-     * awaiting timeout event from scheduler.
-     *
-     * @param timer the active timer
-     * @param currentElem the buffered element
-     */
+      * Upstream already completed, demand from downstream present, one element buffered,
+      * awaiting timeout event from scheduler.
+      *
+      * @param timer the active timer
+      * @param currentElem the buffered element
+      */
     def upstreamCompletedAwaitingTimeout(timer: Cancellable, currentElem: AnyRef): State = state(
       request = (_, _) => stay(),
       cancel = _ => { timer.cancel(); stop() },

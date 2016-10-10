@@ -5,16 +5,16 @@
 package swave.testkit
 
 import java.util.concurrent.atomic.AtomicLong
-import java.util.concurrent.{ TimeUnit, LinkedBlockingQueue }
+import java.util.concurrent.{LinkedBlockingQueue, TimeUnit}
 import scala.annotation.tailrec
 import scala.util.DynamicVariable
 import scala.collection.immutable
-import scala.concurrent.{ TimeoutException, Await, Future, Promise }
+import scala.concurrent.{Await, Future, Promise, TimeoutException}
 import scala.concurrent.duration._
 import swave.testkit.impl.TestkitExtension
 import swave.core.impl.stages.Stage
 import swave.core.impl.stages.drain.DrainStage
-import swave.core.impl.{ Inport, Outport }
+import swave.core.impl.{Inport, Outport}
 import swave.core.impl.stages.spout.SpoutStage
 import swave.core.macros._
 import swave.core.util._
@@ -29,7 +29,7 @@ trait Probes {
     deadlineNanos.withValue(System.nanoTime() + max.dilated.toNanos)(block)
 
   object SpoutProbe {
-    def apply[T](implicit env: StreamEnv): SpoutProbe[T] = new SpoutProbe(TestkitExtension(env))
+    def apply[T](implicit env: StreamEnv): SpoutProbe[T]    = new SpoutProbe(TestkitExtension(env))
     implicit def probe2Spout[T](p: SpoutProbe[T]): Spout[T] = new Spout(p.stage)
   }
 
@@ -112,7 +112,7 @@ trait Probes {
       consumedDemand -= values.size
       runOrEnqueue(values.map(Signal.OnNext): _*)
     }
-    def sendComplete(): this.type = runOrEnqueue(Signal.OnComplete)
+    def sendComplete(): this.type          = runOrEnqueue(Signal.OnComplete)
     def sendError(e: Throwable): this.type = runOrEnqueue(Signal.OnError(e))
 
     def expectRequest(): Long = expect { case Signal.Request(n) ⇒ { consumedDemand += n; n } }
@@ -123,9 +123,9 @@ trait Probes {
     }
 
     /**
-     * Aggregates all request signals arriving within the given time period.
-     * Returns early (with the aggregated value) if a non-request signal is received.
-     */
+      * Aggregates all request signals arriving within the given time period.
+      * Returns early (with the aggregated value) if a non-request signal is received.
+      */
     def expectRequestAggregated(max: FiniteDuration): Long = {
       @tailrec def rec(acc: Long): Long =
         peekSignal() match {
@@ -139,7 +139,7 @@ trait Probes {
   }
 
   object DrainProbe {
-    def apply[T](implicit env: StreamEnv): DrainProbe[T] = new DrainProbe(TestkitExtension(env))
+    def apply[T](implicit env: StreamEnv): DrainProbe[T]                   = new DrainProbe(TestkitExtension(env))
     implicit def probe2Drain[T](p: DrainProbe[T]): Drain[T, DrainProbe[T]] = new Drain(p.stage, p)
   }
 
@@ -196,12 +196,12 @@ trait Probes {
     // format: ON
 
     def sendRequest(n: Long): this.type = { runOrEnqueue(Signal.Request(n)); this }
-    def sendCancel(): this.type = { runOrEnqueue(Signal.Cancel); this }
+    def sendCancel(): this.type         = { runOrEnqueue(Signal.Cancel); this }
 
-    def expectNext(): T = expect { case Signal.OnNext(x) ⇒ x.asInstanceOf[T] }
-    def expectNext(elems: T*): this.type = { elems.foreach(x ⇒ expectSignal(Signal.OnNext(x))); this }
-    def expectComplete(): this.type = { expectSignal(Signal.OnComplete); this }
-    def expectError(): Throwable = expect { case Signal.OnError(x) ⇒ x }
+    def expectNext(): T                      = expect { case Signal.OnNext(x) ⇒ x.asInstanceOf[T] }
+    def expectNext(elems: T*): this.type     = { elems.foreach(x ⇒ expectSignal(Signal.OnNext(x))); this }
+    def expectComplete(): this.type          = { expectSignal(Signal.OnComplete); this }
+    def expectError(): Throwable             = expect { case Signal.OnError(x) ⇒ x }
     def expectError(e: Throwable): this.type = { expectSignal(Signal.OnError(e)); this }
 
     def requestExpectNext(): T = {
@@ -215,7 +215,9 @@ trait Probes {
     }
 
     def receiveElementsWithin(time: FiniteDuration, maxElems: Int = Int.MaxValue): List[T] =
-      receiveSignalsWhile(maxTotalTime = time, maxSignals = maxElems) { case Signal.OnNext(elem) ⇒ elem.asInstanceOf[T] }
+      receiveSignalsWhile(maxTotalTime = time, maxSignals = maxElems) {
+        case Signal.OnNext(elem) ⇒ elem.asInstanceOf[T]
+      }
   }
 
   abstract class Probe(ext: TestkitExtension)(implicit env: StreamEnv) {
@@ -230,14 +232,13 @@ trait Probes {
           requireState(deadlineNanos.value == 0L, "Expect `within` duration doesn't make sense for sync runs")
           stage.log.poll()
         } else stage.log.poll(withinTimeoutNanos, TimeUnit.NANOSECONDS)
-      }
-      else {
+      } else {
         val result = nextSignal
         nextSignal = None
         result
       }
 
-    final def expectSignal(expected: Signal): this.type = expectSignal(Some(expected))
+    final def expectSignal(expected: Signal): this.type         = expectSignal(Some(expected))
     final def expectSignal(expected: Option[Signal]): this.type = verifyEquals(expectSignal(), expected)
 
     final def expect[T](pf: PartialFunction[Signal, T]): T =
@@ -246,17 +247,19 @@ trait Probes {
         case x                                     ⇒ throw ExpectationFailedException(x, Some("a value matching the given partial function"))
       }
 
-    final def expectNoSignal(): this.type = { verifyEquals(peekSignal(), None); this }
+    final def expectNoSignal(): this.type                    = { verifyEquals(peekSignal(), None); this }
     final def expectNoSignal(max: FiniteDuration): this.type = { within(max)(expectSignal(None)); this }
 
     final def verifyCleanStop(): Unit =
       if (stage.isAsync) {
-        val futures: List[(Stage, Future[Unit])] = Graph.explore(stage.stage.pipeElem).map { pe ⇒
-          val stage = pe.asInstanceOf[Stage]
-          val p = Promise[Unit]()
-          stage.runner.enqueueXEvent(stage, Stage.RegisterStopPromise(p))
-          stage → p.future
-        }(collection.breakOut)
+        val futures: List[(Stage, Future[Unit])] = Graph
+          .explore(stage.stage.pipeElem)
+          .map { pe ⇒
+            val stage = pe.asInstanceOf[Stage]
+            val p     = Promise[Unit]()
+            stage.runner.enqueueXEvent(stage, Stage.RegisterStopPromise(p))
+            stage → p.future
+          }(collection.breakOut)
         import env.defaultDispatcher
         try {
           Await.ready(Future.sequence(futures.map(_._2)), withinTimeoutNanos.nanos)
@@ -265,26 +268,32 @@ trait Probes {
           case _: TimeoutException ⇒
             val unstoppedStages = futures.collect { case (stage, future) if !future.isCompleted ⇒ stage }
             throw ExpectationFailedException(
-              unstoppedStages.mkString("At least one stage is still running when it shouldn't be:\n    ", "\n    ", "\n"))
+              unstoppedStages
+                .mkString("At least one stage is still running when it shouldn't be:\n    ", "\n    ", "\n"))
         }
       } else {
-        requireState(deadlineNanos.value == 0L, "`verifyCleanStop` wrapped by `within` doesn't make sense for sync runs")
-        Graph.explore(stage.stage.pipeElem).find(!_.asInstanceOf[Stage].isStopped).foreach(stage ⇒
-          throw ExpectationFailedException(s"Stage `$stage` is still running when it shouldn't be."))
+        requireState(
+          deadlineNanos.value == 0L,
+          "`verifyCleanStop` wrapped by `within` doesn't make sense for sync runs")
+        Graph
+          .explore(stage.stage.pipeElem)
+          .find(!_.asInstanceOf[Stage].isStopped)
+          .foreach(stage ⇒ throw ExpectationFailedException(s"Stage `$stage` is still running when it shouldn't be."))
       }
 
     /**
-     * Receives a series of signals until any one of these conditions becomes true:
-     * - the received signal isn't matched by the given partial function
-     * - the `maxTotalTime` is elapsed
-     * - the `maxIdleTime` (max. time between two messages) expires
-     * - the `maxSignals` count is reached
-     *
-     * Returns the results of the partial function for all successfully received signals.
-     */
-    final def receiveSignalsWhile[A](maxTotalTime: FiniteDuration = 1.day, maxIdleTime: FiniteDuration = 1.day,
-      maxSignals: Int = Int.MaxValue)(pf: PartialFunction[Signal, A]): List[A] = {
-      val deadlineNanos = System.nanoTime() + maxTotalTime.dilated.toNanos
+      * Receives a series of signals until any one of these conditions becomes true:
+      * - the received signal isn't matched by the given partial function
+      * - the `maxTotalTime` is elapsed
+      * - the `maxIdleTime` (max. time between two messages) expires
+      * - the `maxSignals` count is reached
+      *
+      * Returns the results of the partial function for all successfully received signals.
+      */
+    final def receiveSignalsWhile[A](maxTotalTime: FiniteDuration = 1.day,
+                                     maxIdleTime: FiniteDuration = 1.day,
+                                     maxSignals: Int = Int.MaxValue)(pf: PartialFunction[Signal, A]): List[A] = {
+      val deadlineNanos      = System.nanoTime() + maxTotalTime.dilated.toNanos
       val maxIdleTimeDilated = maxIdleTime.dilated
 
       @tailrec def rec(maxRemaining: Int, acc: List[A]): List[A] =
@@ -303,12 +312,12 @@ trait Probes {
     }
 
     protected trait ProbeStage { this: Stage ⇒
-      val log = new LinkedBlockingQueue[Signal]
-      def streamRunner = runner
+      val log                       = new LinkedBlockingQueue[Signal]
+      def streamRunner              = runner
       def onSignal(s: Signal): Unit = xEvent(s)
-      def stage: Stage = this
-      def isSync = streamRunner eq null
-      def isAsync = streamRunner ne null
+      def stage: Stage              = this
+      def isSync                    = streamRunner eq null
+      def isAsync                   = streamRunner ne null
     }
 
     protected def stage: ProbeStage

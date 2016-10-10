@@ -10,22 +10,16 @@ import swave.core._
 
 final class LazyStartSpoutSpec extends SyncPipeSpec with Inspectors {
 
-  implicit val env = StreamEnv()
+  implicit val env    = StreamEnv()
   implicit val config = PropertyCheckConfig(minSuccessful = 100)
 
   implicit val integerInput = Gen.chooseNum(0, 999)
 
   "Spout.lazy" in check {
-    testSetup
-      .input[Int]
-      .output[String]
-      .prop.from { (in, out) ⇒
+    testSetup.input[Int].output[String].prop.from { (in, out) ⇒
+      Spout.lazyStart(() ⇒ in.spout).map(_.toString).drainTo(out.drain) shouldTerminate asScripted(in)
 
-        Spout.lazyStart(() ⇒ in.spout)
-          .map(_.toString)
-          .drainTo(out.drain) shouldTerminate asScripted(in)
-
-        out.received shouldEqual in.produced.take(out.scriptedSize).map(_.toString)
-      }
+      out.received shouldEqual in.produced.take(out.scriptedSize).map(_.toString)
+    }
   }
 }

@@ -23,7 +23,7 @@ object Dispatchers {
 
   object Settings extends SettingsCompanion[Settings]("swave.core.dispatcher") {
     def fromSubConfig(c: Config): Settings = {
-      val defConf = c getConfig "default-config"
+      val defConf    = c getConfig "default-config"
       val definition = c getConfig "definition"
       Settings {
         definition.root().keySet().iterator().asScala.foldLeft(Map.empty[String, Dispatcher.Settings]) { (map, name) ⇒

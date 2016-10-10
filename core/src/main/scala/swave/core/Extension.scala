@@ -13,8 +13,8 @@ trait Extension
 trait ExtensionId[T <: Extension] {
 
   /**
-   * Returns an instance of the extension identified by this ExtensionId instance.
-   */
+    * Returns an instance of the extension identified by this ExtensionId instance.
+    */
   def apply(env: StreamEnv): T =
     env.getOrLoadExtension(this).await(env.settings.extensionSettings.constructionTimeout)
 
@@ -22,7 +22,7 @@ trait ExtensionId[T <: Extension] {
 
   // ExtensionId instances are used as keys in a ConcurrentHashMap,
   // therefore we pin down reference equality semantics for them here
-  override final def hashCode: Int = System.identityHashCode(this)
+  override final def hashCode: Int               = System.identityHashCode(this)
   override final def equals(other: Any): Boolean = this eq other.asInstanceOf[AnyRef]
 }
 
@@ -32,8 +32,7 @@ object Extension {
 
   object Settings extends SettingsCompanion[Settings]("swave.core.extensions") {
     def fromSubConfig(c: Config): Settings =
-      Settings(
-        constructionTimeout = c getFiniteDuration "construction-timeout")
+      Settings(constructionTimeout = c getFiniteDuration "construction-timeout")
   }
 
 }

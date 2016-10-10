@@ -4,7 +4,7 @@
 
 package swave.testkit.impl
 
-import swave.core.{ StreamEnv, Extension, ExtensionId }
+import swave.core.{Extension, ExtensionId, StreamEnv}
 import swave.testkit.Testkit
 
 object TestkitExtension extends ExtensionId[TestkitExtension] {
@@ -12,6 +12,4 @@ object TestkitExtension extends ExtensionId[TestkitExtension] {
     new TestkitExtension(Testkit.Settings(env.config))
 }
 
-class TestkitExtension(val settings: Testkit.Settings) extends Extension {
-
-}
+class TestkitExtension(val settings: Testkit.Settings) extends Extension {}

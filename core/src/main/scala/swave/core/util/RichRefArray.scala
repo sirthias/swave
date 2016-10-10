@@ -4,7 +4,7 @@
 
 package swave.core.util
 
-import scala.annotation.{ switch, tailrec }
+import scala.annotation.{switch, tailrec}
 import shapeless._
 
 final class RichRefArray[T <: AnyRef](val underlying: Array[T]) extends AnyVal {
@@ -20,13 +20,13 @@ final class RichRefArray[T <: AnyRef](val underlying: Array[T]) extends AnyVal {
     else suffix
 
   /**
-   * In-place reverse
-   */
+    * In-place reverse
+    */
   def reverse_!(): Unit = reverse_!(0, underlying.length)
 
   /**
-   * In-place reverse of an array slice.
-   */
+    * In-place reverse of an array slice.
+    */
   @tailrec def reverse_!(start: Int, end: Int): Unit = {
     val end1 = end - 1
     if (start < end1) {
@@ -53,7 +53,7 @@ final class RichRefArray[T <: AnyRef](val underlying: Array[T]) extends AnyVal {
   }
 
   def toTuple: AnyRef = {
-    import underlying.{ apply ⇒ a }
+    import underlying.{apply ⇒ a}
     (underlying.length: @switch) match {
       case 1  ⇒ Tuple1(a(0))
       case 2  ⇒ Tuple2(a(0), a(1))
@@ -70,14 +70,138 @@ final class RichRefArray[T <: AnyRef](val underlying: Array[T]) extends AnyVal {
       case 13 ⇒ Tuple13(a(0), a(1), a(2), a(3), a(4), a(5), a(6), a(7), a(8), a(9), a(10), a(11), a(12))
       case 14 ⇒ Tuple14(a(0), a(1), a(2), a(3), a(4), a(5), a(6), a(7), a(8), a(9), a(10), a(11), a(12), a(13))
       case 15 ⇒ Tuple15(a(0), a(1), a(2), a(3), a(4), a(5), a(6), a(7), a(8), a(9), a(10), a(11), a(12), a(13), a(14))
-      case 16 ⇒ Tuple16(a(0), a(1), a(2), a(3), a(4), a(5), a(6), a(7), a(8), a(9), a(10), a(11), a(12), a(13), a(14), a(15))
-      case 17 ⇒ Tuple17(a(0), a(1), a(2), a(3), a(4), a(5), a(6), a(7), a(8), a(9), a(10), a(11), a(12), a(13), a(14), a(15), a(16))
-      case 18 ⇒ Tuple18(a(0), a(1), a(2), a(3), a(4), a(5), a(6), a(7), a(8), a(9), a(10), a(11), a(12), a(13), a(14), a(15), a(16), a(17))
-      case 19 ⇒ Tuple19(a(0), a(1), a(2), a(3), a(4), a(5), a(6), a(7), a(8), a(9), a(10), a(11), a(12), a(13), a(14), a(15), a(16), a(17), a(18))
-      case 20 ⇒ Tuple20(a(0), a(1), a(2), a(3), a(4), a(5), a(6), a(7), a(8), a(9), a(10), a(11), a(12), a(13), a(14), a(15), a(16), a(17), a(18), a(19))
-      case 21 ⇒ Tuple21(a(0), a(1), a(2), a(3), a(4), a(5), a(6), a(7), a(8), a(9), a(10), a(11), a(12), a(13), a(14), a(15), a(16), a(17), a(18), a(19), a(20))
-      case 22 ⇒ Tuple22(a(0), a(1), a(2), a(3), a(4), a(5), a(6), a(7), a(8), a(9), a(10), a(11), a(12), a(13), a(14), a(15), a(16), a(17), a(18), a(19), a(20), a(21))
-      case _  ⇒ throw new IllegalStateException("Cannot create tuple of size " + underlying.length)
+      case 16 ⇒
+        Tuple16(a(0), a(1), a(2), a(3), a(4), a(5), a(6), a(7), a(8), a(9), a(10), a(11), a(12), a(13), a(14), a(15))
+      case 17 ⇒
+        Tuple17(
+          a(0),
+          a(1),
+          a(2),
+          a(3),
+          a(4),
+          a(5),
+          a(6),
+          a(7),
+          a(8),
+          a(9),
+          a(10),
+          a(11),
+          a(12),
+          a(13),
+          a(14),
+          a(15),
+          a(16))
+      case 18 ⇒
+        Tuple18(
+          a(0),
+          a(1),
+          a(2),
+          a(3),
+          a(4),
+          a(5),
+          a(6),
+          a(7),
+          a(8),
+          a(9),
+          a(10),
+          a(11),
+          a(12),
+          a(13),
+          a(14),
+          a(15),
+          a(16),
+          a(17))
+      case 19 ⇒
+        Tuple19(
+          a(0),
+          a(1),
+          a(2),
+          a(3),
+          a(4),
+          a(5),
+          a(6),
+          a(7),
+          a(8),
+          a(9),
+          a(10),
+          a(11),
+          a(12),
+          a(13),
+          a(14),
+          a(15),
+          a(16),
+          a(17),
+          a(18))
+      case 20 ⇒
+        Tuple20(
+          a(0),
+          a(1),
+          a(2),
+          a(3),
+          a(4),
+          a(5),
+          a(6),
+          a(7),
+          a(8),
+          a(9),
+          a(10),
+          a(11),
+          a(12),
+          a(13),
+          a(14),
+          a(15),
+          a(16),
+          a(17),
+          a(18),
+          a(19))
+      case 21 ⇒
+        Tuple21(
+          a(0),
+          a(1),
+          a(2),
+          a(3),
+          a(4),
+          a(5),
+          a(6),
+          a(7),
+          a(8),
+          a(9),
+          a(10),
+          a(11),
+          a(12),
+          a(13),
+          a(14),
+          a(15),
+          a(16),
+          a(17),
+          a(18),
+          a(19),
+          a(20))
+      case 22 ⇒
+        Tuple22(
+          a(0),
+          a(1),
+          a(2),
+          a(3),
+          a(4),
+          a(5),
+          a(6),
+          a(7),
+          a(8),
+          a(9),
+          a(10),
+          a(11),
+          a(12),
+          a(13),
+          a(14),
+          a(15),
+          a(16),
+          a(17),
+          a(18),
+          a(19),
+          a(20),
+          a(21))
+      case _ ⇒ throw new IllegalStateException("Cannot create tuple of size " + underlying.length)
     }
   }
 }

@@ -5,7 +5,7 @@
 package swave.core.impl.stages.inout
 
 import scala.annotation.compileTimeOnly
-import swave.core.impl.{ Outport, Inport, RunContext }
+import swave.core.impl.{Inport, Outport, RunContext}
 import swave.core.PipeElem
 import swave.core.impl.stages.Stage
 

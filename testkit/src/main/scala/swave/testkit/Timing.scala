@@ -13,13 +13,12 @@ import swave.core.util._
 
 object Timing {
 
-  final case class Settings(
-      factor: Double,
-      scalingChain: immutable.Seq[Double],
-      singleExpectDefault: FiniteDuration) {
+  final case class Settings(factor: Double, scalingChain: immutable.Seq[Double], singleExpectDefault: FiniteDuration) {
 
     requireArg(factor > 0.0 && !factor.isInfinite, "`click` must be finite and > 0")
-    requireArg(scalingChain.nonEmpty && scalingChain.size <= 16, "`scalingChain` must be non-empty and have at most 16 elements")
+    requireArg(
+      scalingChain.nonEmpty && scalingChain.size <= 16,
+      "`scalingChain` must be non-empty and have at most 16 elements")
     requireArg(singleExpectDefault > Duration.Zero, "`singleExpectDefault` must be > 0")
   }
 

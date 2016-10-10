@@ -6,7 +6,7 @@ package swave.core.impl.stages.fanin
 
 import scala.annotation.tailrec
 import swave.core.PipeElem
-import swave.core.impl.util.{ InportAnyRefList, InportList }
+import swave.core.impl.util.{InportAnyRefList, InportList}
 import swave.core.impl.Outport
 import swave.core.macros._
 import swave.core.util._
@@ -30,8 +30,8 @@ private[core] final class MergeStage(subs: InportList, eagerComplete: Boolean)
   }
 
   /**
-   * @param out the active downstream
-   */
+    * @param out the active downstream
+    */
   def awaitingXStart(out: Outport) = state(
     xStart = () => {
       @tailrec def rec(rest: InportList, result: InportAnyRefList): InportAnyRefList =
@@ -44,10 +44,10 @@ private[core] final class MergeStage(subs: InportList, eagerComplete: Boolean)
     })
 
   /**
-   * @param out       the active downstream
-   * @param ins       the active upstreams
-   * @param remaining number of elements already requested by downstream but not yet delivered, >= 0
-   */
+    * @param out       the active downstream
+    * @param ins       the active upstreams
+    * @param remaining number of elements already requested by downstream but not yet delivered, >= 0
+    */
   def running(out: Outport, ins: InportAnyRefList, remaining: Long): State = state(
     request = (n, _) ⇒ {
       @tailrec def rec(n: Int): State =
@@ -96,10 +96,10 @@ private[core] final class MergeStage(subs: InportList, eagerComplete: Boolean)
     onError = cancelAllAndStopErrorF(ins, out))
 
   /**
-   * Upstreams completed, downstream active and buffer non-empty.
-   *
-   * @param out the active downstream
-   */
+    * Upstreams completed, downstream active and buffer non-empty.
+    *
+    * @param out the active downstream
+    */
   def draining(out: Outport) = state(
     request = (n, _) ⇒ {
       @tailrec def rec(n: Int): State =

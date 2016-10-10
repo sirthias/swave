@@ -5,7 +5,7 @@
 package swave.core.graph.impl
 
 import java.lang.StringBuilder
-import swave.core.graph.{ Digraph, GlyphSet }
+import swave.core.graph.{Digraph, GlyphSet}
 import scala.collection.immutable.VectorBuilder
 import Infrastructure._
 
@@ -13,9 +13,9 @@ private[graph] object LineRendering {
 
   def renderLines[V](nodes: Vector[Node], glyphSet: GlyphSet): Digraph.Rendering[V] = {
     var charBuf: Array[Char] = Array.emptyCharArray
-    val lines = new VectorBuilder[String]
-    val sb = new StringBuilder
-    var maxLineLength = 0
+    val lines                = new VectorBuilder[String]
+    val sb                   = new StringBuilder
+    var maxLineLength        = 0
 
     val vertexRenderings =
       for (node ← nodes) yield {

@@ -5,7 +5,7 @@
 package swave.core
 
 import scala.concurrent.duration._
-import org.scalatest.matchers.{ MatchResult, Matcher }
+import org.scalatest.matchers.{MatchResult, Matcher}
 import org.scalatest._
 import swave.core.util._
 
@@ -18,7 +18,8 @@ abstract class SwaveSpec extends FreeSpec with StreamEnvShutdown {
     equal(expected).matcher[Seq[T]].compose(_.drainTo(Drain.seq(100)).await(timeout.duration))
   def produceError[T](expected: Throwable)(implicit timeout: Timeout = Timeout()): Matcher[Spout[T]] =
     equal(expected).matcher[Throwable].compose(_.drainTo(Drain.ignore).failed.await(timeout.duration))
-  def produceErrorLike[T](pf: PartialFunction[Throwable, Unit])(implicit timeout: Timeout = Timeout()): Matcher[Spout[T]] =
+  def produceErrorLike[T](pf: PartialFunction[Throwable, Unit])(
+      implicit timeout: Timeout = Timeout()): Matcher[Spout[T]] =
     new Matcher[Spout[T]] {
       def apply(left: Spout[T]) = {
         val error = left.drainTo(Drain.ignore).failed.await(timeout.duration)

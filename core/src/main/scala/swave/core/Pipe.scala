@@ -9,30 +9,29 @@ import org.reactivestreams.Processor
 import swave.core.impl.util.InportList
 import scala.util.control.NonFatal
 import scala.annotation.tailrec
-import scala.annotation.unchecked.{ uncheckedVariance ⇒ uV }
+import scala.annotation.unchecked.{uncheckedVariance ⇒ uV}
 import shapeless._
 import swave.core.impl.rs.SubPubProcessor
 import swave.core.impl.stages.Stage
 import swave.core.impl.stages.inout.NopStage
 import swave.core.impl._
 
-final class Pipe[-A, +B] private (
-    private[core] val firstStage: Outport,
-    private[core] val lastStage: Inport) extends StreamOps[B @uV] {
+final class Pipe[-A, +B] private (private[core] val firstStage: Outport, private[core] val lastStage: Inport)
+    extends StreamOps[B @uV] {
 
   type Repr[T] = Pipe[A @uV, T]
 
   def pipeElem: PipeElem = firstStage.pipeElem
 
   def inputAsDrain: Drain[A, Unit] = Drain(firstStage)
-  def outputAsSpout: Spout[B] = new Spout(lastStage)
+  def outputAsSpout: Spout[B]      = new Spout(lastStage)
 
   private[core] def transform(spout: Spout[A]): Spout[B] = {
     spout.inport.subscribe()(firstStage)
     new Spout[B](lastStage)
   }
 
-  protected def base: Inport = lastStage
+  protected def base: Inport           = lastStage
   protected def wrap: Inport ⇒ Repr[_] = in ⇒ new Pipe(firstStage, in)
 
   protected[core] def append[T](stage: Stage): Repr[T] = {
@@ -53,8 +52,7 @@ final class Pipe[-A, +B] private (
   }
 
   def via[P <: HList, R, Out](joined: Module.TypeLogic.Joined[B :: HNil, P, R])(
-    implicit
-    vr: TypeLogic.ViaResult[P, Drain[A @uV, R], Repr @uV, Out]): Out = {
+      implicit vr: TypeLogic.ViaResult[P, Drain[A @uV, R], Repr @uV, Out]): Out = {
     val out = ModuleImpl(joined.module)(InportList(lastStage))
     val result = vr.id match {
       case 0 ⇒ new Drain(firstStage, out)
@@ -72,9 +70,7 @@ final class Pipe[-A, +B] private (
   def named(name: String): A =>> B = named(Module.ID(name))
 
   def named(moduleID: Module.ID): A =>> B = {
-    moduleID
-      .markAsInnerEntry(firstStage)
-      .markAsInnerExit(lastStage)
+    moduleID.markAsInnerEntry(firstStage).markAsInnerExit(lastStage)
     this
   }
 }
@@ -94,7 +90,7 @@ object Pipe {
 
   def lazyStart[A, B](onStart: () ⇒ Pipe[A, B]): Pipe[A, B] = {
     val innerPipeRef = new AtomicReference[Pipe[A, B]]
-    val placeholder = Pipe[A].asInstanceOf[Pipe[A, B]]
+    val placeholder  = Pipe[A].asInstanceOf[Pipe[A, B]]
     @tailrec def innerPipe: Pipe[A, B] =
       innerPipeRef.get match {
         case null ⇒

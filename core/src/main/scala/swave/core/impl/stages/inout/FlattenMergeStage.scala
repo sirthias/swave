@@ -5,9 +5,9 @@
 package swave.core.impl.stages.inout
 
 import scala.annotation.tailrec
-import swave.core.impl.util.{ InportAnyRefList, InportList }
+import swave.core.impl.util.{InportAnyRefList, InportList}
 import swave.core.impl.stages.drain.SubDrainStage
-import swave.core.{ PipeElem, Streamable }
+import swave.core.{PipeElem, Streamable}
 import swave.core.macros._
 import swave.core.util._
 import swave.core.impl._
@@ -39,12 +39,12 @@ private[core] final class FlattenMergeStage(streamable: Streamable.Aux[AnyRef, A
       })
 
     /**
-     * Upstream active.
-     *
-     * @param subscribing subs from which we are awaiting an onSubscribe, may be empty
-     * @param subscribed  active subs, may be empty
-     * @param remaining   number of elements already requested by downstream but not yet delivered, >= 0
-     */
+      * Upstream active.
+      *
+      * @param subscribing subs from which we are awaiting an onSubscribe, may be empty
+      * @param subscribed  active subs, may be empty
+      * @param remaining   number of elements already requested by downstream but not yet delivered, >= 0
+      */
     def active(subscribing: InportList, subscribed: InportAnyRefList, remaining: Long): State = {
       requireState(remaining >= 0)
       state(
@@ -127,13 +127,13 @@ private[core] final class FlattenMergeStage(streamable: Streamable.Aux[AnyRef, A
   }
 
   /**
-   * Main upstream completed.
-   *
-   * @param out         the active downstream
-   * @param subscribing subs from which we are awaiting an onSubscribe, may be empty
-   * @param subscribed  active subs, ma be empty
-   * @param remaining   number of elements already requested by downstream but not yet delivered, >= 0
-   */
+    * Main upstream completed.
+    *
+    * @param out         the active downstream
+    * @param subscribing subs from which we are awaiting an onSubscribe, may be empty
+    * @param subscribed  active subs, ma be empty
+    * @param remaining   number of elements already requested by downstream but not yet delivered, >= 0
+    */
   def activeUpstreamCompleted(out: Outport, subscribing: InportList, subscribed: InportAnyRefList,
                               remaining: Long): State = {
     requireState(remaining >= 0)

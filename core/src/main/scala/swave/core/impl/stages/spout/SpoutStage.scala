@@ -6,7 +6,7 @@ package swave.core.impl.stages.spout
 
 import scala.annotation.compileTimeOnly
 import swave.core.PipeElem
-import swave.core.impl.{ Outport, RunContext }
+import swave.core.impl.{Outport, RunContext}
 import swave.core.impl.stages.Stage
 
 // format: OFF

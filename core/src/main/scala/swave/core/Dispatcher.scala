@@ -5,7 +5,7 @@
 package swave.core
 
 import scala.concurrent.ExecutionContextExecutor
-import scala.concurrent.duration.{ FiniteDuration, Duration }
+import scala.concurrent.duration.{Duration, FiniteDuration}
 import com.typesafe.config.Config
 import swave.core.impl.DispatcherImpl
 import swave.core.util._
@@ -32,20 +32,23 @@ object Dispatcher {
   object ThreadPoolConfig {
     def apply(c: Config, defaultThreadPoolConfig: Config): ThreadPoolConfig = {
       def poolConf(x: Config, name: String) = x.withFallback(defaultThreadPoolConfig getConfig name)
-      def forkJoin(x: Config) = ForkJoin(poolConf(x, "fork-join"))
-      def threadPool(x: Config) = ThreadPool(poolConf(x, "thread-pool"))
+      def forkJoin(x: Config)               = ForkJoin(poolConf(x, "fork-join"))
+      def threadPool(x: Config)             = ThreadPool(poolConf(x, "thread-pool"))
       c.getOptionalConfig("fork-join") → c.getOptionalConfig("thread-pool") match {
         case (Some(x), None) ⇒ forkJoin(x)
         case (None, Some(x)) ⇒ threadPool(x)
-        case (None, None)    ⇒ sys.error(s"Config section '$c' is missing a mandatory 'fork-join' or 'thread-pool' section!")
+        case (None, None) ⇒
+          sys.error(s"Config section '$c' is missing a mandatory 'fork-join' or 'thread-pool' section!")
         case (Some(x), Some(y)) ⇒
           if (c.hasPath("type")) {
             c.getString("type") match {
               case "fork-join"   ⇒ forkJoin(x)
               case "thread-pool" ⇒ threadPool(y)
             }
-          } else sys.error(s"Config section '$c' must only define either a 'fork-join' or a 'thread-pool' section, not both. " +
-            "Either remove one of them or add a `type = fork-join` or `type = thread-pool` setting to break the ambiguity!")
+          } else
+            sys.error(
+              s"Config section '$c' must only define either a 'fork-join' or a 'thread-pool' section, not both. " +
+                "Either remove one of them or add a `type = fork-join` or `type = thread-pool` setting to break the ambiguity!")
       }
     }
 
@@ -60,31 +63,29 @@ object Dispatcher {
 
     final case class ForkJoin(parallelism: Size, asyncMode: Boolean, daemonic: Boolean) extends ThreadPoolConfig
     object ForkJoin {
-      def apply(c: Config): ForkJoin = ForkJoin(
-        parallelism = Size(c getConfig "parallelism"),
-        asyncMode = c getString "task-peeking-mode" match {
+      def apply(c: Config): ForkJoin =
+        ForkJoin(parallelism = Size(c getConfig "parallelism"), asyncMode = c getString "task-peeking-mode" match {
           case "FIFO" ⇒ true
           case "LIFO" ⇒ false
           case x      ⇒ throw new IllegalArgumentException(s"Illegal task-peeking-mode `$x`. Must be `FIFO` or `LIFO`.")
-        },
-        daemonic = c getBoolean "daemonic")
+        }, daemonic = c getBoolean "daemonic")
     }
 
-    final case class ThreadPool(
-        corePoolSize: Size,
-        maxPoolSize: Size,
-        keepAliveTime: FiniteDuration,
-        allowCoreTimeout: Boolean,
-        prestart: ThreadPool.Prestart,
-        daemonic: Boolean) extends ThreadPoolConfig {
+    final case class ThreadPool(corePoolSize: Size,
+                                maxPoolSize: Size,
+                                keepAliveTime: FiniteDuration,
+                                allowCoreTimeout: Boolean,
+                                prestart: ThreadPool.Prestart,
+                                daemonic: Boolean)
+        extends ThreadPoolConfig {
       requireArg(keepAliveTime > Duration.Zero)
     }
     object ThreadPool {
       sealed abstract class Prestart
       object Prestart {
-        case object Off extends Prestart
+        case object Off   extends Prestart
         case object First extends Prestart
-        case object All extends Prestart
+        case object All   extends Prestart
       }
 
       def apply(c: Config): ThreadPool =

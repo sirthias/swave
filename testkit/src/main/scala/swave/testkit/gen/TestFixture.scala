@@ -5,10 +5,10 @@
 package swave.testkit.gen
 
 import swave.core._
-import swave.testkit.impl.{ TestDrainStage, TestStage, TestSpoutStage }
+import swave.testkit.impl.{TestDrainStage, TestSpoutStage, TestStage}
 
 import scala.concurrent.Future
-import scala.util.{ Failure, Success }
+import scala.util.{Failure, Success}
 
 sealed abstract class TestFixture {
   private[testkit] def stage: TestStage
@@ -23,13 +23,13 @@ object TestFixture {
   sealed trait State
   object State {
     sealed trait Intermediate extends State
-    sealed trait Terminal extends State
-    sealed trait Finished extends Terminal
+    sealed trait Terminal     extends State
+    sealed trait Finished     extends Terminal
 
-    case object Starting extends Intermediate
-    case object Running extends Intermediate
-    case object Cancelled extends Finished
-    case object Completed extends Finished
+    case object Starting                 extends Intermediate
+    case object Running                  extends Intermediate
+    case object Cancelled                extends Finished
+    case object Completed                extends Finished
     final case class Error(e: Throwable) extends Terminal
   }
 
@@ -48,10 +48,10 @@ object TestFixture {
 }
 
 final class TestInput[T](private[testkit] val stage: TestSpoutStage) extends TestFixture {
-  def spout: Spout[T] = new Spout[T](stage)
-  def produced: Vector[T] = stage.result
-  def size: Int = stage.resultSize
-  def scriptedSize: Int = stage.scriptedSize
+  def spout: Spout[T]                  = new Spout[T](stage)
+  def produced: Vector[T]              = stage.result
+  def size: Int                        = stage.resultSize
+  def scriptedSize: Int                = stage.scriptedSize
   def scriptedError: Option[Throwable] = stage.termination
 
   override def toString: String = s"TestInput${stage.id}"
@@ -61,10 +61,10 @@ final class TestInput[T](private[testkit] val stage: TestSpoutStage) extends Tes
 
 sealed class TestOutput[T](private[testkit] val stage: TestDrainStage) extends TestFixture {
   def drain: Drain[T, Future[TestFixture.State.Finished]] = new Drain(stage, termination)
-  def received: Vector[T] = stage.result
-  def size: Int = stage.resultSize
-  def scriptedSize: Int = stage.scriptedSize
-  def appendElemHandler(f: T ⇒ Unit): Unit = stage.appendElemHandler(f.asInstanceOf[AnyRef ⇒ Unit])
+  def received: Vector[T]                                 = stage.result
+  def size: Int                                           = stage.resultSize
+  def scriptedSize: Int                                   = stage.scriptedSize
+  def appendElemHandler(f: T ⇒ Unit): Unit                = stage.appendElemHandler(f.asInstanceOf[AnyRef ⇒ Unit])
 
   override def toString: String = s"TestOutput${stage.id}"
 }

@@ -10,9 +10,9 @@ private[macros] trait ConnectInAndSealWith { this: Util =>
 
   def connectInAndSealWith(f: Tree): List[Tree] = unblock {
     val q"($ctx0: $_, $in0: $_) => $block0" = f
-    val ctx = freshName("ctx")
-    val in = freshName("in")
-    val block = replaceIdents(block0, ctx0 -> ctx, in0 -> in)
+    val ctx                                 = freshName("ctx")
+    val in                                  = freshName("in")
+    val block                               = replaceIdents(block0, ctx0 -> ctx, in0 -> in)
 
     q"""
       initialState(awaitingOnSubscribe())

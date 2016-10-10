@@ -10,10 +10,10 @@ private[macros] trait ConnectInOutAndSealWith { this: Util =>
 
   def connectInOutAndSealWith(f: Tree): List[Tree] = unblock {
     val q"($ctx0: $_, $in0: $_, $out0: $_) => $block0" = f
-    val ctx = freshName("ctx")
-    val in = freshName("in")
-    val out = freshName("out")
-    val block = replaceIdents(block0, ctx0 -> ctx, in0 -> in, out0 -> out)
+    val ctx                                            = freshName("ctx")
+    val in                                             = freshName("in")
+    val out                                            = freshName("out")
+    val block                                          = replaceIdents(block0, ctx0 -> ctx, in0 -> in, out0 -> out)
 
     q"""
       initialState(awaitingSubscribeOrOnSubscribe())

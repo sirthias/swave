@@ -8,7 +8,7 @@ import scala.annotation.tailrec
 import swave.core.macros.StageImpl
 import swave.core.PipeElem
 import swave.core.impl.stages.Stage
-import swave.core.impl.{ Inport, Outport }
+import swave.core.impl.{Inport, Outport}
 import swave.core.util._
 import Stage.OutportStates
 
@@ -22,10 +22,10 @@ private[core] final class BroadcastStage(eagerCancel: Boolean) extends FanOutSta
   connectFanOutAndSealWith { (ctx, in, outs) ⇒ running(in, outs, 0) }
 
   /**
-   * @param in        the active upstream
-   * @param outs      the active downstreams
-   * @param pending   number of elements already requested from upstream but not yet received, >= 0
-   */
+    * @param in        the active upstream
+    * @param outs      the active downstreams
+    * @param pending   number of elements already requested from upstream but not yet received, >= 0
+    */
   def running(in: Inport, outs: OutportStates, pending: Long): State = {
 
     @tailrec def handleDemand(n: Int, out: Outport, os: OutportStates, current: OutportStates,

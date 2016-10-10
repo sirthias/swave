@@ -5,8 +5,8 @@
 package swave.core.impl.stages.inout
 
 import scala.concurrent.duration._
-import swave.core.{ Cancellable, PipeElem }
-import swave.core.impl.{ StreamRunner, Inport, Outport }
+import swave.core.{Cancellable, PipeElem}
+import swave.core.impl.{Inport, Outport, StreamRunner}
 import swave.core.macros._
 
 // format: OFF
@@ -30,8 +30,8 @@ private[core] final class DropWithinStage(duration: FiniteDuration) extends InOu
       xStart = () => dropping(runner.scheduleTimeout(this, duration)))
 
     /**
-     * Dropping all elements while the timer hasn't fired yet.
-     */
+      * Dropping all elements while the timer hasn't fired yet.
+      */
     def dropping(timer: Cancellable): State = state(
       request = requestF(in),
 
@@ -58,8 +58,8 @@ private[core] final class DropWithinStage(duration: FiniteDuration) extends InOu
       xEvent = { case StreamRunner.Timeout(_) => draining() })
 
     /**
-     * Simply forwarding elements from upstream to downstream.
-     */
+      * Simply forwarding elements from upstream to downstream.
+      */
     def draining() = state(
       intercept = false,
 

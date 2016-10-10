@@ -7,13 +7,13 @@ package swave.core.util
 private[swave] class RichLong(private val underlying: Long) extends AnyVal {
 
   /**
-   * Add with result bounded by [Long.MinValue, Long.MaxValue].
-   */
+    * Add with result bounded by [Long.MinValue, Long.MaxValue].
+    */
   def ⊹(other: Int): Long = ⊹(other.toLong)
 
   /**
-   * Add with result bounded by [Long.MinValue, Long.MaxValue].
-   */
+    * Add with result bounded by [Long.MinValue, Long.MaxValue].
+    */
   def ⊹(other: Long): Long = {
     val r = underlying + other
     // HD 2-12 Overflow iff both arguments have the opposite sign of the result
@@ -23,17 +23,17 @@ private[swave] class RichLong(private val underlying: Long) extends AnyVal {
   }
 
   /**
-   * Multiply with result bounded by [Long.MinValue, Long.MaxValue].
-   */
+    * Multiply with result bounded by [Long.MinValue, Long.MaxValue].
+    */
   def ×(other: Int): Long = ×(other.toLong)
 
   /**
-   * Multiply with result bounded by [Long.MinValue, Long.MaxValue].
-   */
+    * Multiply with result bounded by [Long.MinValue, Long.MaxValue].
+    */
   def ×(other: Long): Long = {
     val r = underlying * other
     if (((math.abs(underlying) | math.abs(other)) >>> 31 != 0) &&
-      (other != 0 && (r / other != underlying) || underlying == Long.MinValue && other == -1)) {
+        (other != 0 && (r / other != underlying) || underlying == Long.MinValue && other == -1)) {
       if ((underlying ^ other) < 0) Long.MinValue else Long.MaxValue
     } else r
   }

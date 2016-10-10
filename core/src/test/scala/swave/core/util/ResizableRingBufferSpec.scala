@@ -6,7 +6,7 @@ package swave.core.util
 
 import org.scalacheck.Gen
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import org.scalatest.{ FreeSpec, Matchers }
+import org.scalatest.{FreeSpec, Matchers}
 
 class ResizableRingBufferSpec extends FreeSpec with Matchers with GeneratorDrivenPropertyChecks {
 
@@ -24,7 +24,7 @@ class ResizableRingBufferSpec extends FreeSpec with Matchers with GeneratorDrive
 
     "read back exactly the number of elems previously written" in {
       val gen = for {
-        buf ← bufferGen
+        buf   ← bufferGen
         count ← Gen.choose(0, buf.maxCapacity)
       } yield (buf, count)
 
@@ -40,15 +40,15 @@ class ResizableRingBufferSpec extends FreeSpec with Matchers with GeneratorDrive
 
     "pass a simple stress-test" in {
       val gen = for {
-        buf ← bufferGen
+        buf     ← bufferGen
         opCount ← Gen.choose(5, 50)
-        ops ← Gen.listOfN(opCount, Gen.choose(-20, 50))
+        ops     ← Gen.listOfN(opCount, Gen.choose(-20, 50))
       } yield (buf, ops)
 
       forAll(gen) {
         case (buf, ops) ⇒
           val queue = collection.mutable.Queue[String]()
-          val ints = Iterator.from(0)
+          val ints  = Iterator.from(0)
           ops foreach {
             case readCount if readCount < 0 ⇒
               -readCount times {

@@ -14,10 +14,10 @@ import swave.core.util._
 import swave.testkit.Probes._
 
 /**
- * Partially transcribed from akka-stream's FlowExpandSpec which carries this copyright:
- *
- *    Copyright (C) 2015-2016 Lightbend Inc. <http://www.lightbend.com>
- */
+  * Partially transcribed from akka-stream's FlowExpandSpec which carries this copyright:
+  *
+  *    Copyright (C) 2015-2016 Lightbend Inc. <http://www.lightbend.com>
+  */
 final class ExpandSpec extends SwaveSpec {
 
   implicit val env = StreamEnv()
@@ -30,7 +30,7 @@ final class ExpandSpec extends SwaveSpec {
     }
 
     "drain the zero Iterator before working as expected" in {
-      val upstream = SpoutProbe[Int]
+      val upstream   = SpoutProbe[Int]
       val downstream = DrainProbe[Int]
       upstream.expandTo(downstream)
 
@@ -51,7 +51,7 @@ final class ExpandSpec extends SwaveSpec {
     }
 
     "work properly when the zero Iterator is not pulled" in {
-      val upstream = SpoutProbe[Int]
+      val upstream   = SpoutProbe[Int]
       val downstream = DrainProbe[Int]
       upstream.expandTo(downstream)
 
@@ -68,7 +68,7 @@ final class ExpandSpec extends SwaveSpec {
     }
 
     "pass-through elements unchanged when there is no rate difference" in {
-      val upstream = SpoutProbe[Int]
+      val upstream   = SpoutProbe[Int]
       val downstream = DrainProbe[Int]
       upstream.expandTo(downstream)
 
@@ -84,15 +84,17 @@ final class ExpandSpec extends SwaveSpec {
     }
 
     "work on a variable rate chain" in {
-      Spout(50 to 100)
-        .map { i ⇒ if (ThreadLocalRandom.current().nextBoolean()) Thread.sleep(10); i }
-        .expand(Iterator.continually(_))
+      Spout(50 to 100).map { i ⇒
+        if (ThreadLocalRandom.current().nextBoolean()) Thread.sleep(10); i
+      }.expand(Iterator.continually(_))
         .drainFolding(Set.empty[Int])(_ + _)
-        .await(1.second).toSeq.sorted shouldEqual (50 to 100)
+        .await(1.second)
+        .toSeq
+        .sorted shouldEqual (50 to 100)
     }
 
     "backpressure publisher when subscriber is slower" in {
-      val upstream = SpoutProbe[Int]
+      val upstream   = SpoutProbe[Int]
       val downstream = DrainProbe[Int]
       upstream.expandTo(downstream)
 
@@ -117,10 +119,12 @@ final class ExpandSpec extends SwaveSpec {
     }
 
     "properly propagate exceptions thrown by zero Iterator" in {
-      val upstream = SpoutProbe[Int]
+      val upstream   = SpoutProbe[Int]
       val downstream = DrainProbe[Int]
 
-      upstream.expand(Iterator(1, 2) ++ Iterator.continually(throw TestError), Iterator.continually(_)).drainTo(downstream)
+      upstream
+        .expand(Iterator(1, 2) ++ Iterator.continually(throw TestError), Iterator.continually(_))
+        .drainTo(downstream)
 
       upstream.expectRequest(1)
       downstream.requestExpectNext(1, 2)
@@ -134,7 +138,7 @@ final class ExpandSpec extends SwaveSpec {
     }
 
     "properly propagate exceptions thrown by extrapolation function" in {
-      val upstream = SpoutProbe[Int]
+      val upstream   = SpoutProbe[Int]
       val downstream = DrainProbe[Int]
 
       upstream.expand(x ⇒ if (x <= 2) Iterator.single(x) else throw TestError).drainTo(downstream)
@@ -151,7 +155,7 @@ final class ExpandSpec extends SwaveSpec {
     }
 
     "properly propagate exceptions thrown by extrapolate Iterator" in {
-      val upstream = SpoutProbe[Int]
+      val upstream   = SpoutProbe[Int]
       val downstream = DrainProbe[Int]
 
       upstream.expand(_ ⇒ Iterator(1, 2) ++ Iterator.continually(throw TestError)).drainTo(downstream)

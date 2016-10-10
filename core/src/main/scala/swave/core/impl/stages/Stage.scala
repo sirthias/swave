@@ -4,86 +4,85 @@
 
 package swave.core.impl.stages
 
-import scala.annotation.{ compileTimeOnly, tailrec }
+import scala.annotation.{compileTimeOnly, tailrec}
 import scala.concurrent.Promise
-import swave.core.impl.util.{ AbstractOutportList, AbstractInportList }
-import swave.core.{ Module, PipeElem }
+import swave.core.impl.util.{AbstractInportList, AbstractOutportList}
+import swave.core.{Module, PipeElem}
 import swave.core.util._
 import swave.core.impl._
 
 /**
- * Signals:
- * - subscribe
- * - request
- * - cancel
- * - onSubscribe
- * - onNext
- * - onComplete
- * - onError
- * and
- * - xSeal
- * - xStart
- * - xEvent
- *
- * Phases (disjunct sets of states):
- *
- * CONNECTING (potentially several states)
- * - must throw exception upon reception of signal other than `subscribe` and `onSubscribe`
- * - upon signal reception:
- *   - must not allocate resources which require explicit releasing
- *   - must transition to AWAITING-XSEAL when all expected peers are wired
- *
- * AWAITING-XSEAL (single state)
- * - must throw exception upon reception of signal other than `xSeal`
- * - upon reception of `xSeal`:
- *   - must propagate `xSeal` signal to all connected peer stages
- *   - must not send non-`xSeal` signals
- *   - may register for reception of `xStart`, `xRun` and/or `xCleanUp`
- *   - when registered for reception of `xStart`:
- *     - must queue (intercept) all other signals until reception of `xStart`
- *     - must transition to AWAITING-XSTART
- *   - otherwise: must transition to RUNNING
- *
- * AWAITING-XSTART (single state)
- * - only for stages which have previously registered interest in `xStart`
- * - must throw exception upon reception of any non `x...` signal
- * - must ignore `xSeal`
- * - upon reception of `xStart`:
- *   - may send one or more non-x signals
- *   - must transition to RUNNING
- *   - must dequeue all intercepted signals
- *
- * RUNNING (potentially several states)
- * - must throw exception upon reception of `xStart`
- * - must ignore `xSeal`
- * - upon signal reception:
- *   - may send one or more signals
- *   - must queue (intercept) all signals while handling one signal instance
- *   - must dequeue all intercepted signals after having finished handling one signal instance
- *   - may transition to STOPPED
- *
- * STOPPED (single state)
- * - ignore all signals
- */
-
+  * Signals:
+  * - subscribe
+  * - request
+  * - cancel
+  * - onSubscribe
+  * - onNext
+  * - onComplete
+  * - onError
+  * and
+  * - xSeal
+  * - xStart
+  * - xEvent
+  *
+  * Phases (disjunct sets of states):
+  *
+  * CONNECTING (potentially several states)
+  * - must throw exception upon reception of signal other than `subscribe` and `onSubscribe`
+  * - upon signal reception:
+  *   - must not allocate resources which require explicit releasing
+  *   - must transition to AWAITING-XSEAL when all expected peers are wired
+  *
+  * AWAITING-XSEAL (single state)
+  * - must throw exception upon reception of signal other than `xSeal`
+  * - upon reception of `xSeal`:
+  *   - must propagate `xSeal` signal to all connected peer stages
+  *   - must not send non-`xSeal` signals
+  *   - may register for reception of `xStart`, `xRun` and/or `xCleanUp`
+  *   - when registered for reception of `xStart`:
+  *     - must queue (intercept) all other signals until reception of `xStart`
+  *     - must transition to AWAITING-XSTART
+  *   - otherwise: must transition to RUNNING
+  *
+  * AWAITING-XSTART (single state)
+  * - only for stages which have previously registered interest in `xStart`
+  * - must throw exception upon reception of any non `x...` signal
+  * - must ignore `xSeal`
+  * - upon reception of `xStart`:
+  *   - may send one or more non-x signals
+  *   - must transition to RUNNING
+  *   - must dequeue all intercepted signals
+  *
+  * RUNNING (potentially several states)
+  * - must throw exception upon reception of `xStart`
+  * - must ignore `xSeal`
+  * - upon signal reception:
+  *   - may send one or more signals
+  *   - must queue (intercept) all signals while handling one signal instance
+  *   - must dequeue all intercepted signals after having finished handling one signal instance
+  *   - may transition to STOPPED
+  *
+  * STOPPED (single state)
+  * - ignore all signals
+  */
 private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
   import Stage.InportStates
 
   type State = Int // semantic alias
 
   // TODO: evaluate moving the two booleans into the (upper) _state integer bits
-  private[this] var _intercepting = false
-  private[this] var _sealed = false
-  private[this] var _state: State = _ // current state; the STOPPED state is always encoded as zero
-  private[this] var _mbs: Int = _
-  private[this] var _inportState: InportStates = _
+  private[this] var _intercepting                        = false
+  private[this] var _sealed                              = false
+  private[this] var _state: State                        = _ // current state; the STOPPED state is always encoded as zero
+  private[this] var _mbs: Int                            = _
+  private[this] var _inportState: InportStates           = _
   private[this] var _buffer: ResizableRingBuffer[AnyRef] = _
-  private[this] var _stopPromise: Promise[Unit] = _
-  private[this] var _lastSubscribed: Outport = _ // needed by `_request` when `fullInterceptions` is off
+  private[this] var _stopPromise: Promise[Unit]          = _
+  private[this] var _lastSubscribed: Outport             = _ // needed by `_request` when `fullInterceptions` is off
 
   /**
-   * The [[StreamRunner]] that is assigned to the given stage.
-   */
+    * The [[StreamRunner]] that is assigned to the given stage.
+    */
   private[swave] final var runner: StreamRunner = _ // null -> sync run, non-null -> async run
 
   protected final var interceptingStates: Int = _ // bit mask holding a 1 bit for every state which requires interception support
@@ -104,7 +103,7 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
 
   def stateName: String = s"<unknown id ${_state}>"
 
-  final def isSealed: Boolean = _sealed
+  final def isSealed: Boolean  = _sealed
   final def isStopped: Boolean = _state == 0
 
   /////////////////////////////////////// SUBSCRIBE ///////////////////////////////////////
@@ -203,7 +202,10 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
     } else storeInterception(Statics._4L, elem, from)
 
   @tailrec
-  private def _onNext(elem: AnyRef, from: Inport, last: InportStates = null, current: InportStates = _inportState): Unit =
+  private def _onNext(elem: AnyRef,
+                      from: Inport,
+                      last: InportStates = null,
+                      current: InportStates = _inportState): Unit =
     if (current.nonEmpty) {
       val currentIn = current.in
       if ((from eq null) || (currentIn eq from)) {
@@ -344,18 +346,17 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
   /////////////////////////////////////// STATE DESIGNATOR ///////////////////////////////////////
 
   @compileTimeOnly("`state(...) can only be used as the single implementation expression of a 'State Def'!")
-  protected final def state(
-    intercept: Boolean = true,
-    subscribe: Outport ⇒ State = null,
-    request: (Int, Outport) ⇒ State = null,
-    cancel: Outport ⇒ State = null,
-    onSubscribe: Inport ⇒ State = null,
-    onNext: (AnyRef, Inport) ⇒ State = null,
-    onComplete: Inport ⇒ State = null,
-    onError: (Throwable, Inport) ⇒ State = null,
-    xSeal: RunContext ⇒ State = null,
-    xStart: () ⇒ State = null,
-    xEvent: AnyRef ⇒ State = null): State = 0
+  protected final def state(intercept: Boolean = true,
+                            subscribe: Outport ⇒ State = null,
+                            request: (Int, Outport) ⇒ State = null,
+                            cancel: Outport ⇒ State = null,
+                            onSubscribe: Inport ⇒ State = null,
+                            onNext: (AnyRef, Inport) ⇒ State = null,
+                            onComplete: Inport ⇒ State = null,
+                            onError: (Throwable, Inport) ⇒ State = null,
+                            xSeal: RunContext ⇒ State = null,
+                            xStart: () ⇒ State = null,
+                            xEvent: AnyRef ⇒ State = null): State = 0
 
   /////////////////////////////////////// STOPPERS ///////////////////////////////////////
 
@@ -365,7 +366,7 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
       else _stopPromise.success(())
     }
     _buffer = null // don't hang on to elements
-    0 // STOPPED state encoding
+    0              // STOPPED state encoding
   }
 
   protected final def stopF(out: Outport): State = stop()
@@ -407,17 +408,22 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
       cancelAll(ins.tail)
     }
 
-  protected final def cancelAllAndStopComplete[L >: Null <: AbstractInportList[L]](ins: L, except: Inport, out: Outport): State = {
+  protected final def cancelAllAndStopComplete[L >: Null <: AbstractInportList[L]](ins: L,
+                                                                                   except: Inport,
+                                                                                   out: Outport): State = {
     cancelAll(ins, except)
     stopComplete(out)
   }
 
-  protected final def cancelAllAndStopCompleteF[L >: Null <: AbstractInportList[L]](ins: L, out: Outport)(in: Inport): State = {
+  protected final def cancelAllAndStopCompleteF[L >: Null <: AbstractInportList[L]](ins: L, out: Outport)(
+      in: Inport): State = {
     cancelAll(ins, except = in)
     stopComplete(out)
   }
 
-  protected final def cancelAllAndStopErrorF[L >: Null <: AbstractInportList[L]](ins: L, out: Outport)(e: Throwable, in: Inport): State = {
+  protected final def cancelAllAndStopErrorF[L >: Null <: AbstractInportList[L]](ins: L, out: Outport)(
+      e: Throwable,
+      in: Inport): State = {
     cancelAll(ins, except = in)
     stopError(e, out)
   }
@@ -425,7 +431,7 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
   /////////////////////////////////////// PRIVATE ///////////////////////////////////////
 
   private def interceptionNeeded: Boolean = ((interceptingStates >> _state) & 1) != 0
-  private def fullInterceptions: Boolean = interceptingStates < 0
+  private def fullInterceptions: Boolean  = interceptingStates < 0
 
   private def storeInterception(signal: java.lang.Long, from: Port): Unit =
     if (fullInterceptions) {
@@ -491,20 +497,20 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
 private[swave] object Stage {
 
   /**
-   * Can be sent as an `xEvent` to register the given promise for completion when the stage is stopped.
-   * If the stage is already stopped the promise is completed as soon as possible.
-   * Note that error completion of the promise is performed on a best-effort basis, i.e. it might
-   * happen that the stage was stopped due to an error but the promise is still completed with a `Success`
-   * (e.g. when the [[RegisterStopPromise]] command arrives *after* the stage has already been stopped.
-   */
+    * Can be sent as an `xEvent` to register the given promise for completion when the stage is stopped.
+    * If the stage is already stopped the promise is completed as soon as possible.
+    * Note that error completion of the promise is performed on a best-effort basis, i.e. it might
+    * happen that the stage was stopped due to an error but the promise is still completed with a `Success`
+    * (e.g. when the [[RegisterStopPromise]] command arrives *after* the stage has already been stopped.
+    */
   final case class RegisterStopPromise(promise: Promise[Unit])
 
-  private class InportStates(in: Inport, tail: InportStates,
-    var pending: Int, // already requested from `in` but not yet received
-    var remaining: Long) // already requested by us but not yet forwarded to `in`
+  private class InportStates(in: Inport,
+                             tail: InportStates,
+                             var pending: Int, // already requested from `in` but not yet received
+                             var remaining: Long) // already requested by us but not yet forwarded to `in`
       extends AbstractInportList[InportStates](in, tail)
 
-  private[stages] class OutportStates(out: Outport, tail: OutportStates,
-    var remaining: Long) // requested by this `out` but not yet delivered, i.e. unfulfilled demand
+  private[stages] class OutportStates(out: Outport, tail: OutportStates, var remaining: Long) // requested by this `out` but not yet delivered, i.e. unfulfilled demand
       extends AbstractOutportList[OutportStates](out, tail)
 }

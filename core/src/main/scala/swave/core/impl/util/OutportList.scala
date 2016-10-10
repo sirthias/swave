@@ -8,9 +8,8 @@ import scala.annotation.tailrec
 import swave.core.impl.Outport
 import swave.core.util.ImsiList
 
-private[swave] abstract class AbstractOutportList[L >: Null <: AbstractOutportList[L]](
-  final val out: Outport,
-  tail: L) extends ImsiList[L](tail)
+private[swave] abstract class AbstractOutportList[L >: Null <: AbstractOutportList[L]](final val out: Outport, tail: L)
+    extends ImsiList[L](tail)
 
 private[swave] object AbstractOutportList {
   implicit class OutportListOps[L >: Null <: AbstractOutportList[L]](private val underlying: L) extends AnyVal {
@@ -20,7 +19,8 @@ private[swave] object AbstractOutportList {
         if (current ne null) {
           if (current.out eq out) current
           else rec(current.tail)
-        } else throw new IllegalStateException(s"Element for OutPort `$out` was required but not found in " + underlying)
+        } else
+          throw new IllegalStateException(s"Element for OutPort `$out` was required but not found in " + underlying)
       rec(underlying)
     }
 
@@ -42,17 +42,18 @@ private[swave] object AbstractOutportList {
               underlying
             } else current.tail
           } else rec(current, current.tail)
-        } else throw new IllegalStateException(s"Element for OutPort `$out` was required but not found in " + underlying)
+        } else
+          throw new IllegalStateException(s"Element for OutPort `$out` was required but not found in " + underlying)
       rec(null, underlying)
     }
   }
 }
 
 private[swave] final class OutportList(out: Outport, tail: OutportList)
-  extends AbstractOutportList[OutportList](out, tail)
+    extends AbstractOutportList[OutportList](out, tail)
 
 private[impl] object OutportList {
-  def empty: OutportList = null
+  def empty: OutportList                            = null
   def apply(out: Outport, tail: OutportList = null) = new OutportList(out, tail)
 
   implicit class OutportListOps(private val underlying: OutportList) extends AnyVal {

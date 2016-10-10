@@ -6,7 +6,7 @@ package swave.core.impl.stages.inout
 
 import swave.core.PipeElem
 import swave.core.impl.stages.Stage
-import swave.core.impl.{ Inport, Outport }
+import swave.core.impl.{Inport, Outport}
 import swave.core.macros.StageImpl
 
 // format: OFF

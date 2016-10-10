@@ -16,7 +16,7 @@ object Coupling {
   def apply[T]: Coupling[T] =
     new Coupling[T] {
       private[this] val pipe = new CouplingStage
-      val in = Drain[T](pipe)
-      val out = new Spout[T](pipe)
+      val in                 = Drain[T](pipe)
+      val out                = new Spout[T](pipe)
     }
 }

@@ -5,7 +5,7 @@
 package swave.core.tck
 
 import org.reactivestreams.Processor
-import swave.core.{ StreamEnv, Pipe }
+import swave.core.{Pipe, StreamEnv}
 
 class IdentityProcessorSpec(ignore: Any) // disabled by default, remove parameter to enable the test
     extends SwaveIdentityProcessorVerification[Int] {

@@ -1,6 +1,4 @@
-import scalariform.formatter.preferences._
 import de.heikoseeberger.sbtheader.HeaderPattern
-import com.typesafe.sbt.SbtScalariform._
 import ReleaseTransformations._
 
 lazy val contributors = Seq(
@@ -27,13 +25,8 @@ lazy val commonSettings = Seq(
       | * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
       |
       |""".stripMargin)),
-  ScalariformKeys.preferences := ScalariformKeys.preferences.value
-    .setPreference(AlignParameters, false)
-    .setPreference(AlignSingleLineCaseStatements, true)
-    .setPreference(DanglingCloseParenthesis, Prevent)
-    .setPreference(DoubleIndentClassDeclaration, true)
-    .setPreference(PreserveSpaceBeforeArguments, true)
-    .setPreference(RewriteArrowSymbols, true),
+  scalafmtConfig := Some(file(".scalafmt.conf")),
+  formatSbtFiles := false,
   coverageMinimum := 90,
   coverageFailOnMinimum := false,
   coverageExcludedPackages := """swave\.benchmarks\..*;swave\.examples\..*""")
@@ -190,7 +183,6 @@ lazy val `core-tests` = project
 lazy val examples = project
   .dependsOn(core, akkaCompat)
   .enablePlugins(AutomateHeaderPlugin)
-  .disablePlugins(com.typesafe.sbt.SbtScalariform)
   .settings(commonSettings: _*)
   .settings(noPublishingSettings: _*)
   .settings(

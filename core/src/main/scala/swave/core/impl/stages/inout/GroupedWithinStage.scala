@@ -6,8 +6,8 @@ package swave.core.impl.stages.inout
 
 import scala.concurrent.duration._
 import scala.collection.immutable.VectorBuilder
-import swave.core.impl.{ Inport, Outport, StreamRunner }
-import swave.core.{ Cancellable, PipeElem }
+import swave.core.impl.{Inport, Outport, StreamRunner}
+import swave.core.{Cancellable, PipeElem}
 import swave.core.macros._
 import swave.core.util._
 
@@ -41,11 +41,11 @@ private[core] final class GroupedWithinStage(maxSize: Int, duration: FiniteDurat
       })
 
     /**
-     * Awaiting elements from upstream. At least one element pending from upstream.
-     *
-     * @param timer the timer for the current period
-     * @param mainRemaining number of elements already requested by downstream but not yet delivered, >= 0
-     */
+      * Awaiting elements from upstream. At least one element pending from upstream.
+      *
+      * @param timer the timer for the current period
+      * @param mainRemaining number of elements already requested by downstream but not yet delivered, >= 0
+      */
     def awaitingElem(timer: Cancellable, mainRemaining: Long): State = state(
       request = (n, _) => awaitingElem(timer, mainRemaining ⊹ n),
 
@@ -83,9 +83,9 @@ private[core] final class GroupedWithinStage(maxSize: Int, duration: FiniteDurat
       })
 
     /**
-     * Next group ready to be sent, awaiting demand from downstream. Builder non-empty.
-     * Potentially elements pending from upstream.
-     */
+      * Next group ready to be sent, awaiting demand from downstream. Builder non-empty.
+      * Potentially elements pending from upstream.
+      */
     def awaitingDemand(): State = {
       requireState(builderSize > 0)
       state(
@@ -104,11 +104,11 @@ private[core] final class GroupedWithinStage(maxSize: Int, duration: FiniteDurat
     }
 
     /**
-     * Time period expired without reception of any element. Builder empty. `maxSize` elements pending.
-     * Awaiting the next element, which is to be emitted immediately in a single-element group.
-     *
-     * @param mainRemaining number of elements already requested by downstream but not yet delivered, >= 0
-     */
+      * Time period expired without reception of any element. Builder empty. `maxSize` elements pending.
+      * Awaiting the next element, which is to be emitted immediately in a single-element group.
+      *
+      * @param mainRemaining number of elements already requested by downstream but not yet delivered, >= 0
+      */
     def awaitingKickerElem(mainRemaining: Long): State = {
       requireState(builderSize == 0)
       state(
@@ -127,9 +127,9 @@ private[core] final class GroupedWithinStage(maxSize: Int, duration: FiniteDurat
     }
 
     /**
-     * Next group ready to be sent, awaiting demand from downstream. Builder non-empty.
-     * Upstream already completed.
-     */
+      * Next group ready to be sent, awaiting demand from downstream. Builder non-empty.
+      * Upstream already completed.
+      */
     def awaitingDemandUpstreamGone(): State = state(
       request = (_, _) => {
         val group = builder.result()

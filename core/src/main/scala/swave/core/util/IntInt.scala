@@ -12,7 +12,7 @@ final class IntInt(val longValue: Long) extends AnyVal {
 
   // extraction support
   def isEmpty: Boolean = false
-  def get: (Int, Int) = toTuple
+  def get: (Int, Int)  = toTuple
 }
 
 object IntInt {

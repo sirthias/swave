@@ -4,7 +4,7 @@
 
 package swave.core.util
 
-import com.typesafe.config.{ ConfigException, Config }
+import com.typesafe.config.{Config, ConfigException}
 import swave.core.ConfigurationException
 import scala.concurrent.duration._
 

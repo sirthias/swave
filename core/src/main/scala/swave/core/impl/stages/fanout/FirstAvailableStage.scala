@@ -6,9 +6,10 @@ package swave.core.impl.stages.fanout
 
 import swave.core.PipeElem
 
-private[core] final class FirstAvailableStage(eagerCancel: Boolean) extends FanOutStage
+private[core] final class FirstAvailableStage(eagerCancel: Boolean)
+    extends FanOutStage
     with PipeElem.FanOut.FirstAvailable {
 
-  def pipeElemType: String = "fanOutFirstAvailable"
+  def pipeElemType: String      = "fanOutFirstAvailable"
   def pipeElemParams: List[Any] = eagerCancel :: Nil
 }

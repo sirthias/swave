@@ -6,7 +6,7 @@ package swave.core.graph
 
 import scala.util.control.NonFatal
 import scala.io.Source
-import org.scalatest.{ Matchers, FreeSpec }
+import org.scalatest.{FreeSpec, Matchers}
 import swave.core.macros._
 
 class DigraphRendererSpec extends FreeSpec with Matchers {
@@ -27,56 +27,42 @@ class DigraphRendererSpec extends FreeSpec with Matchers {
   }
 
   "Example 3a" tests {
-    input("A")
-      .attach(input("B"))
-      .fanIn("C")
-      .to("D")
+    input("A").attach(input("B")).fanIn("C").to("D")
   }
 
   "Example 3b" tests {
-    input("A")
-      .attach(input("B"))
-      .fanIn("C").toDigraph
+    input("A").attach(input("B")).fanIn("C").toDigraph
   }
 
   "Example 4a" tests {
-    input("A")
-      .fanOut("B")
-      .sub.to("C")
-      .subContinue
-      .to("D")
+    input("A").fanOut("B").sub.to("C").subContinue.to("D")
   }
 
   "Example 4b" tests {
-    fanOut("A")
-      .sub.to("B")
-      .subContinue
-      .to("C")
+    fanOut("A").sub.to("B").subContinue.to("C")
   }
 
   "Example 5" tests {
-    input("A")
-      .attach(input("B"))
-      .attach(input("C"))
-      .fanIn("D")
-      .to("E")
+    input("A").attach(input("B")).attach(input("C")).fanIn("D").to("E")
   }
 
   "Example 6" tests {
-    input("A")
-      .fanOut("B")
-      .sub.to("C")
-      .sub.to("D")
-      .subContinue
-      .to("E")
+    input("A").fanOut("B").sub.to("C").sub.to("D").subContinue.to("E")
   }
 
   "Example 7" tests {
     input("A")
       .fanOut("B")
-      .sub.to("C")
-      .sub.next("D").attach(input("E").next("F")).fanIn("G").end
-      .sub.next("H").to("I")
+      .sub
+      .to("C")
+      .sub
+      .next("D")
+      .attach(input("E").next("F"))
+      .fanIn("G")
+      .end
+      .sub
+      .next("H")
+      .to("I")
       .continue
       .to("J")
   }
@@ -85,134 +71,119 @@ class DigraphRendererSpec extends FreeSpec with Matchers {
     val branch1 =
       input("C")
         .fanOut("D")
-        .sub.next("E").next("F").to("G")
-        .sub.next("H").end
-        .sub.next("I").next("J").next("K").to("L")
+        .sub
+        .next("E")
+        .next("F")
+        .to("G")
+        .sub
+        .next("H")
+        .end
+        .sub
+        .next("I")
+        .next("J")
+        .next("K")
+        .to("L")
         .continue
 
     val branch2 =
-      input("M")
-        .next("N")
-        .fanOut("O")
-        .sub.next("P").end
-        .sub.next("Q").next("R").next("S").to("T")
-        .continue
+      input("M").next("N").fanOut("O").sub.next("P").end.sub.next("Q").next("R").next("S").to("T").continue
 
-    input("A")
-      .next("B")
-      .attach(branch1)
-      .attach(branch2)
-      .fanIn("U").toDigraph
+    input("A").next("B").attach(branch1).attach(branch2).fanIn("U").toDigraph
   }
 
   "Example 9" tests {
-    fanOut("A")
-      .sub.to("B")
-      .sub.fanOut("C").subDrains("D", "E").subContinue.to("F")
-      .subContinue
-      .to("G")
+    fanOut("A").sub.to("B").sub.fanOut("C").subDrains("D", "E").subContinue.to("F").subContinue.to("G")
   }
 
   "Example 10" tests {
-    fanOut("A")
-      .sub.next("B").next("C").to("D")
-      .sub.fanOut("E").subDrains("F").subContinue.to("G")
-      .sub.next("H").next("I").next("J").to("K")
+    fanOut("A").sub
+      .next("B")
+      .next("C")
+      .to("D")
+      .sub
+      .fanOut("E")
+      .subDrains("F")
+      .subContinue
+      .to("G")
+      .sub
+      .next("H")
+      .next("I")
+      .next("J")
+      .to("K")
       .subContinue
       .to("L")
   }
 
   "Example 11a" tests {
-    fanOut("A")
-      .sub.end
-      .sub.end
-      .fanIn("B").toDigraph
+    fanOut("A").sub.end.sub.end.fanIn("B").toDigraph
   }
 
   "Example 11b" tests {
-    fanOut("A")
-      .sub.next("B").end
-      .sub.end
-      .fanIn("C").toDigraph
+    fanOut("A").sub.next("B").end.sub.end.fanIn("C").toDigraph
   }
 
   "Example 11c" tests {
-    fanOut("A")
-      .sub.end
-      .sub.next("B").end
-      .fanIn("C").toDigraph
+    fanOut("A").sub.end.sub.next("B").end.fanIn("C").toDigraph
   }
 
   "Example 11d" tests {
-    fanOut("A")
-      .sub.next("B").next("C").end
-      .sub.next("D").end
-      .fanIn("E").toDigraph
+    fanOut("A").sub.next("B").next("C").end.sub.next("D").end.fanIn("E").toDigraph
   }
 
   "Example 12a" tests {
-    input("A")
-      .attach(input("B"))
-      .attach(input("C"))
-      .fanInAndOut("D")
-      .subDrains("E", "F")
-      .subContinue
-      .to("G")
+    input("A").attach(input("B")).attach(input("C")).fanInAndOut("D").subDrains("E", "F").subContinue.to("G")
   }
 
   "Example 12b" tests {
-    input("A")
-      .attach(input("B"))
-      .attach(input("C"))
-      .fanInAndOut("D")
-      .subDrains("E")
-      .subContinue
-      .to("F")
+    input("A").attach(input("B")).attach(input("C")).fanInAndOut("D").subDrains("E").subContinue.to("F")
   }
 
   "Example 12c" tests {
-    input("A")
-      .attach(input("B"))
-      .fanInAndOut("C")
-      .subDrains("D", "E")
-      .subContinue
-      .to("F")
+    input("A").attach(input("B")).fanInAndOut("C").subDrains("D", "E").subContinue.to("F")
   }
 
   "Example 13" tests {
     val cp = coupling("C")
-    input("A")
-      .attach(cp.input)
-      .fanInAndOut("B")
-      .sub.end
-      .sub.to(cp)
-      .continue
-      .to("D")
+    input("A").attach(cp.input).fanInAndOut("B").sub.end.sub.to(cp).continue.to("D")
   }
 
   "Example 14" tests {
     val c = coupling("C")
-    fanOut("A")
-      .sub.end
-      .sub.to(c)
+    fanOut("A").sub.end.sub
+      .to(c)
       .continue
       .fanOut("B")
-      .sub.attach(c.input).fanIn("D").end
-      .sub.attach(c.input).fanIn("E").end
-      .fanIn("F").toDigraph
+      .sub
+      .attach(c.input)
+      .fanIn("D")
+      .end
+      .sub
+      .attach(c.input)
+      .fanIn("E")
+      .end
+      .fanIn("F")
+      .toDigraph
   }
 
   "Example 15" tests {
     val e = coupling("E")
-    fanOut("A")
-      .sub.attach(fanOut("B").sub.end.sub.to(e).continue).fanIn("C").end
+    fanOut("A").sub
+      .attach(fanOut("B").sub.end.sub.to(e).continue)
+      .fanIn("C")
+      .end
       .attach(e.input)
-      .sub.attachLeft(fanOut("D").sub.to(e).subContinue).fanIn("F").end
-      .fanIn("G").to("H")
+      .sub
+      .attachLeft(fanOut("D").sub.to(e).subContinue)
+      .fanIn("F")
+      .end
+      .fanIn("G")
+      .to("H")
   }
 
   val examples: Map[String, String] =
-    Source.fromInputStream(getClass.getResourceAsStream("/DigraphRendererSpec.examples.txt")).getLines()
+    Source
+      .fromInputStream(getClass.getResourceAsStream("/DigraphRendererSpec.examples.txt"))
+      .getLines()
       .scanLeft(Left(Nil): Either[List[String], List[String]]) {
         case (Left(lines), "")   ⇒ Right(lines.reverse)
         case (Left(lines), line) ⇒ Left(line :: lines)
@@ -230,7 +201,8 @@ class DigraphRendererSpec extends FreeSpec with Matchers {
   implicit class Example(name: String) {
     def tests(graph: ⇒ Digraph[Dsl.Node]): Unit =
       name in {
-        val expectedRendering = examples.getOrElse(name + ':', sys.error(s"Section for '$name' not found in examples.txt"))
+        val expectedRendering =
+          examples.getOrElse(name + ':', sys.error(s"Section for '$name' not found in examples.txt"))
         val s = graph.render(glyphSet).format(_.value)
         try s shouldEqual expectedRendering
         catch {

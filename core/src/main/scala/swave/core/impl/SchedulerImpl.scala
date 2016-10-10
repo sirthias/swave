@@ -12,26 +12,27 @@ import com.typesafe.scalalogging.Logger
 import scala.annotation.tailrec
 import scala.util.control.NonFatal
 import scala.concurrent.duration._
-import scala.concurrent.{ Promise, Future, ExecutionContext }
+import scala.concurrent.{ExecutionContext, Future, Promise}
 import swave.core.internal.agrona.TimerWheel
 import swave.core.macros._
 import swave.core._
 
 /**
- * Initial scheduler implementation with quite some improvement potential left.
- * Hoping that https://github.com/JCTools/JCTools/issues/109 will spare us from having to implement
- * a better alternative outselves.
- */
+  * Initial scheduler implementation with quite some improvement potential left.
+  * Hoping that https://github.com/JCTools/JCTools/issues/109 will spare us from having to implement
+  * a better alternative outselves.
+  */
 private[core] final class SchedulerImpl private (val settings: Scheduler.Settings) extends Scheduler {
   import SchedulerImpl._
 
-  private[this] val wheel = new TimerWheel(settings.tickDuration.toNanos, settings.ticksPerWheel)
+  private[this] val wheel          = new TimerWheel(settings.tickDuration.toNanos, settings.ticksPerWheel)
   private[this] val cancelledTimer = new wheel.Timer()
-  private[this] val newTasks = new MpscLinkedQueue8[Task]
-  private[this] val cancellations = new MpscLinkedQueue8[wheel.Timer]
-  private[this] val state = new AtomicReference[State](UnstartedState)
+  private[this] val newTasks       = new MpscLinkedQueue8[Task]
+  private[this] val cancellations  = new MpscLinkedQueue8[wheel.Timer]
+  private[this] val state          = new AtomicReference[State](UnstartedState)
 
-  def schedule(initialDelay: FiniteDuration, interval: FiniteDuration, r: Runnable)(implicit ec: ExecutionContext): Cancellable = {
+  def schedule(initialDelay: FiniteDuration, interval: FiniteDuration, r: Runnable)(
+      implicit ec: ExecutionContext): Cancellable = {
     requireArg(initialDelay >= Duration.Zero)
     requireArg(interval > Duration.Zero)
     schedule(initialDelay.toNanos, interval.toNanos, r)
@@ -56,7 +57,8 @@ private[core] final class SchedulerImpl private (val settings: Scheduler.Setting
     }
 
   @tailrec
-  private def schedule(delayNanos: Long, intervalNanos: Long, r: Runnable)(implicit ec: ExecutionContext): Cancellable =
+  private def schedule(delayNanos: Long, intervalNanos: Long, r: Runnable)(
+      implicit ec: ExecutionContext): Cancellable =
     state.get match {
       case ActiveState ⇒
         val deadline = wheel.ticks + delayNanos
@@ -75,7 +77,9 @@ private[core] final class SchedulerImpl private (val settings: Scheduler.Setting
     }
 
   private final class Task(val deadline: Long, intervalNanos: Long, runnable: Runnable)(implicit ec: ExecutionContext)
-      extends AtomicReference[wheel.Timer] with Runnable with Cancellable {
+      extends AtomicReference[wheel.Timer]
+      with Runnable
+      with Cancellable {
 
     // executed on the TimerThread!
     def run(): Unit = {
@@ -167,7 +171,7 @@ private[core] object SchedulerImpl {
   def apply(settings: Scheduler.Settings): SchedulerImpl = new SchedulerImpl(settings)
 
   private abstract class State
-  private case object UnstartedState extends State
-  private case object ActiveState extends State
+  private case object UnstartedState                             extends State
+  private case object ActiveState                                extends State
   private final case class ShutdownState(promise: Promise[Unit]) extends State
 }

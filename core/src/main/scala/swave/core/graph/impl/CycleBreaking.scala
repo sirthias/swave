@@ -17,8 +17,8 @@ private[graph] object CycleBreaking {
 
   private final class CycleEdge(val id: Int, val edge: Edge, edgeAttrs: EdgeAttrs) {
     private[this] val reversaphile = if (edgeAttrs.has(edge, Digraph.EdgeAttributes.Reversaphile)) 1 else 0
-    var cycleCount: Int = _
-    def sortValue = cycleCount * 2 + reversaphile
+    var cycleCount: Int            = _
+    def sortValue                  = cycleCount * 2 + reversaphile
 
     override def toString = s"CycleEdge(id=$id, edge=${format(edge)}, cycleCount=$cycleCount, sortValue=$sortValue)"
   }
@@ -31,9 +31,9 @@ private[graph] object CycleBreaking {
   // 3. While we still have unbroken cycles:
   //    reverse the edge with the highest cycle-count, as a tie-breaker prefer the ones marked "reversaphile"
   def reverseBackEdges[V](graph: GraphData[V]): GraphData[V] = {
-    val cycles = new mutable.ArrayBuffer[Cycle]
-    val cycleEdges = new mutable.ArrayBuffer[CycleEdge]
-    var edgeMap = Map.empty[Edge, CycleEdge]
+    val cycles      = new mutable.ArrayBuffer[Cycle]
+    val cycleEdges  = new mutable.ArrayBuffer[CycleEdge]
+    var edgeMap     = Map.empty[Edge, CycleEdge]
     val ancestorSet = new mutable.BitSet
 
     def collectCycles(node: Node, ancestors: List[Node]): Unit =
@@ -41,9 +41,10 @@ private[graph] object CycleBreaking {
         ancestorSet += node.id
         val newAncestors = node :: ancestors
         (node.succs: Seq[Node]) match {
-          case Nil       ⇒ // leaf
-          case Seq(next) ⇒ collectCycles(next, newAncestors) // reduce stack pressure by pulling out the most frequent case
-          case nodes     ⇒ nodes.foreach(collectCycles(_, newAncestors))
+          case Nil ⇒ // leaf
+          case Seq(next) ⇒
+            collectCycles(next, newAncestors) // reduce stack pressure by pulling out the most frequent case
+          case nodes ⇒ nodes.foreach(collectCycles(_, newAncestors))
         }
         ancestorSet -= node.id
         ()
@@ -86,10 +87,10 @@ private[graph] object CycleBreaking {
     import Digraph.EdgeAttributes._
     requireState(!graph.edgeAttrs.has(edge, Reversed))
     val revEdge = edge._2 → edge._1
-    val g1 = removeEdge(edge, graph)
-    val g2 = addEdge(revEdge, g1)
-    val a1 = graph.edgeAttrs.add(revEdge, Reversed)
-    val a2 = a1.move(edge, revEdge :: Nil, ~Fusable) // reversed edges are not fusable anymore
+    val g1      = removeEdge(edge, graph)
+    val g2      = addEdge(revEdge, g1)
+    val a1      = graph.edgeAttrs.add(revEdge, Reversed)
+    val a2      = a1.move(edge, revEdge :: Nil, ~Fusable) // reversed edges are not fusable anymore
     g2.copy(edgeAttrs = a2)
   }
 
@@ -102,7 +103,7 @@ private[graph] object CycleBreaking {
 
   private def addEdge[V](edge: Edge, graph: GraphData[V]): GraphData[V] = {
     val (origin, target) = edge
-    val targetWasRoot = target.isRoot
+    val targetWasRoot    = target.isRoot
     origin.succs += target
     target.preds += origin
     if (targetWasRoot) graph.copy(rootNodes = graph.rootNodes.filter(_ != target)) else graph

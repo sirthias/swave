@@ -24,8 +24,8 @@ private[core] final class IgnoreDrainStage(terminationPromise: Promise[Unit])
   }
 
   /**
-   * @param in the active upstream
-   */
+    * @param in the active upstream
+    */
   def awaitingXStart(in: Inport) = state(
     xStart = () => {
       in.request(Long.MaxValue)
@@ -33,8 +33,8 @@ private[core] final class IgnoreDrainStage(terminationPromise: Promise[Unit])
     })
 
   /**
-   * @param in the active upstream
-   */
+    * @param in the active upstream
+    */
   def running(in: Inport) = state(
     onNext = (_, _) ⇒ stay(),
 

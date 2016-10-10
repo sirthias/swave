@@ -7,16 +7,16 @@ package swave.testkit.impl
 import swave.testkit.gen.TestFixture
 
 import scala.collection.immutable.VectorBuilder
-import scala.concurrent.{ Future, Promise }
+import scala.concurrent.{Future, Promise}
 import swave.core.impl.stages.Stage
 
 private[testkit] trait TestStage { this: Stage ⇒
 
   private[this] val resultBuilder = new VectorBuilder[AnyRef]
-  private[this] var _resultSize = 0
+  private[this] var _resultSize   = 0
 
   private[this] var _fixtureState: TestFixture.State = TestFixture.State.Starting
-  private[this] val _finishedState = Promise[TestFixture.State.Finished]()
+  private[this] val _finishedState                   = Promise[TestFixture.State.Finished]()
 
   private[this] var onElem: AnyRef ⇒ Unit = x ⇒ ()
 
@@ -33,7 +33,7 @@ private[testkit] trait TestStage { this: Stage ⇒
   def finishedState: Future[TestFixture.State.Finished] = _finishedState.future
 
   private[testkit] final def result[T]: Vector[T] = resultBuilder.result().asInstanceOf[Vector[T]]
-  private[testkit] final def resultSize: Int = _resultSize
+  private[testkit] final def resultSize: Int      = _resultSize
 
   protected final def recordElem(elem: AnyRef): Unit = {
     resultBuilder += elem

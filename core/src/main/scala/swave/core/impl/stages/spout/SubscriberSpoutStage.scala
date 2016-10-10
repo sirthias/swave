@@ -6,9 +6,9 @@ package swave.core.impl.stages.spout
 
 import java.util.concurrent.atomic.AtomicReference
 import scala.annotation.tailrec
-import org.reactivestreams.{ Subscriber, Subscription }
+import org.reactivestreams.{Subscriber, Subscription}
 import swave.core.PipeElem
-import swave.core.impl.{ StreamRunner, Outport }
+import swave.core.impl.{Outport, StreamRunner}
 import swave.core.impl.rs.RSCompliance
 import swave.core.macros.StageImpl
 import swave.core.util._
@@ -81,10 +81,10 @@ private[core] final class SubscriberSpoutStage extends SpoutStage with PipeElem.
     })
 
   /**
-   * @param out       the active downstream
-   * @param requested the number of elements already requested by the downstream,
-   *                  -1: downstream already cancelled
-   */
+    * @param out       the active downstream
+    * @param requested the number of elements already requested by the downstream,
+    *                  -1: downstream already cancelled
+    */
   def awaitingSubscription(out: Outport, requested: Long): State = state(
     request = (n, _) => if (requested >= 0) awaitingSubscription(out, requested ⊹ n) else stay(),
     cancel = _ => awaitingSubscription(out, -1),

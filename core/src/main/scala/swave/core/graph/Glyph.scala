@@ -10,12 +10,12 @@ import swave.core.macros._
 private[graph] sealed trait GlyphMarker // phantom type
 
 /**
- * A `Glyph` represents an atomic "rendering unit" (or "cell"), which all graph renderings are composed of.
- * By choosing a particular [[GlyphSet]] (or creating one yourself) you have a lot of control over how
- * a graph rendering will appear.
- */
+  * A `Glyph` represents an atomic "rendering unit" (or "cell"), which all graph renderings are composed of.
+  * By choosing a particular [[GlyphSet]] (or creating one yourself) you have a lot of control over how
+  * a graph rendering will appear.
+  */
 object Glyph {
-  private[graph] def apply(i: Int) = i.asInstanceOf[Glyph]
+  private[graph] def apply(i: Int)      = i.asInstanceOf[Glyph]
   private[graph] def idOf(glyph: Glyph) = glyph.asInstanceOf[Int]
 
   final val GLYPH_COUNT = 25
@@ -87,13 +87,13 @@ object Glyph {
 }
 
 /**
- * A [[GlyphSet]] is to a [[Glyph]] what a Font is to an ASCII (integer) value.
- * It defines, how exactly each existing [[Glyph]] instance is to be rendered.
- *
- * Each [[Glyph]] is rendered into a grid of actual characters whereby the grid size is fixed (for this [[GlyphSet]].
- *
- * You can construct your own Glyphsets via the `GlyphSet.apply` method.
- */
+  * A [[GlyphSet]] is to a [[Glyph]] what a Font is to an ASCII (integer) value.
+  * It defines, how exactly each existing [[Glyph]] instance is to be rendered.
+  *
+  * Each [[Glyph]] is rendered into a grid of actual characters whereby the grid size is fixed (for this [[GlyphSet]].
+  *
+  * You can construct your own Glyphsets via the `GlyphSet.apply` method.
+  */
 final class GlyphSet private (val rows: Int, val columns: Int, private[this] val codepoints: Array[Int]) {
 
   private[graph] def place(glyph: Glyph, row: Int, dest: Array[Char], destIx: Int): Int = {
@@ -108,17 +108,16 @@ object GlyphSet {
   import Glyph._
 
   /**
-   * Creates a new [[GlyphSet]] with the given per-Glyph-grid size from a function, which, for each [[Glyph]]
-   * returns a [[String]] containing the Glyph's characters in one or more lines.
-   *
-   * All Strings returned by the function must be `rows * columns + (rows - 1) * lineSep.length` characters long.
-   */
+    * Creates a new [[GlyphSet]] with the given per-Glyph-grid size from a function, which, for each [[Glyph]]
+    * returns a [[String]] containing the Glyph's characters in one or more lines.
+    *
+    * All Strings returned by the function must be `rows * columns + (rows - 1) * lineSep.length` characters long.
+    */
   def apply(rows: Int, columns: Int, lineSep: String = "")(f: Glyph ⇒ String): GlyphSet = {
     requireArg(rows > 0 && columns > 0)
     val codepoints = new Array[Int](GLYPH_COUNT * rows * columns)
 
-    @tailrec def prepareGlyphs(codepointsIx: Int, glyph: Glyph, str: String, strIx: Int,
-      row: Int, col: Int): Unit =
+    @tailrec def prepareGlyphs(codepointsIx: Int, glyph: Glyph, str: String, strIx: Int, row: Int, col: Int): Unit =
       if (col < columns) {
         val cp =
           try str.codePointAt(strIx)
@@ -128,7 +127,9 @@ object GlyphSet {
         codepoints(codepointsIx) = cp
         prepareGlyphs(codepointsIx + 1, glyph, str, strIx + Character.charCount(cp), row, col + 1)
       } else if (row < rows - 1) {
-        requireArg(str.indexOf(lineSep, strIx) == strIx, s", expected line separator not found in row $row of glyph $glyph")
+        requireArg(
+          str.indexOf(lineSep, strIx) == strIx,
+          s", expected line separator not found in row $row of glyph $glyph")
         prepareGlyphs(codepointsIx, glyph, str, strIx + lineSep.length, row + 1, col = 0)
       } else if (Glyph.idOf(glyph) < GLYPH_COUNT - 1) {
         val nextGlyph = Glyph(Glyph.idOf(glyph) + 1)

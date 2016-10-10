@@ -4,16 +4,16 @@
 
 package swave.core.macros
 
-private[macros] trait ConnectFanOutAndSealWith {  this: Util =>
+private[macros] trait ConnectFanOutAndSealWith { this: Util =>
   val c: scala.reflect.macros.whitebox.Context
   import c.universe._
 
   def connectFanOutAndSealWith(f: Tree): List[Tree] = unblock {
     val q"($ctx0: $_, $in0: $_, $outs0: $_) => $block0" = f
-    val ctx = freshName("ctx")
-    val in = freshName("in")
-    val outs = freshName("outs")
-    val block = replaceIdents(block0, ctx0 -> ctx, in0 -> in, outs0 -> outs)
+    val ctx                                             = freshName("ctx")
+    val in                                              = freshName("in")
+    val outs                                            = freshName("outs")
+    val block                                           = replaceIdents(block0, ctx0 -> ctx, in0 -> in, outs0 -> outs)
 
     q"""
       initialState(connecting(null, null))

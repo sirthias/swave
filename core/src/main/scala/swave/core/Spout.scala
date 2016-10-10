@@ -4,15 +4,15 @@
 
 package swave.core
 
-import org.reactivestreams.{ Publisher, Subscriber }
-import scala.annotation.unchecked.{ uncheckedVariance ⇒ uV }
+import org.reactivestreams.{Publisher, Subscriber}
+import scala.annotation.unchecked.{uncheckedVariance ⇒ uV}
 import scala.collection.generic.CanBuildFrom
-import scala.util.{ Failure, Success, Try }
+import scala.util.{Failure, Success, Try}
 import scala.concurrent.Future
 import scala.concurrent.duration.FiniteDuration
 import shapeless._
 import swave.core.impl.util.InportList
-import swave.core.impl.{ ModuleImpl, TypeLogic, Inport }
+import swave.core.impl.{Inport, ModuleImpl, TypeLogic}
 import swave.core.impl.stages.Stage
 import swave.core.impl.stages.spout._
 import swave.core.util._
@@ -20,7 +20,7 @@ import swave.core.util._
 final class Spout[+A](private[swave] val inport: Inport) extends AnyVal with StreamOps[A @uV] {
   type Repr[T] = Spout[T]
 
-  protected def base: Inport = inport
+  protected def base: Inport           = inport
   protected def wrap: Inport ⇒ Repr[_] = Spout.wrap
   protected[core] def append[B](stage: Stage): Spout[B] = {
     inport.subscribe()(stage)
@@ -37,8 +37,7 @@ final class Spout[+A](private[swave] val inport: Inport) extends AnyVal with Str
   def via[B](pipe: A =>> B): Spout[B] = pipe.transform(this)
 
   def via[P <: HList, R, Out](joined: Module.TypeLogic.Joined[A :: HNil, P, R])(
-    implicit
-    vr: TypeLogic.ViaResult[P, Piping[R], Spout, Out]): Out = {
+      implicit vr: TypeLogic.ViaResult[P, Piping[R], Spout, Out]): Out = {
     val out = ModuleImpl(joined.module)(InportList(inport))
     val result = vr.id match {
       case 0 ⇒ new Piping(inport, out)
@@ -54,7 +53,7 @@ final class Spout[+A](private[swave] val inport: Inport) extends AnyVal with Str
   def drainTo[R](drain: Drain[A, R])(implicit env: StreamEnv, ev: TypeLogic.ToTryOrFuture[R]): ev.Out =
     to(drain).run()
 
-  def drainToSeq[M[+_]](limit: Long)(implicit env: StreamEnv, cbf: CanBuildFrom[M[A], A, M[A @uV]]): Future[M[A]] =
+  def drainToSeq[M[+ _]](limit: Long)(implicit env: StreamEnv, cbf: CanBuildFrom[M[A], A, M[A @uV]]): Future[M[A]] =
     drainTo(Drain.generalSeq[M, A](limit))
 
   def drainToList(limit: Long)(implicit env: StreamEnv): Future[List[A]] =
@@ -135,9 +134,11 @@ object Spout {
   def one[T](element: T): Spout[T] =
     fromIterator(Iterator single element) named "Spout.one"
 
-  def push[T](initialBufferSize: Int, maxBufferSize: Int, growByInitialSize: Boolean = false,
-    notifyOnDequeued: (PushSpout[T], Int) ⇒ Unit = dropFunc2,
-    notifyOnCancel: PushSpout[T] ⇒ Unit = dropFunc): PushSpout[T] =
+  def push[T](initialBufferSize: Int,
+              maxBufferSize: Int,
+              growByInitialSize: Boolean = false,
+              notifyOnDequeued: (PushSpout[T], Int) ⇒ Unit = dropFunc2,
+              notifyOnCancel: PushSpout[T] ⇒ Unit = dropFunc): PushSpout[T] =
     PushSpout(initialBufferSize, maxBufferSize, growByInitialSize, notifyOnDequeued, notifyOnCancel)
 
   def repeat[T](element: T): Spout[T] =
@@ -150,36 +151,37 @@ object Spout {
     repeat(value).throttle(elements, per)
 
   /**
-   * A `Spout` that unfolds a "state" instance of type `S` into
-   * the subsequent states and output elements of type `T`.
-   *
-   * For example, all the Fibonacci numbers under 1M:
-   *
-   * {{{
-   *   Spout.unfold(0 → 1) {
-   *    case (a, b) if b > 1000000 ⇒ Spout.Unfolding.EmitFinal(a)
-   *    case (a, b) ⇒ Spout.Unfolding.Emit(a, b → (a + b))
-   *   }
-   * }}}
-   *
-   * CAUTION: `f` might be called from another thread if the stream is asynchronous!
-   */
+    * A `Spout` that unfolds a "state" instance of type `S` into
+    * the subsequent states and output elements of type `T`.
+    *
+    * For example, all the Fibonacci numbers under 1M:
+    *
+    * {{{
+    *   Spout.unfold(0 → 1) {
+    *    case (a, b) if b > 1000000 ⇒ Spout.Unfolding.EmitFinal(a)
+    *    case (a, b) ⇒ Spout.Unfolding.Emit(a, b → (a + b))
+    *   }
+    * }}}
+    *
+    * CAUTION: `f` might be called from another thread if the stream is asynchronous!
+    */
   def unfold[S, T](s: S)(f: S ⇒ Unfolding[S, T]): Spout[T] =
     new Spout(new UnfoldSpoutStage(s.asInstanceOf[AnyRef], f.asInstanceOf[AnyRef ⇒ Unfolding[AnyRef, AnyRef]]))
 
   /**
-   * Same as [[unfold]], but asynchronous.
-   *
-   * CAUTION: `f` will be called from another thread!
-   */
+    * Same as [[unfold]], but asynchronous.
+    *
+    * CAUTION: `f` will be called from another thread!
+    */
   def unfoldAsync[S, T](s: S)(f: S ⇒ Future[Unfolding[S, T]]): Spout[T] =
-    new Spout(new UnfoldAsyncSpoutStage(s.asInstanceOf[AnyRef], f.asInstanceOf[AnyRef ⇒ Future[Unfolding[AnyRef, AnyRef]]]))
+    new Spout(
+      new UnfoldAsyncSpoutStage(s.asInstanceOf[AnyRef], f.asInstanceOf[AnyRef ⇒ Future[Unfolding[AnyRef, AnyRef]]]))
 
   sealed abstract class Unfolding[+S, +T]
   object Unfolding {
     final case class Emit[S, T](elem: T, next: S) extends Unfolding[S, T]
-    final case class EmitFinal[T](elem: T) extends Unfolding[Nothing, T]
-    case object Complete extends Unfolding[Nothing, Nothing]
+    final case class EmitFinal[T](elem: T)        extends Unfolding[Nothing, T]
+    case object Complete                          extends Unfolding[Nothing, Nothing]
   }
 
   private val wrap: Inport ⇒ Spout[_] = new Spout(_)

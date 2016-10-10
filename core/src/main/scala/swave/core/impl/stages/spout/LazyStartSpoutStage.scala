@@ -6,7 +6,7 @@ package swave.core.impl.stages.spout
 
 import scala.util.control.NonFatal
 import swave.core.impl.stages.drain.SubDrainStage
-import swave.core.impl.{ RunContext, Inport, Outport }
+import swave.core.impl.{Inport, Outport, RunContext}
 import swave.core.macros.StageImpl
 import swave.core.util._
 import swave.core._

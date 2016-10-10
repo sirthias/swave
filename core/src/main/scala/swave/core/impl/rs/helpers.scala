@@ -20,10 +20,10 @@ private[impl] object ForwardToRunnerSubscription {
 
 private[core] class SubPubProcessor[A, B](sub: Subscriber[A], pub: Publisher[B]) extends Processor[A, B] {
   override def subscribe(s: Subscriber[_ >: B]): Unit = pub.subscribe(s)
-  override def onSubscribe(s: Subscription): Unit = sub.onSubscribe(s)
-  override def onNext(elem: A): Unit = sub.onNext(elem)
-  override def onComplete(): Unit = sub.onComplete()
-  override def onError(e: Throwable): Unit = sub.onError(e)
+  override def onSubscribe(s: Subscription): Unit     = sub.onSubscribe(s)
+  override def onNext(elem: A): Unit                  = sub.onNext(elem)
+  override def onComplete(): Unit                     = sub.onComplete()
+  override def onError(e: Throwable): Unit            = sub.onError(e)
 }
 
 private[impl] object RSCompliance {
@@ -31,7 +31,8 @@ private[impl] object RSCompliance {
     if (value eq null)
       throw new NullPointerException(s"$subject must be non-null (see reactive-streams spec, rule $ruleNumber)")
 
-  class IllegalRequestCountException extends IllegalArgumentException(
-    "The number of elements requested must be > 0 (see reactive-streams spec, rule 3.9)")
+  class IllegalRequestCountException
+      extends IllegalArgumentException(
+        "The number of elements requested must be > 0 (see reactive-streams spec, rule 3.9)")
 
 }

@@ -28,7 +28,7 @@ class DrainSpec extends SwaveSpec {
     }
 
     "Drain.foreach" in {
-      val buf = new ListBuffer[Int]
+      val buf   = new ListBuffer[Int]
       def drain = Drain.foreach[Int](buf += _)
 
       Spout.empty[Int].drainTo(drain)

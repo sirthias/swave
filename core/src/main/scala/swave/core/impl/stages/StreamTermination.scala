@@ -12,6 +12,6 @@ private[stages] object StreamTermination {
   case object None extends StreamTermination {
     override def transitionTo(to: StreamTermination): StreamTermination = to
   }
-  case object Completed extends StreamTermination
+  case object Completed                extends StreamTermination
   final case class Error(e: Throwable) extends StreamTermination
 }

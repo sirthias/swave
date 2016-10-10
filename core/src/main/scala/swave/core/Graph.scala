@@ -8,7 +8,7 @@ import scala.annotation.tailrec
 import scala.collection.immutable.BitSet
 import scala.collection.mutable
 import swave.core.impl.stages.Stage
-import swave.core.graph.{ GlyphSet, Digraph }
+import swave.core.graph.{Digraph, GlyphSet}
 import swave.core.macros._
 import swave.core.util._
 
@@ -22,18 +22,17 @@ object Graph {
       new ExpandModules {
         def apply(id: Module.ID) = predicate(id)
       }
-    val None = ExpandModules(_ ⇒ false)
-    val All = ExpandModules(_ ⇒ true)
+    val None                      = ExpandModules(_ ⇒ false)
+    val All                       = ExpandModules(_ ⇒ true)
     def Some(names: List[String]) = ExpandModules(id ⇒ names contains id.name)
   }
 
-  def render(
-    pipeElem: PipeElem,
-    expandModules: ExpandModules = ExpandModules.None,
-    glyphSet: GlyphSet = GlyphSet.`3x3 ASCII`,
-    showParams: Boolean = false,
-    showRunners: Boolean = false,
-    showNops: Boolean = false) = {
+  def render(pipeElem: PipeElem,
+             expandModules: ExpandModules = ExpandModules.None,
+             glyphSet: GlyphSet = GlyphSet.`3x3 ASCII`,
+             showParams: Boolean = false,
+             showRunners: Boolean = false,
+             showNops: Boolean = false) = {
 
     val graph = create(pipeElem, expandModules)
     if (!showNops) graph.markHidden { case Right(_: PipeElem.InOut.Nop) ⇒ true; case _ ⇒ false }
@@ -59,9 +58,9 @@ object Graph {
 
   def explore(entryElem: PipeElem): Set[PipeElem] = {
     final class Rec extends (PipeElem ⇒ Unit) {
-      var result = Set.empty[PipeElem]
-      var seenModules = Set.empty[Module.ID]
-      var remainingEntryPoints = Iterator.single(entryElem)
+      var result                     = Set.empty[PipeElem]
+      var seenModules                = Set.empty[Module.ID]
+      var remainingEntryPoints       = Iterator.single(entryElem)
       def _apply(pe: PipeElem): Unit = apply(pe)
       @tailrec def apply(pe: PipeElem): Unit = {
         val newResult = result + pe
@@ -107,7 +106,7 @@ object Graph {
     ///////////////// STEP 1: discover complete graph ///////////////////////
 
     val allElems = explore(entryElem)
-    val graph0 = Digraph[PipeElem](entryElem :: allElems.toList, _.inputElems, _.outputElems)
+    val graph0   = Digraph[PipeElem](entryElem :: allElems.toList, _.inputElems, _.outputElems)
 
     ///////////////// STEP 2: identify modules, apply markers //////////////////////
 
@@ -126,9 +125,9 @@ object Graph {
               case _                                         ⇒ Nil
             }
             val moduleSuccs: List[PipeElem] = regionBoundaries.flatMap {
-              case Digraph.RegionBoundary(elem, false, true) ⇒ elem.outputElems
+              case Digraph.RegionBoundary(elem, false, true)  ⇒ elem.outputElems
               case Digraph.RegionBoundary(elem, false, false) ⇒ elem :: Nil
-              case _ ⇒ Nil
+              case _                                          ⇒ Nil
             }
             ModuleInfo(moduleID, regionBitSet, modulePreds, moduleSuccs) :: Nil
           } else Nil
@@ -143,12 +142,14 @@ object Graph {
           case -1 ⇒ visibleCollapsed += info
           case ix ⇒
             val alreadyStored = visibleCollapsed(ix)
-            def containsAll(a: ModuleInfo, b: ModuleInfo) = (b.vertices &~ a.vertices).isEmpty // true if a contains all of b
+            def containsAll(a: ModuleInfo, b: ModuleInfo) =
+              (b.vertices &~ a.vertices).isEmpty // true if a contains all of b
             if (containsAll(info, alreadyStored)) visibleCollapsed(ix) = info
-            else requireArg(
-              containsAll(alreadyStored, info),
-              s"Modules [${alreadyStored.id.name}] and [${info.id.name}] overlap without one fully containing" +
-                "the other, which is unsupported for rendering!")
+            else
+              requireArg(
+                containsAll(alreadyStored, info),
+                s"Modules [${alreadyStored.id.name}] and [${info.id.name}] overlap without one fully containing" +
+                  "the other, which is unsupported for rendering!")
         }
       }
     }
@@ -160,7 +161,7 @@ object Graph {
 
     if (visibleCollapsed.nonEmpty) {
       implicit val ordering = graph0.xRankOrdering // ordering for the .sortBy calls we have below
-      var needSuccsPatched = Set.empty[PipeElem]
+      var needSuccsPatched  = Set.empty[PipeElem]
       val modulePreds = visibleCollapsed.foldLeft(Map.empty[Module.ID, List[Vertex]]) {
         case (map, ModuleInfo(moduleID, _, mpreds, _)) ⇒
           val preds = mpreds map { p ⇒

@@ -6,7 +6,7 @@ package swave.core
 
 import scala.io.Source
 import scala.util.control.NonFatal
-import org.scalatest.{ Matchers, FreeSpec }
+import org.scalatest.{FreeSpec, Matchers}
 import swave.core.macros._
 
 class PipeElemSpec extends FreeSpec with Matchers {
@@ -23,7 +23,12 @@ class PipeElemSpec extends FreeSpec with Matchers {
     val c = Coupling[Int]
     Spout(1, 2, 3)
       .concat(c.out)
-      .fanOutBroadcast(eagerCancel = false).sub.first.buffer(1).map(_ + 3).to(c.in)
+      .fanOutBroadcast(eagerCancel = false)
+      .sub
+      .first
+      .buffer(1)
+      .map(_ + 3)
+      .to(c.in)
       .subContinue
       .to(Drain.head)
   }
@@ -32,7 +37,8 @@ class PipeElemSpec extends FreeSpec with Matchers {
     val foo = Module.Forward.from2[Int, String] { (a, b) ⇒
       a.attachN(2, b.fanOutBroadcast())
     } named "foo"
-    Spout.from(0)
+    Spout
+      .from(0)
       .duplicate
       .attach(Spout("x", "y", "z"))
       .fromFanInVia(foo)
@@ -42,29 +48,20 @@ class PipeElemSpec extends FreeSpec with Matchers {
   }
 
   "Example 5" tests {
-    Spout(1, 2, 3)
-      .fanOutBroadcast()
-      .sub.end
-      .sub.end
-      .fanInConcat
-      .to(Drain.head)
+    Spout(1, 2, 3).fanOutBroadcast().sub.end.sub.end.fanInConcat.to(Drain.head)
   }
 
   "Example 6" tests {
-    Spout.from(0)
-      .deduplicate
-      .zip(Spout(4, 5, 6))
-      .to(Drain.head)
+    Spout.from(0).deduplicate.zip(Spout(4, 5, 6)).to(Drain.head)
   }
 
   "Example 7" tests {
-    Spout(1, 2, 3)
-      .tee(Drain.ignore.dropResult)
-      .to(Drain.head)
+    Spout(1, 2, 3).tee(Drain.ignore.dropResult).to(Drain.head)
   }
 
   "Example 8" tests {
-    Spout.from(0)
+    Spout
+      .from(0)
       .map(_ * 2)
       .via(Pipe.fromDrainAndSpout[Int, String](Drain.cancelling, Spout.empty))
       .filterNot(_.isEmpty)
@@ -72,7 +69,9 @@ class PipeElemSpec extends FreeSpec with Matchers {
   }
 
   val examples: Map[String, String] =
-    Source.fromInputStream(getClass.getResourceAsStream("/PipeElemSpec.examples.txt")).getLines()
+    Source
+      .fromInputStream(getClass.getResourceAsStream("/PipeElemSpec.examples.txt"))
+      .getLines()
       .scanLeft(Left(Nil): Either[List[String], List[String]]) {
         case (Left(lines), "")   ⇒ Right(lines.reverse)
         case (Left(lines), line) ⇒ Left(line :: lines)
@@ -90,7 +89,8 @@ class PipeElemSpec extends FreeSpec with Matchers {
   implicit class Example(name: String) {
     def tests(pipeNet: ⇒ Piping[_]): Unit =
       name in {
-        val expectedRendering = examples.getOrElse(name + ':', sys.error(s"Section for '$name' not found in examples.txt"))
+        val expectedRendering =
+          examples.getOrElse(name + ':', sys.error(s"Section for '$name' not found in examples.txt"))
         val s = Graph.render(pipeNet.pipeElem, showParams = true)
         try s shouldEqual expectedRendering
         catch {

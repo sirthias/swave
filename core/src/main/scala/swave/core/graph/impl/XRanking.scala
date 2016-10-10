@@ -85,8 +85,8 @@ private[graph] object XRanking {
           !bitSet.contains(rank.id) && {
             bitSet += rank.id
             val minSubRank = if (rank.succs.nonEmpty) rank.succs.minBy(_.level).level else 0
-            val progress = rank.level < minSubRank - 1 && { rank.level = minSubRank - 1; true }
-            val result = rank.succs.foldRight(progress)(compactLevels(_) || _)
+            val progress   = rank.level < minSubRank - 1 && { rank.level = minSubRank - 1; true }
+            val result     = rank.succs.foldRight(progress)(compactLevels(_) || _)
             bitSet -= rank.id
             result
           }

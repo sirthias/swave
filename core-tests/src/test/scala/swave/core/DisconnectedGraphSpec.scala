@@ -20,7 +20,8 @@ class DisconnectedGraphSpec extends SwaveSpec {
         .map(_ * 2)
         .via(Pipe.fromDrainAndSpout(drain.dropResult, spout))
         .filter(_ < 10)
-        .drainTo(DrainProbe[Int]).get
+        .drainTo(DrainProbe[Int])
+        .get
         .sendRequest(5)
         .expectNext(2, 4, 6)
         .expectComplete()

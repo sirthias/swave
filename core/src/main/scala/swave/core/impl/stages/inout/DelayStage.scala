@@ -6,8 +6,8 @@ package swave.core.impl.stages.inout
 
 import scala.concurrent.duration._
 import scala.util.control.NonFatal
-import swave.core.impl.{ Inport, Outport, StreamRunner }
-import swave.core.{ Cancellable, PipeElem }
+import swave.core.impl.{Inport, Outport, StreamRunner}
+import swave.core.{Cancellable, PipeElem}
 import swave.core.macros._
 import swave.core.util._
 
@@ -38,8 +38,8 @@ private[core] final class DelayStage(delayFor: AnyRef => FiniteDuration) extends
         xEvent = { case StreamRunner.Timeout(_) => stay() })
 
     /**
-     * @param remaining number of elements already requested by downstream but not yet delivered, > 0
-     */
+      * @param remaining number of elements already requested by downstream but not yet delivered, > 0
+      */
     def awaitingNextElem(remaining: Long): State = {
       requireState(remaining > 0)
       state(
@@ -64,11 +64,11 @@ private[core] final class DelayStage(delayFor: AnyRef => FiniteDuration) extends
     }
 
     /**
-     *
-     * @param elem the currently delayed element
-     * @param timer the currently active timer for `elem`
-     * @param remaining number of elements already requested by downstream but not yet delivered, > 0
-     */
+      *
+      * @param elem the currently delayed element
+      * @param timer the currently active timer for `elem`
+      * @param remaining number of elements already requested by downstream but not yet delivered, > 0
+      */
     def awaitingTimeout(elem: AnyRef, timer: Cancellable, remaining: Long): State = {
       requireState(remaining > 0)
       state(

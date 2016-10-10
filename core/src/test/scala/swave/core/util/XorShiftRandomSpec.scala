@@ -6,7 +6,7 @@ package swave.core.util
 
 import org.scalacheck.Gen
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import org.scalatest.{ FreeSpec, Matchers }
+import org.scalatest.{FreeSpec, Matchers}
 
 class XorShiftRandomSpec extends FreeSpec with Matchers with GeneratorDrivenPropertyChecks {
 
@@ -35,7 +35,7 @@ class XorShiftRandomSpec extends FreeSpec with Matchers with GeneratorDrivenProp
 
     "shuffle" in {
       val random = XorShiftRandom()
-      val array = Array("1", "2", "3", "4", "5", "6", "7", "8")
+      val array  = Array("1", "2", "3", "4", "5", "6", "7", "8")
       val array2 = array.drop(0)
       random.shuffle_!(array2)
       array2 should not equal array

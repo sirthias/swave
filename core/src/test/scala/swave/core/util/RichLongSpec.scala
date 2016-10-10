@@ -5,7 +5,7 @@
 package swave.core.util
 
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import org.scalatest.{ FreeSpec, Matchers }
+import org.scalatest.{FreeSpec, Matchers}
 
 class RichLongSpec extends FreeSpec with Matchers with GeneratorDrivenPropertyChecks {
 

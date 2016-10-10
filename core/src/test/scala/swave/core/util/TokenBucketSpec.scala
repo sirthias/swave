@@ -3,17 +3,16 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 /**
- * The code in this file is only slightly adapted from a previous version, which
- * is licensed under the Apache License 2.0 and bears this copyright notice:
- *
- *     Copyright (C) 2015-2016 Lightbend Inc. <http://www.lightbend.com>
- *
- * So most credit for this work should go to the original authors.
- */
-
+  * The code in this file is only slightly adapted from a previous version, which
+  * is licensed under the Apache License 2.0 and bears this copyright notice:
+  *
+  *     Copyright (C) 2015-2016 Lightbend Inc. <http://www.lightbend.com>
+  *
+  * So most credit for this work should go to the original authors.
+  */
 package swave.core.util
 
-import org.scalatest.{ FreeSpec, Matchers }
+import org.scalatest.{FreeSpec, Matchers}
 
 class TokenBucketSpec extends FreeSpec with Matchers {
 
@@ -176,7 +175,7 @@ class TokenBucketSpec extends FreeSpec with Matchers {
     }
 
     "work with very slow rates" in {
-      val T = Long.MaxValue >> 10
+      val T      = Long.MaxValue >> 10
       val bucket = new TestBucket(10, T)
 
       bucket.offer(20) should ===(10 * T)
@@ -193,22 +192,22 @@ class TokenBucketSpec extends FreeSpec with Matchers {
       val Debug = false
 
       for {
-        capacity ← List(0, 1, 5, 10)
-        period ← List(1, 3, 5)
+        capacity      ← List(0, 1, 5, 10)
+        period        ← List(1, 3, 5)
         arrivalPeriod ← List(1, 3, 5)
-        startTime ← List(Long.MinValue, -1L, 0L, Long.MaxValue)
-        maxCost ← List(1, 5, 10)
+        startTime     ← List(Long.MinValue, -1L, 0L, Long.MaxValue)
+        maxCost       ← List(1, 5, 10)
       } {
 
         val bucket = new TestBucket(capacity.toLong, period.toLong)
         bucket.currentTime = startTime
         bucket.reset()
 
-        var idealBucket = capacity
-        var untilNextTick = period
+        var idealBucket      = capacity
+        var untilNextTick    = period
         var untilNextElement = random.nextInt(arrivalPeriod) + 1
-        var nextEmit = 0L
-        var delaying = false
+        var nextEmit         = 0L
+        var delaying         = false
 
         for (time ← 0 to 1000) {
           if (untilNextTick == 0) {

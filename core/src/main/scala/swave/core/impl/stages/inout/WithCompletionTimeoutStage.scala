@@ -4,9 +4,9 @@
 
 package swave.core.impl.stages.inout
 
-import swave.core.impl.{ Inport, Outport, StreamRunner }
+import swave.core.impl.{Inport, Outport, StreamRunner}
 import swave.core.macros._
-import swave.core.{ Cancellable, PipeElem, StreamTimeoutException }
+import swave.core.{Cancellable, PipeElem, StreamTimeoutException}
 
 import scala.concurrent.duration._
 

@@ -11,7 +11,7 @@ final class AnyRefExtractor[A, B <: AnyRef](f: A ⇒ B) {
 object AnyRefExtractor {
   class Extraction[T <: AnyRef](val extraction: T) extends AnyVal {
     def isEmpty: Boolean = extraction eq null
-    def get: T = extraction
+    def get: T           = extraction
   }
 
   def apply[A, B <: AnyRef](f: A ⇒ B): AnyRefExtractor[A, B] = new AnyRefExtractor(f)

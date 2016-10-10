@@ -6,7 +6,7 @@ package swave.core.impl.stages.inout
 
 import scala.util.control.NonFatal
 import swave.core.PipeElem
-import swave.core.impl.{ Inport, Outport }
+import swave.core.impl.{Inport, Outport}
 import swave.core.macros.StageImpl
 
 // format: OFF
@@ -20,9 +20,9 @@ private[core] final class ScanStage(zero: AnyRef, f: (AnyRef, AnyRef) ⇒ AnyRef
   connectInOutAndSealWith { (ctx, in, out) ⇒ awaitingDemand(in, out) }
 
   /**
-   * @param in  the active upstream
-   * @param out the active downstream
-   */
+    * @param in  the active upstream
+    * @param out the active downstream
+    */
   def awaitingDemand(in: Inport, out: Outport): State = state(
     request = (n, _) ⇒ {
       out.onNext(zero)
@@ -35,10 +35,10 @@ private[core] final class ScanStage(zero: AnyRef, f: (AnyRef, AnyRef) ⇒ AnyRef
     onError = stopErrorF(out))
 
   /**
-   * @param in        the active upstream
-   * @param out       the active downstream
-   * @param last      the last value produced
-   */
+    * @param in        the active upstream
+    * @param out       the active downstream
+    * @param last      the last value produced
+    */
   def running(in: Inport, out: Outport, last: AnyRef): State = state(
     request = requestF(in),
     cancel = stopCancelF(in),
@@ -59,10 +59,10 @@ private[core] final class ScanStage(zero: AnyRef, f: (AnyRef, AnyRef) ⇒ AnyRef
     onError = stopErrorF(out))
 
   /**
-   * Upstream completed without having produced any element, downstream active, awaiting first request.
-   *
-   * @param out  the active downstream
-   */
+    * Upstream completed without having produced any element, downstream active, awaiting first request.
+    *
+    * @param out  the active downstream
+    */
   def drainingZero(out: Outport) = state(
     request = (_, _) ⇒ {
       out.onNext(zero)

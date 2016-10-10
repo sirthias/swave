@@ -6,20 +6,21 @@ package swave.core.impl
 
 import swave.core._
 
-private[core] final class DispatchersImpl private (
-    val settings: Dispatchers.Settings,
-    val defaultDispatcher: Dispatcher,
-    dispatcherMap: Map[String, DispatcherImpl]) extends Dispatchers {
+private[core] final class DispatchersImpl private (val settings: Dispatchers.Settings,
+                                                   val defaultDispatcher: Dispatcher,
+                                                   dispatcherMap: Map[String, DispatcherImpl])
+    extends Dispatchers {
 
   def apply(id: String) = dispatcherMap(id)
 
   /**
-   * Triggers a shutdown and returns a function that
-   * returns the ids of all dispatchers that are not yet terminated.
-   */
+    * Triggers a shutdown and returns a function that
+    * returns the ids of all dispatchers that are not yet terminated.
+    */
   def shutdownAll(): () ⇒ List[String] = {
     val map = dispatcherMap.transform((_, dispatcher) ⇒ dispatcher.shutdown())
-    () ⇒ map.collect({ case (id, isTerminated) if !isTerminated() ⇒ id })(collection.breakOut)
+    () ⇒
+      map.collect({ case (id, isTerminated) if !isTerminated() ⇒ id })(collection.breakOut)
   }
 
 }

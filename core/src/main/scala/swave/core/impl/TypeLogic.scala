@@ -6,10 +6,10 @@ package swave.core.impl
 
 import scala.annotation.implicitNotFound
 import scala.concurrent.Future
-import scala.util.{ Failure, Success, Try }
+import scala.util.{Failure, Success, Try}
 import shapeless._
-import shapeless.ops.hlist.{ Comapped, ToCoproduct }
-import swave.core.{ Spout, StreamOps }
+import shapeless.ops.hlist.{Comapped, ToCoproduct}
+import swave.core.{Spout, StreamOps}
 import swave.core.util.FastFuture
 
 object TypeLogic {
@@ -59,7 +59,7 @@ object TypeLogic {
     implicit def forAny[T] =
       new ToTryOrFuture[T] {
         type Out = Try[T]
-        def success(value: T) = Success(value)
+        def success(value: T)         = Success(value)
         def failure(error: Throwable) = Failure(error)
       }
   }
@@ -89,14 +89,15 @@ object TypeLogic {
   object Mapped {
     type Aux[L <: HList, F[_], Out0 <: HList] = Mapped[L, F] { type Out = Out0 }
     implicit def hnilMapped[F[_]]: Aux[HNil, F, HNil] = null
-    implicit def hlistMapped[H, T <: HList, F[_], OutM <: HList](implicit mt: Mapped.Aux[T, F, OutM]): Aux[H :: T, F, F[H] :: OutM] = null
+    implicit def hlistMapped[H, T <: HList, F[_], OutM <: HList](
+        implicit mt: Mapped.Aux[T, F, OutM]): Aux[H :: T, F, F[H] :: OutM] = null
   }
 
   final class HLen[L <: HList](val value: Int) {
     lazy val succ: HLen[HList] = new HLen(value + 1)
   }
   object HLen {
-    implicit val hnil: HLen[HNil] = new HLen(0)
+    implicit val hnil: HLen[HNil]                                         = new HLen(0)
     implicit def hlist[H, T <: HList](implicit ev: HLen[T]): HLen[H :: T] = ev.succ.asInstanceOf[HLen[H :: T]]
   }
 
@@ -116,18 +117,18 @@ object TypeLogic {
   }
   object HLub {
     type Aux[L <: HList, Out0] = HLub[L] { type Out = Out0 }
-    implicit def hsingle[T]: Aux[T :: HNil, T] = null
+    implicit def hsingle[T]: Aux[T :: HNil, T]                                                         = null
     implicit def hlist[H, T <: HList, TO, O](implicit a: Aux[T, TO], u: Lub[H, TO, O]): Aux[H :: T, O] = null
   }
 
   final class ViaResult[L <: HList, Out0, Out1[_], Out](val id: Int) extends AnyVal
   object ViaResult extends LowPrioViaResult {
-    implicit def _0[Out0, Out1[_]]: ViaResult[HNil, Out0, Out1, Out0] = new ViaResult(0)
+    implicit def _0[Out0, Out1[_]]: ViaResult[HNil, Out0, Out1, Out0]            = new ViaResult(0)
     implicit def _1[T, Out0, Out1[_]]: ViaResult[T :: HNil, Out0, Out1, Out1[T]] = new ViaResult(1)
   }
   sealed abstract class LowPrioViaResult {
-    implicit def _n[L <: HList, Out0, Out1[_], C <: Coproduct, U](implicit
-      ev0: ToCoproduct.Aux[L, C],
-      ev1: HLub.Aux[L, U]): ViaResult[L, Out0, Out1, StreamOps.FanIn[L, C, U, Out1]] = new ViaResult(2)
+    implicit def _n[L <: HList, Out0, Out1[_], C <: Coproduct, U](
+        implicit ev0: ToCoproduct.Aux[L, C],
+        ev1: HLub.Aux[L, U]): ViaResult[L, Out0, Out1, StreamOps.FanIn[L, C, U, Out1]] = new ViaResult(2)
   }
 }

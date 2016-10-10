@@ -7,14 +7,14 @@ package swave.core
 trait Cancellable {
 
   /**
-   * Cancels this instance and returns true if that was successful,
-   * i.e. if the instance was not already expired or cancelled.
-   */
+    * Cancels this instance and returns true if that was successful,
+    * i.e. if the instance was not already expired or cancelled.
+    */
   def cancel(): Boolean
 
   /**
-   * Returns false if this instance is not active (anymore).
-   */
+    * Returns false if this instance is not active (anymore).
+    */
   def stillActive: Boolean
 
 }
@@ -22,7 +22,7 @@ trait Cancellable {
 object Cancellable {
 
   val Inactive = new Cancellable {
-    def cancel() = false
+    def cancel()    = false
     def stillActive = false
   }
 }

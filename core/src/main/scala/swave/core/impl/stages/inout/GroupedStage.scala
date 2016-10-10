@@ -5,7 +5,7 @@
 package swave.core.impl.stages.inout
 
 import scala.collection.mutable
-import swave.core.impl.{ Outport, Inport }
+import swave.core.impl.{Inport, Outport}
 import swave.core.PipeElem
 import swave.core.macros._
 import swave.core.util._
@@ -25,8 +25,8 @@ private[core] final class GroupedStage(groupSize: Int, emitSingleEmpty: Boolean,
   def running(in: Inport, out: Outport): State = {
 
     /**
-     * Waiting for a request from downstream.
-     */
+      * Waiting for a request from downstream.
+      */
     def awaitingDemand() = state(
       request = (n, _) ⇒ {
         in.request(groupSize.toLong)
@@ -38,13 +38,13 @@ private[core] final class GroupedStage(groupSize: Int, emitSingleEmpty: Boolean,
       onError = stopErrorF(out))
 
     /**
-     * Gathering up the elements for the next group.
-     *
-     * @param pending   number of elements still required for completing the current group,
-     *                  already requested from upstream but not yet received, > 0
-     * @param remaining number of elements already requested by downstream but not yet delivered, > 0
-     * @param firstElem true if we are still awaiting the very first element from upstream
-     */
+      * Gathering up the elements for the next group.
+      *
+      * @param pending   number of elements still required for completing the current group,
+      *                  already requested from upstream but not yet received, > 0
+      * @param remaining number of elements already requested by downstream but not yet delivered, > 0
+      * @param firstElem true if we are still awaiting the very first element from upstream
+      */
     def collecting(pending: Int, remaining: Long, firstElem: Boolean): State = state(
       request = (n, _) ⇒ collecting(pending, remaining ⊹ n, firstElem),
       cancel = stopCancelF(in),

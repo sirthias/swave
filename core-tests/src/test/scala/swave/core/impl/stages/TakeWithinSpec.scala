@@ -8,7 +8,7 @@ import scala.concurrent.duration._
 import scala.util.Success
 import org.scalatest.FreeSpec
 import swave.core.util._
-import swave.core.{ NotOnTravis, StreamEnv, StreamEnvShutdown }
+import swave.core.{NotOnTravis, StreamEnv, StreamEnvShutdown}
 import swave.testkit.Probes._
 
 final class TakeWithinSpec extends FreeSpec with StreamEnvShutdown {

@@ -5,9 +5,9 @@
 package swave.core.impl.stages.inout
 
 import scala.util.control.NonFatal
-import swave.core.impl.{ Outport, Inport }
+import swave.core.impl.{Inport, Outport}
 import swave.core.macros.StageImpl
-import swave.core.{ PipeElem, StreamEvent }
+import swave.core.{PipeElem, StreamEvent}
 
 // format: OFF
 @StageImpl

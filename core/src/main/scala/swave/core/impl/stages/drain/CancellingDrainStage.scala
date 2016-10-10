@@ -22,8 +22,8 @@ private[core] final class CancellingDrainStage extends DrainStage with PipeElem.
   }
 
   /**
-   * @param in the active upstream
-   */
+    * @param in the active upstream
+    */
   def awaitingXStart(in: Inport) =
     state(xStart = () => stopCancel(in))
 }

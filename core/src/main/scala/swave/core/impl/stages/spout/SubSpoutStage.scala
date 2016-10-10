@@ -4,9 +4,9 @@
 
 package swave.core.impl.stages.spout
 
-import swave.core.{ Cancellable, PipeElem }
-import swave.core.impl.{ Outport, RunContext }
-import swave.core.impl.stages.{ StreamTermination, Stage }
+import swave.core.{Cancellable, PipeElem}
+import swave.core.impl.{Outport, RunContext}
+import swave.core.impl.stages.{Stage, StreamTermination}
 import swave.core.macros.StageImpl
 import SubSpoutStage._
 

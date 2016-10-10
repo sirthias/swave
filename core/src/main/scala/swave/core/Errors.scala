@@ -5,7 +5,7 @@
 package swave.core
 
 final case class StreamLimitExceeded(max: Long, offendingElem: Any)
-  extends RuntimeException(s"Limit of $max exceeded by element '$offendingElem'")
+    extends RuntimeException(s"Limit of $max exceeded by element '$offendingElem'")
 
 final class ConfigurationException(msg: String) extends RuntimeException(msg)
 

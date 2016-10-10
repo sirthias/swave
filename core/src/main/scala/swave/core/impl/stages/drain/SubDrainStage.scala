@@ -6,9 +6,9 @@ package swave.core.impl.stages.drain
 
 import scala.util.control.NonFatal
 import swave.core.impl.stages.Stage
-import swave.core.impl.{ Inport, RunContext }
+import swave.core.impl.{Inport, RunContext}
 import swave.core.macros.StageImpl
-import swave.core.{ SubscriptionTimeoutException, Cancellable, PipeElem }
+import swave.core.{Cancellable, PipeElem, SubscriptionTimeoutException}
 
 // format: OFF
 @StageImpl(fullInterceptions = true)

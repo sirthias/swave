@@ -5,7 +5,7 @@
 package swave.core.impl.stages.inout
 
 import swave.core.PipeElem
-import swave.core.impl.{ Inport, Outport }
+import swave.core.impl.{Inport, Outport}
 import swave.core.macros._
 import swave.core.util._
 
@@ -22,8 +22,8 @@ private[core] final class IntersperseStage(start: AnyRef, inject: AnyRef, end: A
   def running(in: Inport, out: Outport) = {
 
     /**
-     * Upstream and downstream active, no demand seen yet.
-     */
+      * Upstream and downstream active, no demand seen yet.
+      */
     def awaitingFirstDemand(): State = state(
       request = (n, _) => {
         in.request(1)
@@ -35,10 +35,10 @@ private[core] final class IntersperseStage(start: AnyRef, inject: AnyRef, end: A
       onError = stopErrorF(out))
 
     /**
-     * Upstream and downstream active, first element pending from upstream.
-     *
-     * @param remaining number of elements already requested by downstream but not yet delivered, >= 0
-     */
+      * Upstream and downstream active, first element pending from upstream.
+      *
+      * @param remaining number of elements already requested by downstream but not yet delivered, >= 0
+      */
     def awaitingFirstElem(remaining: Long): State = {
       requireState(remaining > 0)
       state(
@@ -71,9 +71,9 @@ private[core] final class IntersperseStage(start: AnyRef, inject: AnyRef, end: A
     }
 
     /**
-     * Upstream and downstream active, first element (plus initial separators) already pushed to downstream.
-     * No open demand.
-     */
+      * Upstream and downstream active, first element (plus initial separators) already pushed to downstream.
+      * No open demand.
+      */
     def awaitingDemand(): State = state(
       request = (n, _) => {
         in.request(1)
@@ -85,10 +85,10 @@ private[core] final class IntersperseStage(start: AnyRef, inject: AnyRef, end: A
       onError = stopErrorF(out))
 
     /**
-     * Upstream and downstream active, next element pending from upstream.
-     *
-     * @param remaining number of elements already requested by downstream but not yet delivered, >= 0
-     */
+      * Upstream and downstream active, next element pending from upstream.
+      *
+      * @param remaining number of elements already requested by downstream but not yet delivered, >= 0
+      */
     def awaitingElem(remaining: Long): State = {
       requireState(remaining > 0)
       state(
@@ -111,9 +111,9 @@ private[core] final class IntersperseStage(start: AnyRef, inject: AnyRef, end: A
     }
 
     /**
-     * Upstream and downstream active, next element buffered.
-     * No open demand.
-     */
+      * Upstream and downstream active, next element buffered.
+      * No open demand.
+      */
     def awaitingDemandFor(elem: AnyRef) = state(
       request = (n, _) => {
         out.onNext(elem)
@@ -128,9 +128,9 @@ private[core] final class IntersperseStage(start: AnyRef, inject: AnyRef, end: A
       onError = stopErrorF(out))
 
     /**
-     * Upstream already cancelled, last element buffered.
-     * No open demand.
-     */
+      * Upstream already cancelled, last element buffered.
+      * No open demand.
+      */
     def awaitingDemandForFinalElement(elem: AnyRef) = state(
       request = (n, _) => {
         out.onNext(elem)
@@ -140,9 +140,9 @@ private[core] final class IntersperseStage(start: AnyRef, inject: AnyRef, end: A
       cancel = stopF)
 
     /**
-     * Upstream already cancelled, `end` element to be sent.
-     * No open demand.
-     */
+      * Upstream already cancelled, `end` element to be sent.
+      * No open demand.
+      */
     def awaitingDemandForEnd() = state(
       request = (n, _) => {
         out.onNext(end)

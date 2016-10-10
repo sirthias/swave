@@ -4,10 +4,10 @@
 
 package swave.core.impl
 
-import java.util.concurrent.{ ConcurrentHashMap, TimeoutException }
+import java.util.concurrent.{ConcurrentHashMap, TimeoutException}
 import scala.annotation.tailrec
 import scala.util.Try
-import scala.concurrent.{ Promise, Future }
+import scala.concurrent.{Future, Promise}
 import scala.concurrent.duration._
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.Logger
@@ -15,11 +15,11 @@ import org.slf4j.LoggerFactory
 import swave.core.macros._
 import swave.core._
 
-private[core] final class StreamEnvImpl(
-    val name: String,
-    val config: Config,
-    val settings: StreamEnv.Settings,
-    val classLoader: ClassLoader) extends StreamEnv {
+private[core] final class StreamEnvImpl(val name: String,
+                                        val config: Config,
+                                        val settings: StreamEnv.Settings,
+                                        val classLoader: ClassLoader)
+    extends StreamEnv {
 
   val startTime = System.currentTimeMillis()
 
@@ -35,7 +35,7 @@ private[core] final class StreamEnvImpl(
 
   def shutdown(): StreamEnv.Termination =
     new StreamEnv.Termination {
-      val schedulerTermination = scheduler.shutdown()
+      val schedulerTermination   = scheduler.shutdown()
       val dispatchersTermination = dispatchers.shutdownAll()
 
       def isTerminated: Boolean = schedulerTermination.isCompleted && unterminatedDispatchers.isEmpty
@@ -56,8 +56,9 @@ private[core] final class StreamEnvImpl(
               val unterminated =
                 if (schedulerTermination.isCompleted) unterminatedDispatchers
                 else "scheduler" :: unterminatedDispatchers
-              throw new TimeoutException(s"StreamEnv did not shut down within specified timeout of $timeout.\n" +
-                s"Unterminated dispatchers: [${unterminated.mkString(", ")}]")
+              throw new TimeoutException(
+                s"StreamEnv did not shut down within specified timeout of $timeout.\n" +
+                  s"Unterminated dispatchers: [${unterminated.mkString(", ")}]")
             }
           }
 

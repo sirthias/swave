@@ -8,8 +8,8 @@ import java.util.function.BiConsumer
 import scala.util.control.NonFatal
 import swave.core.impl.stages.Stage
 import swave.core.impl.stages.spout.SubSpoutStage
-import swave.core.impl.{ Inport, Outport, RunContext }
-import swave.core.{ PipeElem, Spout }
+import swave.core.impl.{Inport, Outport, RunContext}
+import swave.core.{PipeElem, Spout}
 import swave.core.macros._
 import swave.core.util._
 import GroupByStage.Sub
@@ -41,11 +41,11 @@ private[core] final class GroupByStage(maxSubstreams: Int, reopenCancelledSubs: 
       })
 
     /**
-     * Zero or more sub-streams open.
-     * Waiting for pending element from upstream.
-     *
-     * @param mainRemaining number of elements already requested by downstream but not yet delivered, >= 0
-     */
+      * Zero or more sub-streams open.
+      * Waiting for pending element from upstream.
+      *
+      * @param mainRemaining number of elements already requested by downstream but not yet delivered, >= 0
+      */
     def awaitingElem(mainRemaining: Long): State = {
       requireState(mainRemaining >= 0)
       state(
@@ -106,13 +106,13 @@ private[core] final class GroupByStage(maxSubstreams: Int, reopenCancelledSubs: 
     }
 
     /**
-     * At least one sub-stream open. One element buffered. No element pending from upstream.
-     * Awaiting demand from sub for buffered elem.
-     *
-     * @param awaitingFrom sub we are awaiting demand from
-     * @param currentElem the buffered element to be delivered to `awaitingFrom` sub
-     * @param mainRemaining number of elements already requested by downstream but not yet delivered, >= 0
-     */
+      * At least one sub-stream open. One element buffered. No element pending from upstream.
+      * Awaiting demand from sub for buffered elem.
+      *
+      * @param awaitingFrom sub we are awaiting demand from
+      * @param currentElem the buffered element to be delivered to `awaitingFrom` sub
+      * @param mainRemaining number of elements already requested by downstream but not yet delivered, >= 0
+      */
     def awaitingSubDemand(awaitingFrom: Sub, currentElem: AnyRef, mainRemaining: Long): State = {
       requireState(!subMap.isEmpty && mainRemaining >= 0)
       state(
@@ -165,12 +165,12 @@ private[core] final class GroupByStage(maxSubstreams: Int, reopenCancelledSubs: 
     }
 
     /**
-     * Zero or more sub-streams open. One element buffered. No element pending from upstream.
-     * Awaiting demand from main downstream.
-     *
-     * @param key the key for the `currentElement`
-     * @param currentElem the buffered element
-     */
+      * Zero or more sub-streams open. One element buffered. No element pending from upstream.
+      * Awaiting demand from main downstream.
+      *
+      * @param key the key for the `currentElement`
+      * @param currentElem the buffered element
+      */
     def awaitingMainDemand(key: AnyRef, currentElem: AnyRef): State = state(
       request = (n, from) => {
         from match {
@@ -210,9 +210,9 @@ private[core] final class GroupByStage(maxSubstreams: Int, reopenCancelledSubs: 
       onError = stopErrorSubsAndMainF)
 
     /**
-     * At least one sub-streams open. Main downstream cancelled.
-     * Waiting for pending element from upstream.
-     */
+      * At least one sub-streams open. Main downstream cancelled.
+      * Waiting for pending element from upstream.
+      */
     def awaitingElemMainGone(): State = {
       requireState(!eagerComplete && !subMap.isEmpty)
       state(
@@ -260,12 +260,12 @@ private[core] final class GroupByStage(maxSubstreams: Int, reopenCancelledSubs: 
     }
 
     /**
-     * At least one sub-stream open. One element buffered. No element pending from upstream.
-     * Main downstream cancelled. Awaiting demand from sub for buffered elem.
-     *
-     * @param awaitingFrom sub we are awaiting demand from
-     * @param currentElem the buffered element to be delivered to `awaitingFrom` sub
-     */
+      * At least one sub-stream open. One element buffered. No element pending from upstream.
+      * Main downstream cancelled. Awaiting demand from sub for buffered elem.
+      *
+      * @param awaitingFrom sub we are awaiting demand from
+      * @param currentElem the buffered element to be delivered to `awaitingFrom` sub
+      */
     def awaitingSubDemandMainGone(awaitingFrom: Sub, currentElem: AnyRef): State = {
       requireState(!eagerComplete && !subMap.isEmpty)
       state(
@@ -302,13 +302,13 @@ private[core] final class GroupByStage(maxSubstreams: Int, reopenCancelledSubs: 
     }
 
     /**
-     * Exactly one sub-stream open. One element buffered. Upstream completed.
-     * Awaiting demand from sub for buffered elem.
-     *
-     * @param awaitingFrom sub we are awaiting demand from
-     * @param currentElem the buffered element to be delivered to `awaitingFrom` sub
-     * @param mainRemaining number of elements already requested by downstream but not yet delivered, >= 0
-     */
+      * Exactly one sub-stream open. One element buffered. Upstream completed.
+      * Awaiting demand from sub for buffered elem.
+      *
+      * @param awaitingFrom sub we are awaiting demand from
+      * @param currentElem the buffered element to be delivered to `awaitingFrom` sub
+      * @param mainRemaining number of elements already requested by downstream but not yet delivered, >= 0
+      */
     def awaitingSubDemandUpstreamGone(awaitingFrom: Sub, currentElem: AnyRef, mainRemaining: Long): State = {
       requireState(!subMap.isEmpty && mainRemaining >= 0)
       state(
@@ -340,12 +340,12 @@ private[core] final class GroupByStage(maxSubstreams: Int, reopenCancelledSubs: 
     }
 
     /**
-     * No sub-streams open. One element buffered. Upstream completed.
-     * Awaiting demand from main downstream.
-     *
-     * @param key the key for the `currentElement`
-     * @param currentElem the buffered element
-     */
+      * No sub-streams open. One element buffered. Upstream completed.
+      * Awaiting demand from main downstream.
+      *
+      * @param key the key for the `currentElement`
+      * @param currentElem the buffered element
+      */
     def awaitingMainDemandUpstreamGone(key: AnyRef, currentElem: AnyRef): State = state(
       request = (n, from) => {
         from match {
@@ -365,12 +365,12 @@ private[core] final class GroupByStage(maxSubstreams: Int, reopenCancelledSubs: 
       onError = (_, _) => stay())
 
     /**
-     * Exactly one sub-stream open. One element buffered. Upstream completed. Downstream cancelled.
-     * Awaiting demand from sub for buffered elem.
-     *
-     * @param awaitingFrom sub we are awaiting demand from
-     * @param currentElem the buffered element to be delivered to `awaitingFrom` sub
-     */
+      * Exactly one sub-stream open. One element buffered. Upstream completed. Downstream cancelled.
+      * Awaiting demand from sub for buffered elem.
+      *
+      * @param awaitingFrom sub we are awaiting demand from
+      * @param currentElem the buffered element to be delivered to `awaitingFrom` sub
+      */
     def awaitingSubDemandAllOthersGone(awaitingFrom: Sub, currentElem: AnyRef): State = state(
       request = (n, from) => {
         from match {

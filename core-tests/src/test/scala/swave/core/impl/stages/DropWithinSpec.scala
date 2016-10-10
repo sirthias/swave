@@ -8,7 +8,7 @@ import scala.util.Success
 import org.scalatest.FreeSpec
 import scala.concurrent.duration._
 import swave.testkit.Probes
-import swave.core.{ NotOnTravis, StreamEnvShutdown, StreamEnv }
+import swave.core.{NotOnTravis, StreamEnv, StreamEnvShutdown}
 import swave.core.util._
 import Probes._
 

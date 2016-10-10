@@ -13,12 +13,19 @@ object MonteCarloPi extends App {
 
   val random = XorShiftRandom()
 
-  Spout.continually(random.nextDouble())
+  Spout
+    .continually(random.nextDouble())
     .grouped(2)
     .map { case x +: y +: Nil ⇒ Point(x, y) }
     .fanOutBroadcast()
-      .sub.filter(_.isInner).map(_ => InnerSample).end
-      .sub.filterNot(_.isInner).map(_ => OuterSample).end
+    .sub
+    .filter(_.isInner)
+    .map(_ => InnerSample)
+    .end
+    .sub
+    .filterNot(_.isInner)
+    .map(_ => OuterSample)
+    .end
     .fanInMerge()
     .scan(State(0, 0)) { _ withNextSample _ }
     .drop(1)
@@ -30,7 +37,7 @@ object MonteCarloPi extends App {
     .foreach(println)
 
   val time = System.currentTimeMillis() - env.startTime
-  println(f"Done. Total time: $time%,6d ms, Throughput: ${50000.0/time}%.3fM samples/sec\n")
+  println(f"Done. Total time: $time%,6d ms, Throughput: ${50000.0 / time}%.3fM samples/sec\n")
 
   //////////////// MODEL ///////////////
 

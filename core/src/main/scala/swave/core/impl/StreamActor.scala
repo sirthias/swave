@@ -12,18 +12,17 @@ import org.jctools.queues.MpscLinkedQueue8
 import swave.core.Dispatcher
 
 /**
- * Minimalistic actor implementation without `become`.
- */
-private[impl] abstract class StreamActor(
-    protected final val throughput: Int,
-    protected final val log: Logger,
-    final val dispatcher: Dispatcher) {
+  * Minimalistic actor implementation without `become`.
+  */
+private[impl] abstract class StreamActor(protected final val throughput: Int,
+                                         protected final val log: Logger,
+                                         final val dispatcher: Dispatcher) {
 
   protected type MessageType <: AnyRef
 
   /**
-   * The mailbox.
-   */
+    * The mailbox.
+    */
   private[this] val mailbox = {
     // TODO: upgrade to intrusive variant as soon as https://github.com/JCTools/JCTools/issues/102 is cleared
     new MpscLinkedQueue8[MessageType]()

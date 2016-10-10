@@ -7,9 +7,9 @@ package swave.core.impl
 import scala.concurrent.ExecutionContext
 
 /**
- * [[ExecutionContext]] which runs everything on the calling thread.
- * Only use it for non-blocking and non-throwing tasks!
- */
+  * [[ExecutionContext]] which runs everything on the calling thread.
+  * Only use it for non-blocking and non-throwing tasks!
+  */
 private[swave] object CallingThreadExecutionContext extends ExecutionContext {
 
   def execute(runnable: Runnable): Unit = runnable.run()

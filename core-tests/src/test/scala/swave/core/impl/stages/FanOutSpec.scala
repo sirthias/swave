@@ -11,30 +11,26 @@ import swave.testkit.gen.TestFixture
 
 final class FanOutSpec extends SyncPipeSpec with Inspectors {
 
-  implicit val env = StreamEnv()
+  implicit val env    = StreamEnv()
   implicit val config = PropertyCheckConfig(minSuccessful = 1000)
 
   implicit val integerInput = Gen.chooseNum(0, 999)
 
   "FanOutBroadcast" in check {
-    testSetup
-      .input[Int]
-      .fixtures(Gen.chooseNum(1, 3), _.output[Int])
-      .prop.from { (in, outs) ⇒
-        import TestFixture.State._
+    testSetup.input[Int].fixtures(Gen.chooseNum(1, 3), _.output[Int]).prop.from { (in, outs) ⇒
+      import TestFixture.State._
 
-        in.spout.fanOutBroadcast()
-          .subDrains(outs.tail.map(_.drain.dropResult))
-          .subContinue
-          .drainTo(outs.head.drain)
+      in.spout.fanOutBroadcast().subDrains(outs.tail.map(_.drain.dropResult)).subContinue.drainTo(outs.head.drain)
 
-        in.terminalState match {
-          case Cancelled ⇒ forAll(outs) { _.terminalState shouldBe Cancelled }
-          case Completed ⇒ forAll(outs) { _.terminalState should (be(Cancelled) or be(Completed)) }
-          case error     ⇒ forAll(outs) { _.terminalState should (be(error) or be(Cancelled)) }
-        }
-
-        forAll(outs) { out ⇒ out.received shouldEqual in.produced.take(out.scriptedSize) }
+      in.terminalState match {
+        case Cancelled ⇒ forAll(outs) { _.terminalState shouldBe Cancelled }
+        case Completed ⇒ forAll(outs) { _.terminalState should (be(Cancelled) or be(Completed)) }
+        case error     ⇒ forAll(outs) { _.terminalState should (be(error) or be(Cancelled)) }
       }
+
+      forAll(outs) { out ⇒
+        out.received shouldEqual in.produced.take(out.scriptedSize)
+      }
+    }
   }
 }

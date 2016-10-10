@@ -8,22 +8,26 @@ import scala.util.control.NonFatal
 import swave.testkit.gen.TestFixture
 import swave.core.PipeElem
 import swave.core.impl.stages.drain.DrainStage
-import swave.core.impl.{ RunContext, Inport }
+import swave.core.impl.{Inport, RunContext}
 import swave.core.macros._
 
 @StageImpl(fullInterceptions = true)
-private[testkit] final class TestDrainStage(
-    val id: Int,
-    val requestsIterable: Iterable[Long],
-    val cancelAfterOpt: Option[Int],
-    testCtx: TestContext) extends DrainStage with TestStage with PipeElem.Drain.Test {
+private[testkit] final class TestDrainStage(val id: Int,
+                                            val requestsIterable: Iterable[Long],
+                                            val cancelAfterOpt: Option[Int],
+                                            testCtx: TestContext)
+    extends DrainStage
+    with TestStage
+    with PipeElem.Drain.Test {
 
   private[this] val requests: Iterator[Long] = requestsIterable.iterator
 
   override def toString: String = "Output " + id
 
   def formatLong = {
-    def ts(o: AnyRef) = try o.toString catch { case NonFatal(e) ⇒ s"<${e.getClass.getSimpleName}>" }
+    def ts(o: AnyRef) =
+      try o.toString
+      catch { case NonFatal(e) ⇒ s"<${e.getClass.getSimpleName}>" }
     val requests = requestsIterable.map(r ⇒ if (r == Long.MaxValue) "Long.MaxValue" else r.toString)
     s"""|Output  : id = $id, state = $fixtureState / $stateName
         |script  : size = $scriptedSize, requests = [${requests.mkString(", ")}], cancelAfter = $cancelAfterOpt

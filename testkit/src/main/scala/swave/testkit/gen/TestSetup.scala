@@ -4,14 +4,14 @@
 
 package swave.testkit.gen
 
-import org.scalacheck.{ Gen, Prop }
+import org.scalacheck.{Gen, Prop}
 import swave.testkit.TestError
 import scala.util.control.NonFatal
 import shapeless.ops.function.FnToProduct
-import shapeless.ops.hlist.{ Reverse, Tupler }
+import shapeless.ops.hlist.{Reverse, Tupler}
 import shapeless._
 import swave.testkit.impl._
-import swave.core.{ Graph, PipeElem }
+import swave.core.{Graph, PipeElem}
 import swave.core.impl.stages.Stage
 import swave.core.util._
 import swave.core.macros._
@@ -50,9 +50,8 @@ object TestSetup {
   sealed abstract class FixtureDef {
     def input[T](implicit elems: Gen[T]): Gen[TestInput[T]]
     def input[T](elems: Gen[T], terminations: Gen[Option[Throwable]]): Gen[TestInput[T]]
-    def inputFromIterables[T](
-      elemSeqs: Gen[Iterable[T]],
-      terminations: Gen[Option[Throwable]] = Default.terminations): Gen[TestInput[T]]
+    def inputFromIterables[T](elemSeqs: Gen[Iterable[T]],
+                              terminations: Gen[Option[Throwable]] = Default.terminations): Gen[TestInput[T]]
     def inputFromScripts[T](scripts: Gen[InputScript[T]]): Gen[TestInput[T]]
     def output[T](implicit scripts: Gen[OutputScript] = Default.defaultOutputScripts): Gen[TestOutput[T]]
   }
@@ -64,22 +63,22 @@ object TestSetup {
 
   sealed abstract class AsyncScheduling
   object AsyncScheduling {
-    case object InOrder extends AsyncScheduling
-    case object RandomOrder extends AsyncScheduling
+    case object InOrder       extends AsyncScheduling
+    case object RandomOrder   extends AsyncScheduling
     case object ReversedOrder extends AsyncScheduling
-    case object Mixed extends AsyncScheduling
+    case object Mixed         extends AsyncScheduling
   }
 
   /**
-   * @param elems the elements to produce
-   * @param termination the type of termination to perform after the last element
-   */
+    * @param elems the elements to produce
+    * @param termination the type of termination to perform after the last element
+    */
   case class InputScript[+T](elems: Iterable[T], termination: Option[Throwable])
 
   /**
-   * @param requests the sequence of request calls to make before cancellation
-   * @param cancelAfter if defined triggers an early cancel after reception of n total elements
-   */
+    * @param requests the sequence of request calls to make before cancellation
+    * @param cancelAfter if defined triggers an early cancel after reception of n total elements
+    */
   case class OutputScript(requests: Iterable[Long], cancelAfter: Option[Int] = None) {
     requireArg(cancelAfter.isEmpty || cancelAfter.get < requests.sum)
   }
@@ -121,22 +120,23 @@ object TestSetup {
 
   ////////////////////////////////// DSL IMPLEMENTATION ///////////////////////////////////////////
 
-  private class TestSetupDefImpl(asyncRates: Gen[Double], asyncSchedulings: Gen[AsyncScheduling],
-      tracing: Boolean) extends TestSetupDef {
+  private class TestSetupDefImpl(asyncRates: Gen[Double], asyncSchedulings: Gen[AsyncScheduling], tracing: Boolean)
+      extends TestSetupDef {
     private[this] val runCounter = Iterator from 0
 
     def withAsyncRates(asyncRates: Gen[Double]) = new TestSetupDefImpl(asyncRates, asyncSchedulings, tracing)
-    def withAsyncSchedulings(asyncSchedulings: Gen[AsyncScheduling]) = new TestSetupDefImpl(asyncRates, asyncSchedulings, tracing)
-    def withTracing() = new TestSetupDefImpl(asyncRates, asyncSchedulings, tracing = true)
-    def param[T](implicit gen: Gen[T]) = finish.param[T]
+    def withAsyncSchedulings(asyncSchedulings: Gen[AsyncScheduling]) =
+      new TestSetupDefImpl(asyncRates, asyncSchedulings, tracing)
+    def withTracing()                      = new TestSetupDefImpl(asyncRates, asyncSchedulings, tracing = true)
+    def param[T](implicit gen: Gen[T])     = finish.param[T]
     def fixture[T](f: FixtureDef ⇒ Gen[T]) = finish.fixture(f)
 
     private def finish = {
       val contexts =
         for {
-          asyncRate ← asyncRates
+          asyncRate       ← asyncRates
           asyncScheduling ← asyncSchedulings
-          random ← Gen.parameterized(params ⇒ Gen.const(params.rng))
+          random          ← Gen.parameterized(params ⇒ Gen.const(params.rng))
         } yield {
           val xorShiftRandom = random match {
             case x: XorShiftRandom.Random ⇒ x.xorShiftRandom
@@ -149,9 +149,8 @@ object TestSetup {
     }
   }
 
-  private class DefImpl[L <: HList](
-      contexts: Gen[TestContext],
-      creatorsList: List[FixtureDef ⇒ Gen[Any]]) extends MainDef[L] {
+  private class DefImpl[L <: HList](contexts: Gen[TestContext], creatorsList: List[FixtureDef ⇒ Gen[Any]])
+      extends MainDef[L] {
 
     def param[T](implicit gen: Gen[T]): MainDef[T :: L] = fixture(_ ⇒ gen)
 
@@ -178,10 +177,11 @@ object TestSetup {
     def input[T](elems: Gen[T], terminations: Gen[Option[Throwable]]) =
       inputFromIterables(Default.elemLists(elems), terminations)
 
-    def inputFromIterables[T](elemSeqs: Gen[Iterable[T]], terminations: Gen[Option[Throwable]] = Default.terminations) =
+    def inputFromIterables[T](elemSeqs: Gen[Iterable[T]],
+                              terminations: Gen[Option[Throwable]] = Default.terminations) =
       inputFromScripts {
         for {
-          elems ← elemSeqs
+          elems       ← elemSeqs
           termination ← terminations
         } yield InputScript(elems, termination)
       }
@@ -198,7 +198,8 @@ object TestSetup {
       }
   }
 
-  private class PropperImpl[L <: HList, F](gen: Gen[(TestContext, L)], convertF: F ⇒ L ⇒ Unit, seed: String) extends Propper[F] {
+  private class PropperImpl[L <: HList, F](gen: Gen[(TestContext, L)], convertF: F ⇒ L ⇒ Unit, seed: String)
+      extends Propper[F] {
     def withRandomSeed(seed: String): Propper[F] = new PropperImpl[L, F](gen, convertF, seed)
 
     def from(f: F): Prop = Prop { params ⇒
@@ -214,13 +215,13 @@ object TestSetup {
       case (ctx, l) ⇒
         def filterStages(untypedList: List[Any]): List[TestStage] =
           untypedList flatMap {
-            case x: TestInput[_]              ⇒ filterStages(x.elements.toList) :+ x.stage
-            case x: TestOutput[_]             ⇒ x.stage :: Nil
-            case x @ List(_: TestFixture, _*) ⇒ x.map(_.asInstanceOf[TestFixture].stage)
-            case _                            ⇒ Nil
+            case x: TestInput[_]               ⇒ filterStages(x.elements.toList) :+ x.stage
+            case x: TestOutput[_]              ⇒ x.stage :: Nil
+            case x @ List(_: TestFixture, _ *) ⇒ x.map(_.asInstanceOf[TestFixture].stage)
+            case _                             ⇒ Nil
           }
         val untypedList = l.toUntypedList
-        val testStages = filterStages(untypedList)
+        val testStages  = filterStages(untypedList)
         try {
           f(l)
           postRunVerification(testStages)
@@ -234,17 +235,19 @@ object TestSetup {
             println(graphRendering getOrElse "(no graph rendering available)")
             println()
             val params = untypedList flatMap {
-              case _: TestFixture           ⇒ Nil
-              case List(_: TestFixture, _*) ⇒ Nil
-              case x                        ⇒ x :: Nil
+              case _: TestFixture            ⇒ Nil
+              case List(_: TestFixture, _ *) ⇒ Nil
+              case x                         ⇒ x :: Nil
             }
             val fixtures = testStages.map(s ⇒ f"${s.id}%3d: ${s.formatLong}".replace("\n", "\n       "))
-            val specimens = testStages.map({
-              case x: TestSpoutStage ⇒ x.outputElem
-              case x: TestDrainStage ⇒ x.inputElem
-            }).filter(_ != PipeElem.Unconnected).distinct
-            println(
-              s"""|Error Context
+            val specimens = testStages
+              .map({
+                case x: TestSpoutStage ⇒ x.outputElem
+                case x: TestDrainStage ⇒ x.inputElem
+              })
+              .filter(_ != PipeElem.Unconnected)
+              .distinct
+            println(s"""|Error Context
                   |  randomSeed     : ${XorShiftRandom.formatSeed(randomSeed)}
                   |  runNr          : ${ctx.runNr}
                   |  asyncScheduling: ${ctx.asyncScheduling}

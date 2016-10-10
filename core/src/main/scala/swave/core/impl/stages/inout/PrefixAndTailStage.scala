@@ -7,7 +7,7 @@ package swave.core.impl.stages.inout
 import scala.collection.immutable.VectorBuilder
 import swave.core.PipeElem
 import swave.core.impl.stages.spout.SubSpoutStage
-import swave.core.impl.{ Inport, Outport, RunContext }
+import swave.core.impl.{Inport, Outport, RunContext}
 import swave.core.macros._
 import swave.core._
 
@@ -36,9 +36,9 @@ private[core] final class PrefixAndTailStage(prefixSize: Int) extends InOutStage
       })
 
     /**
-     * @param pending       number of prefix elements already requested from upstream but not yet received, > 0
-     * @param mainRequested true if the main downstream has already requested at least one element
-     */
+      * @param pending       number of prefix elements already requested from upstream but not yet received, > 0
+      * @param mainRequested true if the main downstream has already requested at least one element
+      */
     def assemblingPrefix(pending: Long, mainRequested: Boolean): State = {
       requireState(pending > 0)
       state(
@@ -58,8 +58,8 @@ private[core] final class PrefixAndTailStage(prefixSize: Int) extends InOutStage
     }
 
     /**
-     * Prefix fully received, awaiting demand from the main downstream.
-     */
+      * Prefix fully received, awaiting demand from the main downstream.
+      */
     def awaitingDemand(): State = state(
       request = (_, _) => emit(),
       cancel = stopCancelF(in),
@@ -89,11 +89,11 @@ private[core] final class PrefixAndTailStage(prefixSize: Int) extends InOutStage
   }
 
   /**
-   * Simply forwarding elements from upstream to the tail sub downstream.
-   *
-   * @param in  the active upstream
-   * @param sub the active tail sub downstream
-   */
+    * Simply forwarding elements from upstream to the tail sub downstream.
+    *
+    * @param in  the active upstream
+    * @param sub the active tail sub downstream
+    */
   def draining(in: Inport, sub: Outport) = state(
     intercept = false,
 

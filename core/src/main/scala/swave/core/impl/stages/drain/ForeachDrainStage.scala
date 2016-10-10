@@ -26,8 +26,8 @@ private[core] final class ForeachDrainStage(
   }
 
   /**
-   * @param in the active upstream
-   */
+    * @param in the active upstream
+    */
   def awaitingXStart(in: Inport) = state(
     xStart = () => {
       in.request(Long.MaxValue)
@@ -35,8 +35,8 @@ private[core] final class ForeachDrainStage(
     })
 
   /**
-   * @param in the active upstream
-   */
+    * @param in the active upstream
+    */
   def running(in: Inport) = state(
     onNext = (elem, _) ⇒ {
       try {

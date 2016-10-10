@@ -6,7 +6,7 @@ package swave.core.io.files.impl
 
 import java.io.IOException
 import java.nio.channels.FileChannel
-import java.nio.file.{ StandardOpenOption, Path }
+import java.nio.file.{Path, StandardOpenOption}
 import scala.collection.JavaConverters._
 import scala.concurrent.Promise
 import com.typesafe.scalalogging.Logger
