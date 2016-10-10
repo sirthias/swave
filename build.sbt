@@ -1,4 +1,3 @@
-import de.heikoseeberger.sbtheader.HeaderPattern
 import ReleaseTransformations._
 
 lazy val contributors = Seq(
@@ -18,15 +17,13 @@ lazy val commonSettings = Seq(
   scalacOptions in (Compile, doc) ~= { _.filterNot(o => o == "-Xlint" || o == "-Xfatal-warnings") :+ "-nowarn" },
   initialCommands in console := """import swave.core._""",
   scmInfo := Some(ScmInfo(url("https://github.com/sirthias/swave"), "scm:git:git@github.com:sirthias/swave.git")),
-  headers := Map("scala" -> (
-    HeaderPattern.cStyleBlockComment,
-    """/* This Source Code Form is subject to the terms of the Mozilla Public
-      | * License, v. 2.0. If a copy of the MPL was not distributed with this
-      | * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-      |
-      |""".stripMargin)),
+
+  // code formatting
+  headers := Map("scala" -> de.heikoseeberger.sbtheader.license.MPLv2_NoCopyright("", "")),
   scalafmtConfig := Some(file(".scalafmt.conf")),
   formatSbtFiles := false,
+
+  // test coverage
   coverageMinimum := 90,
   coverageFailOnMinimum := false,
   coverageExcludedPackages := """swave\.benchmarks\..*;swave\.examples\..*""")
