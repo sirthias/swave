@@ -13,6 +13,8 @@ import swave.core.impl.{Inport, Outport, RunContext}
 import swave.core.macros._
 import swave.core.util._
 
+// TODO: reduce buffer to one single element, like in the SplitStage
+
 // format: OFF
 @StageImpl(fullInterceptions = true)
 private[core] final class InjectStage extends InOutStage with PipeElem.InOut.Inject { stage =>

@@ -284,6 +284,8 @@ trait StreamOps[A] extends Any { self ⇒
   final def prefixAndTail(n: Int): Repr[(immutable.Seq[A], Spout[A])] =
     append(new PrefixAndTailStage(n))
 
+  final def protect[B](recreate: Option[Throwable] => Pipe[A, B]): Repr[B] = ???
+
   final def recover[B >: A](pf: PartialFunction[Throwable, B]): Repr[B] =
     via(Pipe[A].recoverWith[B](1)(pf.andThen(Spout.one)) named "recover")
 
