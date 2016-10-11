@@ -101,6 +101,7 @@ object PipeElem {
     trait RecoverWith            extends InOut
     trait PrefixAndTail          extends InOut
     trait Scan                   extends InOut
+    trait Split                  extends InOut
     trait Take                   extends InOut
     trait TakeWhile              extends InOut
     trait TakeWithin             extends InOut

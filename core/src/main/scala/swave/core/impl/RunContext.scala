@@ -105,9 +105,8 @@ private[swave] final class RunContext(val port: Port)(implicit val env: StreamEn
     val needXStart = data.needXStart
     data.needXStart = Nil
     needXStart.foreach(if (isAsyncRun) dispatchAsyncXStart else dispatchXStart)
-
     if (!isSubContext && !isAsyncRun) dispatchPostRunSignal()
-    data.cleanup.foreach(dispatchCleanup)
+    if (!isSubContext) data.cleanup.foreach(dispatchCleanup)
   }
 
   private def dispatchPostRunSignal(): Unit =

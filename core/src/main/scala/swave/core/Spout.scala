@@ -70,6 +70,19 @@ final class Spout[+A](private[swave] val inport: Inport) extends AnyVal with Str
   def drainFolding[R](zero: R)(f: (R, A) ⇒ R)(implicit env: StreamEnv): Future[R] =
     drainTo(Drain.fold(zero)(f))
 
+  def drainToMkString(sep: String = "")(implicit env: StreamEnv): Future[String] =
+    drainToMkString("", sep, "")
+
+  def drainToMkString(start: String, sep: String, end: String)(implicit env: StreamEnv): Future[String] = {
+    var first = true
+    val pipe =
+      Pipe[A].fold(new java.lang.StringBuilder(start)) { (sb, elem) =>
+        if (first) first = false else sb.append(sep)
+        sb.append(elem)
+      }.map(_.append(end).toString)
+    drainTo(pipe to Drain.head)
+  }
+
   def named(name: String): Spout[A] = {
     Module.ID(name).markAsInnerExit(inport)
     this

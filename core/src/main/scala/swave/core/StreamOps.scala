@@ -304,7 +304,14 @@ trait StreamOps[A] extends Any { self ⇒
   final def slice(startIndex: Long, length: Long): Repr[A] =
     via(Pipe[A] drop startIndex take length named "slice")
 
-  final def split(f: A ⇒ Split.Command): Repr[Spout[A]] = ???
+  final def split(f: A ⇒ Split.Command, eagerCancel: Boolean = true): Repr[Spout[A]] =
+    append(new SplitStage(f.asInstanceOf[AnyRef => Split.Command], eagerCancel: Boolean))
+
+  final def splitAfter(f: A ⇒ Boolean, eagerCancel: Boolean = true): Repr[Spout[A]] =
+    via(Pipe[A].split(x => if (f(x)) Split.EmitComplete else Split.Emit, eagerCancel) named "splitAfter")
+
+  final def splitWhen(f: A ⇒ Boolean, eagerCancel: Boolean = true): Repr[Spout[A]] =
+    via(Pipe[A].split(x => if (f(x)) Split.CompleteEmit else Split.Emit, eagerCancel) named "splitWhen")
 
   final def switch(n: Nat, eagerCancel: Boolean = false)(
       f: A ⇒ Int)(implicit ti: ToInt[n.N], fl: Fill[n.N, A]): BranchOut[fl.Out, HNil, CNil, Nothing, Repr] =
@@ -333,7 +340,7 @@ trait StreamOps[A] extends Any { self ⇒
     val pipe =
       if (n > 0) {
         Pipe[A]
-          .fold(new RingBuffer[A](roundUpToNextPowerOf2(n))) { (buf, elem) ⇒
+          .fold(new RingBuffer[A](roundUpToPowerOf2(n))) { (buf, elem) ⇒
             if (buf.size == n) buf.unsafeDropHead()
             buf.unsafeWrite(elem)
             buf
