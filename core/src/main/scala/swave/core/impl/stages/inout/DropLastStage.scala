@@ -18,7 +18,7 @@ private[core] final class DropLastStage(count: Int) extends InOutStage with Pipe
   def pipeElemType: String = "dropLast"
   def pipeElemParams: List[Any] = count :: Nil
 
-  private[this] val buffer = new RingBuffer[AnyRef](roundUpToNextPowerOf2(count))
+  private[this] val buffer = new RingBuffer[AnyRef](roundUpToPowerOf2(count))
 
   connectInOutAndSealWith { (ctx, in, out) ⇒
     ctx.registerForXStart(this)

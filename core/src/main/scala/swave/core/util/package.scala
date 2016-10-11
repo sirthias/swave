@@ -30,7 +30,7 @@ package object util {
 
   def isPowerOf2(i: Int): Boolean = Integer.lowestOneBit(i) == i
 
-  def roundUpToNextPowerOf2(i: Int): Int = 1 << (32 - Integer.numberOfLeadingZeros(i - 1))
+  def roundUpToPowerOf2(i: Int): Int = 1 << (32 - Integer.numberOfLeadingZeros(i - 1))
 
   implicit def richByteArray(array: Array[Byte]): RichByteArray                    = new RichByteArray(array)
   implicit def richConfig[T](config: Config): RichConfig                           = new RichConfig(config)

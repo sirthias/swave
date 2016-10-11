@@ -31,7 +31,7 @@ private[core] final class InjectStage extends InOutStage with PipeElem.InOut.Inj
 
     def awaitingXStart() = state(
       xStart = () => {
-        buffer = new RingBuffer[AnyRef](roundUpToNextPowerOf2(ctx.env.settings.maxBatchSize))
+        buffer = new RingBuffer[AnyRef](roundUpToPowerOf2(ctx.env.settings.maxBatchSize))
         in.request(buffer.capacity.toLong)
         noSubAwaitingElem(buffer.capacity, mainRemaining = 0)
       })

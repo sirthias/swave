@@ -25,7 +25,7 @@ private[core] final class FlattenMergeStage(streamable: Streamable.Aux[AnyRef, A
   def pipeElemParams: List[Any] = parallelism :: Nil
 
   // stores (sub, elem) records in the order they arrived so we can dispatch them quickly when they are requested
-  private[this] val buffer: RingBuffer[InportAnyRefList] = new RingBuffer(roundUpToNextPowerOf2(parallelism))
+  private[this] val buffer: RingBuffer[InportAnyRefList] = new RingBuffer(roundUpToPowerOf2(parallelism))
 
   connectInOutAndSealWith { (ctx, in, out) ⇒
     ctx.registerForXStart(this)

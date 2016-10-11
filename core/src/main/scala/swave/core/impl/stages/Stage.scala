@@ -459,7 +459,7 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
 
   private def buffer = {
     if (_buffer eq null) {
-      val initialSize = roundUpToNextPowerOf2(_mbs)
+      val initialSize = roundUpToPowerOf2(_mbs)
       _buffer = new ResizableRingBuffer(initialSize, initialSize << 4)
     }
     _buffer

@@ -22,7 +22,7 @@ private[core] final class BufferBackpressureStage(size: Int) extends InOutStage
   def pipeElemType: String = "bufferBackpressure"
   def pipeElemParams: List[Any] = size :: Nil
 
-  private[this] val buffer = new RingBuffer[AnyRef](roundUpToNextPowerOf2(size))
+  private[this] val buffer = new RingBuffer[AnyRef](roundUpToPowerOf2(size))
 
   connectInOutAndSealWith { (ctx, in, out) ⇒
     ctx.registerForXStart(this)

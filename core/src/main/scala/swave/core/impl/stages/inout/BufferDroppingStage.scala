@@ -22,7 +22,7 @@ private[core] final class BufferDroppingStage(size: Int, overflowStrategy: Overf
   def pipeElemType: String = "bufferDropping"
   def pipeElemParams: List[Any] = size :: overflowStrategy :: Nil
 
-  private[this] val buffer = new RingBuffer[AnyRef](roundUpToNextPowerOf2(size))
+  private[this] val buffer = new RingBuffer[AnyRef](roundUpToPowerOf2(size))
 
   connectInOutAndSealWith { (ctx, in, out) ⇒
     ctx.registerForXStart(this)
