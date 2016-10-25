@@ -17,19 +17,13 @@ object MonteCarloPiAsync extends App {
 
   val random = XorShiftRandom()
 
-  Spout
-    .continually(random.nextDouble())
+  // format: OFF
+  Spout.continually(random.nextDouble())
     .grouped(2)
     .map { case x +: y +: Nil ⇒ Point(x, y) }
     .fanOutBroadcast()
-    .sub
-    .filter(_.isInner)
-    .map(_ => InnerSample)
-    .end
-    .sub
-    .filterNot(_.isInner)
-    .map(_ => OuterSample)
-    .end
+      .sub.filter(_.isInner).map(_ => InnerSample).end
+      .sub.filterNot(_.isInner).map(_ => OuterSample).end
     .fanInMerge()
     .async()
     .scan(State(0, 0)) { _ withNextSample _ }
