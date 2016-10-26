@@ -57,7 +57,7 @@ private[swave] final class RunContext(val port: Port)(implicit val env: StreamEn
     *
     * Note: This event is only available for synchronous runs!
     */
-  def registerForPostRunEvent(stage: Stage): Unit = data.needPostRun ::= stage
+  def registerForPostRunEvent(stage: Stage): Unit = data.syncNeedPostRun ::= stage
 
   def scheduleSubscriptionTimeout(stage: Stage, delay: Duration): Cancellable =
     delay match {
@@ -68,16 +68,16 @@ private[swave] final class RunContext(val port: Port)(implicit val env: StreamEn
           val timer =
             new Cancellable with Runnable {
               def run()       = stage.xEvent(SubscriptionTimeout)
-              def stillActive = data.cleanup contains stage
+              def stillActive = data.syncCleanup contains this
               def cancel() = {
-                val x = data.cleanup.remove(this)
-                (x ne data.cleanup) && {
-                  data.cleanup = x
+                val x = data.syncCleanup.remove(this)
+                (x ne data.syncCleanup) && {
+                  data.syncCleanup = x
                   true
                 }
               }
             }
-          data.cleanup ::= timer
+          data.syncCleanup ::= timer
           timer
         }
       case _ ⇒ Cancellable.Inactive
@@ -88,8 +88,8 @@ private[swave] final class RunContext(val port: Port)(implicit val env: StreamEn
       requireArg(other.env == env)
       data.needRunner = data.needRunner append other.data.needRunner
       data.needXStart = data.needXStart ::: other.data.needXStart
-      data.needPostRun = data.needPostRun ::: other.data.needPostRun
-      data.cleanup = data.cleanup ::: other.data.cleanup
+      data.syncNeedPostRun = data.syncNeedPostRun ::: other.data.syncNeedPostRun
+      data.syncCleanup = data.syncCleanup ::: other.data.syncCleanup
       other.data = data
       other.parent = this
     }
@@ -104,17 +104,22 @@ private[swave] final class RunContext(val port: Port)(implicit val env: StreamEn
   def start(): Unit = {
     val needXStart = data.needXStart
     data.needXStart = Nil
-    needXStart.foreach(if (isAsyncRun) dispatchAsyncXStart else dispatchXStart)
-    if (!isSubContext && !isAsyncRun) dispatchPostRunSignal()
-    if (!isSubContext) data.cleanup.foreach(dispatchCleanup)
+    if (!isAsyncRun) {
+      needXStart.foreach(dispatchSyncXStart)
+      if (!isSubContext) {
+        dispatchSyncPostRunSignal()
+        data.syncCleanup.foreach(dispatchSyncCleanup)
+        if (!port.isStopped) throw new UnterminatedSynchronousStreamException
+      }
+    } else needXStart.foreach(dispatchAsyncXStart)
   }
 
-  private def dispatchPostRunSignal(): Unit =
-    if (data.needPostRun.nonEmpty) {
-      val needPostRun = data.needPostRun
-      data.needPostRun = Nil // allow for re-registration in xRun handler
-      needPostRun.foreach(dispatchPostRun)
-      dispatchPostRunSignal()
+  private def dispatchSyncPostRunSignal(): Unit =
+    if (data.syncNeedPostRun.nonEmpty) {
+      val needPostRun = data.syncNeedPostRun
+      data.syncNeedPostRun = Nil // allow for re-registration in xRun handler
+      needPostRun.foreach(dispatchSyncPostRun)
+      dispatchSyncPostRunSignal()
     }
 }
 
@@ -123,14 +128,14 @@ private[swave] object RunContext {
   case object SubscriptionTimeout
 
   private val dispatchAsyncXStart: Stage ⇒ Unit = stage ⇒ stage.runner.enqueueXStart(stage)
-  private val dispatchXStart: Stage ⇒ Unit      = _.xStart()
-  private val dispatchPostRun: Stage ⇒ Unit     = _.xEvent(PostRun)
-  private val dispatchCleanup: Runnable ⇒ Unit  = _.run()
+  private val dispatchSyncXStart: Stage ⇒ Unit      = _.xStart()
+  private val dispatchSyncPostRun: Stage ⇒ Unit     = _.xEvent(PostRun)
+  private val dispatchSyncCleanup: Runnable ⇒ Unit  = _.run()
 
   private class Data {
     var needRunner  = StageDispatcherIdListMap.empty
     var needXStart  = List.empty[Stage]
-    var needPostRun = List.empty[Stage]
-    var cleanup     = List.empty[Runnable]
+    var syncNeedPostRun = List.empty[Stage]
+    var syncCleanup     = List.empty[Runnable]
   }
 }

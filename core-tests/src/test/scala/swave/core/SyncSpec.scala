@@ -7,6 +7,7 @@
 package swave.core
 
 import scala.concurrent.Promise
+import scala.util.Failure
 import swave.core.util._
 
 // format: OFF
@@ -89,6 +90,18 @@ class SyncSpec extends SwaveSpec {
 
     "inject" in {
       Spout(1 to 10).inject.map(_ elementAt 1).flattenConcat() should produce(2, 4, 6, 8, 10)
+    }
+
+    "non-terminating" in {
+      val c = Coupling[Int]
+      val result = Spout.one(1)
+        .concat(c.out)
+        .fanOutBroadcast()
+          .sub.to(c.in)
+          .subContinue.drainToBlackHole()
+      inside(result.value) {
+        case Some(Failure(_: UnterminatedSynchronousStreamException)) ⇒ // ok
+      }
     }
   }
 }
