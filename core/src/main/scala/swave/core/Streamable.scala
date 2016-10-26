@@ -8,6 +8,7 @@ package swave.core
 
 import org.reactivestreams.Publisher
 import scala.annotation.implicitNotFound
+import scala.collection.immutable
 import scala.concurrent.Future
 import scala.util.Try
 import swave.core.util.RingBuffer
@@ -38,11 +39,11 @@ object Streamable {
   implicit def forOption[T]: Aux[Option[T], T] = option.asInstanceOf[Aux[Option[T], T]]
 
   private val iterable =
-    new Streamable[Iterable[AnyRef]] {
+    new Streamable[immutable.Iterable[AnyRef]] {
       type Out = AnyRef
-      def apply(value: Iterable[AnyRef]): Spout[AnyRef] = Spout.fromIterable(value)
+      def apply(value: immutable.Iterable[AnyRef]): Spout[AnyRef] = Spout.fromIterable(value)
     }
-  implicit def forIterable[T]: Aux[Iterable[T], T] = iterable.asInstanceOf[Aux[Iterable[T], T]]
+  implicit def forIterable[T]: Aux[immutable.Iterable[T], T] = iterable.asInstanceOf[Aux[immutable.Iterable[T], T]]
 
   private val iterator =
     new Streamable[Iterator[AnyRef]] {
