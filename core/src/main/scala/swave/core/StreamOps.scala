@@ -315,6 +315,42 @@ trait StreamOps[A] extends Any { self ⇒
   final def slice(startIndex: Long, length: Long): Repr[A] =
     via(Pipe[A] drop startIndex take length named "slice")
 
+  final def sliding(windowSize: Int): Repr[immutable.Seq[A]] =
+    slidingTo[immutable.Seq](windowSize)
+
+  final def slidingTo[M[+ _]](windowSize: Int)(implicit cbf: CanBuildFrom[M[A], A, M[A]]): Repr[M[A]] = {
+
+    val builder = cbf.apply()
+
+    prefixAndTail(windowSize).map {
+      case (prefix, tail) =>
+        if (prefix.length == windowSize) {
+          // there are enough elements to fill at least one window
+          // prepare buffer
+          val buffer = new RingBuffer[A](roundUpToPowerOf2(windowSize))
+          buffer ++= prefix
+
+          tail
+            .scan(buffer) { (buf, elem) ⇒
+              if (buf.size == windowSize) buf.unsafeDropHead()
+              buf.unsafeWrite(elem)
+              buf
+            }
+            .map { b =>
+              builder.clear()
+              b.foreach { builder += _ }
+              builder.result()
+            }
+        } else if (prefix.length > 0) {
+          // less elements than one window - just return the elements
+          prefix.foreach { builder += _ }
+          Spout.one(builder.result())
+        } else {
+          Spout.empty
+        }
+    }.flattenConcat()
+  }
+
   final def split(f: A ⇒ Split.Command, eagerCancel: Boolean = true): Repr[Spout[A]] =
     append(new SplitStage(f.asInstanceOf[AnyRef => Split.Command], eagerCancel: Boolean))
 

@@ -7,6 +7,7 @@
 package swave.core.util
 
 import swave.core.macros._
+import scala.annotation.tailrec
 
 /**
   * A mutable RingBuffer with a fixed capacity.
@@ -116,6 +117,25 @@ private[swave] final class RingBuffer[T](cap: Int) {
   def hardClear(): Unit = {
     softClear()
     java.util.Arrays.fill(array, null)
+  }
+
+  /**
+    * Adds a traversable of elements to the buffer
+    * @param elems
+    */
+  def ++=(elems: Traversable[T]): Boolean = elems.forall(write)
+
+  /**
+    * Iterates the underlying elements of the buffer
+    *
+    */
+  def foreach[U](f: T => U): Unit = {
+    @tailrec def rec(i: Int): Unit =
+      if (i < writeIx) {
+        f(array(i & mask).asInstanceOf[T])
+        rec(i + 1)
+      }
+    rec(readIx)
   }
 
   override def toString: String = s"RingBuffer(len=${array.length}, size=$size, writeIx=$writeIx, readIx=$readIx)"
