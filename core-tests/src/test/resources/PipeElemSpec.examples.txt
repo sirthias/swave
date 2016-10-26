@@ -29,7 +29,7 @@ Example 3:
  o--+  ^ {first}
  |     ^
  |     ^
- o  >>>^ bufferBackpressure(1)
+ o  >>>^ buffer(1)
  |  ^
  |  ^
  o  ^ map(<function1>)

@@ -36,7 +36,7 @@ trait StreamOps[A] extends Any { self ⇒
   protected def append[T](stage: Stage): Repr[T]
 
   final def async(dispatcherId: String = "", bufferSize: Int = 16): Repr[A] =
-    append(new AsyncBoundaryStage(dispatcherId)).buffer(bufferSize, Overflow.Backpressure)
+    append(new AsyncBoundaryStage(dispatcherId)).buffer(bufferSize)
 
   final def attach[T, O](sub: Spout[T])(implicit ev: Lub[A, T, O]): FanIn[A :: T :: HNil, A :+: T :+: CNil, O, Repr] =
     new FanIn(InportList(base) :+ sub.inport, wrap)
@@ -63,9 +63,14 @@ trait StreamOps[A] extends Any { self ⇒
                                                                  lub: Lub[A, T, O]): FanIn[A :: f.Out, CNil, O, Repr] =
     new FanIn(base +: InportList.fill(ti(), attachNop(fo.base)), wrap)
 
-  final def buffer(size: Int, overflowStrategy: Overflow = Overflow.Backpressure): Repr[A] = {
+  final def buffer(size: Int, requestStrategy: Buffer.RequestStrategy = Buffer.RequestStrategy.WhenHalfEmpty): Repr[A] = {
     requireArg(size >= 0)
-    if (size > 0) append(overflowStrategy.newStage(size)) else identity
+    if (size > 0) append(new BufferStage(size, requestStrategy(size))) else identity
+  }
+
+  final def bufferDropping(size: Int, overflowStrategy: Buffer.OverflowStrategy): Repr[A] = {
+    requireArg(size > 0)
+    append(new BufferDroppingStage(size, overflowStrategy))
   }
 
   final def collect[B](pf: PartialFunction[A, B]): Repr[B] =

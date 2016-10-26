@@ -9,6 +9,7 @@ package swave.core
 import scala.concurrent.Promise
 import swave.core.util._
 
+// format: OFF
 class SyncSpec extends SwaveSpec {
 
   implicit val env = StreamEnv()
@@ -32,12 +33,17 @@ class SyncSpec extends SwaveSpec {
       Spout(1, 2, 3)
         .concat(c.out)
         .fanOutBroadcast()
-        .sub
-        .first
-        .buffer(1)
-        .map(_ + 3)
-        .to(c.in)
-        .subContinue should produce(1, 2, 3, 4)
+          .sub.first.buffer(1).map(_ + 3).to(c.in)
+          .subContinue should produce(1, 2, 3, 4)
+    }
+
+    "cycles 2" in {
+      val c = Coupling[Int]
+      Spout.one(1)
+        .concat(c.out)
+        .fanOutBroadcast(eagerCancel = true)
+          .sub.buffer(2, requestStrategy = Buffer.RequestStrategy.Always).map(_ + 1).to(c.in)
+          .subContinue.take(10) should produce(1 to 10: _*)
     }
 
     "fanout / fanInToProduct" in {
@@ -45,25 +51,15 @@ class SyncSpec extends SwaveSpec {
 
       Spout(1, 2, 3)
         .fanOutBroadcast()
-        .sub
-        .buffer(4)
-        .map(_.toString)
-        .end
-        .sub
-        .buffer(4)
-        .map(_ * 2.0)
-        .end
-        .sub
-        .to(Drain.ignore.dropResult) // just for fun
-        .sub
-        .drop(2)
-        .concat(Spout(List(4, 5)))
-        .end
-        .attach(Spout.repeat(true))
+          .sub.buffer(4).map(_.toString).end
+          .sub.buffer(4).map(_ * 2.0).end
+          .sub.to(Drain.ignore.dropResult) // just for fun
+          .sub.drop(2).concat(Spout(List(4, 5))).end
+          .attach(Spout.repeat(true))
         .fanInToProduct[Foo] should produce(
-        Foo("1", 2.0, 3, b = true),
-        Foo("2", 4.0, 4, b = true),
-        Foo("3", 6.0, 5, b = true))
+          Foo("1", 2.0, 3, b = true),
+          Foo("2", 4.0, 4, b = true),
+          Foo("3", 6.0, 5, b = true))
     }
 
     "fanout to drain" in {

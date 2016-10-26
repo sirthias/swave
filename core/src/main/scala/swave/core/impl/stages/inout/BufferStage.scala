@@ -14,12 +14,12 @@ import swave.core.util._
 
 // format: OFF
 @StageImpl
-private[core] final class BufferBackpressureStage(size: Int) extends InOutStage
+private[core] final class BufferStage(size: Int, requestThreshold: Int) extends InOutStage
   with PipeElem.InOut.BufferWithBackpressure {
 
   requireArg(size > 0)
 
-  def pipeElemType: String = "bufferBackpressure"
+  def pipeElemType: String = "buffer"
   def pipeElemParams: List[Any] = size :: Nil
 
   private[this] val buffer = new RingBuffer[AnyRef](roundUpToPowerOf2(size))
@@ -60,7 +60,7 @@ private[core] final class BufferBackpressureStage(size: Int) extends InOutStage
         val target = rem ⊹ size
         val delta = target - alreadyRequested
         val newPending =
-          if (delta > (size >> 1)) { // we suppress requesting a number of elems < half the buffer size
+          if (delta > requestThreshold) {
             in.request(delta)
             pend + delta
           } else pend

@@ -11,6 +11,7 @@ import scala.util.control.NonFatal
 import org.scalatest.{FreeSpec, Matchers}
 import swave.core.macros._
 
+// format: OFF
 class PipeElemSpec extends FreeSpec with Matchers {
 
   "Example 1" tests {
@@ -26,21 +27,15 @@ class PipeElemSpec extends FreeSpec with Matchers {
     Spout(1, 2, 3)
       .concat(c.out)
       .fanOutBroadcast(eagerCancel = false)
-      .sub
-      .first
-      .buffer(1)
-      .map(_ + 3)
-      .to(c.in)
-      .subContinue
-      .to(Drain.head)
+        .sub.first.buffer(1).map(_ + 3).to(c.in)
+        .subContinue.to(Drain.head)
   }
 
   "Example 4" tests {
     val foo = Module.Forward.from2[Int, String] { (a, b) ⇒
       a.attachN(2, b.fanOutBroadcast())
     } named "foo"
-    Spout
-      .from(0)
+    Spout.from(0)
       .duplicate
       .attach(Spout("x", "y", "z"))
       .fromFanInVia(foo)
@@ -62,8 +57,7 @@ class PipeElemSpec extends FreeSpec with Matchers {
   }
 
   "Example 8" tests {
-    Spout
-      .from(0)
+    Spout.from(0)
       .map(_ * 2)
       .via(Pipe.fromDrainAndSpout[Int, String](Drain.cancelling, Spout.empty))
       .filterNot(_.isEmpty)
@@ -71,8 +65,7 @@ class PipeElemSpec extends FreeSpec with Matchers {
   }
 
   val examples: Map[String, String] =
-    Source
-      .fromInputStream(getClass.getResourceAsStream("/PipeElemSpec.examples.txt"))
+    Source.fromInputStream(getClass.getResourceAsStream("/PipeElemSpec.examples.txt"))
       .getLines()
       .scanLeft(Left(Nil): Either[List[String], List[String]]) {
         case (Left(lines), "")   ⇒ Right(lines.reverse)

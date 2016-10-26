@@ -7,14 +7,14 @@
 package swave.core.impl.stages.inout
 
 import scala.annotation.tailrec
-import swave.core.{Overflow, PipeElem}
+import swave.core.{Buffer, PipeElem}
 import swave.core.impl.{Inport, Outport}
 import swave.core.macros._
 import swave.core.util._
 
 // format: OFF
 @StageImpl
-private[core] final class BufferDroppingStage(size: Int, overflowStrategy: Overflow) extends InOutStage
+private[core] final class BufferDroppingStage(size: Int, overflowStrategy: Buffer.OverflowStrategy) extends InOutStage
   with PipeElem.InOut.BufferDropping {
 
   requireArg(size > 0)
@@ -67,7 +67,7 @@ private[core] final class BufferDroppingStage(size: Int, overflowStrategy: Overf
           case 2 /* Overflow.DropTail */ => { buffer.unsafeDropTail(); stay() }
           case 3 /* Overflow.DropBuffer */ => { buffer.softClear(); stay() }
           case 4 /* Overflow.DropNew */ => stay()
-          case 5 /* Overflow.Fail */ => stopError(Overflow.OverflowFailure, out)
+          case 5 /* Overflow.Fail */ => stopError(Buffer.OverflowStrategy.OverflowFailure, out)
         }
       },
 

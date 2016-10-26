@@ -8,7 +8,7 @@ package swave.core.impl.stages
 
 import org.scalacheck.Gen
 import org.scalatest.Inspectors
-import swave.core.{Overflow, StreamEnv, StreamLimitExceeded}
+import swave.core.{Buffer, StreamEnv, StreamLimitExceeded}
 import swave.testkit.TestError
 import swave.testkit.gen.TestFixture
 
@@ -20,7 +20,7 @@ final class SimpleOpSpec extends SyncPipeSpec with Inspectors {
   implicit val integerInput = Gen.chooseNum(0, 999)
   implicit val stringInput  = Gen.listOfN(3, Gen.alphaNumChar).map(_.mkString)
 
-  "BufferBackpressure" in check {
+  "Buffer" in check {
     testSetup.input[Int].output[Int].param(Gen.chooseNum(0, 16)).prop.from { (in, out, param) ⇒
       in.spout.buffer(param).drainTo(out.drain) shouldTerminate asScripted(in)
 
@@ -29,13 +29,14 @@ final class SimpleOpSpec extends SyncPipeSpec with Inspectors {
   }
 
   "BufferDropping" in check {
+    import Buffer.OverflowStrategy._
     testSetup
       .input[Int]
       .output[Int]
-      .param(Gen.oneOf(Overflow.DropHead, Overflow.DropTail, Overflow.DropBuffer, Overflow.DropNew))
+      .param(Gen.oneOf(DropHead, DropTail, DropBuffer, DropNew))
       .prop
       .from { (in, out, param) ⇒
-        in.spout.buffer(4, param).drainTo(out.drain) shouldTerminate asScripted(in)
+        in.spout.bufferDropping(4, param).drainTo(out.drain) shouldTerminate asScripted(in)
       }
   }
 
