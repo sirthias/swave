@@ -31,7 +31,9 @@ final class SplitSpec extends SyncPipeSpec with Inspectors {
       Spout(1 to 9)
         .splitWhen(_ % 4 == 0)
         .map(_.map(_.toString).reduce(_ + _))
-        .flattenConcat().drainToMkString(",").value.get.get shouldEqual "123,4567,89"
+        .flattenConcat()
+        .drainToMkString(",")
+        .value.get.get shouldEqual "123,4567,89"
     }
   }
 
@@ -43,7 +45,9 @@ final class SplitSpec extends SyncPipeSpec with Inspectors {
       Spout(1 to 9)
         .splitAfter(_ % 4 == 0)
         .map(_.map(_.toString).reduce(_ + _))
-        .flattenConcat().drainToMkString(",").value.get.get shouldEqual "1234,5678,9"
+        .flattenConcat()
+        .drainToMkString(",")
+        .value.get.get shouldEqual "1234,5678,9"
     }
   }
 
@@ -53,11 +57,10 @@ final class SplitSpec extends SyncPipeSpec with Inspectors {
       .output[Spout[Int]]
       .fixture(fd ⇒ Gen.listOfN(10, fd.output[Int]))
       .param[Boolean]
-      .prop
-      .from { (in, out, allSubOuts, eagerCancel) ⇒
+      .prop.from { (in, out, allSubOuts, eagerCancel) ⇒
         import TestFixture.State._
 
-        val iter = allSubOuts.iterator
+        val iter    = allSubOuts.iterator
         val subOuts = ListBuffer.empty[TestOutput[Int]]
         out.appendElemHandler { sub ⇒
           if (iter.hasNext) {
@@ -65,7 +68,7 @@ final class SplitSpec extends SyncPipeSpec with Inspectors {
             subOuts += subOut
             inside(sub.drainTo(subOut.drain).value) {
               case Some(Failure(e)) ⇒ e shouldEqual TestError
-              case _ ⇒ // ok here
+              case _                ⇒ // ok here
             }
           } else sub.drainTo(Drain.ignore)
         }
@@ -80,7 +83,7 @@ final class SplitSpec extends SyncPipeSpec with Inspectors {
 
           case Completed ⇒ in.scriptedSize shouldBe 0
 
-          case error@Error(TestError) ⇒
+          case error @ Error(TestError) ⇒
             if (subOuts.nonEmpty) {
               forAll(subOuts.init) {
                 _.terminalState should (be(Cancelled) or be(Completed))
@@ -88,7 +91,6 @@ final class SplitSpec extends SyncPipeSpec with Inspectors {
             }
             in.terminalState should (be(Cancelled) or be(error))
         }
-      }
+    }
   }
-
 }

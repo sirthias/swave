@@ -18,8 +18,13 @@ final class LazyStartSpoutSpec extends SyncPipeSpec with Inspectors {
   implicit val integerInput = Gen.chooseNum(0, 999)
 
   "Spout.lazy" in check {
-    testSetup.input[Int].output[String].prop.from { (in, out) ⇒
-      Spout.lazyStart(() ⇒ in.spout).map(_.toString).drainTo(out.drain) shouldTerminate asScripted(in)
+    testSetup
+      .input[Int]
+      .output[String]
+      .prop.from { (in, out) ⇒
+      Spout.lazyStart(() ⇒ in.spout)
+        .map(_.toString)
+        .drainTo(out.drain) shouldTerminate asScripted(in)
 
       out.received shouldEqual in.produced.take(out.scriptedSize).map(_.toString)
     }

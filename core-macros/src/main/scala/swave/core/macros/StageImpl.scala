@@ -99,9 +99,9 @@ private[swave] class StageImplMacro(val c: scala.reflect.macros.whitebox.Context
 
   private def annotationFlag(flag: String) =
     c.prefix.tree match {
-      case q"new StageImpl(..$params)"                                                                ⇒
+      case q"new StageImpl(..$params)" ⇒
         params.collectFirst { case AssignOrNamedArg(Ident(TermName(`flag`)), Literal(Constant(true))) ⇒ }.isDefined
-      case _                                                                                          ⇒ false
+      case _ ⇒ false
     }
 
   def generateStage(annottees: c.Expr[Any]*): c.Expr[Any] =
@@ -230,19 +230,18 @@ private[swave] class StageImplMacro(val c: scala.reflect.macros.whitebox.Context
 
   def signalHandlersImpl: List[Tree] = {
 
-    def withDefault(cs: Seq[Tree], default: Tree): Seq[Tree] = {
-      if (cs exists { case cq"_ => ${ _ }" ⇒ true; case _ ⇒ false }) cs else cs :+ default
-    }
+    def withDefault(cs: Seq[Tree], default: Tree): Seq[Tree] =
+      if (cs exists { case cq"_ => ${_}" ⇒ true; case _ ⇒ false }) cs else cs :+ default
 
     def compact(cases: List[CaseDef]): List[CaseDef] =
       cases
         .foldLeft(List.empty[CaseDef]) { (acc, cd) ⇒
-          acc indexWhere { case cq"${ _ } => $body" ⇒ body equalsStructure cd.body } match {
-            case -1                                 ⇒ cd :: acc
+          acc indexWhere { case cq"${_} => $body" ⇒ body equalsStructure cd.body } match {
+            case -1 ⇒ cd :: acc
             case ix ⇒
               val altPat = acc(ix) match {
-                case cq"$head | ..$tail => ${ _ }" ⇒ pq"${cd.pat} | ..${head :: tail}"
-                case cq"$pat => ${ _ }"            ⇒ pq"${cd.pat} | $pat"
+                case cq"$head | ..$tail => ${_}" ⇒ pq"${cd.pat} | ..${head :: tail}"
+                case cq"$pat => ${_}"            ⇒ pq"${cd.pat} | $pat"
               }
               acc.updated(ix, cq"$altPat => ${cd.body}")
           }
@@ -513,8 +512,8 @@ private[swave] class StageImplMacro(val c: scala.reflect.macros.whitebox.Context
       tree match {
         case q"{ ..$stats; state(..$handlers) }" ⇒
           val allowedPreTrees = stats.collect {
-            case x @ q"requireState(..${ _ })" ⇒ Left(x)
-            case x @ DefDef(_, _, _, _, _, _)  ⇒ Right(x)
+            case x @ q"requireState(..${_})"  ⇒ Left(x)
+            case x @ DefDef(_, _, _, _, _, _) ⇒ Right(x)
           }
           if (allowedPreTrees.size == stats.size) {
             val requires = allowedPreTrees collect { case Left(x)  ⇒ x }
@@ -556,7 +555,7 @@ private[swave] class StageImplMacro(val c: scala.reflect.macros.whitebox.Context
 
     def apply(id: Int, params: List[ValDef], handlers: List[Tree]): StateHandlers = {
       val args = handlers.foldLeft(Map.empty[String, Tree]) {
-        case (m, x @ q"${ ref: RefTree } = $value") ⇒
+        case (m, x @ q"${ref: RefTree} = $value") ⇒
           val name = ref.name.decodedName.toString
           if (!definedSignals.contains(name)) c.abort(x.pos, s"Unknown signal `$name`!")
           m.updated(name, value)

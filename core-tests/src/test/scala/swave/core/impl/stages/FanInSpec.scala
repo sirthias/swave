@@ -22,13 +22,19 @@ final class FanInSpec extends SyncPipeSpec with Inspectors {
   implicit val doubleInput  = Gen.posNum[Double]
 
   "Concat" in check {
-    testSetup.fixtures(Gen.chooseNum(2, 4), _.input[Int]).output[Int].prop.from { (ins, out) ⇒
+    testSetup
+      .fixtures(Gen.chooseNum(2, 4), _.input[Int])
+      .output[Int]
+      .prop.from { (ins, out) ⇒
       import TestFixture.State._
 
       val spouts             = ins.map(_.spout)
       var expectedResultSize = out.scriptedSize
 
-      spouts.head.attachAll(spouts.tail).fanInConcat.drainTo(out.drain) shouldTerminate likeThis {
+      spouts.head
+        .attachAll(spouts.tail)
+        .fanInConcat
+        .drainTo(out.drain) shouldTerminate likeThis {
         case Cancelled ⇒ // inputs can be in any state
         case Completed ⇒ forAll(ins) { _.terminalState shouldBe Completed }
         case error @ Error(TestError) ⇒
@@ -41,13 +47,19 @@ final class FanInSpec extends SyncPipeSpec with Inspectors {
   }
 
   "FirstNonEmpty" in check {
-    testSetup.fixtures(Gen.chooseNum(2, 4), _.input[Int]).output[Int].prop.from { (ins, out) ⇒
+    testSetup
+      .fixtures(Gen.chooseNum(2, 4), _.input[Int])
+      .output[Int]
+      .prop.from { (ins, out) ⇒
       import TestFixture.State._
 
       val spouts             = ins.map(_.spout)
       var expectedResultSize = out.scriptedSize
 
-      spouts.head.attachAll(spouts.tail).fanInFirstNonEmpty.drainTo(out.drain) shouldTerminate likeThis {
+      spouts.head
+        .attachAll(spouts.tail)
+        .fanInFirstNonEmpty
+        .drainTo(out.drain) shouldTerminate likeThis {
         case Cancelled ⇒ // inputs can be in any state
         case Completed ⇒
           forAll(ins.dropWhile(_.terminalState == Completed)) { in ⇒
@@ -63,13 +75,19 @@ final class FanInSpec extends SyncPipeSpec with Inspectors {
   }
 
   "Merge" in check {
-    testSetup.fixture(fd ⇒ nonOverlappingIntTestInputs(fd, 2, 4)).output[Int].prop.from { (ins, out) ⇒
+    testSetup
+      .fixture(fd ⇒ nonOverlappingIntTestInputs(fd, 2, 4))
+      .output[Int]
+      .prop.from { (ins, out) ⇒
       import TestFixture.State._
 
       val spouts             = ins.map(_.spout)
       var expectedResultSize = out.scriptedSize
 
-      spouts.head.attachAll(spouts.tail).fanInMerge().drainTo(out.drain) shouldTerminate likeThis {
+      spouts.head
+        .attachAll(spouts.tail)
+        .fanInMerge()
+        .drainTo(out.drain) shouldTerminate likeThis {
         case Cancelled ⇒ // inputs can be in any state
         case Completed ⇒ forAll(ins) { _.terminalState shouldBe Completed }
         case error @ Error(TestError) ⇒
@@ -87,7 +105,12 @@ final class FanInSpec extends SyncPipeSpec with Inspectors {
   }
 
   "ToTuple" in check {
-    testSetup.input[Int].input[Char].input[Double].output[(Int, Char, Double)].prop.from {
+    testSetup
+      .input[Int]
+      .input[Char]
+      .input[Double]
+      .output[(Int, Char, Double)]
+      .prop.from {
       (inInt, inChar, inDouble, out) ⇒
         import TestFixture.State._
 

@@ -368,7 +368,7 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
       else _stopPromise.success(())
     }
     _buffer = null // don't hang on to elements
-    0              // STOPPED state encoding
+    0 // STOPPED state encoding
   }
 
   protected final def stopF(out: Outport): State = stop()

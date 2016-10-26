@@ -23,7 +23,7 @@ that is typically required in applications that work with Reactive-Streams_.
 
 .. image:: https://img.shields.io/gitter/room/nwjs/nw.js.svg?maxAge=86400
    :target: https://gitter.im/sirthias/swave
-   :alt: Gitter chat for swave https://gitter.im/sirthias/swave
+   :alt: Gitter chat for swave
 
 .. image:: https://img.shields.io/badge/uses-badges-ff69b4.svg
    :target: http://shields.io/

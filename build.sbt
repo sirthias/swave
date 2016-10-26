@@ -3,7 +3,7 @@ import ReleaseTransformations._
 lazy val contributors = Seq(
   "Mathias Doenitz" -> "sirthias")
 
-lazy val commonSettings = Seq(
+lazy val commonSettings = reformatOnCompileSettings ++ Seq(
   organization := "io.swave",
   scalaVersion := "2.11.8",
   homepage := Some(url("http://swave.io")),
@@ -27,6 +27,8 @@ lazy val commonSettings = Seq(
   coverageMinimum := 90,
   coverageFailOnMinimum := false,
   coverageExcludedPackages := """swave\.benchmarks\..*;swave\.examples\..*""")
+
+lazy val noScalaFmtFormatting = includeFilter in hasScalafmt := NothingFilter
 
 lazy val publishingSettings = Seq(
   useGpg := true,
@@ -175,7 +177,9 @@ lazy val `core-tests` = project
   .enablePlugins(AutomateHeaderPlugin)
   .settings(commonSettings: _*)
   .settings(noPublishingSettings: _*)
-  .settings(libraryDependencies ++= Seq(shapeless, scalatest, `reactive-streams-tck`, scalacheck % "test", logback % "test"))
+  .settings(
+    noScalaFmtFormatting,
+    libraryDependencies ++= Seq(shapeless, scalatest, `reactive-streams-tck`, scalacheck % "test", logback % "test"))
 
 lazy val examples = project
   .dependsOn(core, akkaCompat)
@@ -183,6 +187,7 @@ lazy val examples = project
   .settings(commonSettings: _*)
   .settings(noPublishingSettings: _*)
   .settings(
+    noScalaFmtFormatting,
     fork in run := true,
     connectInput in run := true,
     javaOptions in run ++= Seq("-XX:+UnlockCommercialFeatures", "-XX:+FlightRecorder"),

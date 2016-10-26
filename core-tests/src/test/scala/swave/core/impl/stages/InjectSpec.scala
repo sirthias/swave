@@ -26,8 +26,7 @@ final class InjectSpec extends SyncPipeSpec with Inspectors {
       .input[Int]
       .output[Spout[Int]]
       .fixture(fd ⇒ Gen.listOfN(10, fd.output[Int](TestSetup.Default.nonDroppingOutputScripts)))
-      .prop
-      .from { (in, out, allSubOuts) ⇒
+      .prop.from { (in, out, allSubOuts) ⇒
         import TestFixture.State._
 
         val iter    = allSubOuts.iterator

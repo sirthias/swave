@@ -24,14 +24,15 @@ final class FlattenSpec extends SyncPipeSpec with Inspectors {
       .fixture(fd ⇒ fd.inputFromIterables(Gen.chooseNum(0, 3).flatMap(Gen.listOfN(_, fd.input[Int]))))
       .output[Int]
       .param(Gen.chooseNum(1, 3))
-      .prop
-      .from { (in, out, parallelism) ⇒
+      .prop.from { (in, out, parallelism) ⇒
         import TestFixture.State._
 
         val allInputs          = in :: in.elements.toList
         var expectedResultSize = out.scriptedSize
 
-        in.spout.map(_.spout).flattenConcat(parallelism).drainTo(out.drain) shouldTerminate likeThis {
+        in.spout.map(_.spout)
+          .flattenConcat(parallelism)
+          .drainTo(out.drain) shouldTerminate likeThis {
           case Cancelled ⇒ // inputs can be in any state
           case Completed ⇒ forAll(allInputs) { _.terminalState shouldBe Completed }
           case error @ Error(TestError) ⇒
@@ -48,14 +49,15 @@ final class FlattenSpec extends SyncPipeSpec with Inspectors {
       .fixture(fd ⇒ fd.inputFromIterables(nonOverlappingIntTestInputs(fd, 0, 3)))
       .output[Int]
       .param(Gen.chooseNum(1, 3))
-      .prop
-      .from { (in, out, parallelism) ⇒
+      .prop.from { (in, out, parallelism) ⇒
         import TestFixture.State._
 
         val allInputs          = in :: in.elements.toList
         var expectedResultSize = out.scriptedSize
 
-        in.spout.map(_.spout).flattenMerge(parallelism).drainTo(out.drain) shouldTerminate likeThis {
+        in.spout.map(_.spout)
+          .flattenMerge(parallelism)
+          .drainTo(out.drain) shouldTerminate likeThis {
           case Cancelled ⇒ // inputs can be in any state
           case Completed ⇒ forAll(allInputs) { _.terminalState shouldBe Completed }
           case error @ Error(TestError) ⇒

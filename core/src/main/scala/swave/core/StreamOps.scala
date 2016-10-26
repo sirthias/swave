@@ -63,7 +63,8 @@ trait StreamOps[A] extends Any { self ⇒
                                                                  lub: Lub[A, T, O]): FanIn[A :: f.Out, CNil, O, Repr] =
     new FanIn(base +: InportList.fill(ti(), attachNop(fo.base)), wrap)
 
-  final def buffer(size: Int, requestStrategy: Buffer.RequestStrategy = Buffer.RequestStrategy.WhenHalfEmpty): Repr[A] = {
+  final def buffer(size: Int,
+                   requestStrategy: Buffer.RequestStrategy = Buffer.RequestStrategy.WhenHalfEmpty): Repr[A] = {
     requireArg(size >= 0)
     if (size > 0) append(new BufferStage(size, requestStrategy(size))) else identity
   }
