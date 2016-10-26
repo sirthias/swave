@@ -311,6 +311,17 @@ trait StreamOps[A] extends Any { self ⇒
   final def slice(startIndex: Long, length: Long): Repr[A] =
     via(Pipe[A] drop startIndex take length named "slice")
 
+  final def sliding(windowSize: Int, emitSingleEmpty: Boolean = false): Repr[immutable.Seq[A]] =
+    slidingTo[immutable.Seq](windowSize, emitSingleEmpty)
+
+  final def slidingTo[M[+ _]](windowSize: Int, emitSingleEmpty: Boolean = false)(
+    implicit cbf: CanBuildFrom[M[A], A, M[A]]): Repr[M[A]] =
+    append(
+      new SlidingStage(
+        windowSize,
+        emitSingleEmpty,
+        cbf.apply().asInstanceOf[scala.collection.mutable.Builder[Any, AnyRef]]))
+
   final def split(f: A ⇒ Split.Command, eagerCancel: Boolean = true): Repr[Spout[A]] =
     append(new SplitStage(f.asInstanceOf[AnyRef => Split.Command], eagerCancel: Boolean))
 
