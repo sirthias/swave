@@ -6,8 +6,6 @@
 
 package swave.core
 
-import scala.util.control.NoStackTrace
-
 object Buffer {
 
   /**
@@ -43,16 +41,10 @@ object Buffer {
     case object DropNew extends OverflowStrategy(4)
 
     /**
-      * Signals unlimited demand to upstream and completes the stream with an `OverflowFailure`
+      * Signals unlimited demand to upstream and completes the stream with an [[BufferOverflowFailure]]
       * if the buffer is full and a new element arrives.
       */
     case object Fail extends OverflowStrategy(5)
-
-    /**
-      * The exception instance thrown by the [[OverflowFailure]] [[OverflowStrategy]]
-      * when the buffer is full and a new element arrives.
-      */
-    case object OverflowFailure extends RuntimeException with NoStackTrace
   }
 
   /**

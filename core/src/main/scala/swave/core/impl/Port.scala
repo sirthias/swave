@@ -14,6 +14,7 @@ private[swave] sealed trait Port {
   def xSeal(ctx: RunContext): Unit
 
   def isSealed: Boolean
+  def isStopped: Boolean
 }
 
 private[swave] sealed trait Inport extends Port {

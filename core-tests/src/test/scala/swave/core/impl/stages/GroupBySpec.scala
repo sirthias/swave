@@ -9,12 +9,12 @@ package swave.core.impl.stages
 import scala.collection.mutable.ListBuffer
 import scala.util.Failure
 import org.scalacheck.Gen
-import org.scalatest.{Inside, Inspectors}
+import org.scalatest.Inspectors
 import swave.core._
 import swave.testkit.TestError
 import swave.testkit.gen.{TestFixture, TestOutput, TestSetup}
 
-final class GroupBySpec extends SyncPipeSpec with Inspectors with Inside {
+final class GroupBySpec extends SyncPipeSpec with Inspectors {
 
   implicit val env    = StreamEnv()
   implicit val config = PropertyCheckConfig(minSuccessful = 1000)

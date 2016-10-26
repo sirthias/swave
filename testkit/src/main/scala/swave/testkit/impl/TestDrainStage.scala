@@ -53,6 +53,7 @@ private[testkit] final class TestDrainStage(val id: Int,
     xSeal = c ⇒ {
       testCtx.trace("Received XSEAL in 'ready'")
       configureFrom(c)
+      c.allowSyncUnstopped()
       testCtx.trace("⇠ XSEAL")
       in.xSeal(c)
 
