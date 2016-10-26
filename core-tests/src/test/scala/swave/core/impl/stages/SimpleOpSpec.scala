@@ -190,6 +190,13 @@ final class SimpleOpSpec extends SyncPipeSpec with Inspectors {
     }
   }
 
+  "Sliding" in check {
+    testSetup.input[Int].output[Seq[Int]].param(Gen.chooseNum(1, 10)).prop.from { (in, out, param) ⇒
+      in.spout.sliding(param).drainTo(out.drain) shouldTerminate asScripted(in)
+      out.received shouldEqual in.produced.sliding(param).take(out.size).toList
+    }
+  }
+
   "Take" in check {
     testSetup.input[Int].output[Int].param(Gen.chooseNum(0, 10)).prop.from { (in, out, param) ⇒
       import TestFixture.State._

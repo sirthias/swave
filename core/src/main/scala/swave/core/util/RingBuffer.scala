@@ -118,5 +118,17 @@ private[swave] final class RingBuffer[T](cap: Int) {
     java.util.Arrays.fill(array, null)
   }
 
+  /**
+    * Iterates the underlying elements of the buffer
+    *
+    */
+  def foreach[U](f: AnyRef => U) : Unit = {
+    var i = readIx;
+    while (i < writeIx) {
+      f(array(i & mask))
+      i += 1
+    }
+  }
+
   override def toString: String = s"RingBuffer(len=${array.length}, size=$size, writeIx=$writeIx, readIx=$readIx)"
 }
