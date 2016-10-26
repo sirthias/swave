@@ -30,7 +30,11 @@ private[swave] final class RunContext(val port: Port)(implicit val env: StreamEn
   def allowSyncUnstopped(): Unit = data.allowSyncUnstopped = true
 
   def seal(): Unit = {
-    if (port.isSealed) throw new IllegalReuseException(port + " is already sealed. It cannot be sealed a second time.")
+    if (port.isSealed) {
+      val msg = port + " is already sealed. It cannot be sealed a second time. " +
+          "Are you trying to reuse a Spout, Drain, Pipe or Module?"
+      throw new IllegalReuseException(msg)
+    }
     port.xSeal(this)
     if (data.needRunner.nonEmpty) {
       StreamRunner.assignRunners(data.needRunner)

@@ -7,7 +7,7 @@
 package swave.core
 
 import scala.concurrent.Promise
-import scala.util.Failure
+import scala.util.{Failure, Success}
 import swave.core.util._
 
 // format: OFF
@@ -90,6 +90,17 @@ class SyncSpec extends SwaveSpec {
 
     "inject" in {
       Spout(1 to 10).inject.map(_ elementAt 1).flattenConcat() should produce(2, 4, 6, 8, 10)
+    }
+
+    "illegal restart" in {
+      val spout = Spout.one(42)
+      val first = spout.drainToBlackHole()
+      val second = spout.drainToBlackHole()
+      first.value shouldEqual Some(Success(()))
+      inside(second.value) {
+        case Some(Failure(e: IllegalReuseException)) ⇒
+          e.getMessage should endWith("Are you trying to reuse a Spout, Drain, Pipe or Module?")
+      }
     }
 
     "non-terminating" in {
