@@ -26,6 +26,9 @@ import swave.core.util._
 import swave.core.macros._
 import TypeLogic._
 
+/**
+  * Defines all the transformations that are available on [[Spout]], [[Pipe]] and fan-out sub-streams.
+  */
 trait StreamOps[A] extends Any { self ⇒
   import StreamOps._
 

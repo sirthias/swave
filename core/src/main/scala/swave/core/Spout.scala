@@ -49,11 +49,11 @@ final class Spout[+A](private[swave] val inport: Inport) extends AnyVal with Str
     result.asInstanceOf[Out]
   }
 
-  def foreach(callback: A ⇒ Unit)(implicit env: StreamEnv): Future[Unit] =
-    drainTo(Drain.foreach(callback))
-
   def drainTo[R](drain: Drain[A, R])(implicit env: StreamEnv, ev: TypeLogic.ToTryOrFuture[R]): ev.Out =
     to(drain).run()
+
+  def foreach(callback: A ⇒ Unit)(implicit env: StreamEnv): Future[Unit] =
+    drainTo(Drain.foreach(callback))
 
   def drainToSeq[M[+ _]](limit: Long)(implicit env: StreamEnv, cbf: CanBuildFrom[M[A], A, M[A @uV]]): Future[M[A]] =
     drainTo(Drain.generalSeq[M, A](limit))
@@ -63,6 +63,9 @@ final class Spout[+A](private[swave] val inport: Inport) extends AnyVal with Str
 
   def drainToVector(limit: Long)(implicit env: StreamEnv): Future[Vector[A]] =
     drainToSeq[Vector](limit)
+
+  def drainToHead()(implicit env: StreamEnv): Future[A] =
+    drainTo(Drain.head[A])
 
   def drainToBlackHole()(implicit env: StreamEnv): Future[Unit] =
     drainTo(Drain.ignore)
