@@ -1,4 +1,5 @@
 import ReleaseTransformations._
+import com.lightbend.paradox.ParadoxProcessor
 
 lazy val contributors = Seq(
   "Mathias Doenitz" -> "sirthias")
@@ -131,7 +132,7 @@ val logback                = "ch.qos.logback"             %   "logback-classic" 
 /////////////////////// PROJECTS /////////////////////////
 
 lazy val swave = project.in(file("."))
-  .aggregate(akkaCompat, benchmarks, core, `core-macros`, `core-tests`, examples, scodecCompat, testkit)
+  .aggregate(akkaCompat, benchmarks, core, `core-macros`, `core-tests`, docs, examples, scodecCompat, testkit)
   .settings(commonSettings: _*)
   .settings(releaseSettings: _*)
   .settings(noPublishingSettings: _*)
@@ -180,6 +181,49 @@ lazy val `core-tests` = project
   .settings(
     noScalaFmtFormatting,
     libraryDependencies ++= Seq(shapeless, scalatest, `reactive-streams-tck`, scalacheck % "test", logback % "test"))
+
+lazy val docs = project
+  .dependsOn(akkaCompat, core, scodecCompat, testkit)
+  .enablePlugins(ParadoxSitePlugin)
+  .settings(commonSettings: _*)
+  .settings(noPublishingSettings: _*)
+  .settings(
+    noScalaFmtFormatting,
+    libraryDependencies ++= Seq(shapeless, scalatest),
+    apiURL := Some(url("http://swave.io/api/")),
+    siteSubdirName in Paradox := "",
+    paradoxTheme := None,
+    sourceDirectory in (Paradox, paradoxTheme) := sourceDirectory.value / "paradox" / "_template",
+    paradoxProcessor in Paradox := new ParadoxProcessor(writer = new CustomWriter),
+    paradoxNavigationDepth := 3,
+    commands += Command.command("openSite") { state =>
+      val uri = s"file://${Project.extract(state).get(target in Paradox)}/index.html"
+      state.log.info(s"Opening browser at $uri ...")
+      java.awt.Desktop.getDesktop.browse(new java.net.URI(uri))
+      state
+    },
+    paradoxProperties in Paradox ++= Map(
+      "latest-version" -> "0.5",
+      "scala.binaryVersion" -> scalaBinaryVersion.value,
+      "scala.version" -> scalaVersion.value,
+      "github.base_url" -> {
+        val v = version.value
+        s"https://github.com/sirthias/swave/tree/${if (v.endsWith("SNAPSHOT")) "master" else "v" + v}"
+      },
+      "extref.rfc.base_url" -> "http://tools.ietf.org/html/rfc%s",
+      "extref.akka-docs.base_url" -> "http://doc.akka.io/docs/akka/2.4.10/%s.html",
+      "snippet.base_dir" -> s"${(sourceDirectory in Test).value}/scala/swave/docs",
+      "image.base_url" -> ".../assets/img",
+      "scaladoc.org.reactivestreams.base_url" -> "http://www.reactive-streams.org/reactive-streams-1.0.0-javadoc/",
+      "scaladoc.swave.compat.akka.base_url" -> "http://swave.io/api/akkaCompat/latest/",
+      "scaladoc.swave.compat.scodec.base_url" -> "http://swave.io/api/scodecCompat/latest/",
+      "scaladoc.swave.core.base_url" -> "http://swave.io/api/core/latest/",
+      "scaladoc.swave.testkit.base_url" -> "http://swave.io/api/testkit/latest/"))
+  .settings({
+    def apiDocs(p: Project) = siteMappings <++= (mappings in (p, Compile, packageDoc), name in p) map { (m, n) =>
+      for ((f, d) <- m) yield f -> s"api/$n/latest/$d"
+    }
+    List(apiDocs(akkaCompat), apiDocs(core), apiDocs(scodecCompat), apiDocs(testkit))}: _*)
 
 lazy val examples = project
   .dependsOn(core, akkaCompat)
