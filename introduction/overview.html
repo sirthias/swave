@@ -1,0 +1,179 @@
+<!doctype html>
+<html class="fixed sidebar-light">
+<head>
+    <meta charset="UTF-8">
+
+    <title>Overview · swave</title>
+    <meta name="keywords" content="scala, streams, streaming, reactive, asynchronous, non-blocking" />
+    <meta name="description" content='A Reactive Streams infrastructure implementation in Scala'>
+    <meta name="author" content="The swave team">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700,800|Shadows+Into+Light" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" />
+    <link rel="stylesheet" href="../assets/css/theme.css" />
+    <link rel="stylesheet" href="../assets/css/skins/default.css" />
+    <link rel="stylesheet" href="../assets/css/theme-custom.css">
+    <link rel="stylesheet" href="../assets/vendor/highlight/github.css">
+    <script src="../assets/vendor/modernizr/modernizr.js"></script>
+</head>
+<body >
+<section class="body">
+
+    <header class="header">
+        <div class="logo-container">
+            <a href="../index.html" class="logo">
+                <img src="../assets/img/swave-logo.svg" height="35" alt="swave" />
+            </a>
+            <div class="visible-xs toggle-sidebar-left" data-toggle-class="sidebar-left-opened" data-target="html" data-fire-event="sidebar-left-opened">
+                <i class="fa fa-bars" aria-label="Toggle sidebar"></i>
+            </div>
+        </div>
+
+        <div class="header-right hidden-xs">
+            <ul class="social-icons">
+                <li class="social-icons-github"><a href="https://github.com/sirthias/swave/" target="_blank" title="Github"><i class="fa fa-github"></i></a></li>
+                <li class="social-icons-email"><a href="https://groups.google.com/forum/#!forum/swave-user" target="_blank" title="Mailing List"><i class="fa fa-envelope"></i></a></li>
+                <li class="social-icons-twitter"><a href="https://twitter.com/swaveio/" target="_blank" title="Twitter"><i class="fa fa-twitter"></i></a></li>
+            </ul>
+            <div id="talks-link">
+                <a href="../introduction/talks-on-swave.html" title="Watch the latest introductory talks for swave!">
+                    <i class="fa fa-chevron-right" aria-hidden="true"></i>&nbsp;
+                    <i class="fa fa-video-camera" aria-hidden="true"></i>&nbsp;Watch an intro talk on swave!&nbsp;
+                    <i class="fa fa-chevron-left" aria-hidden="true"></i>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="inner-wrapper">
+        <aside id="sidebar-left" class="sidebar-left">
+
+            <div class="sidebar-header">
+                <div class="sidebar-title">
+                    Content
+                </div>
+                <div class="sidebar-toggle hidden-xs" data-toggle-class="sidebar-left-collapsed" data-target="html" data-fire-event="sidebar-left-toggle">
+                    <i class="fa fa-bars" aria-label="Toggle sidebar"></i>
+                </div>
+            </div>
+
+            <div class="nano">
+                <div class="nano-content">
+                    <nav id="menu" class="nav-main" role="navigation">
+                        <ul class="nav nav-main">
+                          <li class="nav-parent nav-expanded nav-active"><a><i class="fa fa-blind" aria-hidden="true"></i><span>Introduction</span></a>
+                          <ul class="nav nav-children">
+                            <li class="nav-expanded nav-active"><a href="../introduction/overview.html">Overview</a></li>
+                            <li><a href="../introduction/reactive-streams.html">Reactive Streams</a></li>
+                            <li><a href="../introduction/swave-vs-akka-stream.html"><em>swave</em> vs. Akka-Stream</a></li>
+                            <li><a href="../introduction/talks-on-swave.html">Talks on <em>swave</em></a></li>
+                          </ul></li>
+                          <li class="nav-parent"><a><i class="fa fa-book" aria-hidden="true"></i><span>User Documentation</span></a>
+                          <ul class="nav nav-children">
+                            <li><a href="../usage/setup.html">Setup</a></li>
+                            <li><a href="../usage/quick-start.html">Quick Start</a></li>
+                            <li><a href="../usage/spouts.html">Spouts</a></li>
+                            <li><a href="../usage/drains.html">Drains</a></li>
+                            <li class="nav-parent"><a>Transformations</a>
+                            <ul class="nav nav-children">
+                              <li><a href="../usage/transformations/overview.html">Transformations Overview</a></li>
+                              <li><a href="../usage/transformations/simple.html">Simple Transformations</a></li>
+                              <li><a href="../usage/transformations/fan-outs.html">Fan-Outs</a></li>
+                              <li><a href="../usage/transformations/fan-ins.html">Fan-Ins</a></li>
+                              <li><a href="../usage/transformations/pipes.html">Pipes</a></li>
+                              <li><a href="../usage/transformations/modules.html">Modules</a></li>
+                            </ul></li>
+                            <li><a href="../usage/debugging.html">Debugging</a></li>
+                            <li><a href="../usage/rendering.html">Rendering</a></li>
+                            <li><a href="../usage/configuration.html">Configuration</a></li>
+                            <li><a href="../usage/swave-core-api.html">API Docs (ScalaDoc)</a></li>
+                            <li><a href="../usage/swave-akka-compat/index.html">swave-akka-compat</a></li>
+                            <li><a href="../usage/swave-scodec-compat/index.html">swave-scodec-compat</a></li>
+                            <li><a href="../usage/swave-testkit/index.html">swave-testkit</a></li>
+                          </ul></li>
+                          <li><a href="../dev/index.html"><i class="fa fa-cogs" aria-hidden="true"></i><span>Developer Documentation</span></a></li>
+                          <li class="nav-parent"><a><i class="fa fa-info-circle" aria-hidden="true"></i><span>Project Info</span></a>
+                          <ul class="nav nav-children">
+                            <li><a href="../project/license.html">License</a></li>
+                            <li><a href="../project/contributing.html">Contributing</a></li>
+                            <li><a href="../project/changelog.html">Changelog</a></li>
+                            <li><a href="../project/sponsors.html">Sponsors</a></li>
+                            <li><a href="../project/references.html">References</a></li>
+                          </ul></li>
+                          <li><a href="../support.html"><i class="fa fa-users" aria-hidden="true"></i><span>Support</span></a></li>
+                        </ul>
+                    </nav>
+                </div>
+
+                <script>
+                    // Maintain Scroll Position
+                    if (typeof localStorage !== 'undefined') {
+                        if (localStorage.getItem('sidebar-left-position') !== null) {
+                            var initialPosition = localStorage.getItem('sidebar-left-position'),
+                                    sidebarLeft = document.querySelector('#sidebar-left .nano-content');
+
+                            sidebarLeft.scrollTop = initialPosition;
+                        }
+                    }
+                </script>
+
+            </div>
+
+        </aside>
+
+        <section role="main" class="content-body">
+            <header class="page-header">
+                <ul class="breadcrumbs">
+                  <li><a href="../index.html"><i class="fa fa-home"></i></a></li>
+                  <li><a href="../introduction/index.html">Introduction</a></li>
+                  <li>Overview</li>
+                </ul>
+            </header>
+            <div id="main-content">
+                <!-- start: page -->
+<h1><a href="#overview" name="overview" class="anchor"><span class="anchor-link"></span></a>Overview</h1>
+<h2><a href="#what-is-" name="what-is-" class="anchor"><span class="anchor-link"></span></a>What is <em>swave</em>?</h2>
+<p><em>swave</em> is a library providing a general, <a href="reactive-streams.html">Reactive-Streams</a>-compliant streaming infrastructure for applications written in <a href="http://www.scala-lang.org/">Scala</a>. As such it plays in the same space as <a href="http://doc.akka.io/docs/akka/2.4/scala/stream/index.html">Akka-Stream</a>, but differs from it in some important aspects. (For more info on this check out <a href="swave-vs-akka-stream.html">swave vs Akka-Stream</a>)</p>
+<h2><a href="#motivation" name="motivation" class="anchor"><span class="anchor-link"></span></a>Motivation</h2>
+<p>The requirements imposed on today&rsquo;s software are manifold. Apart from simply &ldquo;working&rdquo; the applications we write are supposed to be responsive, resilient and elastic (as defined, for example, by the <a href="http://www.reactivemanifesto.org/">Reactive Manifesto</a>). Additionally they are expected to digest ever-growing data volumes and make efficient use of their increasingly parallel and distributed hardware basis. All this presents significant challenges, which fuel the continuing search for programming models that are attractive and advantageous in today computing environments.</p>
+<p>One such programming model, albeit hardly a recent invention at its core, is <a href="https://en.wikipedia.org/wiki/Stream_processing">Stream Processing</a>.</p>
+<p>Although <a href="http://www.scala-lang.org/">Scala</a> provides the <a href="http://www.scala-lang.org/api/2.11.8/#scala.immutable.Stream">scala.immutable.Stream</a> datatype with its standard library this abstraction is quite limited in its functionality and barely scratches the surface of the benefits that <a href="https://en.wikipedia.org/wiki/Stream_processing">Stream Processing</a> as a programming abstraction is able to provide. Therefore a number of stream processing libraries have recently emerged in the <a href="http://www.scala-lang.org/">Scala</a> eco-system, the most prominent of which are probably <a href="http://doc.akka.io/docs/akka/2.4/scala/stream/index.html">Akka-Stream</a> and <a href="https://github.com/functional-streams-for-scala/fs2">FS2</a> (formally <a href="https://github.com/scalaz/scalaz-stream">Scalaz Stream</a>), which approach the field from two different angles.</p>
+<p>Since modern stream processing, especially with support for non-blocking back pressure, is both incredibly sexy and still relatively new, with plenty of learnings still to be unearthed, we believe that there is more than enough space for a few more implementations to be tried and tested before settling on one or two &ldquo;standard implementations&rdquo;.</p>
+<p><em>swave</em> attempts to be just that: A stream processing implementation, purely in and for <a href="http://www.scala-lang.org/">Scala</a>, which further explores the boundaries of the possible, sometimes by being intentionally different.</p>
+<h2><a href="#design-principles" name="design-principles" class="anchor"><span class="anchor-link"></span></a>Design Principles</h2>
+<p><em>swave&rsquo;s</em> design is guided by the following principles:</p>
+<dl>
+  <dt>High-Performance
+  </dt>
+  <dd><em>swave&rsquo;s</em> internal mechanics as carefully crafted for excellent performance in high-load environments. Apart from  being fully non-blocking this also entails a focus on limiting allocations (and thereby GC pressure).<br/> The type-heavy DSL is designed to add almost no runtime overhead.</dd>
+  <dt>Lightweight</dt>
+  <dd>All dependencies are very carefully managed, <em>swave&rsquo;s</em> codebase itself is kept as lean as possible.</dd>
+  <dt>Conceptually Simple</dt>
+  <dd>Being effective at writing stream-based logic can take some getting used to. <em>swave</em> tries to make this as easy as  possible by only introducing concepts that are absolutely essential.</dd>
+  <dt>Debuggable</dt>
+  <dd>As with any new programming model you&rsquo;ll likely spent the large majority of your time debugging code that doesn&rsquo;t  (yet) quite do what you expect it to. Making this task as easy as possible is one of <em>swave&rsquo;s</em> key focus points.</dd>
+  <dt>Type-Safe and Concise
+  </dt>
+  <dd>Being written in and for <a href="http://www.scala-lang.org/">Scala</a> a type-safe API naturally key. <em>swave</em> tries to let the compiler statically verify as  much of your program logic as possible while reducing necessary boilerplate to the absolute minimum.</dd>
+</dl>
+                <div class="nav-next">
+                    <p><strong>Next:</strong> <a href="../introduction/reactive-streams.html">Reactive Streams</a></p>
+                </div>
+                <!-- end: page -->
+            </div>
+        </section>
+    </div>
+</section>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="../assets/vendor/jquery.browser.mobile/jquery.browser.mobile.js"></script>
+<script src="../assets/vendor/nanoscroller/nanoscroller.js"></script>
+<script src="../assets/vendor/highlight/highlight.js"></script>
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/theme.init.js"></script>
+
+</body>
+</html>

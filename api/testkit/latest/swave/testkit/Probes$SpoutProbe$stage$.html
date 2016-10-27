@@ -1,0 +1,1625 @@
+<!DOCTYPE html >
+<html>
+        <head>
+          <title>stage - swave.testkit.Probes.SpoutProbe.stage</title>
+          <meta name="description" content="stage - swave.testkit.Probes.SpoutProbe.stage" />
+          <meta name="keywords" content="stage swave.testkit.Probes.SpoutProbe.stage" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../lib/template.js"></script>
+      <script type="text/javascript" src="../../lib/tools.tooltip.js"></script>
+      
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../index.html';
+            var hash = 'swave.testkit.Probes$SpoutProbe$stage$';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
+    
+        </head>
+        <body class="value">
+      <div id="definition">
+        <img alt="Object" src="../../lib/object_big.png" />
+        <p id="owner"><a href="../package.html" class="extype" name="swave">swave</a>.<a href="package.html" class="extype" name="swave.testkit">testkit</a>.<a href="Probes.html" class="extype" name="swave.testkit.Probes">Probes</a>.<a href="Probes$SpoutProbe.html" class="extype" name="swave.testkit.Probes.SpoutProbe">SpoutProbe</a></p>
+        <h1>stage</h1><h3><span class="morelinks"><div>Related Doc:
+            <a href="Probes$SpoutProbe.html" class="extype" name="swave.testkit.Probes.SpoutProbe">package SpoutProbe</a>
+          </div></span></h3><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <span class="name">stage</span><span class="result"> extends <span class="extype" name="swave.core.impl.stages.spout.SpoutStage">SpoutStage</span> with <span class="extype" name="swave.core.PipeElem.Spout.Test">Test</span> with <a href="Probes$SpoutProbe.html#ProbeStageextendsAnyRef" class="extmbr" name="swave.testkit.Probes.Probe.ProbeStage">ProbeStage</a></span>
+      </span>
+      </h4>
+      
+          <div id="comment" class="fullcommenttop"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="Probes$SpoutProbe.html" class="extype" name="swave.testkit.Probes.SpoutProbe">SpoutProbe</a> → <a href="Probes$Probe.html" class="extype" name="swave.testkit.Probes.Probe">Probe</a></dd></dl><div class="toggleContainer block">
+          <span class="toggle">Linear Supertypes</span>
+          <div class="superTypes hiddenContent"><a href="Probes$SpoutProbe.html#ProbeStageextendsAnyRef" class="extmbr" name="swave.testkit.Probes.Probe.ProbeStage">SpoutProbe.ProbeStage</a>, <span class="extype" name="swave.core.PipeElem.Spout.Test">Test</span>, <span class="extype" name="swave.core.PipeElem.Spout">Spout</span>, <span class="extype" name="swave.core.PipeElem">PipeElem</span>, <span class="extype" name="swave.core.impl.stages.spout.SpoutStage">SpoutStage</span>, <span class="extype" name="swave.core.impl.stages.Stage">Stage</span>, <span class="extype" name="swave.core.impl.PipeElemImpl">PipeElemImpl</span>, <span class="extype" name="swave.core.impl.Outport">Outport</span>, <span class="extype" name="swave.core.impl.Inport">Inport</span>, <span class="extype" name="swave.core.impl.Port">Port</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+        </div></div>
+        
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        <div id="order">
+              <span class="filtertype">Ordering</span>
+              <ol>
+                
+                <li class="alpha in"><span>Alphabetic</span></li>
+                <li class="inherit out"><span>By Inheritance</span></li>
+              </ol>
+            </div>
+        <div id="ancestors">
+                <span class="filtertype">Inherited<br />
+                </span>
+                <ol id="linearization">
+                  <li class="in" name="swave.testkit.Probes.SpoutProbe.stage"><span>stage</span></li><li class="in" name="swave.testkit.Probes.Probe.ProbeStage"><span>ProbeStage</span></li><li class="in" name="swave.core.PipeElem.Spout.Test"><span>Test</span></li><li class="in" name="swave.core.PipeElem.Spout"><span>Spout</span></li><li class="in" name="swave.core.PipeElem"><span>PipeElem</span></li><li class="in" name="swave.core.impl.stages.spout.SpoutStage"><span>SpoutStage</span></li><li class="in" name="swave.core.impl.stages.Stage"><span>Stage</span></li><li class="in" name="swave.core.impl.PipeElemImpl"><span>PipeElemImpl</span></li><li class="in" name="swave.core.impl.Outport"><span>Outport</span></li><li class="in" name="swave.core.impl.Inport"><span>Inport</span></li><li class="in" name="swave.core.impl.Port"><span>Port</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                </ol>
+              </div><div id="ancestors">
+            <span class="filtertype"></span>
+            <ol>
+              <li class="hideall out"><span>Hide All</span></li>
+              <li class="showall in"><span>Show All</span></li>
+            </ol>
+          </div>
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="swave.core.impl.stages.Stage.State" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="State=Int"></a>
+      <a id="State:State"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">State</span><span class="result"> = <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@State=Int" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Stage</dd></dl></div>
+    </li></ol>
+            </div>
+
+        
+
+        <div id="values" class="values members">
+              <h3>Value Members</h3>
+              <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="!=(x$1:Any):Boolean"></a>
+      <a id="!=(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@!=(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef###" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="##():Int"></a>
+      <a id="##():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@##():Int" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="==(x$1:Any):Boolean"></a>
+      <a id="==(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@==(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="swave.testkit.Probes.SpoutProbe.stage#_cancel0" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="_cancel0(from$macro$6:swave.core.impl.Outport):swave.testkit.Probes.SpoutProbe.stage.State"></a>
+      <a id="_cancel0(Outport):State"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">_cancel0</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="swave.core.impl.Outport">Outport</span></span>)</span><span class="result">: <a href="#State=Int" class="extmbr" name="swave.testkit.Probes.SpoutProbe.stage.State">State</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@_cancel0(from$macro$6:swave.core.impl.Outport):swave.testkit.Probes.SpoutProbe.stage.State" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="swave.testkit.Probes.SpoutProbe.stage">stage</a> → Stage</dd></dl></div>
+    </li><li name="swave.core.impl.stages.Stage#_onComplete0" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="_onComplete0(from:swave.core.impl.Inport):Stage.this.State"></a>
+      <a id="_onComplete0(Inport):State"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">_onComplete0</span><span class="params">(<span name="from">from: <span class="extype" name="swave.core.impl.Inport">Inport</span></span>)</span><span class="result">: <a href="#State=Int" class="extmbr" name="swave.testkit.Probes.SpoutProbe.stage.State">State</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@_onComplete0(from:swave.core.impl.Inport):Stage.this.State" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Stage</dd></dl></div>
+    </li><li name="swave.core.impl.stages.Stage#_onError0" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="_onError0(error:Throwable,from:swave.core.impl.Inport):Stage.this.State"></a>
+      <a id="_onError0(Throwable,Inport):State"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">_onError0</span><span class="params">(<span name="error">error: <span class="extype" name="scala.Throwable">Throwable</span></span>, <span name="from">from: <span class="extype" name="swave.core.impl.Inport">Inport</span></span>)</span><span class="result">: <a href="#State=Int" class="extmbr" name="swave.testkit.Probes.SpoutProbe.stage.State">State</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@_onError0(error:Throwable,from:swave.core.impl.Inport):Stage.this.State" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Stage</dd></dl></div>
+    </li><li name="swave.core.impl.stages.Stage#_onNext0" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="_onNext0(elem:AnyRef,from:swave.core.impl.Inport):Stage.this.State"></a>
+      <a id="_onNext0(AnyRef,Inport):State"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">_onNext0</span><span class="params">(<span name="elem">elem: <span class="extype" name="scala.AnyRef">AnyRef</span></span>, <span name="from">from: <span class="extype" name="swave.core.impl.Inport">Inport</span></span>)</span><span class="result">: <a href="#State=Int" class="extmbr" name="swave.testkit.Probes.SpoutProbe.stage.State">State</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@_onNext0(elem:AnyRef,from:swave.core.impl.Inport):Stage.this.State" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Stage</dd></dl></div>
+    </li><li name="swave.core.impl.stages.Stage#_onSubscribe0" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="_onSubscribe0(from:swave.core.impl.Inport):Stage.this.State"></a>
+      <a id="_onSubscribe0(Inport):State"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">_onSubscribe0</span><span class="params">(<span name="from">from: <span class="extype" name="swave.core.impl.Inport">Inport</span></span>)</span><span class="result">: <a href="#State=Int" class="extmbr" name="swave.testkit.Probes.SpoutProbe.stage.State">State</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@_onSubscribe0(from:swave.core.impl.Inport):Stage.this.State" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Stage</dd></dl></div>
+    </li><li name="swave.core.impl.stages.spout.SpoutStage#_outputPipeElem" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="_outputPipeElem:swave.core.PipeElem"></a>
+      <a id="_outputPipeElem:PipeElem"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">var</span>
+      </span>
+      <span class="symbol">
+        <span class="name">_outputPipeElem</span><span class="result">: <span class="extype" name="swave.core.PipeElem">PipeElem</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@_outputPipeElem:swave.core.PipeElem" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>SpoutStage</dd></dl></div>
+    </li><li name="swave.testkit.Probes.SpoutProbe.stage#_request0" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="_request0(n$macro$4:Int,from$macro$5:swave.core.impl.Outport):swave.testkit.Probes.SpoutProbe.stage.State"></a>
+      <a id="_request0(Int,Outport):State"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">_request0</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Int">Int</span></span>, <span name="arg1">arg1: <span class="extype" name="swave.core.impl.Outport">Outport</span></span>)</span><span class="result">: <a href="#State=Int" class="extmbr" name="swave.testkit.Probes.SpoutProbe.stage.State">State</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@_request0(n$macro$4:Int,from$macro$5:swave.core.impl.Outport):swave.testkit.Probes.SpoutProbe.stage.State" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="swave.testkit.Probes.SpoutProbe.stage">stage</a> → Stage</dd></dl></div>
+    </li><li name="swave.testkit.Probes.SpoutProbe.stage#_subscribe0" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="_subscribe0(from$macro$3:swave.core.impl.Outport):swave.testkit.Probes.SpoutProbe.stage.State"></a>
+      <a id="_subscribe0(Outport):State"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">_subscribe0</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="swave.core.impl.Outport">Outport</span></span>)</span><span class="result">: <a href="#State=Int" class="extmbr" name="swave.testkit.Probes.SpoutProbe.stage.State">State</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@_subscribe0(from$macro$3:swave.core.impl.Outport):swave.testkit.Probes.SpoutProbe.stage.State" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="swave.testkit.Probes.SpoutProbe.stage">stage</a> → Stage</dd></dl></div>
+    </li><li name="swave.testkit.Probes.SpoutProbe.stage#_xEvent0" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="_xEvent0(ev$macro$15:AnyRef):swave.testkit.Probes.SpoutProbe.stage.State"></a>
+      <a id="_xEvent0(AnyRef):State"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">_xEvent0</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <a href="#State=Int" class="extmbr" name="swave.testkit.Probes.SpoutProbe.stage.State">State</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@_xEvent0(ev$macro$15:AnyRef):swave.testkit.Probes.SpoutProbe.stage.State" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="swave.testkit.Probes.SpoutProbe.stage">stage</a> → Stage</dd></dl></div>
+    </li><li name="swave.testkit.Probes.SpoutProbe.stage#_xSeal" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="_xSeal(ctx$macro$13:swave.core.impl.RunContext):swave.testkit.Probes.SpoutProbe.stage.State"></a>
+      <a id="_xSeal(RunContext):State"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">_xSeal</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="swave.core.impl.RunContext">RunContext</span></span>)</span><span class="result">: <a href="#State=Int" class="extmbr" name="swave.testkit.Probes.SpoutProbe.stage.State">State</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@_xSeal(ctx$macro$13:swave.core.impl.RunContext):swave.testkit.Probes.SpoutProbe.stage.State" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="swave.testkit.Probes.SpoutProbe.stage">stage</a> → Stage</dd></dl></div>
+    </li><li name="swave.testkit.Probes.SpoutProbe.stage#_xStart" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="_xStart():swave.testkit.Probes.SpoutProbe.stage.State"></a>
+      <a id="_xStart():State"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">_xStart</span><span class="params">()</span><span class="result">: <a href="#State=Int" class="extmbr" name="swave.testkit.Probes.SpoutProbe.stage.State">State</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@_xStart():swave.testkit.Probes.SpoutProbe.stage.State" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="swave.testkit.Probes.SpoutProbe.stage">stage</a> → Stage</dd></dl></div>
+    </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="asInstanceOf[T0]:T0"></a>
+      <a id="asInstanceOf[T0]:T0"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@asInstanceOf[T0]:T0" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="swave.core.impl.PipeElemImpl#boundaryOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="boundaryOf:List[swave.core.Module.ID]"></a>
+      <a id="boundaryOf:List[ID]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">boundaryOf</span><span class="result">: <span class="extype" name="scala.collection.immutable.List">List</span>[<span class="extype" name="swave.core.Module.ID">ID</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@boundaryOf:List[swave.core.Module.ID]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>PipeElemImpl</dd></dl></div>
+    </li><li name="swave.core.impl.stages.Stage#cancel" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="cancel()(implicitfrom:swave.core.impl.Outport):Unit"></a>
+      <a id="cancel()(Outport):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">cancel</span><span class="params">()</span><span class="params">(<span class="implicit">implicit </span><span name="from">from: <span class="extype" name="swave.core.impl.Outport">Outport</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@cancel()(implicitfrom:swave.core.impl.Outport):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Stage → Inport</dd></dl></div>
+    </li><li name="swave.core.impl.stages.Stage#cancelAll" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="cancelAll[L&gt;:Null&lt;:swave.core.impl.util.AbstractInportList[L]](ins:L,except:swave.core.impl.Inport):Unit"></a>
+      <a id="cancelAll[L&lt;:AbstractInportList[L]&gt;:Null](L,Inport):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">cancelAll</span><span class="tparams">[<span name="L">L &gt;: <span class="extype" name="scala.Null">Null</span> &lt;: <span class="extype" name="swave.core.impl.util.AbstractInportList">AbstractInportList</span>[<span class="extype" name="swave.core.impl.stages.Stage.cancelAll.L">L</span>]</span>]</span><span class="params">(<span name="ins">ins: <span class="extype" name="swave.core.impl.stages.Stage.cancelAll.L">L</span></span>, <span name="except">except: <span class="extype" name="swave.core.impl.Inport">Inport</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@cancelAll[L&gt;:Null&lt;:swave.core.impl.util.AbstractInportList[L]](ins:L,except:swave.core.impl.Inport):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Stage</dd><dt>Annotations</dt><dd>
+                <span class="name">@tailrec</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="swave.core.impl.stages.Stage#cancelAllAndStopComplete" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="cancelAllAndStopComplete[L&gt;:Null&lt;:swave.core.impl.util.AbstractInportList[L]](ins:L,except:swave.core.impl.Inport,out:swave.core.impl.Outport):Stage.this.State"></a>
+      <a id="cancelAllAndStopComplete[L&lt;:AbstractInportList[L]&gt;:Null](L,Inport,Outport):State"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">cancelAllAndStopComplete</span><span class="tparams">[<span name="L">L &gt;: <span class="extype" name="scala.Null">Null</span> &lt;: <span class="extype" name="swave.core.impl.util.AbstractInportList">AbstractInportList</span>[<span class="extype" name="swave.core.impl.stages.Stage.cancelAllAndStopComplete.L">L</span>]</span>]</span><span class="params">(<span name="ins">ins: <span class="extype" name="swave.core.impl.stages.Stage.cancelAllAndStopComplete.L">L</span></span>, <span name="except">except: <span class="extype" name="swave.core.impl.Inport">Inport</span></span>, <span name="out">out: <span class="extype" name="swave.core.impl.Outport">Outport</span></span>)</span><span class="result">: <a href="#State=Int" class="extmbr" name="swave.testkit.Probes.SpoutProbe.stage.State">State</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@cancelAllAndStopComplete[L&gt;:Null&lt;:swave.core.impl.util.AbstractInportList[L]](ins:L,except:swave.core.impl.Inport,out:swave.core.impl.Outport):Stage.this.State" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Stage</dd></dl></div>
+    </li><li name="swave.core.impl.stages.Stage#cancelAllAndStopCompleteF" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="cancelAllAndStopCompleteF[L&gt;:Null&lt;:swave.core.impl.util.AbstractInportList[L]](ins:L,out:swave.core.impl.Outport)(in:swave.core.impl.Inport):Stage.this.State"></a>
+      <a id="cancelAllAndStopCompleteF[L&lt;:AbstractInportList[L]&gt;:Null](L,Outport)(Inport):State"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">cancelAllAndStopCompleteF</span><span class="tparams">[<span name="L">L &gt;: <span class="extype" name="scala.Null">Null</span> &lt;: <span class="extype" name="swave.core.impl.util.AbstractInportList">AbstractInportList</span>[<span class="extype" name="swave.core.impl.stages.Stage.cancelAllAndStopCompleteF.L">L</span>]</span>]</span><span class="params">(<span name="ins">ins: <span class="extype" name="swave.core.impl.stages.Stage.cancelAllAndStopCompleteF.L">L</span></span>, <span name="out">out: <span class="extype" name="swave.core.impl.Outport">Outport</span></span>)</span><span class="params">(<span name="in">in: <span class="extype" name="swave.core.impl.Inport">Inport</span></span>)</span><span class="result">: <a href="#State=Int" class="extmbr" name="swave.testkit.Probes.SpoutProbe.stage.State">State</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@cancelAllAndStopCompleteF[L&gt;:Null&lt;:swave.core.impl.util.AbstractInportList[L]](ins:L,out:swave.core.impl.Outport)(in:swave.core.impl.Inport):Stage.this.State" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Stage</dd></dl></div>
+    </li><li name="swave.core.impl.stages.Stage#cancelAllAndStopErrorF" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="cancelAllAndStopErrorF[L&gt;:Null&lt;:swave.core.impl.util.AbstractInportList[L]](ins:L,out:swave.core.impl.Outport)(e:Throwable,in:swave.core.impl.Inport):Stage.this.State"></a>
+      <a id="cancelAllAndStopErrorF[L&lt;:AbstractInportList[L]&gt;:Null](L,Outport)(Throwable,Inport):State"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">cancelAllAndStopErrorF</span><span class="tparams">[<span name="L">L &gt;: <span class="extype" name="scala.Null">Null</span> &lt;: <span class="extype" name="swave.core.impl.util.AbstractInportList">AbstractInportList</span>[<span class="extype" name="swave.core.impl.stages.Stage.cancelAllAndStopErrorF.L">L</span>]</span>]</span><span class="params">(<span name="ins">ins: <span class="extype" name="swave.core.impl.stages.Stage.cancelAllAndStopErrorF.L">L</span></span>, <span name="out">out: <span class="extype" name="swave.core.impl.Outport">Outport</span></span>)</span><span class="params">(<span name="e">e: <span class="extype" name="scala.Throwable">Throwable</span></span>, <span name="in">in: <span class="extype" name="swave.core.impl.Inport">Inport</span></span>)</span><span class="result">: <a href="#State=Int" class="extmbr" name="swave.testkit.Probes.SpoutProbe.stage.State">State</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@cancelAllAndStopErrorF[L&gt;:Null&lt;:swave.core.impl.util.AbstractInportList[L]](ins:L,out:swave.core.impl.Outport)(e:Throwable,in:swave.core.impl.Inport):Stage.this.State" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Stage</dd></dl></div>
+    </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="clone():Object"></a>
+      <a id="clone():AnyRef"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@clone():Object" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.CloneNotSupportedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="swave.core.impl.stages.Stage#configureFrom" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="configureFrom(ctx:swave.core.impl.RunContext):Unit"></a>
+      <a id="configureFrom(RunContext):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">configureFrom</span><span class="params">(<span name="ctx">ctx: <span class="extype" name="swave.core.impl.RunContext">RunContext</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@configureFrom(ctx:swave.core.impl.RunContext):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Stage</dd></dl></div>
+    </li><li name="swave.core.impl.stages.spout.SpoutStage#connectOutAndSealWith" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="connectOutAndSealWith(f:&lt;?&gt;):Unit"></a>
+      <a id="connectOutAndSealWith((RunContext,Outport)⇒State):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">connectOutAndSealWith</span><span class="params">(<span name="f">f: (<span class="extype" name="swave.core.impl.RunContext">RunContext</span>, <span class="extype" name="swave.core.impl.Outport">Outport</span>) ⇒ <a href="#State=Int" class="extmbr" name="swave.testkit.Probes.SpoutProbe.stage.State">State</a></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@connectOutAndSealWith(f:(swave.core.impl.RunContext,swave.core.impl.Outport)=&gt;SpoutStage.this.State):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>SpoutStage</dd><dt>Annotations</dt><dd>
+                <span class="name">@compileTimeOnly</span><span class="args">(<span>
+      
+      <span class="defval" name="&quot;Unresolved `connectOutAndSealWith` call&quot;">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="swave.core.impl.stages.Stage#enqueueXEvent" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="enqueueXEvent(ev:AnyRef):Unit"></a>
+      <a id="enqueueXEvent(AnyRef):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">enqueueXEvent</span><span class="params">(<span name="ev">ev: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@enqueueXEvent(ev:AnyRef):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Stage</dd></dl></div>
+    </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="eq(x$1:AnyRef):Boolean"></a>
+      <a id="eq(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#equals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="equals(x$1:Any):Boolean"></a>
+      <a id="equals(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@equals(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="finalize():Unit"></a>
+      <a id="finalize():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@finalize():Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Throwable]</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getClass():Class[_]"></a>
+      <a id="getClass():Class[_]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@getClass():Class[_]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hashCode():Int"></a>
+      <a id="hashCode():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@hashCode():Int" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="swave.core.impl.stages.Stage#illegalState" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="illegalState(msg:String):Nothing"></a>
+      <a id="illegalState(String):Nothing"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">illegalState</span><span class="params">(<span name="msg">msg: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Nothing">Nothing</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@illegalState(msg:String):Nothing" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Stage</dd></dl></div>
+    </li><li name="swave.core.impl.stages.Stage#initialState" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="initialState(s:Stage.this.State):Unit"></a>
+      <a id="initialState(State):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">initialState</span><span class="params">(<span name="s">s: <a href="#State=Int" class="extmbr" name="swave.testkit.Probes.SpoutProbe.stage.State">State</a></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@initialState(s:Stage.this.State):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Stage</dd></dl></div>
+    </li><li name="swave.core.PipeElem.Spout#inputElems" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="inputElems:scala.collection.immutable.Nil.type"></a>
+      <a id="inputElems:Nil.type"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">inputElems</span><span class="result">: <span class="extype" name="scala.collection.immutable.Nil">Nil</span>.type</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@inputElems:scala.collection.immutable.Nil.type" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Spout → PipeElem</dd></dl></div>
+    </li><li name="swave.core.impl.stages.Stage#interceptingStates" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="interceptingStates:Int"></a>
+      <a id="interceptingStates:Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">var</span>
+      </span>
+      <span class="symbol">
+        <span class="name">interceptingStates</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@interceptingStates:Int" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Stage</dd></dl></div>
+    </li><li name="swave.testkit.Probes.Probe.ProbeStage#isAsync" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isAsync:Boolean"></a>
+      <a id="isAsync:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isAsync</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@isAsync:Boolean" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Probes$Probe$ProbeStage.html" class="extype" name="swave.testkit.Probes.Probe.ProbeStage">ProbeStage</a></dd></dl></div>
+    </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="swave.core.impl.stages.Stage#isSealed" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isSealed:Boolean"></a>
+      <a id="isSealed:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isSealed</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@isSealed:Boolean" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Stage → Port</dd></dl></div>
+    </li><li name="swave.core.impl.stages.Stage#isStopped" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isStopped:Boolean"></a>
+      <a id="isStopped:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isStopped</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@isStopped:Boolean" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Stage → Port</dd></dl></div>
+    </li><li name="swave.testkit.Probes.Probe.ProbeStage#isSync" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isSync:Boolean"></a>
+      <a id="isSync:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isSync</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@isSync:Boolean" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Probes$Probe$ProbeStage.html" class="extype" name="swave.testkit.Probes.Probe.ProbeStage">ProbeStage</a></dd></dl></div>
+    </li><li name="swave.testkit.Probes.Probe.ProbeStage#log" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="log:java.util.concurrent.LinkedBlockingQueue[swave.testkit.Testkit.Signal]"></a>
+      <a id="log:LinkedBlockingQueue[Signal]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">log</span><span class="result">: <span class="extype" name="java.util.concurrent.LinkedBlockingQueue">LinkedBlockingQueue</span>[<a href="Testkit$$Signal.html" class="extype" name="swave.testkit.Testkit.Signal">Signal</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@log:java.util.concurrent.LinkedBlockingQueue[swave.testkit.Testkit.Signal]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Probes$Probe$ProbeStage.html" class="extype" name="swave.testkit.Probes.Probe.ProbeStage">ProbeStage</a></dd></dl></div>
+    </li><li name="swave.core.impl.PipeElemImpl#markAsBoundaryOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="markAsBoundaryOf(moduleID:swave.core.Module.ID):Unit"></a>
+      <a id="markAsBoundaryOf(ID):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">markAsBoundaryOf</span><span class="params">(<span name="moduleID">moduleID: <span class="extype" name="swave.core.Module.ID">ID</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@markAsBoundaryOf(moduleID:swave.core.Module.ID):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>PipeElemImpl</dd></dl></div>
+    </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ne(x$1:AnyRef):Boolean"></a>
+      <a id="ne(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notify():Unit"></a>
+      <a id="notify():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@notify():Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#notifyAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notifyAll():Unit"></a>
+      <a id="notifyAll():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@notifyAll():Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="swave.core.impl.stages.Stage#onComplete" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="onComplete()(implicitfrom:swave.core.impl.Inport):Unit"></a>
+      <a id="onComplete()(Inport):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">onComplete</span><span class="params">()</span><span class="params">(<span class="implicit">implicit </span><span name="from">from: <span class="extype" name="swave.core.impl.Inport">Inport</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@onComplete()(implicitfrom:swave.core.impl.Inport):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Stage → Outport</dd></dl></div>
+    </li><li name="swave.core.impl.stages.Stage#onError" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="onError(error:Throwable)(implicitfrom:swave.core.impl.Inport):Unit"></a>
+      <a id="onError(Throwable)(Inport):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">onError</span><span class="params">(<span name="error">error: <span class="extype" name="scala.Throwable">Throwable</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="from">from: <span class="extype" name="swave.core.impl.Inport">Inport</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@onError(error:Throwable)(implicitfrom:swave.core.impl.Inport):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Stage → Outport</dd></dl></div>
+    </li><li name="swave.core.impl.stages.Stage#onNext" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="onNext(elem:AnyRef)(implicitfrom:swave.core.impl.Inport):Unit"></a>
+      <a id="onNext(AnyRef)(Inport):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">onNext</span><span class="params">(<span name="elem">elem: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="from">from: <span class="extype" name="swave.core.impl.Inport">Inport</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@onNext(elem:AnyRef)(implicitfrom:swave.core.impl.Inport):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Stage → Outport</dd></dl></div>
+    </li><li name="swave.core.impl.stages.Stage#onNextF" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="onNextF(out:swave.core.impl.Outport)(elem:AnyRef,from:swave.core.impl.Inport):Stage.this.State"></a>
+      <a id="onNextF(Outport)(AnyRef,Inport):State"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">onNextF</span><span class="params">(<span name="out">out: <span class="extype" name="swave.core.impl.Outport">Outport</span></span>)</span><span class="params">(<span name="elem">elem: <span class="extype" name="scala.AnyRef">AnyRef</span></span>, <span name="from">from: <span class="extype" name="swave.core.impl.Inport">Inport</span></span>)</span><span class="result">: <a href="#State=Int" class="extmbr" name="swave.testkit.Probes.SpoutProbe.stage.State">State</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@onNextF(out:swave.core.impl.Outport)(elem:AnyRef,from:swave.core.impl.Inport):Stage.this.State" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Stage</dd></dl></div>
+    </li><li name="swave.testkit.Probes.Probe.ProbeStage#onSignal" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="onSignal(s:swave.testkit.Testkit.Signal):Unit"></a>
+      <a id="onSignal(Signal):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">onSignal</span><span class="params">(<span name="s">s: <a href="Testkit$$Signal.html" class="extype" name="swave.testkit.Testkit.Signal">Signal</a></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@onSignal(s:swave.testkit.Testkit.Signal):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Probes$Probe$ProbeStage.html" class="extype" name="swave.testkit.Probes.Probe.ProbeStage">ProbeStage</a></dd></dl></div>
+    </li><li name="swave.core.impl.stages.Stage#onSubscribe" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="onSubscribe()(implicitfrom:swave.core.impl.Inport):Unit"></a>
+      <a id="onSubscribe()(Inport):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">onSubscribe</span><span class="params">()</span><span class="params">(<span class="implicit">implicit </span><span name="from">from: <span class="extype" name="swave.core.impl.Inport">Inport</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@onSubscribe()(implicitfrom:swave.core.impl.Inport):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Stage → Outport</dd></dl></div>
+    </li><li name="swave.core.impl.stages.spout.SpoutStage#outputElem" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="outputElem:swave.core.PipeElem"></a>
+      <a id="outputElem:PipeElem"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">outputElem</span><span class="result">: <span class="extype" name="swave.core.PipeElem">PipeElem</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@outputElem:swave.core.PipeElem" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>SpoutStage</dd></dl></div>
+    </li><li name="swave.core.PipeElem.Spout#outputElems" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="outputElems:List[swave.core.PipeElem]"></a>
+      <a id="outputElems:List[PipeElem]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">outputElems</span><span class="result">: <span class="extype" name="scala.List">List</span>[<span class="extype" name="swave.core.PipeElem">PipeElem</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@outputElems:List[swave.core.PipeElem]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Spout → PipeElem</dd></dl></div>
+    </li><li name="swave.core.impl.PipeElemImpl#pipeElem" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="pipeElem:swave.core.impl.PipeElemImplwithswave.core.PipeElem"></a>
+      <a id="pipeElem:PipeElemImplwithPipeElem"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">pipeElem</span><span class="result">: <span class="extype" name="swave.core.impl.PipeElemImpl">PipeElemImpl</span> with <span class="extype" name="swave.core.PipeElem">PipeElem</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@pipeElem:swave.core.impl.PipeElemImplwithswave.core.PipeElem" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>PipeElemImpl → Port</dd></dl></div>
+    </li><li name="swave.testkit.Probes.SpoutProbe.stage#pipeElemParams" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="pipeElemParams:scala.collection.immutable.Nil.type"></a>
+      <a id="pipeElemParams:Nil.type"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">pipeElemParams</span><span class="result">: <span class="extype" name="scala.collection.immutable.Nil">Nil</span>.type</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@pipeElemParams:scala.collection.immutable.Nil.type" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="swave.testkit.Probes.SpoutProbe.stage">stage</a> → PipeElem</dd></dl></div>
+    </li><li name="swave.testkit.Probes.SpoutProbe.stage#pipeElemType" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="pipeElemType:String"></a>
+      <a id="pipeElemType:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">pipeElemType</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@pipeElemType:String" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="swave.testkit.Probes.SpoutProbe.stage">stage</a> → PipeElem</dd></dl></div>
+    </li><li name="swave.core.impl.stages.Stage#request" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="request(n:Long)(implicitfrom:swave.core.impl.Outport):Unit"></a>
+      <a id="request(Long)(Outport):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">request</span><span class="params">(<span name="n">n: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="from">from: <span class="extype" name="swave.core.impl.Outport">Outport</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@request(n:Long)(implicitfrom:swave.core.impl.Outport):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Stage → Inport</dd></dl></div>
+    </li><li name="swave.core.impl.stages.Stage#requestF" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="requestF(in:swave.core.impl.Inport)(n:Int,from:swave.core.impl.Outport):Stage.this.State"></a>
+      <a id="requestF(Inport)(Int,Outport):State"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">requestF</span><span class="params">(<span name="in">in: <span class="extype" name="swave.core.impl.Inport">Inport</span></span>)</span><span class="params">(<span name="n">n: <span class="extype" name="scala.Int">Int</span></span>, <span name="from">from: <span class="extype" name="swave.core.impl.Outport">Outport</span></span>)</span><span class="result">: <a href="#State=Int" class="extmbr" name="swave.testkit.Probes.SpoutProbe.stage.State">State</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@requestF(in:swave.core.impl.Inport)(n:Int,from:swave.core.impl.Outport):Stage.this.State" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Stage</dd></dl></div>
+    </li><li name="swave.core.impl.stages.Stage#self" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="self:swave.core.impl.stages.Stage.&lt;refinement&gt;.type"></a>
+      <a id="self:SpoutProbe.stage.this.type"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">self</span><span class="result">: <a href="" class="extype" name="swave.testkit.Probes.SpoutProbe.stage">SpoutProbe.stage</a>.this.type</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@self:swave.core.impl.stages.Stage.&lt;refinement&gt;.type" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Stage</dd></dl></div>
+    </li><li name="swave.core.impl.stages.Stage#setIntercepting" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setIntercepting(flag:Boolean):Unit"></a>
+      <a id="setIntercepting(Boolean):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setIntercepting</span><span class="params">(<span name="flag">flag: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@setIntercepting(flag:Boolean):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Stage</dd></dl></div>
+    </li><li name="swave.testkit.Probes.Probe.ProbeStage#stage" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="stage:swave.core.impl.stages.Stage"></a>
+      <a id="stage:Stage"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">stage</span><span class="result">: <span class="extype" name="swave.core.impl.stages.Stage">Stage</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@stage:swave.core.impl.stages.Stage" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Probes$Probe$ProbeStage.html" class="extype" name="swave.testkit.Probes.Probe.ProbeStage">ProbeStage</a></dd></dl></div>
+    </li><li name="swave.core.impl.stages.Stage#state" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="state(intercept:Boolean,subscribe:swave.core.impl.Outport=&gt;Stage.this.State,request:(Int,swave.core.impl.Outport)=&gt;Stage.this.State,cancel:swave.core.impl.Outport=&gt;Stage.this.State,onSubscribe:swave.core.impl.Inport=&gt;Stage.this.State,onNext:(AnyRef,swave.core.impl.Inport)=&gt;Stage.this.State,onComplete:swave.core.impl.Inport=&gt;Stage.this.State,onError:(Throwable,swave.core.impl.Inport)=&gt;Stage.this.State,xSeal:swave.core.impl.RunContext=&gt;Stage.this.State,xStart:()=&gt;Stage.this.State,xEvent:AnyRef=&gt;Stage.this.State):Stage.this.State"></a>
+      <a id="state(Boolean,(Outport)⇒State,(Int,Outport)⇒State,(Outport)⇒State,(Inport)⇒State,(AnyRef,Inport)⇒State,(Inport)⇒State,(Throwable,Inport)⇒State,(RunContext)⇒State,()⇒State,(AnyRef)⇒State):State"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">state</span><span class="params">(<span name="intercept">intercept: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="subscribe">subscribe: (<span class="extype" name="swave.core.impl.Outport">Outport</span>) ⇒ <a href="#State=Int" class="extmbr" name="swave.testkit.Probes.SpoutProbe.stage.State">State</a></span>, <span name="request">request: (<span class="extype" name="scala.Int">Int</span>, <span class="extype" name="swave.core.impl.Outport">Outport</span>) ⇒ <a href="#State=Int" class="extmbr" name="swave.testkit.Probes.SpoutProbe.stage.State">State</a></span>, <span name="cancel">cancel: (<span class="extype" name="swave.core.impl.Outport">Outport</span>) ⇒ <a href="#State=Int" class="extmbr" name="swave.testkit.Probes.SpoutProbe.stage.State">State</a></span>, <span name="onSubscribe">onSubscribe: (<span class="extype" name="swave.core.impl.Inport">Inport</span>) ⇒ <a href="#State=Int" class="extmbr" name="swave.testkit.Probes.SpoutProbe.stage.State">State</a></span>, <span name="onNext">onNext: (<span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="swave.core.impl.Inport">Inport</span>) ⇒ <a href="#State=Int" class="extmbr" name="swave.testkit.Probes.SpoutProbe.stage.State">State</a></span>, <span name="onComplete">onComplete: (<span class="extype" name="swave.core.impl.Inport">Inport</span>) ⇒ <a href="#State=Int" class="extmbr" name="swave.testkit.Probes.SpoutProbe.stage.State">State</a></span>, <span name="onError">onError: (<span class="extype" name="scala.Throwable">Throwable</span>, <span class="extype" name="swave.core.impl.Inport">Inport</span>) ⇒ <a href="#State=Int" class="extmbr" name="swave.testkit.Probes.SpoutProbe.stage.State">State</a></span>, <span name="xSeal">xSeal: (<span class="extype" name="swave.core.impl.RunContext">RunContext</span>) ⇒ <a href="#State=Int" class="extmbr" name="swave.testkit.Probes.SpoutProbe.stage.State">State</a></span>, <span name="xStart">xStart: () ⇒ <a href="#State=Int" class="extmbr" name="swave.testkit.Probes.SpoutProbe.stage.State">State</a></span>, <span name="xEvent">xEvent: (<span class="extype" name="scala.AnyRef">AnyRef</span>) ⇒ <a href="#State=Int" class="extmbr" name="swave.testkit.Probes.SpoutProbe.stage.State">State</a></span>)</span><span class="result">: <a href="#State=Int" class="extmbr" name="swave.testkit.Probes.SpoutProbe.stage.State">State</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@state(intercept:Boolean,subscribe:swave.core.impl.Outport=&gt;Stage.this.State,request:(Int,swave.core.impl.Outport)=&gt;Stage.this.State,cancel:swave.core.impl.Outport=&gt;Stage.this.State,onSubscribe:swave.core.impl.Inport=&gt;Stage.this.State,onNext:(AnyRef,swave.core.impl.Inport)=&gt;Stage.this.State,onComplete:swave.core.impl.Inport=&gt;Stage.this.State,onError:(Throwable,swave.core.impl.Inport)=&gt;Stage.this.State,xSeal:swave.core.impl.RunContext=&gt;Stage.this.State,xStart:()=&gt;Stage.this.State,xEvent:AnyRef=&gt;Stage.this.State):Stage.this.State" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Stage</dd><dt>Annotations</dt><dd>
+                <span class="name">@compileTimeOnly</span><span class="args">(<span>
+      
+      <span class="defval" name="&quot;`state(...) can only be used as the single implementation expression of a \'State Def\'!&quot;">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="swave.testkit.Probes.SpoutProbe.stage#stateName" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="stateName:String"></a>
+      <a id="stateName:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">stateName</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@stateName:String" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="swave.testkit.Probes.SpoutProbe.stage">stage</a> → Stage</dd></dl></div>
+    </li><li name="swave.core.impl.stages.Stage#stay" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="stay():Stage.this.State"></a>
+      <a id="stay():State"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">stay</span><span class="params">()</span><span class="result">: <a href="#State=Int" class="extmbr" name="swave.testkit.Probes.SpoutProbe.stage.State">State</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@stay():Stage.this.State" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Stage</dd></dl></div>
+    </li><li name="swave.core.impl.stages.Stage#stop" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="stop(e:Throwable):Stage.this.State"></a>
+      <a id="stop(Throwable):State"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">stop</span><span class="params">(<span name="e">e: <span class="extype" name="scala.Throwable">Throwable</span></span>)</span><span class="result">: <a href="#State=Int" class="extmbr" name="swave.testkit.Probes.SpoutProbe.stage.State">State</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@stop(e:Throwable):Stage.this.State" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Stage</dd></dl></div>
+    </li><li name="swave.core.impl.stages.Stage#stopCancel" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="stopCancel[L&gt;:Null&lt;:swave.core.impl.util.AbstractInportList[L]](ins:L,except:swave.core.impl.Inport):Stage.this.State"></a>
+      <a id="stopCancel[L&lt;:AbstractInportList[L]&gt;:Null](L,Inport):State"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">stopCancel</span><span class="tparams">[<span name="L">L &gt;: <span class="extype" name="scala.Null">Null</span> &lt;: <span class="extype" name="swave.core.impl.util.AbstractInportList">AbstractInportList</span>[<span class="extype" name="swave.core.impl.stages.Stage.stopCancel.L">L</span>]</span>]</span><span class="params">(<span name="ins">ins: <span class="extype" name="swave.core.impl.stages.Stage.stopCancel.L">L</span></span>, <span name="except">except: <span class="extype" name="swave.core.impl.Inport">Inport</span></span>)</span><span class="result">: <a href="#State=Int" class="extmbr" name="swave.testkit.Probes.SpoutProbe.stage.State">State</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@stopCancel[L&gt;:Null&lt;:swave.core.impl.util.AbstractInportList[L]](ins:L,except:swave.core.impl.Inport):Stage.this.State" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Stage</dd></dl></div>
+    </li><li name="swave.core.impl.stages.Stage#stopCancel" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="stopCancel(in:swave.core.impl.Inport):Stage.this.State"></a>
+      <a id="stopCancel(Inport):State"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">stopCancel</span><span class="params">(<span name="in">in: <span class="extype" name="swave.core.impl.Inport">Inport</span></span>)</span><span class="result">: <a href="#State=Int" class="extmbr" name="swave.testkit.Probes.SpoutProbe.stage.State">State</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@stopCancel(in:swave.core.impl.Inport):Stage.this.State" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Stage</dd></dl></div>
+    </li><li name="swave.core.impl.stages.Stage#stopCancelF" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="stopCancelF[L&gt;:Null&lt;:swave.core.impl.util.AbstractInportList[L]](ins:L)(out:swave.core.impl.Outport):Stage.this.State"></a>
+      <a id="stopCancelF[L&lt;:AbstractInportList[L]&gt;:Null](L)(Outport):State"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">stopCancelF</span><span class="tparams">[<span name="L">L &gt;: <span class="extype" name="scala.Null">Null</span> &lt;: <span class="extype" name="swave.core.impl.util.AbstractInportList">AbstractInportList</span>[<span class="extype" name="swave.core.impl.stages.Stage.stopCancelF.L">L</span>]</span>]</span><span class="params">(<span name="ins">ins: <span class="extype" name="swave.core.impl.stages.Stage.stopCancelF.L">L</span></span>)</span><span class="params">(<span name="out">out: <span class="extype" name="swave.core.impl.Outport">Outport</span></span>)</span><span class="result">: <a href="#State=Int" class="extmbr" name="swave.testkit.Probes.SpoutProbe.stage.State">State</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@stopCancelF[L&gt;:Null&lt;:swave.core.impl.util.AbstractInportList[L]](ins:L)(out:swave.core.impl.Outport):Stage.this.State" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Stage</dd></dl></div>
+    </li><li name="swave.core.impl.stages.Stage#stopCancelF" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="stopCancelF(in:swave.core.impl.Inport)(out:swave.core.impl.Outport):Stage.this.State"></a>
+      <a id="stopCancelF(Inport)(Outport):State"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">stopCancelF</span><span class="params">(<span name="in">in: <span class="extype" name="swave.core.impl.Inport">Inport</span></span>)</span><span class="params">(<span name="out">out: <span class="extype" name="swave.core.impl.Outport">Outport</span></span>)</span><span class="result">: <a href="#State=Int" class="extmbr" name="swave.testkit.Probes.SpoutProbe.stage.State">State</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@stopCancelF(in:swave.core.impl.Inport)(out:swave.core.impl.Outport):Stage.this.State" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Stage</dd></dl></div>
+    </li><li name="swave.core.impl.stages.Stage#stopComplete" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="stopComplete(out:swave.core.impl.Outport):Stage.this.State"></a>
+      <a id="stopComplete(Outport):State"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">stopComplete</span><span class="params">(<span name="out">out: <span class="extype" name="swave.core.impl.Outport">Outport</span></span>)</span><span class="result">: <a href="#State=Int" class="extmbr" name="swave.testkit.Probes.SpoutProbe.stage.State">State</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@stopComplete(out:swave.core.impl.Outport):Stage.this.State" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Stage</dd></dl></div>
+    </li><li name="swave.core.impl.stages.Stage#stopCompleteF" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="stopCompleteF(out:swave.core.impl.Outport)(in:swave.core.impl.Inport):Stage.this.State"></a>
+      <a id="stopCompleteF(Outport)(Inport):State"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">stopCompleteF</span><span class="params">(<span name="out">out: <span class="extype" name="swave.core.impl.Outport">Outport</span></span>)</span><span class="params">(<span name="in">in: <span class="extype" name="swave.core.impl.Inport">Inport</span></span>)</span><span class="result">: <a href="#State=Int" class="extmbr" name="swave.testkit.Probes.SpoutProbe.stage.State">State</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@stopCompleteF(out:swave.core.impl.Outport)(in:swave.core.impl.Inport):Stage.this.State" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Stage</dd></dl></div>
+    </li><li name="swave.core.impl.stages.Stage#stopError" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="stopError(e:Throwable,out:swave.core.impl.Outport):Stage.this.State"></a>
+      <a id="stopError(Throwable,Outport):State"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">stopError</span><span class="params">(<span name="e">e: <span class="extype" name="scala.Throwable">Throwable</span></span>, <span name="out">out: <span class="extype" name="swave.core.impl.Outport">Outport</span></span>)</span><span class="result">: <a href="#State=Int" class="extmbr" name="swave.testkit.Probes.SpoutProbe.stage.State">State</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@stopError(e:Throwable,out:swave.core.impl.Outport):Stage.this.State" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Stage</dd></dl></div>
+    </li><li name="swave.core.impl.stages.Stage#stopErrorF" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="stopErrorF(out:swave.core.impl.Outport)(e:Throwable,in:swave.core.impl.Inport):Stage.this.State"></a>
+      <a id="stopErrorF(Outport)(Throwable,Inport):State"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">stopErrorF</span><span class="params">(<span name="out">out: <span class="extype" name="swave.core.impl.Outport">Outport</span></span>)</span><span class="params">(<span name="e">e: <span class="extype" name="scala.Throwable">Throwable</span></span>, <span name="in">in: <span class="extype" name="swave.core.impl.Inport">Inport</span></span>)</span><span class="result">: <a href="#State=Int" class="extmbr" name="swave.testkit.Probes.SpoutProbe.stage.State">State</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@stopErrorF(out:swave.core.impl.Outport)(e:Throwable,in:swave.core.impl.Inport):Stage.this.State" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Stage</dd></dl></div>
+    </li><li name="swave.core.impl.stages.Stage#stopF" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="stopF(out:swave.core.impl.Outport):Stage.this.State"></a>
+      <a id="stopF(Outport):State"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">stopF</span><span class="params">(<span name="out">out: <span class="extype" name="swave.core.impl.Outport">Outport</span></span>)</span><span class="result">: <a href="#State=Int" class="extmbr" name="swave.testkit.Probes.SpoutProbe.stage.State">State</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@stopF(out:swave.core.impl.Outport):Stage.this.State" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Stage</dd></dl></div>
+    </li><li name="swave.testkit.Probes.Probe.ProbeStage#streamRunner" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="streamRunner:swave.core.impl.StreamRunner"></a>
+      <a id="streamRunner:StreamRunner"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">streamRunner</span><span class="result">: <span class="extype" name="swave.core.impl.StreamRunner">StreamRunner</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@streamRunner:swave.core.impl.StreamRunner" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Probes$Probe$ProbeStage.html" class="extype" name="swave.testkit.Probes.Probe.ProbeStage">ProbeStage</a></dd></dl></div>
+    </li><li name="swave.core.impl.stages.Stage#subscribe" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="subscribe()(implicitfrom:swave.core.impl.Outport):Unit"></a>
+      <a id="subscribe()(Outport):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">subscribe</span><span class="params">()</span><span class="params">(<span class="implicit">implicit </span><span name="from">from: <span class="extype" name="swave.core.impl.Outport">Outport</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@subscribe()(implicitfrom:swave.core.impl.Outport):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Stage → Inport</dd></dl></div>
+    </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
+      <a id="synchronized[T0](⇒T0):T0"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="swave.testkit.Probes.SpoutProbe.stage#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="toString():String"></a>
+      <a id="toString():String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@toString():String" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="swave.testkit.Probes.SpoutProbe.stage">stage</a> → Stage → AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait():Unit"></a>
+      <a id="wait():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@wait():Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long,x$2:Int):Unit"></a>
+      <a id="wait(Long,Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long):Unit"></a>
+      <a id="wait(Long):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@wait(x$1:Long):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="swave.core.impl.stages.Stage#xEvent" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="xEvent(ev:AnyRef):Unit"></a>
+      <a id="xEvent(AnyRef):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">xEvent</span><span class="params">(<span name="ev">ev: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@xEvent(ev:AnyRef):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Stage</dd></dl></div>
+    </li><li name="swave.core.impl.stages.Stage#xSeal" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="xSeal(ctx:swave.core.impl.RunContext):Unit"></a>
+      <a id="xSeal(RunContext):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">xSeal</span><span class="params">(<span name="ctx">ctx: <span class="extype" name="swave.core.impl.RunContext">RunContext</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@xSeal(ctx:swave.core.impl.RunContext):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Stage → Port</dd></dl></div>
+    </li><li name="swave.core.impl.stages.Stage#xStart" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="xStart():Unit"></a>
+      <a id="xStart():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">xStart</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.testkit.Probes$SpoutProbe$stage$@xStart():Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Stage</dd></dl></div>
+    </li></ol>
+            </div>
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        <div class="parent" name="swave.testkit.Probes.Probe.ProbeStage">
+              <h3>Inherited from <a href="Probes$SpoutProbe.html#ProbeStageextendsAnyRef" class="extmbr" name="swave.testkit.Probes.Probe.ProbeStage">SpoutProbe.ProbeStage</a></h3>
+            </div><div class="parent" name="swave.core.PipeElem.Spout.Test">
+              <h3>Inherited from <span class="extype" name="swave.core.PipeElem.Spout.Test">Test</span></h3>
+            </div><div class="parent" name="swave.core.PipeElem.Spout">
+              <h3>Inherited from <span class="extype" name="swave.core.PipeElem.Spout">Spout</span></h3>
+            </div><div class="parent" name="swave.core.PipeElem">
+              <h3>Inherited from <span class="extype" name="swave.core.PipeElem">PipeElem</span></h3>
+            </div><div class="parent" name="swave.core.impl.stages.spout.SpoutStage">
+              <h3>Inherited from <span class="extype" name="swave.core.impl.stages.spout.SpoutStage">SpoutStage</span></h3>
+            </div><div class="parent" name="swave.core.impl.stages.Stage">
+              <h3>Inherited from <span class="extype" name="swave.core.impl.stages.Stage">Stage</span></h3>
+            </div><div class="parent" name="swave.core.impl.PipeElemImpl">
+              <h3>Inherited from <span class="extype" name="swave.core.impl.PipeElemImpl">PipeElemImpl</span></h3>
+            </div><div class="parent" name="swave.core.impl.Outport">
+              <h3>Inherited from <span class="extype" name="swave.core.impl.Outport">Outport</span></h3>
+            </div><div class="parent" name="swave.core.impl.Inport">
+              <h3>Inherited from <span class="extype" name="swave.core.impl.Inport">Inport</span></h3>
+            </div><div class="parent" name="swave.core.impl.Port">
+              <h3>Inherited from <span class="extype" name="swave.core.impl.Port">Port</span></h3>
+            </div><div class="parent" name="scala.AnyRef">
+              <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+            </div>
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>

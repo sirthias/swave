@@ -1,0 +1,862 @@
+<!DOCTYPE html >
+<html>
+        <head>
+          <title>BranchOut - swave.core.StreamOps.BranchOut</title>
+          <meta name="description" content="BranchOut - swave.core.StreamOps.BranchOut" />
+          <meta name="keywords" content="BranchOut swave.core.StreamOps.BranchOut" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../lib/template.js"></script>
+      <script type="text/javascript" src="../../lib/tools.tooltip.js"></script>
+      
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../index.html';
+            var hash = 'swave.core.StreamOps$$BranchOut';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
+    
+        </head>
+        <body class="type">
+      <div id="definition">
+        <img alt="Class" src="../../lib/class_big.png" />
+        <p id="owner"><a href="../package.html" class="extype" name="swave">swave</a>.<a href="package.html" class="extype" name="swave.core">core</a>.<a href="StreamOps$.html" class="extype" name="swave.core.StreamOps">StreamOps</a></p>
+        <h1>BranchOut</h1><h3><span class="morelinks"><div>Related Doc:
+            <a href="StreamOps$.html" class="extype" name="swave.core.StreamOps">package StreamOps</a>
+          </div></span></h3><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps$$BranchOut" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <span class="name">BranchOut</span><span class="tparams">[<span name="A">A &lt;: <span class="extype" name="shapeless.HList">HList</span></span>, <span name="L">L &lt;: <span class="extype" name="shapeless.HList">HList</span></span>, <span name="C">C &lt;: <span class="extype" name="shapeless.Coproduct">Coproduct</span></span>, <span name="Sup">Sup</span>, <span name="Repr">Repr<span class="tparams">[<span name="_">_</span>]</span></span>]</span><span class="result"> extends <a href="StreamOps$$FanIn.html" class="extype" name="swave.core.StreamOps.FanIn">FanIn</a>[<span class="extype" name="swave.core.StreamOps.BranchOut.L">L</span>, <span class="extype" name="swave.core.StreamOps.BranchOut.C">C</span>, <span class="extype" name="swave.core.StreamOps.BranchOut.Sup">Sup</span>, <span class="extype" name="swave.core.StreamOps.BranchOut.Repr">Repr</span>]</span>
+      </span>
+      </h4>
+      
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Closed fan-out, where the number of fan-out sub streams and their (potentially differing) types are predefined.
+</p></div><dl class="paramcmts block"><dt class="tparam">A</dt><dd class="cmt"><p>element types of the still unconsumed fan-out sub-streams as an HList</p></dd><dt class="tparam">L</dt><dd class="cmt"><p>element types of all unterminated fan-in sub-streams as an HList</p></dd><dt class="tparam">C</dt><dd class="cmt"><p>element types of all unterminated fan-in sub-streams as a Coproduct</p></dd><dt class="tparam">Sup</dt><dd class="cmt"><p>super-type of all unterminated fan-in sub-streams</p></dd><dt class="tparam">Repr</dt><dd class="cmt"><p>underlying representation</p></dd></dl><div class="toggleContainer block">
+          <span class="toggle">Linear Supertypes</span>
+          <div class="superTypes hiddenContent"><a href="StreamOps$$FanIn.html" class="extype" name="swave.core.StreamOps.FanIn">FanIn</a>[<span class="extype" name="swave.core.StreamOps.BranchOut.L">L</span>, <span class="extype" name="swave.core.StreamOps.BranchOut.C">C</span>, <span class="extype" name="swave.core.StreamOps.BranchOut.Sup">Sup</span>, <span class="extype" name="swave.core.StreamOps.BranchOut.Repr">Repr</span>], <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+        </div></div>
+        
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        <div id="order">
+              <span class="filtertype">Ordering</span>
+              <ol>
+                
+                <li class="alpha in"><span>Alphabetic</span></li>
+                <li class="inherit out"><span>By Inheritance</span></li>
+              </ol>
+            </div>
+        <div id="ancestors">
+                <span class="filtertype">Inherited<br />
+                </span>
+                <ol id="linearization">
+                  <li class="in" name="swave.core.StreamOps.BranchOut"><span>BranchOut</span></li><li class="in" name="swave.core.StreamOps.FanIn"><span>FanIn</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                </ol>
+              </div><div id="ancestors">
+            <span class="filtertype"></span>
+            <ol>
+              <li class="hideall out"><span>Hide All</span></li>
+              <li class="showall in"><span>Show All</span></li>
+            </ol>
+          </div>
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="swave.core.StreamOps.BranchOut.FI" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="FI[LL&lt;:shapeless.HList,CC&lt;:shapeless.Coproduct,S]=swave.core.StreamOps.BranchOut[A,LL,CC,S,Repr]"></a>
+      <a id="FI[LL&lt;:HList,CC&lt;:Coproduct,S]:FI[LL,CC,S]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">FI</span><span class="tparams">[<span name="LL">LL &lt;: <span class="extype" name="shapeless.HList">HList</span></span>, <span name="CC">CC &lt;: <span class="extype" name="shapeless.Coproduct">Coproduct</span></span>, <span name="S">S</span>]</span><span class="result"> = <a href="" class="extype" name="swave.core.StreamOps.BranchOut">BranchOut</a>[<span class="extype" name="swave.core.StreamOps.BranchOut.A">A</span>, <span class="extype" name="swave.core.StreamOps.BranchOut.FI.LL">LL</span>, <span class="extype" name="swave.core.StreamOps.BranchOut.FI.CC">CC</span>, <span class="extype" name="swave.core.StreamOps.BranchOut.FI.S">S</span>, <span class="extype" name="swave.core.StreamOps.BranchOut.Repr">Repr</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps$$BranchOut@FI[LL&lt;:shapeless.HList,CC&lt;:shapeless.Coproduct,S]=swave.core.StreamOps.BranchOut[A,LL,CC,S,Repr]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="swave.core.StreamOps.BranchOut">BranchOut</a> → <a href="StreamOps$$FanIn.html" class="extype" name="swave.core.StreamOps.FanIn">FanIn</a></dd></dl></div>
+    </li></ol>
+            </div>
+
+        
+
+        <div id="values" class="values members">
+              <h3>Value Members</h3>
+              <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="!=(x$1:Any):Boolean"></a>
+      <a id="!=(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps$$BranchOut@!=(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef###" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="##():Int"></a>
+      <a id="##():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps$$BranchOut@##():Int" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="==(x$1:Any):Boolean"></a>
+      <a id="==(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps$$BranchOut@==(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="swave.core.StreamOps.FanIn#asBranchOut" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="asBranchOut:swave.core.StreamOps.BranchOut[L,shapeless.HNil,shapeless.CNil,Nothing,Repr]"></a>
+      <a id="asBranchOut:BranchOut[L,HNil,CNil,Nothing,Repr]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">asBranchOut</span><span class="result">: <a href="" class="extype" name="swave.core.StreamOps.BranchOut">BranchOut</a>[<span class="extype" name="swave.core.StreamOps.BranchOut.L">L</span>, <span class="extype" name="shapeless.HNil">HNil</span>, <span class="extype" name="shapeless.CNil">CNil</span>, <span class="extype" name="scala.Nothing">Nothing</span>, <span class="extype" name="swave.core.StreamOps.BranchOut.Repr">Repr</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps$$BranchOut@asBranchOut:swave.core.StreamOps.BranchOut[L,shapeless.HNil,shapeless.CNil,Nothing,Repr]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="StreamOps$$FanIn.html" class="extype" name="swave.core.StreamOps.FanIn">FanIn</a></dd></dl></div>
+    </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="asInstanceOf[T0]:T0"></a>
+      <a id="asInstanceOf[T0]:T0"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps$$BranchOut@asInstanceOf[T0]:T0" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="swave.core.StreamOps.FanIn#attach" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="attach[T,Sup2,P&lt;:shapeless.HList,Q&lt;:shapeless.Coproduct](sub:swave.core.Spout[T])(implicitev0:shapeless.Lub[Sup,T,Sup2],implicitev1:shapeless.ops.hlist.Prepend.Aux[L,shapeless.::[T,shapeless.HNil],P],implicitev2:shapeless.ops.coproduct.Prepend.Aux[C,shapeless.:+:[T,shapeless.CNil],Q]):FanIn.this.FI[P,Q,Sup2]"></a>
+      <a id="attach[T,Sup2,P&lt;:HList,Q&lt;:Coproduct](Spout[T])(Lub[Sup,T,Sup2],shapeless.ops.hlist.Prepend.Aux[L,::[T,HNil],P],shapeless.ops.coproduct.Prepend.Aux[C,:+:[T,CNil],Q]):FI[P,Q,Sup2]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">attach</span><span class="tparams">[<span name="T">T</span>, <span name="Sup2">Sup2</span>, <span name="P">P &lt;: <span class="extype" name="shapeless.HList">HList</span></span>, <span name="Q">Q &lt;: <span class="extype" name="shapeless.Coproduct">Coproduct</span></span>]</span><span class="params">(<span name="sub">sub: <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a>[<span class="extype" name="swave.core.StreamOps.FanIn.attach.T">T</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="ev0">ev0: <span class="extype" name="shapeless.Lub">Lub</span>[<span class="extype" name="swave.core.StreamOps.BranchOut.Sup">Sup</span>, <span class="extype" name="swave.core.StreamOps.FanIn.attach.T">T</span>, <span class="extype" name="swave.core.StreamOps.FanIn.attach.Sup2">Sup2</span>]</span>, <span name="ev1">ev1: <span class="extype" name="shapeless.ops.hlist.LowPriorityPrepend.Aux">shapeless.ops.hlist.Prepend.Aux</span>[<span class="extype" name="swave.core.StreamOps.BranchOut.L">L</span>, <span class="extype" name="shapeless.::">::</span>[<span class="extype" name="swave.core.StreamOps.FanIn.attach.T">T</span>, <span class="extype" name="shapeless.HNil">HNil</span>], <span class="extype" name="swave.core.StreamOps.FanIn.attach.P">P</span>]</span>, <span name="ev2">ev2: <span class="extype" name="shapeless.ops.coproduct.LowestPriorityPrepend.Aux">shapeless.ops.coproduct.Prepend.Aux</span>[<span class="extype" name="swave.core.StreamOps.BranchOut.C">C</span>, <span class="extype" name="shapeless.:+:">:+:</span>[<span class="extype" name="swave.core.StreamOps.FanIn.attach.T">T</span>, <span class="extype" name="shapeless.CNil">CNil</span>], <span class="extype" name="swave.core.StreamOps.FanIn.attach.Q">Q</span>]</span>)</span><span class="result">: <a href="#FI[LL&lt;:shapeless.HList,CC&lt;:shapeless.Coproduct,S]=swave.core.StreamOps.BranchOut[A,LL,CC,S,Repr]" class="extmbr" name="swave.core.StreamOps.BranchOut.FI">FI</a>[<span class="extype" name="swave.core.StreamOps.FanIn.attach.P">P</span>, <span class="extype" name="swave.core.StreamOps.FanIn.attach.Q">Q</span>, <span class="extype" name="swave.core.StreamOps.FanIn.attach.Sup2">Sup2</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps$$BranchOut@attach[T,Sup2,P&lt;:shapeless.HList,Q&lt;:shapeless.Coproduct](sub:swave.core.Spout[T])(implicitev0:shapeless.Lub[Sup,T,Sup2],implicitev1:shapeless.ops.hlist.Prepend.Aux[L,shapeless.::[T,shapeless.HNil],P],implicitev2:shapeless.ops.coproduct.Prepend.Aux[C,shapeless.:+:[T,shapeless.CNil],Q]):FanIn.this.FI[P,Q,Sup2]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="StreamOps$$FanIn.html" class="extype" name="swave.core.StreamOps.FanIn">FanIn</a></dd></dl></div>
+    </li><li name="swave.core.StreamOps.FanIn#attachAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="attachAll[S,Sup2&gt;:Sup](subs:Traversable[S])(implicitev:swave.core.Streamable.Aux[S,Sup2]):swave.core.StreamOps.FanIn0[Sup2,Repr]"></a>
+      <a id="attachAll[S,Sup2&gt;:Sup](Traversable[S])(Aux[S,Sup2]):FanIn0[Sup2,Repr]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">attachAll</span><span class="tparams">[<span name="S">S</span>, <span name="Sup2">Sup2 &gt;: <span class="extype" name="swave.core.StreamOps.BranchOut.Sup">Sup</span></span>]</span><span class="params">(<span name="subs">subs: <span class="extype" name="scala.Traversable">Traversable</span>[<span class="extype" name="swave.core.StreamOps.FanIn.attachAll.S">S</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="ev">ev: <a href="Streamable$.html#Aux[T,Out0]=swave.core.Streamable[T]{typeOut=Out0}" class="extmbr" name="swave.core.Streamable.Aux">Aux</a>[<span class="extype" name="swave.core.StreamOps.FanIn.attachAll.S">S</span>, <span class="extype" name="swave.core.StreamOps.FanIn.attachAll.Sup2">Sup2</span>]</span>)</span><span class="result">: <a href="StreamOps$$FanIn0.html" class="extype" name="swave.core.StreamOps.FanIn0">FanIn0</a>[<span class="extype" name="swave.core.StreamOps.FanIn.attachAll.Sup2">Sup2</span>, <span class="extype" name="swave.core.StreamOps.BranchOut.Repr">Repr</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps$$BranchOut@attachAll[S,Sup2&gt;:Sup](subs:Traversable[S])(implicitev:swave.core.Streamable.Aux[S,Sup2]):swave.core.StreamOps.FanIn0[Sup2,Repr]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="StreamOps$$FanIn.html" class="extype" name="swave.core.StreamOps.FanIn">FanIn</a></dd></dl></div>
+    </li><li name="swave.core.StreamOps.FanIn#attachLeft" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="attachLeft[T,Sup2](sub:swave.core.Spout[T])(implicitev:shapeless.Lub[Sup,T,Sup2]):FanIn.this.FI[shapeless.::[T,L],shapeless.:+:[T,C],Sup2]"></a>
+      <a id="attachLeft[T,Sup2](Spout[T])(Lub[Sup,T,Sup2]):FI[::[T,L],:+:[T,C],Sup2]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">attachLeft</span><span class="tparams">[<span name="T">T</span>, <span name="Sup2">Sup2</span>]</span><span class="params">(<span name="sub">sub: <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a>[<span class="extype" name="swave.core.StreamOps.FanIn.attachLeft.T">T</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="ev">ev: <span class="extype" name="shapeless.Lub">Lub</span>[<span class="extype" name="swave.core.StreamOps.BranchOut.Sup">Sup</span>, <span class="extype" name="swave.core.StreamOps.FanIn.attachLeft.T">T</span>, <span class="extype" name="swave.core.StreamOps.FanIn.attachLeft.Sup2">Sup2</span>]</span>)</span><span class="result">: <a href="#FI[LL&lt;:shapeless.HList,CC&lt;:shapeless.Coproduct,S]=swave.core.StreamOps.BranchOut[A,LL,CC,S,Repr]" class="extmbr" name="swave.core.StreamOps.BranchOut.FI">FI</a>[<span class="extype" name="shapeless.::">::</span>[<span class="extype" name="swave.core.StreamOps.FanIn.attachLeft.T">T</span>, <span class="extype" name="swave.core.StreamOps.BranchOut.L">L</span>], <span class="extype" name="shapeless.:+:">:+:</span>[<span class="extype" name="swave.core.StreamOps.FanIn.attachLeft.T">T</span>, <span class="extype" name="swave.core.StreamOps.BranchOut.C">C</span>], <span class="extype" name="swave.core.StreamOps.FanIn.attachLeft.Sup2">Sup2</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps$$BranchOut@attachLeft[T,Sup2](sub:swave.core.Spout[T])(implicitev:shapeless.Lub[Sup,T,Sup2]):FanIn.this.FI[shapeless.::[T,L],shapeless.:+:[T,C],Sup2]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="StreamOps$$FanIn.html" class="extype" name="swave.core.StreamOps.FanIn">FanIn</a></dd></dl></div>
+    </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="clone():Object"></a>
+      <a id="clone():AnyRef"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps$$BranchOut@clone():Object" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.CloneNotSupportedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="swave.core.StreamOps.BranchOut#continue" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="continue(implicitev0:swave.core.StreamOps.ContinueReq0[L],implicitev1:swave.core.StreamOps.ContinueReq1[L]):Repr[ev1.Out]"></a>
+      <a id="continue(ContinueReq0[L],ContinueReq1[L]):Repr[Out]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">continue</span><span class="params">(<span class="implicit">implicit </span><span name="ev0">ev0: <span class="extype" name="swave.core.StreamOps.ContinueReq0">ContinueReq0</span>[<span class="extype" name="swave.core.StreamOps.BranchOut.L">L</span>]</span>, <span name="ev1">ev1: <span class="extype" name="swave.core.StreamOps.ContinueReq1">ContinueReq1</span>[<span class="extype" name="swave.core.StreamOps.BranchOut.L">L</span>]</span>)</span><span class="result">: <span class="extype" name="swave.core.StreamOps.BranchOut.Repr">Repr</span>[<a href="impl/TypeLogic$$IsSingle.html#Out" class="extmbr" name="swave.core.impl.TypeLogic.IsSingle.Out">Out</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps$$BranchOut@continue(implicitev0:swave.core.StreamOps.ContinueReq0[L],implicitev1:swave.core.StreamOps.ContinueReq1[L]):Repr[ev1.Out]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="swave.core.StreamOps.BranchOut#copy" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="copy[LL&lt;:shapeless.HList,CC&lt;:shapeless.Coproduct,S](subs:swave.core.impl.util.InportList):BranchOut.this.FI[LL,CC,S]"></a>
+      <a id="copy[LL&lt;:HList,CC&lt;:Coproduct,S](InportList):FI[LL,CC,S]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">copy</span><span class="tparams">[<span name="LL">LL &lt;: <span class="extype" name="shapeless.HList">HList</span></span>, <span name="CC">CC &lt;: <span class="extype" name="shapeless.Coproduct">Coproduct</span></span>, <span name="S">S</span>]</span><span class="params">(<span name="subs">subs: <span class="extype" name="swave.core.impl.util.InportList">InportList</span></span>)</span><span class="result">: <a href="#FI[LL&lt;:shapeless.HList,CC&lt;:shapeless.Coproduct,S]=swave.core.StreamOps.BranchOut[A,LL,CC,S,Repr]" class="extmbr" name="swave.core.StreamOps.BranchOut.FI">FI</a>[<span class="extype" name="swave.core.StreamOps.BranchOut.copy.LL">LL</span>, <span class="extype" name="swave.core.StreamOps.BranchOut.copy.CC">CC</span>, <span class="extype" name="swave.core.StreamOps.BranchOut.copy.S">S</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps$$BranchOut@copy[LL&lt;:shapeless.HList,CC&lt;:shapeless.Coproduct,S](subs:swave.core.impl.util.InportList):BranchOut.this.FI[LL,CC,S]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="swave.core.StreamOps.BranchOut">BranchOut</a> → <a href="StreamOps$$FanIn.html" class="extype" name="swave.core.StreamOps.FanIn">FanIn</a></dd></dl></div>
+    </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="eq(x$1:AnyRef):Boolean"></a>
+      <a id="eq(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps$$BranchOut@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#equals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="equals(x$1:Any):Boolean"></a>
+      <a id="equals(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps$$BranchOut@equals(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="swave.core.StreamOps.FanIn#fanInConcat" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="fanInConcat(implicitev:swave.core.StreamOps.FanInReq[L]):Repr[Sup]"></a>
+      <a id="fanInConcat(FanInReq[L]):Repr[Sup]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">fanInConcat</span><span class="params">(<span class="implicit">implicit </span><span name="ev">ev: <span class="extype" name="swave.core.StreamOps.FanInReq">FanInReq</span>[<span class="extype" name="swave.core.StreamOps.BranchOut.L">L</span>]</span>)</span><span class="result">: <span class="extype" name="swave.core.StreamOps.BranchOut.Repr">Repr</span>[<span class="extype" name="swave.core.StreamOps.BranchOut.Sup">Sup</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps$$BranchOut@fanInConcat(implicitev:swave.core.StreamOps.FanInReq[L]):Repr[Sup]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="StreamOps$$FanIn.html" class="extype" name="swave.core.StreamOps.FanIn">FanIn</a></dd></dl></div>
+    </li><li name="swave.core.StreamOps.FanIn#fanInFirstNonEmpty" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="fanInFirstNonEmpty(implicitev:swave.core.StreamOps.FanInReq[L]):Repr[Sup]"></a>
+      <a id="fanInFirstNonEmpty(FanInReq[L]):Repr[Sup]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">fanInFirstNonEmpty</span><span class="params">(<span class="implicit">implicit </span><span name="ev">ev: <span class="extype" name="swave.core.StreamOps.FanInReq">FanInReq</span>[<span class="extype" name="swave.core.StreamOps.BranchOut.L">L</span>]</span>)</span><span class="result">: <span class="extype" name="swave.core.StreamOps.BranchOut.Repr">Repr</span>[<span class="extype" name="swave.core.StreamOps.BranchOut.Sup">Sup</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps$$BranchOut@fanInFirstNonEmpty(implicitev:swave.core.StreamOps.FanInReq[L]):Repr[Sup]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="StreamOps$$FanIn.html" class="extype" name="swave.core.StreamOps.FanIn">FanIn</a></dd></dl></div>
+    </li><li name="swave.core.StreamOps.FanIn#fanInInterleave" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="fanInInterleave(segmentSize:Int,eagerComplete:Boolean)(implicitev:swave.core.StreamOps.FanInReq[L]):Repr[Sup]"></a>
+      <a id="fanInInterleave(Int,Boolean)(FanInReq[L]):Repr[Sup]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">fanInInterleave</span><span class="params">(<span name="segmentSize">segmentSize: <span class="extype" name="scala.Int">Int</span></span>, <span name="eagerComplete">eagerComplete: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="ev">ev: <span class="extype" name="swave.core.StreamOps.FanInReq">FanInReq</span>[<span class="extype" name="swave.core.StreamOps.BranchOut.L">L</span>]</span>)</span><span class="result">: <span class="extype" name="swave.core.StreamOps.BranchOut.Repr">Repr</span>[<span class="extype" name="swave.core.StreamOps.BranchOut.Sup">Sup</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps$$BranchOut@fanInInterleave(segmentSize:Int,eagerComplete:Boolean)(implicitev:swave.core.StreamOps.FanInReq[L]):Repr[Sup]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="StreamOps$$FanIn.html" class="extype" name="swave.core.StreamOps.FanIn">FanIn</a></dd></dl></div>
+    </li><li name="swave.core.StreamOps.FanIn#fanInMerge" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="fanInMerge(eagerComplete:Boolean)(implicitev:swave.core.StreamOps.FanInReq[L]):Repr[Sup]"></a>
+      <a id="fanInMerge(Boolean)(FanInReq[L]):Repr[Sup]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">fanInMerge</span><span class="params">(<span name="eagerComplete">eagerComplete: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="ev">ev: <span class="extype" name="swave.core.StreamOps.FanInReq">FanInReq</span>[<span class="extype" name="swave.core.StreamOps.BranchOut.L">L</span>]</span>)</span><span class="result">: <span class="extype" name="swave.core.StreamOps.BranchOut.Repr">Repr</span>[<span class="extype" name="swave.core.StreamOps.BranchOut.Sup">Sup</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps$$BranchOut@fanInMerge(eagerComplete:Boolean)(implicitev:swave.core.StreamOps.FanInReq[L]):Repr[Sup]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="StreamOps$$FanIn.html" class="extype" name="swave.core.StreamOps.FanIn">FanIn</a></dd></dl></div>
+    </li><li name="swave.core.StreamOps.FanIn#fanInMergeSorted" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="fanInMergeSorted(eagerComplete:Boolean)(implicitev:swave.core.StreamOps.FanInReq[L],implicitord:Ordering[Sup]):Repr[Sup]"></a>
+      <a id="fanInMergeSorted(Boolean)(FanInReq[L],Ordering[Sup]):Repr[Sup]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">fanInMergeSorted</span><span class="params">(<span name="eagerComplete">eagerComplete: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="ev">ev: <span class="extype" name="swave.core.StreamOps.FanInReq">FanInReq</span>[<span class="extype" name="swave.core.StreamOps.BranchOut.L">L</span>]</span>, <span name="ord">ord: <span class="extype" name="scala.Ordering">Ordering</span>[<span class="extype" name="swave.core.StreamOps.BranchOut.Sup">Sup</span>]</span>)</span><span class="result">: <span class="extype" name="swave.core.StreamOps.BranchOut.Repr">Repr</span>[<span class="extype" name="swave.core.StreamOps.BranchOut.Sup">Sup</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps$$BranchOut@fanInMergeSorted(eagerComplete:Boolean)(implicitev:swave.core.StreamOps.FanInReq[L],implicitord:Ordering[Sup]):Repr[Sup]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="StreamOps$$FanIn.html" class="extype" name="swave.core.StreamOps.FanIn">FanIn</a></dd></dl></div>
+    </li><li name="swave.core.StreamOps.FanIn#fanInToCoproduct" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="fanInToCoproduct(eagerComplete:Boolean)(implicitev:swave.core.StreamOps.FanInReq[L]):Repr[C]"></a>
+      <a id="fanInToCoproduct(Boolean)(FanInReq[L]):Repr[C]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">fanInToCoproduct</span><span class="params">(<span name="eagerComplete">eagerComplete: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">true</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="ev">ev: <span class="extype" name="swave.core.StreamOps.FanInReq">FanInReq</span>[<span class="extype" name="swave.core.StreamOps.BranchOut.L">L</span>]</span>)</span><span class="result">: <span class="extype" name="swave.core.StreamOps.BranchOut.Repr">Repr</span>[<span class="extype" name="swave.core.StreamOps.BranchOut.C">C</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps$$BranchOut@fanInToCoproduct(eagerComplete:Boolean)(implicitev:swave.core.StreamOps.FanInReq[L]):Repr[C]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="StreamOps$$FanIn.html" class="extype" name="swave.core.StreamOps.FanIn">FanIn</a></dd></dl></div>
+    </li><li name="swave.core.StreamOps.FanIn#fanInToHList" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="fanInToHList(implicitev:swave.core.StreamOps.FanInReq[L]):Repr[L]"></a>
+      <a id="fanInToHList(FanInReq[L]):Repr[L]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">fanInToHList</span><span class="params">(<span class="implicit">implicit </span><span name="ev">ev: <span class="extype" name="swave.core.StreamOps.FanInReq">FanInReq</span>[<span class="extype" name="swave.core.StreamOps.BranchOut.L">L</span>]</span>)</span><span class="result">: <span class="extype" name="swave.core.StreamOps.BranchOut.Repr">Repr</span>[<span class="extype" name="swave.core.StreamOps.BranchOut.L">L</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps$$BranchOut@fanInToHList(implicitev:swave.core.StreamOps.FanInReq[L]):Repr[L]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="StreamOps$$FanIn.html" class="extype" name="swave.core.StreamOps.FanIn">FanIn</a></dd></dl></div>
+    </li><li name="swave.core.StreamOps.FanIn#fanInToProduct" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="fanInToProduct[T](implicitev:swave.core.StreamOps.FanInReq[L],implicitgen:swave.core.StreamOps.Productable[T,L]):Repr[T]"></a>
+      <a id="fanInToProduct[T](FanInReq[L],Productable[T,L]):Repr[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">fanInToProduct</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span class="implicit">implicit </span><span name="ev">ev: <span class="extype" name="swave.core.StreamOps.FanInReq">FanInReq</span>[<span class="extype" name="swave.core.StreamOps.BranchOut.L">L</span>]</span>, <span name="gen">gen: <span class="extype" name="swave.core.StreamOps.Productable">Productable</span>[<span class="extype" name="swave.core.StreamOps.FanIn.fanInToProduct.T">T</span>, <span class="extype" name="swave.core.StreamOps.BranchOut.L">L</span>]</span>)</span><span class="result">: <span class="extype" name="swave.core.StreamOps.BranchOut.Repr">Repr</span>[<span class="extype" name="swave.core.StreamOps.FanIn.fanInToProduct.T">T</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps$$BranchOut@fanInToProduct[T](implicitev:swave.core.StreamOps.FanInReq[L],implicitgen:swave.core.StreamOps.Productable[T,L]):Repr[T]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="StreamOps$$FanIn.html" class="extype" name="swave.core.StreamOps.FanIn">FanIn</a></dd></dl></div>
+    </li><li name="swave.core.StreamOps.FanIn#fanInToSum" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="fanInToSum[T](eagerComplete:Boolean)(implicitev:swave.core.StreamOps.FanInReq[L],implicitgen:swave.core.StreamOps.Summable[T,C]):Repr[T]"></a>
+      <a id="fanInToSum[T](Boolean)(FanInReq[L],Summable[T,C]):Repr[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">fanInToSum</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="eagerComplete">eagerComplete: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">true</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="ev">ev: <span class="extype" name="swave.core.StreamOps.FanInReq">FanInReq</span>[<span class="extype" name="swave.core.StreamOps.BranchOut.L">L</span>]</span>, <span name="gen">gen: <span class="extype" name="swave.core.StreamOps.Summable">Summable</span>[<span class="extype" name="swave.core.StreamOps.FanIn.fanInToSum.T">T</span>, <span class="extype" name="swave.core.StreamOps.BranchOut.C">C</span>]</span>)</span><span class="result">: <span class="extype" name="swave.core.StreamOps.BranchOut.Repr">Repr</span>[<span class="extype" name="swave.core.StreamOps.FanIn.fanInToSum.T">T</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps$$BranchOut@fanInToSum[T](eagerComplete:Boolean)(implicitev:swave.core.StreamOps.FanInReq[L],implicitgen:swave.core.StreamOps.Summable[T,C]):Repr[T]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="StreamOps$$FanIn.html" class="extype" name="swave.core.StreamOps.FanIn">FanIn</a></dd></dl></div>
+    </li><li name="swave.core.StreamOps.FanIn#fanInToTuple" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="fanInToTuple(implicitev:swave.core.StreamOps.FanInReq[L],implicitt:swave.core.StreamOps.Tuplable[L]):Repr[t.Out]"></a>
+      <a id="fanInToTuple(FanInReq[L],Tuplable[L]):Repr[shapeless.ops.hlist.Tupler.Out]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">fanInToTuple</span><span class="params">(<span class="implicit">implicit </span><span name="ev">ev: <span class="extype" name="swave.core.StreamOps.FanInReq">FanInReq</span>[<span class="extype" name="swave.core.StreamOps.BranchOut.L">L</span>]</span>, <span name="t">t: <span class="extype" name="swave.core.StreamOps.Tuplable">Tuplable</span>[<span class="extype" name="swave.core.StreamOps.BranchOut.L">L</span>]</span>)</span><span class="result">: <span class="extype" name="swave.core.StreamOps.BranchOut.Repr">Repr</span>[<span class="extype" name="shapeless.DepFn1.Out">shapeless.ops.hlist.Tupler.Out</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps$$BranchOut@fanInToTuple(implicitev:swave.core.StreamOps.FanInReq[L],implicitt:swave.core.StreamOps.Tuplable[L]):Repr[t.Out]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="StreamOps$$FanIn.html" class="extype" name="swave.core.StreamOps.FanIn">FanIn</a></dd></dl></div>
+    </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="finalize():Unit"></a>
+      <a id="finalize():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps$$BranchOut@finalize():Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Throwable]</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="swave.core.StreamOps.FanIn#fromFanInVia" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="fromFanInVia[P&lt;:shapeless.HList,R,Out](joined:swave.core.Module.TypeLogic.Joined[L,P,R])(implicitvr:swave.core.impl.TypeLogic.ViaResult[P,swave.core.Piping[R],Repr,Out]):Out"></a>
+      <a id="fromFanInVia[P&lt;:HList,R,Out](Joined[L,P,R])(ViaResult[P,Piping[R],Repr,Out]):Out"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">fromFanInVia</span><span class="tparams">[<span name="P">P &lt;: <span class="extype" name="shapeless.HList">HList</span></span>, <span name="R">R</span>, <span name="Out">Out</span>]</span><span class="params">(<span name="joined">joined: <a href="Module$$TypeLogic$$Joined.html" class="extype" name="swave.core.Module.TypeLogic.Joined">Joined</a>[<span class="extype" name="swave.core.StreamOps.BranchOut.L">L</span>, <span class="extype" name="swave.core.StreamOps.FanIn.fromFanInVia.P">P</span>, <span class="extype" name="swave.core.StreamOps.FanIn.fromFanInVia.R">R</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="vr">vr: <a href="impl/TypeLogic$$ViaResult.html" class="extype" name="swave.core.impl.TypeLogic.ViaResult">ViaResult</a>[<span class="extype" name="swave.core.StreamOps.FanIn.fromFanInVia.P">P</span>, <a href="Piping.html" class="extype" name="swave.core.Piping">Piping</a>[<span class="extype" name="swave.core.StreamOps.FanIn.fromFanInVia.R">R</span>], <span class="extype" name="swave.core.StreamOps.BranchOut.Repr">Repr</span>, <span class="extype" name="swave.core.StreamOps.FanIn.fromFanInVia.Out">Out</span>]</span>)</span><span class="result">: <span class="extype" name="swave.core.StreamOps.FanIn.fromFanInVia.Out">Out</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps$$BranchOut@fromFanInVia[P&lt;:shapeless.HList,R,Out](joined:swave.core.Module.TypeLogic.Joined[L,P,R])(implicitvr:swave.core.impl.TypeLogic.ViaResult[P,swave.core.Piping[R],Repr,Out]):Out" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="StreamOps$$FanIn.html" class="extype" name="swave.core.StreamOps.FanIn">FanIn</a></dd></dl></div>
+    </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getClass():Class[_]"></a>
+      <a id="getClass():Class[_]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps$$BranchOut@getClass():Class[_]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hashCode():Int"></a>
+      <a id="hashCode():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps$$BranchOut@hashCode():Int" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps$$BranchOut@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ne(x$1:AnyRef):Boolean"></a>
+      <a id="ne(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps$$BranchOut@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notify():Unit"></a>
+      <a id="notify():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps$$BranchOut@notify():Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#notifyAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notifyAll():Unit"></a>
+      <a id="notifyAll():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps$$BranchOut@notifyAll():Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="swave.core.StreamOps.FanIn#rawWrap" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="rawWrap:swave.core.impl.Inport=&gt;Repr[_]"></a>
+      <a id="rawWrap:(Inport)⇒Repr[_]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">rawWrap</span><span class="result">: (<span class="extype" name="swave.core.impl.Inport">Inport</span>) ⇒ <span class="extype" name="swave.core.StreamOps.BranchOut.Repr">Repr</span>[_]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps$$BranchOut@rawWrap:swave.core.impl.Inport=&gt;Repr[_]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="StreamOps$$FanIn.html" class="extype" name="swave.core.StreamOps.FanIn">FanIn</a></dd></dl></div>
+    </li><li name="swave.core.StreamOps.BranchOut#sub" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="sub(implicitev:swave.core.StreamOps.SubReq[A]):swave.core.StreamOps.SubStreamOps[ev.H,L,C,Sup,Repr,swave.core.StreamOps.BranchOut[ev.T,L,C,Sup,Repr]]"></a>
+      <a id="sub(SubReq[A]):SubStreamOps[H,L,C,Sup,Repr,BranchOut[T,L,C,Sup,Repr]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">sub</span><span class="params">(<span class="implicit">implicit </span><span name="ev">ev: <span class="extype" name="swave.core.StreamOps.SubReq">SubReq</span>[<span class="extype" name="swave.core.StreamOps.BranchOut.A">A</span>]</span>)</span><span class="result">: <a href="StreamOps$$SubStreamOps.html" class="extype" name="swave.core.StreamOps.SubStreamOps">SubStreamOps</a>[<a href="impl/TypeLogic$$IsHCons.html#H" class="extmbr" name="swave.core.impl.TypeLogic.IsHCons.H">H</a>, <span class="extype" name="swave.core.StreamOps.BranchOut.L">L</span>, <span class="extype" name="swave.core.StreamOps.BranchOut.C">C</span>, <span class="extype" name="swave.core.StreamOps.BranchOut.Sup">Sup</span>, <span class="extype" name="swave.core.StreamOps.BranchOut.Repr">Repr</span>, <a href="" class="extype" name="swave.core.StreamOps.BranchOut">BranchOut</a>[<a href="impl/TypeLogic$$IsHCons.html#T&lt;:shapeless.HList" class="extmbr" name="swave.core.impl.TypeLogic.IsHCons.T">T</a>, <span class="extype" name="swave.core.StreamOps.BranchOut.L">L</span>, <span class="extype" name="swave.core.StreamOps.BranchOut.C">C</span>, <span class="extype" name="swave.core.StreamOps.BranchOut.Sup">Sup</span>, <span class="extype" name="swave.core.StreamOps.BranchOut.Repr">Repr</span>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps$$BranchOut@sub(implicitev:swave.core.StreamOps.SubReq[A]):swave.core.StreamOps.SubStreamOps[ev.H,L,C,Sup,Repr,swave.core.StreamOps.BranchOut[ev.T,L,C,Sup,Repr]]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="swave.core.StreamOps.BranchOut#subContinue" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="subContinue(implicitev0:swave.core.StreamOps.SubContinueReq0[L],implicitev1:swave.core.StreamOps.SubContinueReq1[L]):Repr[A]"></a>
+      <a id="subContinue(SubContinueReq0[L],SubContinueReq1[L]):Repr[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">subContinue</span><span class="params">(<span class="implicit">implicit </span><span name="ev0">ev0: <span class="extype" name="swave.core.StreamOps.SubContinueReq0">SubContinueReq0</span>[<span class="extype" name="swave.core.StreamOps.BranchOut.L">L</span>]</span>, <span name="ev1">ev1: <span class="extype" name="swave.core.StreamOps.SubContinueReq1">SubContinueReq1</span>[<span class="extype" name="swave.core.StreamOps.BranchOut.L">L</span>]</span>)</span><span class="result">: <span class="extype" name="swave.core.StreamOps.BranchOut.Repr">Repr</span>[<span class="extype" name="swave.core.StreamOps.BranchOut.A">A</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps$$BranchOut@subContinue(implicitev0:swave.core.StreamOps.SubContinueReq0[L],implicitev1:swave.core.StreamOps.SubContinueReq1[L]):Repr[A]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
+      <a id="synchronized[T0](⇒T0):T0"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps$$BranchOut@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="toString():String"></a>
+      <a id="toString():String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps$$BranchOut@toString():String" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait():Unit"></a>
+      <a id="wait():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps$$BranchOut@wait():Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long,x$2:Int):Unit"></a>
+      <a id="wait(Long,Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps$$BranchOut@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long):Unit"></a>
+      <a id="wait(Long):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps$$BranchOut@wait(x$1:Long):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="swave.core.StreamOps.FanIn#wrap" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wrap[T](in:swave.core.impl.Inport):Repr[T]"></a>
+      <a id="wrap[T](Inport):Repr[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wrap</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="in">in: <span class="extype" name="swave.core.impl.Inport">Inport</span></span>)</span><span class="result">: <span class="extype" name="swave.core.StreamOps.BranchOut.Repr">Repr</span>[<span class="extype" name="swave.core.StreamOps.FanIn.wrap.T">T</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps$$BranchOut@wrap[T](in:swave.core.impl.Inport):Repr[T]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="StreamOps$$FanIn.html" class="extype" name="swave.core.StreamOps.FanIn">FanIn</a></dd></dl></div>
+    </li></ol>
+            </div>
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        <div class="parent" name="swave.core.StreamOps.FanIn">
+              <h3>Inherited from <a href="StreamOps$$FanIn.html" class="extype" name="swave.core.StreamOps.FanIn">FanIn</a>[<span class="extype" name="swave.core.StreamOps.BranchOut.L">L</span>, <span class="extype" name="swave.core.StreamOps.BranchOut.C">C</span>, <span class="extype" name="swave.core.StreamOps.BranchOut.Sup">Sup</span>, <span class="extype" name="swave.core.StreamOps.BranchOut.Repr">Repr</span>]</h3>
+            </div><div class="parent" name="scala.AnyRef">
+              <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+            </div>
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>
