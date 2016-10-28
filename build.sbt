@@ -126,7 +126,7 @@ val scalacheck             = "org.scalacheck"             %%  "scalacheck"      
 val `reactive-streams-tck` = "org.reactivestreams"        %   "reactive-streams-tck"  % "1.0.0"   % "test"
 
 // examples
-val `akka-http-core`       = "com.typesafe.akka"          %%  "akka-http-core"        % "2.4.8"
+val `akka-http-core`       = "com.typesafe.akka"          %%  "akka-http-core"        % "2.4.11"
 val logback                = "ch.qos.logback"             %   "logback-classic"       % "1.1.7"
 
 /////////////////////// PROJECTS /////////////////////////
