@@ -1,11 +1,23 @@
+Version 0.5 (2016-10-28)
+------------------------
+
+- Added `docs` sub-project
+- Added `split` transformation
+- Added `Spout::drainToHead` and `Spout::drainToMkString`
+- Split out `bufferDropping` transformation, introduce `Buffer.RequestStrategy`
+- Introduced `UnterminatedSynchronousStreamException`
+- Removed `Streamable` creation for mutable `Seq`s
+- Smaller fixes and improvements
+
+
 Version 0.5-M4 (2016-09-26)
 ---------------------------
 
-- Added operation implementations for:
+- Added transformation implementations for:
   delay, expand, flattenMerge, groupBy, groupedWithin, headAndTail, intersperse, mapAsync, mapAsyncUnordered, multiply,
   prefixAndTail, recover, recoverToTry, recoverWith, reduce, takeLast, takeWhile, takeWithin, withCompletionTimeout,
   withIdleTimeout, withInitialTimeout
-- Implement `PushSpout`, closes #13
+- Implement `PushSpout` (#13)
 - Implement `Spout.tick`, `Spout.unfold` and `Spout.unfoldAsync`
 - Implement `Drain.headOption`
 - Many smaller fixes and improvements
@@ -15,7 +27,7 @@ Version 0.5-M3 (2016-07-21)
 ---------------------------
 
 - Renamed `swave.core.Stream` to `swave.core.Spout`
-- Add `throttle` op, `Spout.lazyStart`, `Spout.fromFuture` and `Drain.lazyStart`
+- Add `throttle` transformation, `Spout.lazyStart`, `Spout.fromFuture` and `Drain.lazyStart`
 - Add `swave-akka-compat` and `swave-scodec-compat` modules
 - Add `swave.core.io.files` (file streaming, draining to files)
 - Add basic StreamEnv extension infrastructure
