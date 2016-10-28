@@ -186,12 +186,111 @@
   <li>
   <p>Edit the documentation files inside the <code>docs/src/paradox</code> subdirectory.  After saving a file SBT will automatically regenerate the site and you can reload the page in the browser  to see your changes.</p></li>
 </ul>
-<h2><a href="#git-branching-model" name="git-branching-model" class="anchor"><span class="anchor-link"></span></a>GIT Branching Model</h2>
-<p>The <em>swave</em> team follows the &ldquo;standard&rdquo; practice of using the <code>master</code> branch as main integration branch, with WIP- and feature branches branching of it. The rule is to keep the <code>master</code> branch always &ldquo;in good shape&rdquo;, i.e. having it compile and test cleanly.</p>
-<p>Additionally we might maintain release branches for older and possibly future releases.</p>
 <h2><a href="#issue-tracking" name="issue-tracking" class="anchor"><span class="anchor-link"></span></a>Issue Tracking</h2>
 <p>The <em>swave</em> team uses the <a href="https://github.com/sirthias/swave/issues">Issues Page</a> of the projects <a href="https://github.com/sirthias/swave/">github repository</a> for issue management. If you find a bug and would like to report it please go there and create an issue.</p>
 <p>If you are unsure, whether the problem you&rsquo;ve found really is a bug please ask on the <a href="../support.html">Mailing List</a> first.</p>
+<h2><a href="#git-branching-model" name="git-branching-model" class="anchor"><span class="anchor-link"></span></a>GIT Branching Model</h2>
+<p>The <em>swave</em> team follows the &ldquo;standard&rdquo; practice of using the <code>master</code> branch as main integration branch, with WIP- and feature branches branching of it. The rule is to keep the <code>master</code> branch always &ldquo;in good shape&rdquo;, i.e. having it compile and test cleanly.</p>
+<p>Additionally we might maintain release branches for older and possibly future releases.</p>
+<h2><a href="#git-commit-messages" name="git-commit-messages" class="anchor"><span class="anchor-link"></span></a>GIT Commit Messages</h2>
+<p>We try to follow the <a href="http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html">imperative present tense style for commit messages</a> and additionally prefix each message with some simple meta data that make it easier to see</p>
+<ul>
+  <li>how the public API is affected by the commit</li>
+  <li>what sub-project(s) the commit mainly affects</li>
+  <li>which ticket the commit is associated with</li>
+</ul>
+<p>Here are three exemplary (and made-up) commit messages to illustrate the concept:</p>
+<pre><code class="nohighlight">=tsk #123 fix incorrect display of unterminated output state
+
++cor #234 add `takeWithin` transformation
+
+!cak,csc #345 clean up package structure
+</code></pre>
+<p>Following this naming pattern for <em>all</em> commits (except for merges, which start with &ldquo;Merge&rdquo;) is extremely helpful when looking at the commit history. Also, it makes the generation of CHANGELOG entries and release notes much easier.</p>
+<h3><a href="#api-effect-category" name="api-effect-category" class="anchor"><span class="anchor-link"></span></a>API Effect Category</h3>
+<p>The first character classifies the effect of the commit on the public <em>swave</em> API that we try to keep as stable as possible. Requiring this marker makes sure that the committer has actively thought about the effects of the commit on the public API. There are three categories:</p>
+<table>
+  <thead>
+    <tr>
+      <th align="center">Marker</th>
+      <th>Category </th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="center"><code>=</code> </td>
+      <td>Neutral </td>
+      <td>Only touches things &ldquo;under the hood&rdquo; and has no effect on <em>swave&rsquo;s</em> public API.</td>
+    </tr>
+    <tr>
+      <td align="center"><code>+</code> </td>
+      <td>Extending</td>
+      <td>Extends the API by adding things. In rare cases this might break code due to things like identifier shadowing but is generally considered a &ldquo;safe&rdquo; change.</td>
+    </tr>
+    <tr>
+      <td align="center"><code>!</code> </td>
+      <td>Breaking </td>
+      <td>Changes or removes public API elements. Will definitely break user code relying on these parts of the API surface.</td>
+    </tr>
+  </tbody>
+</table>
+<p>Note that apart from the actual Scala interfaces the public API surface covered by these categories also includes configuration settings (most importantly the <code>reference.conf</code> files).</p>
+<h3><a href="#project-identifier-s-" name="project-identifier-s-" class="anchor"><span class="anchor-link"></span></a>Project Identifier(s)</h3>
+<p>Immediately after the initial &ldquo;API Effect Category Marker&rdquo; we list all sub-projects touched by the commit (in decreasing order of &ldquo;affectedness&rdquo; and separated by a simple comma without spaces). In order to keep things concise the projects are identified with these simple 3-letter abbreviations:</p>
+<table>
+  <thead>
+    <tr>
+      <th>Sub-Project </th>
+      <th align="center">Abbreviation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>core </td>
+      <td align="center"><code>cor</code> </td>
+    </tr>
+    <tr>
+      <td>core-macros </td>
+      <td align="center"><code>cor</code> </td>
+    </tr>
+    <tr>
+      <td>core-tests </td>
+      <td align="center"><code>cor</code> </td>
+    </tr>
+    <tr>
+      <td>compat-akka </td>
+      <td align="center"><code>cak</code> </td>
+    </tr>
+    <tr>
+      <td>compat-scodec</td>
+      <td align="center"><code>csc</code> </td>
+    </tr>
+    <tr>
+      <td>docs </td>
+      <td align="center"><code>doc</code> </td>
+    </tr>
+    <tr>
+      <td>examples </td>
+      <td align="center"><code>exa</code> </td>
+    </tr>
+    <tr>
+      <td>testkit </td>
+      <td align="center"><code>tkt</code> </td>
+    </tr>
+    <tr>
+      <td>benchmarks </td>
+      <td align="center"><code>bhm</code> </td>
+    </tr>
+    <tr>
+      <td>sbt project </td>
+      <td align="center"><code>pro</code> </td>
+    </tr>
+  </tbody>
+</table>
+<h3><a href="#ticket-number" name="ticket-number" class="anchor"><span class="anchor-link"></span></a>Ticket Number</h3>
+<p>The <a href="http://rfc.zeromq.org/spec:42/C4/">Collective Code Construction Contract (C4)</a> mandates that all changes should happen in the context of a certain ticket / github issue. By putting the number of the ticket into the commit message GitHub can associate the commit with the ticket and list it on the ticket&rsquo;s GitHub page.</p>
+<p>Also, having all commits display their ticket number makes it much easier to understand the project history and compile the release notes and the CHANGELOG.</p>
                 <div class="nav-next">
                     <p><strong>Next:</strong> <a href="../project/changelog.html">Changelog</a></p>
                 </div>

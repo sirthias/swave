@@ -116,6 +116,10 @@ h1:hover > a.anchor, h2:hover > a.anchor, h3:hover > a.anchor, h4:hover > a.anch
     text-decoration: none;
 }
 
+table { margin: 1em auto; }
+table th { font-weight: bold; padding: 8px; }
+table td { padding: 8px; border-top: 1px solid #ddd; }
+
 /*************************** PAGES **************************/
 
 #main-index .header .logo { opacity: 0.32; }
