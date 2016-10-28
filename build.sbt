@@ -132,12 +132,18 @@ val logback                = "ch.qos.logback"             %   "logback-classic" 
 /////////////////////// PROJECTS /////////////////////////
 
 lazy val swave = project.in(file("."))
-  .aggregate(akkaCompat, benchmarks, core, `core-macros`, `core-tests`, docs, examples, scodecCompat, testkit)
+  .aggregate(benchmarks, `compat-akka`, `compat-scodec`, core, `core-macros`, `core-tests`, docs, examples, testkit)
   .settings(commonSettings: _*)
   .settings(releaseSettings: _*)
   .settings(noPublishingSettings: _*)
 
-lazy val akkaCompat = project
+lazy val benchmarks = project
+  .dependsOn(core)
+  .enablePlugins(AutomateHeaderPlugin)
+  .settings(commonSettings: _*)
+  .settings(noPublishingSettings: _*)
+
+lazy val `compat-akka` = project
   .dependsOn(core, `core-macros` % "compile-internal", testkit)
   .enablePlugins(AutomateHeaderPlugin)
   .settings(commonSettings: _*)
@@ -147,11 +153,15 @@ lazy val akkaCompat = project
     moduleName := "swave-akka-compat",
     libraryDependencies ++= Seq(`akka-stream`, scalatest))
 
-lazy val benchmarks = project
-  .dependsOn(core)
+lazy val `compat-scodec` = project
+  .dependsOn(core, `core-macros` % "compile-internal", testkit, `core-tests` % "test->test")
   .enablePlugins(AutomateHeaderPlugin)
   .settings(commonSettings: _*)
-  .settings(noPublishingSettings: _*)
+  .settings(releaseSettings: _*)
+  .settings(publishingSettings: _*)
+  .settings(
+    moduleName := "swave-scodec-compat",
+    libraryDependencies ++= Seq(`scodec-bits`, scalatest, logback % "test"))
 
 lazy val core = project
   .dependsOn(`core-macros` % "compile-internal, test-internal")
@@ -183,12 +193,14 @@ lazy val `core-tests` = project
     libraryDependencies ++= Seq(shapeless, scalatest, `reactive-streams-tck`, scalacheck % "test", logback % "test"))
 
 lazy val docs = project
-  .dependsOn(akkaCompat, core, scodecCompat, testkit)
+  .dependsOn(`compat-akka`, `compat-scodec`, core, testkit)
   .enablePlugins(ParadoxSitePlugin)
   .settings(commonSettings: _*)
   .settings(noPublishingSettings: _*)
+  .settings(ghpages.settings)
   .settings(
     noScalaFmtFormatting,
+    git.remoteRepo := scmInfo.value.get.connection.drop("scm:git:".length),
     libraryDependencies ++= Seq(shapeless, scalatest),
     apiURL := Some(url("http://swave.io/api/")),
     siteSubdirName in Paradox := "",
@@ -215,18 +227,18 @@ lazy val docs = project
       "snippet.base_dir" -> s"${(sourceDirectory in Test).value}/scala/swave/docs",
       "image.base_url" -> ".../assets/img",
       "scaladoc.org.reactivestreams.base_url" -> "http://www.reactive-streams.org/reactive-streams-1.0.0-javadoc/",
-      "scaladoc.swave.compat.akka.base_url" -> "http://swave.io/api/akkaCompat/latest/",
-      "scaladoc.swave.compat.scodec.base_url" -> "http://swave.io/api/scodecCompat/latest/",
+      "scaladoc.swave.compat.akka.base_url" -> "http://swave.io/api/compat-akka/latest/",
+      "scaladoc.swave.compat.scodec.base_url" -> "http://swave.io/api/compat-scodec/latest/",
       "scaladoc.swave.core.base_url" -> "http://swave.io/api/core/latest/",
       "scaladoc.swave.testkit.base_url" -> "http://swave.io/api/testkit/latest/"))
   .settings({
     def apiDocs(p: Project) = siteMappings <++= (mappings in (p, Compile, packageDoc), name in p) map { (m, n) =>
       for ((f, d) <- m) yield f -> s"api/$n/latest/$d"
     }
-    List(apiDocs(akkaCompat), apiDocs(core), apiDocs(scodecCompat), apiDocs(testkit))}: _*)
+    List(apiDocs(`compat-akka`), apiDocs(core), apiDocs(`compat-scodec`), apiDocs(testkit))}: _*)
 
 lazy val examples = project
-  .dependsOn(core, akkaCompat)
+  .dependsOn(core, `compat-akka`)
   .enablePlugins(AutomateHeaderPlugin)
   .settings(commonSettings: _*)
   .settings(noPublishingSettings: _*)
@@ -236,16 +248,6 @@ lazy val examples = project
     connectInput in run := true,
     javaOptions in run ++= Seq("-XX:+UnlockCommercialFeatures", "-XX:+FlightRecorder"),
     libraryDependencies ++= Seq(`akka-stream`, `akka-http-core`, logback))
-
-lazy val scodecCompat = project
-  .dependsOn(core, `core-macros` % "compile-internal", testkit, `core-tests` % "test->test")
-  .enablePlugins(AutomateHeaderPlugin)
-  .settings(commonSettings: _*)
-  .settings(releaseSettings: _*)
-  .settings(publishingSettings: _*)
-  .settings(
-    moduleName := "swave-scodec-compat",
-    libraryDependencies ++= Seq(`scodec-bits`, scalatest, logback % "test"))
 
 lazy val testkit = project
   .dependsOn(core, `core-macros` % "compile-internal")
