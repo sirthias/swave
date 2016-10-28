@@ -84,16 +84,6 @@ how your changes affect the look of the site:
   to see your changes.
   
   [paradox]: https://github.com/lightbend/paradox
-  
-  
-GIT Branching Model
--------------------
-
-The *swave* team follows the "standard" practice of using the `master` branch as main integration branch,
-with WIP- and feature branches branching of it. The rule is to keep the `master` branch always "in good shape",
-i.e. having it compile and test cleanly.
-
-Additionally we might maintain release branches for older and possibly future releases.
 
 
 Issue Tracking
@@ -106,4 +96,86 @@ If you are unsure, whether the problem you've found really is a bug please ask o
 @ref:[Mailing List](../support.md) first.
 
   [Issues Page]: https://github.com/sirthias/swave/issues
-  [github repository]: https://github.com/sirthias/swave/
+  [github repository]: https://github.com/sirthias/swave/  
+  
+  
+GIT Branching Model
+-------------------
+
+The *swave* team follows the "standard" practice of using the `master` branch as main integration branch,
+with WIP- and feature branches branching of it. The rule is to keep the `master` branch always "in good shape",
+i.e. having it compile and test cleanly.
+
+Additionally we might maintain release branches for older and possibly future releases.
+
+
+GIT Commit Messages
+-------------------
+
+We try to follow the [imperative present tense style for commit messages][style] and additionally prefix each message
+with some simple meta data that make it easier to see
+
+- how the public API is affected by the commit
+- what sub-project(s) the commit mainly affects
+- which ticket the commit is associated with
+
+Here are three exemplary (and made-up) commit messages to illustrate the concept:
+
+```nohighlight
+=tsk #123 fix incorrect display of unterminated output state
+
++cor #234 add `takeWithin` transformation
+
+!cak,csc #345 clean up package structure
+```
+
+Following this naming pattern for *all* commits (except for merges, which start with "Merge") is extremely helpful when
+looking at the commit history. Also, it makes the generation of CHANGELOG entries and release notes much easier.
+
+  [style]: http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html
+
+
+### API Effect Category  
+  
+The first character classifies the effect of the commit on the public *swave* API that we try to keep as stable as
+possible. Requiring this marker makes sure that the committer has actively thought about the effects of the commit on
+the public API. There are three categories:
+
+|Marker|Category |Description                                                                    
+|:----:|---------|-----------
+| `=`  |Neutral  |Only touches things "under the hood" and has no effect on *swave's* public API.
+| `+`  |Extending|Extends the API by adding things. In rare cases this might break code due to things like identifier shadowing but is generally considered a "safe" change.
+| `!`  |Breaking |Changes or removes public API elements. Will definitely break user code relying on these parts of the API surface.
+
+Note that apart from the actual Scala interfaces the public API surface covered by these categories also includes
+configuration settings (most importantly the `reference.conf` files).
+
+
+### Project Identifier(s)
+  
+Immediately after the initial "API Effect Category Marker" we list all sub-projects touched by the commit (in decreasing
+order of "affectedness" and separated by a simple comma without spaces). In order to keep things concise the projects
+are identified with these simple 3-letter abbreviations:
+  
+| Sub-Project |Abbreviation|
+|-------------|:----------:|
+|core         |   `cor`    |
+|core-macros  |   `cor`    |
+|core-tests   |   `cor`    |
+|compat-akka  |   `cak`    |
+|compat-scodec|   `csc`    |
+|docs         |   `doc`    |
+|examples     |   `exa`    |
+|testkit      |   `tkt`    |
+|benchmarks   |   `bhm`    |
+|sbt project  |   `pro`    |
+
+
+### Ticket Number
+
+The [Collective Code Construction Contract (C4)][1] mandates that all changes should happen in the context of a certain
+ticket / github issue. By putting the number of the ticket into the commit message GitHub can associate the commit with
+the ticket and list it on the ticket's GitHub page.
+
+Also, having all commits display their ticket number makes it much easier to understand the project history and compile
+the release notes and the CHANGELOG.
