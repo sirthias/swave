@@ -215,7 +215,7 @@ lazy val docs = project
       state
     },
     paradoxProperties in Paradox ++= Map(
-      "latest-version" -> "0.5",
+      "latest-version" -> "0.5.0",
       "scala.binaryVersion" -> scalaBinaryVersion.value,
       "scala.version" -> scalaVersion.value,
       "github.base_url" -> {

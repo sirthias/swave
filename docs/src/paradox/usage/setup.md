@@ -48,3 +48,8 @@ Dependencies
 - `com.typesafe % config` (non-scala)
 - `com.chuusai %% shapeless`
 - `com.typesafe.scala-logging %% scala-logging`
+
+
+  [Akka-Stream]: http://doc.akka.io/docs/akka/2.4/scala/stream/index.html
+  [Scodec]: http://scodec.org/
+  [SBT]: http://www.scala-sbt.org/
