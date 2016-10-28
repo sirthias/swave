@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>swave - Reactive Streams in Scala</title>
+
+		<meta name="author" content="Mathias Doenitz">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/sirthias.css" id="theme">
+		<link rel="stylesheet" href="lib/font-awesome/css/font-awesome.css">
+
+		<!-- Code syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/sirthias.css">
+
+		<!-- Printing and PDF exports -->
+    <script>
+      var link = document.createElement( 'link' );
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+      document.getElementsByTagName( 'head' )[0].appendChild( link );
+    </script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+		<div class="reveal">
+			<div class="slides">
+
+			<!-- *************************************************************** -->
+			
+      <section>
+        <p style="top: -30px; position: relative">
+          <img style="width: 70%" src="img/swave-logo.svg" alt="swave">
+        </p>
+        <h2 style="top: -20px; position: relative">Reactive Streams in Scala</h2>
+        <p style="font-size: 0.8em; top: -20px; position: relative">
+          Scala Days &nbsp; 2016-06-17 @ Berlin
+        </p>
+          <small>
+            Mathias Doenitz &nbsp;
+            <a href="mailto:mathias(at)swave(dot)io"><i class="fa fa-envelope-square"></i></a> /
+            <a href="https://github.com/sirthias"><i class="fa fa-github-square"></i></a> /
+            <a href="http://twitter.com/sirthias"><i class="fa fa-twitter-square"></i></a><br/><br/>
+            This presentation: <a href="http://swave.io/2016/scaladays/index.html">http://swave.io/2016/scaladays/index.html</a>
+          </small>
+      </section>
+
+			<section>
+        <h2>Stream Processing Popularity Drivers</h2>
+        <img style="width:100%" src="img/processing-graph.svg" alt="A simple processing graph">
+        <ul>
+          <li>Big data (video, audio, tweets, metrics, sensor data, ...)</li>
+          <li>Challenges in distributed/concurrent programming</li>
+          <li>Need for powerful, general programming abstractions (that are intuitive, expressive and type-safe)</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Focus points of select streaming tools</h2>
+        <img style="width:80%" src="img/focus-points.svg" alt="Focus points of select streaming tools">
+      </section>
+
+            <section>
+        <h3 style="top: -30px; position: relative">Scala Collections:<br/>Our intra-thread workhorse</h3>
+        <pre style="width: 80%"><code class="scala">
+val departments: Seq[Department] = ...
+
+departments
+  .flatMap(_.employees)
+  .filter(_.birthday == today)
+  .zipWith(randomBirthdayCardTemplates)
+  .map(personalizeCard)
+  .grouped(16)
+  .foreach(sendCardBatch)
+        </code></pre>
+        <img class="fragment" style="position: absolute; width:40%; margin-top: -12%" src="img/collection-benefits.svg" alt="Benefits">
+      </section>
+
+      <section>
+        <h3>Our Approaches are shaped by experience</h3>
+        <p class="fragment">Example: How do you generate 10 random strings?</p>
+<pre class="fragment" style="width: 65%"><code class="scala">
+val buf = new ListBuffer[String]
+for (1 to 10) buf += random.nextString()
+</code></pre>
+        <p class="fragment" >vs.</p>
+<pre class="fragment" style="width: 65%"><code class="scala">List.fill(10)(random.nextString())</code></pre>
+        <p class="fragment" >vs.</p>
+<pre class="fragment" style="width: 75%"><code class="scala">Stream.continually(random.nextString()).take(10)</code></pre>
+      </section>
+
+      <section>
+        <h2>Stream-based solutions</h2>
+        <ul>
+          <li>Not limited to “real” data streams!</li>
+          <li>Often as good as (or even better than)<br/>alternative approaches</li>
+          <li>But: Require "Thinking in streams"<br/>which can take some getting used to...</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>The five basic types of stream transformations</h3>
+        <br/>
+        <table class="definition">
+          <tr><td>Simple:</td><td>Stream ⇒ Stream</td><td><img src="img/small-inout.svg" alt="in/out"></td></tr>
+          <tr><td>Fan-In:</td><td>Stream* ⇒ Stream</td><td><img src="img/small-fanin.svg" alt="in/out"></td></tr>
+          <tr><td>Fan-Out:</td><td>Stream ⇒ Stream*</td><td><img src="img/small-fanout.svg" alt="in/out"></td></tr>
+          <tr><td>Inject:</td><td>Stream ⇒ Stream[Stream]</td><td><img src="img/small-inject.svg" alt="in/out"></td></tr>
+          <tr><td>Flatten:</td><td>Stream[Stream] ⇒ Stream</td><td><img src="img/small-flatten.svg" alt="in/out"></td></tr>
+        </table>
+      </section>
+
+      <section>
+        <h2>Collection counterparts</h2>
+        <br/>
+        <table class="definition">
+          <tr><td>Simple:</td><td>map, filter, drop, take, fold, ...</td></tr>
+          <tr><td>Fan-In:</td><td>union, diff, intersect, zip, ...</td></tr>
+          <tr><td>Fan-Out:</td><td>unzip, partition, span, split, ...</td></tr>
+          <tr><td>Flatten:</td><td>flatten, flatMap</td></tr>
+          <tr><td>Inject:</td><td>grouped, inits, tails, sliding, ...</td></tr>
+        </table>
+      </section>
+
+      <section>
+        <h2>Strict vs. lazy collections</h2>
+        <table class="vs">
+          <tr><td>Seq, Set, Map, ...</td><td>⇔</td><td>immutable.Stream, Iterator</td></tr>
+          <tr><td>Storage</td><td>⇔</td><td>Transformation</td></tr>
+          <tr><td>Stand-alone</td><td>⇔</td><td>Pipelines / Graphs</td></tr>
+          <tr><td>Bounded</td><td>⇔</td><td>Potentially unbounded</td></tr>
+          <tr><td>Repeatable</td><td>⇔</td><td>Consumed (Iterator)</td></tr>
+        </table>
+      </section>
+
+      <section>
+        <h2>Reactive Streams / Swave:</h2>
+        <p style="font-size: 120%">A generalization of lazy collections</p>
+        <p class="fragment" >&ndash; or &ndash;</p>
+        <p class="fragment" style="font-size: 120%">Lazy collections are a special<br/>kind of Reactive Stream.</p>
+        <img class="fragment" style="position: absolute; width:40%; margin: -26.5% 0 0 -19%" src="img/not-the-other-way-around.svg" alt="Not the other way around!">
+      </section>
+
+      <section>
+        <h2>Lazy collections vs. RS / swave</h2>
+        <table>
+          <tr><td>Sync</td><td>⇔</td><td>Sync / Async</td></tr>
+          <tr><td>Pull</td><td>⇔</td><td>Dynamic Push/Pull</td></tr>
+          <tr><td>Never loose elems</td><td>⇔</td><td>Might not observe all</td></tr>
+          <tr><td>Linear "DSL"</td><td>⇔</td><td>Fully "graphed", modular</td></tr>
+          <tr><td>Opaque</td><td>⇔</td><td>Inspectable (swave, Akka)</td></tr>
+          <tr><td>Consumed (Iterator),<br/>repeatable (i.Stream)</td><td>⇔</td><td>Consumed (swave),<br/>pot. repeatable (Akka)</td></tr>
+        </table>
+      </section>
+
+      <section>
+        <h2>Swave API Basics</h2>
+        <pre style="width: 100%"><code class="scala">
+import swave.core._
+
+val stream: Stream[Int] = // similar to Akka's `Source[T, _]`
+  Stream(1, 2, 3)
+
+val pipe: Pipe[Int, String] = // similar to Akka's `Flow[A, B, _]`
+  Pipe[Int].map(_.toString)
+
+val drain: Drain[Int, Unit] = // similar to Akka's `Sink[T, _]`
+  Drain.foreach(println)
+        </code></pre>
+      </section>
+
+      <section>
+        <h2>Simple example: Monte Carlo Pi(e)</h2>
+        <img style="width:80%" src="img/monte-carlo-pi.svg" alt="Monte Carlo Pi(e)">
+      </section>
+
+      <section>
+        <h2>"Complexified" example stream graph</h2>
+        <div style="height: 500px; overflow-y: scroll">
+          <img style="width: 50%; max-height: none" src="img/monte-carlo-graph.svg" alt="Monte Carlo Pi(e)">
+        </div>
+      </section>
+
+      <section>
+        <h2>Swave Implementation</h2>
+        <p>[DEMO]</p>
+      </section>
+
+      <section>
+        <h2>Swave DSL: Basics</h2>
+        <pre style="width: 70%"><code class="scala">
+import swave.core._
+
+implicit val env = StreamEnv()
+
+val drainResult = // often a `Future[...]`
+  Stream(1, 2, 3)
+    .filter(_ > 1)
+    .map(_.toString)
+    .to(Drain.head) // can be shortened
+    .run()          // to `.drainTo(drain)`
+        </code></pre>
+      </section>
+
+      <section>
+        <h2>Swave DSL: homogeneous Fan-Ins</h2>
+        <pre style="width: 65%"><code class="scala">
+ val input: Stream[String] = ...
+ val output: Stream[String] =
+   input
+     .attach(stringStream)
+     .attach(someStream.map(_.toString))
+     .attach(...)
+     .fanInConcat() 
+  // or .fanInMerge()
+  // or .fanInFirstNonEmpty()
+  // or .fanInInterleave(...)
+  // ...
+        </code></pre>
+        <img class="fragment" style="position: absolute; width: 5.8%; margin: -29% 0 0 -32%;" src="img/line-fanin4.svg" alt="fanin">
+      </section>
+
+      <section>
+        <h2>Swave DSL: heterogeneous Fan-Ins</h2>
+        <pre style="width: 95%"><code class="scala">
+case class Foo(s: String, i: Int, f: Float)
+
+ stringStream
+   .attach(intStream)
+   .attach(floatStream)
+   .fanInToTuple // Stream[(String, Int, Float)]
+// or .fanInToHList // Stream[String :: Int :: Float :: HNil]
+// or .fanInToProduct[Foo] // Stream[Foo]
+// or .fanInToSum[ADT]() // e.g. Stream[Either[A, B]] from
+// ...            Stream[Left[A, B]] and Stream[Right[A, B]]
+        </code></pre>
+        <img class="fragment" style="position: absolute; width: 4.3%; margin: -26.3% 0 0 -49%;" src="img/line-fanin3.svg" alt="fanin">
+      </section>
+
+      <section>
+        <h2>Swave DSL: Basic Fan-Outs</h2>
+        <pre style="width: 70%"><code class="scala">
+ intStream
+   .fanOutBroadcast()
+// or .fanOutFirstAvailable()
+// or .fanOutRoundRobin()   
+     .sub.slice(42, 7).to(someDrain)
+     .sub.map(_.toString).end
+     .sub.filter(_ min 5).to(someOtherDrain)
+   .continue // Stream[String]
+// or .fanInXXX() // if > 1 subs open 
+        </code></pre>
+        <img class="fragment" style="position: absolute; width: 9.4%; margin: -26.0% 0 0 -40%;" src="img/line-fanout.svg" alt="fanout">
+      </section>
+
+      <section>
+        <h2>Swave DSL: Mixed Fan-Out-In</h2>
+        <pre style="width: 72%"><code class="scala">
+intStream
+  .fanOutBroadcast()
+    .sub.map(_.toString).end
+    .attach(intStream)
+    .sub.to(Drain.ignore) // just for fun
+    .attachLeft(floatStream)
+  .fanInToTuple // Stream[(Float, String, Int)]
+        </code></pre>
+        <img class="fragment" style="position: absolute; width: 12.5%; margin: -20.8% 0 0 -45%;" src="img/line-mixed.svg" alt="mixed fan-in-out">
+      </section>
+
+      <section>
+        <h2>Swave DSL: Couplings</h2>
+        <pre style="width: 85%"><code class="scala">
+val coupling = Coupling[Int]
+
+Stream(1, 2, 3)
+  .concat(coupling.out)
+  .fanOut()
+    .sub.first.map(_ + 3).to(coupling.in)
+    .subContinue // = `.sub.end.continue`
+  .foreach(println) // = `.drainTo(Drain.foreach(...))`
+  // What's the output?
+</code></pre>
+        <img class="fragment" style="position: absolute; width:40%; margin: -22.5% 0 0 -6%" src="img/deadlock.svg" alt="Looks good, but deadlocks!">
+      </section>
+
+      <section>
+        <h2>Swave DSL: Couplings</h2>
+        <pre style="width: 85%"><code class="scala">
+val coupling = Coupling[Int]
+
+Stream(1, 2, 3)
+  .concat(coupling.out)
+  .fanOut()
+    .sub.first.buffer(1).map(_ + 3).to(coupling.in)
+    .subContinue
+  .foreach(println)
+  // output: 1, 2, 3, 4
+</code></pre>
+        <img style="position: absolute; width:40%; margin: -24% 0 0 -10%" src="img/demand.svg" alt="We need to generate demand in the cycle!">
+      </section>
+
+      <section>
+        <h2>There is more</h2>
+        <ul>
+          <li>Pipes &amp; Modules
+            <ul>
+              <li>Types (Forward, Backward, Bidi)</li>
+              <li>Definition</li>
+              <li>Combinators</li>
+              <li>DSL integration</li>
+            </ul>
+          </li>
+          <li>Testkit w/ automatic test generation</li>
+          <li>Debugging, Inspecting &amp; Rendering</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Swave Pipeline Graphing</h2>
+        <p>[DEMO]</p>
+      </section>
+
+      <section>
+        <h3>Coupling example rendered to `2x2 UTF8`</h3>
+        <pre style="width: 60%"><code class="nohighlight">
+┳ Stream.fromIterable(List(1, 2, 3))
+┃
+◉━━━┓ fanInConcat()
+┃　　　┃
+◉━┓　┇ fanOutBroadcast(false)
+┃　┃　┇
+┻　┃　┇ Drain.foreach(&lt;function1&gt;)
+　　┃　┇
+◉━┛　┇ first
+┃　　　┇
+◉　┏┅┛ bufferBackpressure(1)
+┃　┇
+◉　┇ map(&lt;function1&gt;)
+┃　┇
+◉━┛ Coupling()
+</code></pre>
+      </section>
+
+      <section>
+        <h2>Swave design goals</h2>
+        <ul>
+          <li>Runtime perf (incl. sync-mode)</li>
+          <li>Concise, flexible and general DSL</li>
+          <li>Lightweightedness (few dependencies,<br/>i.e. little more than shapeless, no Akka)</li>
+          <li>Debugability</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Swave vs. Akka Stream</h2>
+        <table class="vs">
+          <tr><td>Non-lifted</td><td>⇔</td><td>Lifted</td></tr>
+          <tr><td>Sync + Async</td><td>⇔</td><td>Async</td></tr>
+          <tr><td>Runs on caller thread<br/>or Executors</td><td>⇔</td><td>Runs on actors</td></tr>
+          <tr><td>Scala-only</td><td>⇔</td><td>Scala + Java</td></tr>
+          <tr><td>Shapeless-based DSL</td><td>⇔</td><td>Point-to-point Graph DSL</td></tr>
+          <tr><td>Quick evolution</td><td>⇔</td><td>Long-term stability</td></tr>
+        </table>
+      </section>
+
+      <section>
+        <h2>Non-Lifted vs. Lifted Design</h2>
+        <img style="width:70%" src="img/swave-vs-akka-stream.svg" alt="Swave vs. Akka Stream">
+      </section>
+
+      <section>
+        <h2>Swave Roadmap</h2>
+        <ul>
+          <li>Released version 0.5-M1 this morning</li>
+          <li>Next: Docs, Docs, Docs</li>
+          <li>Fill remaining operation "holes"</li>
+          <li>Further increase test coverage</li>
+          <li>More performance tuning</li>
+          <li>Add "native bindings" for TCP, UDP, Aeron,<br>as well as Akka, Scodec, ...</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Contributing</h2>
+        <ul>
+          <li>Dev process:<br><a href="http://rfc.zeromq.org/spec:42/C4/">Collective Code Construction Contract (C4)</a>
+            <ul>
+              <li>Minimize barriers for contributions</li>
+              <li>Relieve dependencies on key individuals</li>
+              <li>More diversity, higher velocity</li>
+            </ul>
+          </li>
+          <li>Everyone is invited to contribute<br>and become maintainer!</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Resources</h2>
+        <ul>
+          <li>Github: <a href="https://github.com/sirthias/swave">https://github.com/sirthias/swave</a></li>
+          <li>Mailing list: <a href="https://groups.google.com/forum/#!forum/swave-user">https://groups.google.com/forum/#!forum/swave-user</a></li>
+          <li>Twitter:  <a href="https://twitter.com/swaveio">@swaveio</a></li>
+          <li>Also: <a href="http://www.reactive-streams.org/">http://www.reactive-streams.org/</a></li>
+        </ul>
+      </section>
+
+      <section>
+		    <h2>THANK YOU!</h2>
+			</section>
+
+      <section>
+				<h2>Q &amp; A</h2>
+			</section>
+
+			</div>
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+
+			// Full list of configuration options available at:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: false,
+				history: true,
+
+				transition: 'fade',
+				transitionSpeed: 'fast',
+
+				// Optional reveal.js plugins
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>
