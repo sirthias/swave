@@ -65,7 +65,7 @@ final class XorShiftRandom(seed0: Long, seed1: Long) {
     * The `bound` must be > 0.
     */
   def nextLong(bound: Long): Long = {
-    requireArg(bound > 0)
+    requireArg(bound > 0, "`bound` must be > 0")
     val mask = bound - 1
     if ((bound & mask) == 0) nextLong() & mask // bound is a power of 2
     else (nextLong() >>> 1) % bound // bound is not a power of 2
@@ -81,7 +81,7 @@ final class XorShiftRandom(seed0: Long, seed1: Long) {
     * The `bound` must be > 0.
     */
   def nextInt(bound: Int): Int = {
-    requireArg(bound > 0)
+    requireArg(bound > 0, "`bound` must be > 0")
     val mask = bound - 1
     if ((bound & mask) == 0) nextInt() & mask // bound is a power of 2
     else (nextInt() >>> 1) % bound // bound is not a power of 2
@@ -146,7 +146,7 @@ final class XorShiftRandom(seed0: Long, seed1: Long) {
     * `seq` must be non-empty.
     */
   def pick[T](seq: Seq[T]): T = {
-    requireArg(seq.nonEmpty)
+    requireArg(seq.nonEmpty, "`seq` must be > 0")
     seq(nextInt(seq.size))
   }
 
@@ -233,7 +233,7 @@ object XorShiftRandom {
   def parseSeed(seed: String): Option[(Long, Long)] =
     seed.toOption map { s ⇒
       import java.lang.Long.parseLong
-      requireArg(s.length == 32)
+      requireArg(s.length == 32, "`seed` must consist of 32 chars")
       try parseLong(s.substring(0, 16), 16) → parseLong(s.substring(16, 32), 16)
       catch {
         case e: NumberFormatException ⇒ throw new IllegalArgumentException("Invalid random seed string", e)
@@ -282,7 +282,7 @@ object XorShiftRandom {
     }
     override def nextPrintableChar(): Char = (nextInt(127 - 33) + 33).toChar
     override def setSeed(seed: Long): Unit = {
-      requireArg(seed != 0)
+      requireArg(seed != 0, "`seed` must be != 0")
       xorShiftRandom.s0 = seed
       xorShiftRandom.s1 = seed
     }

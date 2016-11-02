@@ -141,7 +141,7 @@ object GraphBuilding {
       }
       def sub: SubOps = new SubOpsImpl(base)
       def subContinue: FRepr = {
-        requireArg(inputs.isEmpty)
+        requireArg(inputs.isEmpty, "Cannot `subContinue` when other sub-streams are open")
         wrap(base)
       }
       def continue: FRepr = {

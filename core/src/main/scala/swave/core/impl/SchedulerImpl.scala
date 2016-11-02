@@ -35,13 +35,13 @@ private[core] final class SchedulerImpl private (val settings: Scheduler.Setting
 
   def schedule(initialDelay: FiniteDuration, interval: FiniteDuration, r: Runnable)(
       implicit ec: ExecutionContext): Cancellable = {
-    requireArg(initialDelay >= Duration.Zero)
-    requireArg(interval > Duration.Zero)
+    requireArg(initialDelay >= Duration.Zero, "`initialDelay` must be >= 0")
+    requireArg(interval > Duration.Zero, "`interval` must be > 0")
     schedule(initialDelay.toNanos, interval.toNanos, r)
   }
 
   def scheduleOnce(delay: FiniteDuration, r: Runnable)(implicit ec: ExecutionContext): Cancellable = {
-    requireArg(delay >= Duration.Zero)
+    requireArg(delay >= Duration.Zero, "`delay` must be >= 0")
     schedule(delay.toNanos, 0, r)
   }
 

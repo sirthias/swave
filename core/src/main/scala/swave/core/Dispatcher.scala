@@ -23,7 +23,7 @@ abstract class Dispatcher private[core] extends ExecutionContextExecutor {
 object Dispatcher {
 
   final case class Settings(name: String, threadPoolConfig: ThreadPoolConfig) {
-    requireArg(name.nonEmpty)
+    requireArg(name.nonEmpty, "`name` must not be empty")
   }
   object Settings {
     def apply(name: String, config: Config, defaultThreadPoolConfig: Config): Settings =
@@ -55,9 +55,9 @@ object Dispatcher {
     }
 
     final case class Size(factor: Double, min: Int, max: Int) {
-      requireArg(factor >= 0.0)
-      requireArg(min >= 0)
-      requireArg(max >= min)
+      requireArg(factor >= 0.0, "`factor` must be >= 0.0")
+      requireArg(min >= 0, "`min` must be >= 0")
+      requireArg(max >= min, "`max` must be >= `min`")
     }
     object Size {
       def apply(c: Config): Size = Size(c getDouble "factor", c getInt "min", c getInt "max")
@@ -80,7 +80,7 @@ object Dispatcher {
                                 prestart: ThreadPool.Prestart,
                                 daemonic: Boolean)
         extends ThreadPoolConfig {
-      requireArg(keepAliveTime > Duration.Zero)
+      requireArg(keepAliveTime > Duration.Zero, "`keepAliveTime` must be > 0")
     }
     object ThreadPool {
       sealed abstract class Prestart

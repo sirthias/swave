@@ -17,7 +17,7 @@ import swave.core.util._
 private[core] final class BufferDroppingStage(size: Int, overflowStrategy: Buffer.OverflowStrategy) extends InOutStage
   with PipeElem.InOut.BufferDropping {
 
-  requireArg(size > 0)
+  requireArg(size > 0, "`size` must be > 0")
 
   def pipeElemType: String = "bufferDropping"
   def pipeElemParams: List[Any] = size :: overflowStrategy :: Nil

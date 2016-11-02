@@ -20,7 +20,7 @@ private[core] final class RecoverWithStage(maxRecoveries: Long, pf: PartialFunct
 
   import RecoverWithStage._
 
-  requireArg(maxRecoveries >= 0)
+  requireArg(maxRecoveries >= 0, "`maxRecoveries` must be >= 0")
 
   def pipeElemType: String = "recoverWith"
   def pipeElemParams: List[Any] = maxRecoveries :: pf :: Nil

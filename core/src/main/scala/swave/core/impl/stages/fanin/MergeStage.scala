@@ -18,7 +18,7 @@ import swave.core.util._
 private[core] final class MergeStage(subs: InportList, eagerComplete: Boolean)
   extends FanInStage with PipeElem.FanIn.Concat {
 
-  requireArg(subs.nonEmpty)
+  requireArg(subs.nonEmpty, "Cannot `merge` an empty set of sub-streams")
 
   def pipeElemType: String = "fanInMerge"
   def pipeElemParams: List[Any] = Nil

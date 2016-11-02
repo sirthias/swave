@@ -19,7 +19,7 @@ private[core] final class ToProductStage(val pipeElemType: String,
                                          subs: InportList, f: Array[AnyRef] ⇒ AnyRef) extends FanInStage
   with PipeElem.FanIn.ToProduct {
 
-  requireArg(subs.nonEmpty)
+  requireArg(subs.nonEmpty, "Cannot fan-in with `toProduct` when the set of sub-streams is empty")
 
   def pipeElemParams: List[Any] = Nil
 

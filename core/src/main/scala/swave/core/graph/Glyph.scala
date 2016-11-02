@@ -116,7 +116,8 @@ object GlyphSet {
     * All Strings returned by the function must be `rows * columns + (rows - 1) * lineSep.length` characters long.
     */
   def apply(rows: Int, columns: Int, lineSep: String = "")(f: Glyph ⇒ String): GlyphSet = {
-    requireArg(rows > 0 && columns > 0)
+    requireArg(rows > 0, "`rows` must be > 0")
+    requireArg(columns > 0, "`columns` must be > 0")
     val codepoints = new Array[Int](GLYPH_COUNT * rows * columns)
 
     @tailrec def prepareGlyphs(codepointsIx: Int, glyph: Glyph, str: String, strIx: Int, row: Int, col: Int): Unit =

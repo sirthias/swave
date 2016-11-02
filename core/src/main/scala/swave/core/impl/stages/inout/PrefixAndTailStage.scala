@@ -17,7 +17,7 @@ import swave.core._
 private[core] final class PrefixAndTailStage(prefixSize: Int, prefixBuilder: scala.collection.mutable.Builder[Any, AnyRef])
   extends InOutStage with PipeElem.InOut.PrefixAndTail {
 
-  requireArg(prefixSize > 0)
+  requireArg(prefixSize > 0, "`prefixSize` must be > 0")
 
   def pipeElemType: String = "prefixAndTail"
   def pipeElemParams: List[Any] = prefixSize :: Nil

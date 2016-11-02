@@ -17,7 +17,7 @@ import swave.core.util._
 private[core] final class BufferStage(size: Int, requestThreshold: Int) extends InOutStage
   with PipeElem.InOut.BufferWithBackpressure {
 
-  requireArg(size > 0)
+  requireArg(size > 0, "`size` must be > 0")
 
   def pipeElemType: String = "buffer"
   def pipeElemParams: List[Any] = size :: Nil

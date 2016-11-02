@@ -15,7 +15,7 @@ import swave.core.macros._
 @StageImpl
 private[core] final class LimitStage(max: Long, cost: AnyRef ⇒ Long) extends InOutStage with PipeElem.InOut.Limit {
 
-  requireArg(max >= 0)
+  requireArg(max >= 0, "`max` must be >= 0")
 
   def pipeElemType: String = "limit"
   def pipeElemParams: List[Any] = max :: cost :: Nil

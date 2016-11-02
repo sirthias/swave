@@ -45,7 +45,7 @@ private[core] final class StreamEnvImpl(val name: String,
       def unterminatedDispatchers: List[String] = dispatchersTermination()
 
       def awaitTermination(timeout: FiniteDuration): Unit = {
-        requireArg(timeout >= Duration.Zero)
+        requireArg(timeout >= Duration.Zero, "`timeout` must be > 0")
         var deadline = System.nanoTime() + timeout.toNanos
         if (deadline < 0) deadline = Long.MaxValue // overflow protection
 

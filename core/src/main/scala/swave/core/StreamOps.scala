@@ -53,7 +53,7 @@ trait StreamOps[A] extends Any { self ⇒
     new FanIn(base +: fanIn.subs, wrap)
 
   final def attachAll[S, Sup >: A](subs: Traversable[S])(implicit ev: Streamable.Aux[S, Sup]): FanIn0[Sup, Repr] = {
-    requireArg(subs.nonEmpty)
+    requireArg(subs.nonEmpty, "Cannot `attachAll` without open sub-streams")
     new FanIn0(InportList(base) :++ subs, wrap)
   }
 
@@ -68,12 +68,12 @@ trait StreamOps[A] extends Any { self ⇒
 
   final def buffer(size: Int,
                    requestStrategy: Buffer.RequestStrategy = Buffer.RequestStrategy.WhenHalfEmpty): Repr[A] = {
-    requireArg(size >= 0)
+    requireArg(size >= 0, "`size` must be >= 0")
     if (size > 0) append(new BufferStage(size, requestStrategy(size))) else identity
   }
 
   final def bufferDropping(size: Int, overflowStrategy: Buffer.OverflowStrategy): Repr[A] = {
-    requireArg(size > 0)
+    requireArg(size > 0, "`size` must be > 0")
     append(new BufferDroppingStage(size, overflowStrategy))
   }
 
@@ -96,7 +96,7 @@ trait StreamOps[A] extends Any { self ⇒
     append(new DelayStage(f.asInstanceOf[AnyRef ⇒ FiniteDuration]))
 
   final def drop(n: Long): Repr[A] = {
-    requireArg(n >= 0)
+    requireArg(n >= 0, "`n` must be >= 0")
     if (n > 0) append(new DropStage(n)) else identity
   }
 
@@ -104,7 +104,7 @@ trait StreamOps[A] extends Any { self ⇒
     via(Pipe[A] drop Long.MaxValue named "dropAll")
 
   final def dropLast(n: Int): Repr[A] = {
-    requireArg(n >= 0)
+    requireArg(n >= 0, "`n` must be >= 0")
     if (n > 0) append(new DropLastStage(n)) else identity
   }
 
@@ -326,7 +326,7 @@ trait StreamOps[A] extends Any { self ⇒
 
   final def slidingTo[M[+ _]](windowSize: Int)(implicit cbf: CanBuildFrom[M[A], A, M[A]],
                                                ev: M[A] <:< immutable.Seq[A]): Repr[M[A]] = {
-    requireArg(windowSize > 0)
+    requireArg(windowSize > 0, "windowSize must be > 0")
     val builder = cbf.apply()
     prefixAndTailTo[M](windowSize) flatmap {
       case (prefix, tail) =>
@@ -454,15 +454,20 @@ object StreamOps {
       new FanIn0(sub.inport +: subs, rawWrap)
 
     def attachAll[S, Sup2 >: Sup](subs: Traversable[S])(implicit ev: Streamable.Aux[S, Sup2]): FanIn0[Sup2, Repr] = {
-      requireArg(subs.nonEmpty)
+      requireArg(subs.nonEmpty, "Cannot `attachAll` without open sub-streams")
       new FanIn0(this.subs :++ subs, rawWrap)
     }
 
-    def fanInConcat: Repr[Sup]                                                                   = wrap(new ConcatStage(subs))
-    def fanInFirstNonEmpty: Repr[Sup]                                                            = wrap(new FirstNonEmptyStage(subs))
-    def fanInInterleave(segmentSize: Int, eagerComplete: Boolean): Repr[Sup]                     = ???
-    def fanInMerge(eagerComplete: Boolean = false): Repr[Sup]                                    = wrap(new MergeStage(subs, eagerComplete))
-    def fanInMergeSorted(eagerComplete: Boolean = false)(implicit ord: Ordering[Sup]): Repr[Sup] = ???
+    def fanInConcat: Repr[Sup] =
+      wrap(new ConcatStage(subs))
+    def fanInFirstNonEmpty: Repr[Sup] =
+      wrap(new FirstNonEmptyStage(subs))
+    def fanInInterleave(segmentSize: Int, eagerComplete: Boolean): Repr[Sup] =
+      ???
+    def fanInMerge(eagerComplete: Boolean = false): Repr[Sup] =
+      wrap(new MergeStage(subs, eagerComplete))
+    def fanInMergeSorted(eagerComplete: Boolean = false)(implicit ord: Ordering[Sup]): Repr[Sup] =
+      ???
 
     private def wrap[T](in: Inport): Repr[T] = rawWrap(in).asInstanceOf[Repr[T]]
   }
@@ -495,7 +500,7 @@ object StreamOps {
 
     final def attachAll[S, Sup2 >: Sup](subs: Traversable[S])(
         implicit ev: Streamable.Aux[S, Sup2]): FanIn0[Sup2, Repr] = {
-      requireArg(subs.nonEmpty)
+      requireArg(subs.nonEmpty, "Cannot `attachAll` without open sub-streams")
       new FanIn0(this.subs :++ subs, rawWrap)
     }
 

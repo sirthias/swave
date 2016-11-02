@@ -38,8 +38,9 @@ trait Scheduler {
 object Scheduler {
 
   final case class Settings(tickDuration: FiniteDuration, ticksPerWheel: Int) {
-    requireArg(tickDuration > Duration.Zero)
-    requireArg(ticksPerWheel > 0 && isPowerOf2(ticksPerWheel))
+    requireArg(tickDuration > Duration.Zero, "`tickDuration` must be > 0")
+    requireArg(ticksPerWheel > 0, "`ticksPerWheel` must be > 0")
+    requireArg(isPowerOf2(ticksPerWheel), "`ticksPerWheel` must be a power of 2")
   }
 
   object Settings extends SettingsCompanion[Settings]("swave.core.scheduler") {
