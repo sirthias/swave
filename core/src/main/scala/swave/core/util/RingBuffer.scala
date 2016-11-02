@@ -121,13 +121,12 @@ private[swave] final class RingBuffer[T](cap: Int) {
 
   /**
     * Adds a traversable of elements to the buffer
-    * @param elems
     */
   def ++=(elems: Traversable[T]): Boolean = elems.forall(write)
 
   /**
-    * Iterates the underlying elements of the buffer
-    *
+    * Iterates (in FIFO order) over all elements currently in the buffer
+    * changing neither the read- nor the write cursor.
     */
   def foreach[U](f: T => U): Unit = {
     @tailrec def rec(i: Int): Unit =

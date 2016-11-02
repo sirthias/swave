@@ -150,6 +150,9 @@ trait StreamOps[A] extends Any { self ⇒
   final def first: Repr[A] =
     via(Pipe[A] take 1 named "first")
 
+  final def flatmap[B, C](f: A ⇒ B, parallelism: Int = 1)(implicit ev: Streamable.Aux[B, C]): Repr[C] =
+    via(Pipe[A] map f flattenConcat parallelism named "flatmap")
+
   final def flattenConcat[B](parallelism: Int = 1)(implicit ev: Streamable.Aux[A, B]): Repr[B] =
     append(new FlattenConcatStage(ev.asInstanceOf[Streamable.Aux[AnyRef, AnyRef]], parallelism))
 
@@ -291,7 +294,10 @@ trait StreamOps[A] extends Any { self ⇒
     }
 
   final def prefixAndTail(n: Int): Repr[(immutable.Seq[A], Spout[A])] =
-    append(new PrefixAndTailStage(n))
+    prefixAndTailTo[immutable.Seq](n)
+
+  final def prefixAndTailTo[M[+ _]](n: Int)(implicit cbf: CanBuildFrom[M[A], A, M[A]]): Repr[(M[A], Spout[A])] =
+    append(new PrefixAndTailStage(n, cbf.apply().asInstanceOf[scala.collection.mutable.Builder[Any, AnyRef]]))
 
   final def protect[B](recreate: Option[Throwable] => Pipe[A, B]): Repr[B] = ???
 
@@ -318,37 +324,30 @@ trait StreamOps[A] extends Any { self ⇒
   final def sliding(windowSize: Int): Repr[immutable.Seq[A]] =
     slidingTo[immutable.Seq](windowSize)
 
-  final def slidingTo[M[+ _]](windowSize: Int)(implicit cbf: CanBuildFrom[M[A], A, M[A]]): Repr[M[A]] = {
-
+  final def slidingTo[M[+ _]](windowSize: Int)(implicit cbf: CanBuildFrom[M[A], A, M[A]],
+                                               ev: M[A] <:< immutable.Seq[A]): Repr[M[A]] = {
+    requireArg(windowSize > 0)
     val builder = cbf.apply()
-
-    prefixAndTail(windowSize).map {
+    prefixAndTailTo[M](windowSize) flatmap {
       case (prefix, tail) =>
-        if (prefix.length == windowSize) {
-          // there are enough elements to fill at least one window
-          // prepare buffer
-          val buffer = new RingBuffer[A](roundUpToPowerOf2(windowSize))
-          buffer ++= prefix
-
-          tail
-            .scan(buffer) { (buf, elem) ⇒
-              if (buf.size == windowSize) buf.unsafeDropHead()
-              buf.unsafeWrite(elem)
-              buf
+        val p = ev(prefix)
+        p.size match {
+          case `windowSize` =>
+            val buffer = new RingBuffer[A](roundUpToPowerOf2(windowSize))
+            p.foreach(buffer.unsafeWrite)
+            Spout.one(prefix).concat {
+              tail.map { elem ⇒
+                buffer.unsafeDropHead()
+                buffer.unsafeWrite(elem)
+                builder.clear()
+                buffer.foreach(builder += _)
+                builder.result()
+              }
             }
-            .map { b =>
-              builder.clear()
-              b.foreach { builder += _ }
-              builder.result()
-            }
-        } else if (prefix.length > 0) {
-          // less elements than one window - just return the elements
-          prefix.foreach { builder += _ }
-          Spout.one(builder.result())
-        } else {
-          Spout.empty
+          case 0 => Spout.empty
+          case _ => Spout.one(prefix)
         }
-    }.flattenConcat()
+    }
   }
 
   final def split(f: A ⇒ Split.Command, eagerCancel: Boolean = true): Repr[Spout[A]] =
