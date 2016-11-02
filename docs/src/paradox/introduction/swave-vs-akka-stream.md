@@ -10,9 +10,8 @@ Scala-only vs. Scala + Java
   a strictly larger user base it also adds a significant amount of development and maintenance effort.
 
 Non-Lifted vs. Lifted Design
-: As discussed under [swave-core Basics](../usage/swave-core/basics.md) all of *swave*'s key types are non-lifted,
-  single use abstractions. This differs from [Akka-Stream] which tries to keep its abstraction as reusable as possible
-  (which is not always possible).
+: All of *swave*'s key types are non-lifted, single use abstractions. This differs from [Akka-Stream] which tries to
+  keep its abstraction as reusable as possible (which is not always possible).
   
 Sync + Async vs. Async only
 : In addition to scheduling tasks onto configurable thread-pools *swave* allows for synchronous

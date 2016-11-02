@@ -16,7 +16,7 @@ Note::
 :  Your first post after signup is going to be moderated (for spam protection), but we'll immediately
    give you full posting privileges if your message doesn't unmask you as a spammer.
 
-  [1]: https://groups.google.com/group/spray-user/
+  [1]: https://groups.google.com/group/swave-user/
 
   
 Gitter Channel
@@ -36,7 +36,7 @@ Twitter
 
 If you [follow us on twitter][1] we'll keep you informed about new developments as well as general news around *swave*.
 
-  [3]: https://twitter.com/sprayio
+  [3]: https://twitter.com/swaveio
 
 
 Email
