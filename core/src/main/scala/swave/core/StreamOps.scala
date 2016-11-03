@@ -335,14 +335,12 @@ trait StreamOps[A] extends Any { self ⇒
           case `windowSize` =>
             val buffer = new RingBuffer[A](roundUpToPowerOf2(windowSize))
             p.foreach(buffer.unsafeWrite)
-            Spout.one(prefix).concat {
-              tail.map { elem ⇒
-                buffer.unsafeDropHead()
-                buffer.unsafeWrite(elem)
-                builder.clear()
-                buffer.foreach(builder += _)
-                builder.result()
-              }
+            tail.scan(prefix) { (_, elem) ⇒
+              buffer.unsafeDropHead()
+              buffer.unsafeWrite(elem)
+              builder.clear()
+              buffer.foreach(builder += _)
+              builder.result()
             }
           case 0 => Spout.empty
           case _ => Spout.one(prefix)
