@@ -7,8 +7,8 @@
 package swave.testkit
 
 import com.typesafe.config.Config
+import swave.core.impl.util.SettingsCompanion
 import swave.core.macros._
-import swave.core.util._
 
 object Testkit {
 

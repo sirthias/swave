@@ -11,8 +11,8 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 import shapeless._
 import shapeless.ops.hlist.{Comapped, ToCoproduct}
+import swave.core.impl.util.FastFuture
 import swave.core.{Spout, StreamOps}
-import swave.core.util.FastFuture
 
 object TypeLogic {
 

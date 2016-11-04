@@ -12,11 +12,11 @@
   *
   * So most credit for this work should go to the original authors.
   */
-package swave.core.util
+package swave.core.impl.util
 
 import swave.core.macros._
 
-private[util] abstract class TokenBucket(capacity: Long, nanosBetweenTokens: Long) {
+private[swave] abstract class TokenBucket(capacity: Long, nanosBetweenTokens: Long) {
   requireArg(capacity >= 0, "`capacity` must be >= 0")
   requireArg(nanosBetweenTokens > 0, "`nanosBetweenTokens` must be > 0")
 
@@ -87,6 +87,6 @@ private[util] abstract class TokenBucket(capacity: Long, nanosBetweenTokens: Lon
 /**
   * Default implementation of [[TokenBucket]] that uses `System.nanoTime` as the time source.
   */
-final class NanoTimeTokenBucket(_cap: Long, _period: Long) extends TokenBucket(_cap, _period) {
+private[swave] final class NanoTimeTokenBucket(_cap: Long, _period: Long) extends TokenBucket(_cap, _period) {
   def currentTime = System.nanoTime()
 }

@@ -12,6 +12,7 @@ import swave.core.macros._
 import swave.core.util._
 import swave.testkit.gen.TestSetup
 import TestSetup.AsyncScheduling
+import swave.core.impl.util.ResizableRingBuffer
 
 private[testkit] final class TestContext(val runNr: Int,
                                          val asyncRate: Double,

@@ -8,7 +8,7 @@ package swave.core
 
 import com.typesafe.config.Config
 import scala.collection.JavaConverters._
-import swave.core.util.SettingsCompanion
+import swave.core.impl.util.SettingsCompanion
 
 abstract class Dispatchers private[core] {
 

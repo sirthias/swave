@@ -8,6 +8,7 @@ package swave.core.impl.stages.fanout
 
 import scala.annotation.tailrec
 import swave.core.PipeElem
+import swave.core.impl.util.MultiReaderRingBuffer
 import swave.core.impl.{Inport, Outport}
 import swave.core.macros._
 import swave.core.util._

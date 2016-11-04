@@ -7,11 +7,11 @@
 package swave.core
 
 import org.reactivestreams.Publisher
+import swave.core.impl.util.RingBuffer
 import scala.annotation.implicitNotFound
 import scala.collection.immutable
 import scala.concurrent.Future
 import scala.util.Try
-import swave.core.util.RingBuffer
 
 @implicitNotFound(
   msg =

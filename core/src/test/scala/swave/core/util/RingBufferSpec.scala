@@ -9,6 +9,7 @@ package swave.core.util
 import org.scalacheck.Gen
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{FreeSpec, Matchers}
+import swave.core.impl.util.RingBuffer
 
 class RingBufferSpec extends FreeSpec with Matchers with GeneratorDrivenPropertyChecks {
 

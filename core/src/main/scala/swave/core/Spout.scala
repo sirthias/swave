@@ -7,13 +7,13 @@
 package swave.core
 
 import org.reactivestreams.{Publisher, Subscriber}
-import scala.annotation.unchecked.{uncheckedVariance ⇒ uV}
+import scala.annotation.unchecked.{uncheckedVariance => uV}
 import scala.collection.generic.CanBuildFrom
 import scala.util.{Failure, Success, Try}
 import scala.concurrent.Future
 import scala.concurrent.duration.FiniteDuration
 import shapeless._
-import swave.core.impl.util.InportList
+import swave.core.impl.util.{InportList, RingBuffer}
 import swave.core.impl.{Inport, ModuleImpl, TypeLogic}
 import swave.core.impl.stages.Stage
 import swave.core.impl.stages.spout._

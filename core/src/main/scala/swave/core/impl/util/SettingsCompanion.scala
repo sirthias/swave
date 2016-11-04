@@ -4,7 +4,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package swave.core.util
+package swave.core.impl.util
 
 import com.typesafe.config.Config
 import swave.core.ConfigurationException

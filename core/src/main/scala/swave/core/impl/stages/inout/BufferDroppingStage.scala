@@ -9,6 +9,7 @@ package swave.core.impl.stages.inout
 import scala.annotation.tailrec
 import swave.core.{Buffer, BufferOverflowFailure, PipeElem}
 import swave.core.impl.{Inport, Outport}
+import swave.core.impl.util.RingBuffer
 import swave.core.macros._
 import swave.core.util._
 

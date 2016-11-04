@@ -7,7 +7,7 @@
 package swave.core.impl.stages.inout
 
 import scala.annotation.tailrec
-import swave.core.impl.util.{InportAnyRefList, InportList}
+import swave.core.impl.util.{InportAnyRefList, InportList, RingBuffer}
 import swave.core.impl.stages.drain.SubDrainStage
 import swave.core.{PipeElem, Streamable}
 import swave.core.macros._

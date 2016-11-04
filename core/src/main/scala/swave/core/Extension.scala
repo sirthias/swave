@@ -8,6 +8,7 @@ package swave.core
 
 import com.typesafe.config.Config
 import scala.concurrent.duration.FiniteDuration
+import swave.core.impl.util.SettingsCompanion
 import swave.core.util._
 
 trait Extension

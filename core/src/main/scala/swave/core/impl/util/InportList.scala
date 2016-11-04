@@ -10,7 +10,6 @@ import scala.annotation.tailrec
 import shapeless._
 import swave.core._
 import swave.core.impl.Inport
-import swave.core.util.ImsiList
 
 private[swave] abstract class AbstractInportList[L >: Null <: AbstractInportList[L]](final val in: Inport, tail: L)
     extends ImsiList[L](tail)

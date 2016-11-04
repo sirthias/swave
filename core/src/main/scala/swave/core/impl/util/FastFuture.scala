@@ -12,13 +12,14 @@
   *
   * So most credit for this work should go to the original authors.
   */
-package swave.core.util
+package swave.core.impl.util
 
-import scala.util.control.{NoStackTrace, NonFatal}
-import scala.util.{Failure, Success, Try}
 import scala.collection.generic.CanBuildFrom
 import scala.concurrent.duration.Duration
 import scala.concurrent._
+import scala.util.control.{NoStackTrace, NonFatal}
+import scala.util.{Failure, Success, Try}
+import swave.core.util._
 
 /**
   * Provides alternative implementations of the basic transformation operations defined on [[Future]],

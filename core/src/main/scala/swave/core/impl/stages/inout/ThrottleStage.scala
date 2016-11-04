@@ -10,6 +10,7 @@ import scala.util.control.NonFatal
 import scala.concurrent.duration._
 import swave.core.{Cancellable, PipeElem}
 import swave.core.impl.{Inport, Outport, StreamRunner}
+import swave.core.impl.util.NanoTimeTokenBucket
 import swave.core.macros._
 import swave.core.util._
 

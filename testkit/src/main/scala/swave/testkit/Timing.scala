@@ -7,6 +7,8 @@
 package swave.testkit
 
 import com.typesafe.config.Config
+import swave.core.impl.util.SettingsCompanion
+
 import scala.collection._
 import scala.concurrent.duration._
 import scala.collection.JavaConverters._

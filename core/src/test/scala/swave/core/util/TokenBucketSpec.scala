@@ -15,6 +15,7 @@
 package swave.core.util
 
 import org.scalatest.{FreeSpec, Matchers}
+import swave.core.impl.util.TokenBucket
 
 class TokenBucketSpec extends FreeSpec with Matchers {
 

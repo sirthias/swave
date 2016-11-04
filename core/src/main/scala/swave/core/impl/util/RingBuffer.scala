@@ -4,12 +4,13 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package swave.core.util
+package swave.core.impl.util
 
+import scala.annotation.tailrec
 import org.jctools.util.UnsafeAccess.UNSAFE
 import org.jctools.util.UnsafeRefArrayAccess.calcElementOffset
-import scala.annotation.tailrec
 import swave.core.macros._
+import swave.core.util._
 
 /**
   * A mutable RingBuffer with a fixed capacity.

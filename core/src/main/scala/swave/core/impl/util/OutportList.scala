@@ -8,7 +8,6 @@ package swave.core.impl.util
 
 import scala.annotation.tailrec
 import swave.core.impl.Outport
-import swave.core.util.ImsiList
 
 private[swave] abstract class AbstractOutportList[L >: Null <: AbstractOutportList[L]](final val out: Outport, tail: L)
     extends ImsiList[L](tail)

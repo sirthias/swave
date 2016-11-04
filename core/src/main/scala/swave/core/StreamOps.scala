@@ -17,7 +17,7 @@ import shapeless._
 import shapeless.ops.nat.ToInt
 import shapeless.ops.hlist.{Fill, ToCoproduct, Tupler}
 import swave.core.impl.stages.Stage
-import swave.core.impl.util.InportList
+import swave.core.impl.util.{InportList, RingBuffer}
 import swave.core.impl.stages.fanin.{ConcatStage, FirstNonEmptyStage, MergeStage, ToProductStage}
 import swave.core.impl.stages.fanout._
 import swave.core.impl.{Inport, ModuleImpl, TypeLogic}

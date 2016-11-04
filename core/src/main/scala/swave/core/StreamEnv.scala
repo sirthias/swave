@@ -7,11 +7,12 @@
 package swave.core
 
 import com.typesafe.config.{Config, ConfigFactory}
-import swave.core.io.files.FileIO
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import com.typesafe.scalalogging.Logger
+import swave.core.io.files.FileIO
 import swave.core.impl.StreamEnvImpl
+import swave.core.impl.util.SettingsCompanion
 import swave.core.util._
 import swave.core.macros._
 

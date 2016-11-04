@@ -9,8 +9,8 @@ package swave.core.io.files
 import java.io.File
 import java.nio.file.{Files, Path, StandardOpenOption}
 import com.typesafe.config.Config
+import swave.core.impl.util.SettingsCompanion
 import swave.core.io.Bytes
-import swave.core.util.SettingsCompanion
 import swave.core.macros._
 
 object FileIO extends SpoutFromFiles with DrainToFiles {
