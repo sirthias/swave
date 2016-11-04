@@ -65,7 +65,7 @@ private[core] final class BufferDroppingStage(size: Int, overflowStrategy: Buffe
         } else overflowStrategy.id match {
           case 1 /* Overflow.DropHead */ => { buffer.unsafeDropHead(); stay() }
           case 2 /* Overflow.DropTail */ => { buffer.unsafeDropTail(); stay() }
-          case 3 /* Overflow.DropBuffer */ => { buffer.softClear(); stay() }
+          case 3 /* Overflow.DropBuffer */ => { buffer.clear(); stay() }
           case 4 /* Overflow.DropNew */ => stay()
           case 5 /* Overflow.Fail */ => stopError(new BufferOverflowFailure(elem), out)
         }

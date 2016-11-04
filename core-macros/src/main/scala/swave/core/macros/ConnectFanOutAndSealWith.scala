@@ -20,7 +20,7 @@ private[macros] trait ConnectFanOutAndSealWith { this: Util =>
     q"""
       initialState(connecting(null, null))
 
-      def connecting(in: Inport, outs: OutportStates): State = state(
+      def connecting(in: Inport, outs: OutportCtx): State = state(
         onSubscribe = from ⇒ {
           if (in eq null) {
             _inputPipeElem = from.pipeElem
@@ -29,12 +29,12 @@ private[macros] trait ConnectFanOutAndSealWith { this: Util =>
         },
 
         subscribe = from ⇒ {
-          @tailrec def rec(outPort: Outport, current: OutportStates): State =
+          @tailrec def rec(outPort: Outport, current: OutportCtx): State =
             if (current.nonEmpty) {
               if (current.out ne outPort) rec(outPort, current.tail)
               else illegalState("Double subscribe(" + outPort + ')')
             } else {
-              val newOuts = new OutportStates(outPort, outs, 0)
+              val newOuts = createOutportCtx(outPort, outs)
               _outputElems = newOuts
               outPort.onSubscribe()
               connecting(in, newOuts)
@@ -47,7 +47,7 @@ private[macros] trait ConnectFanOutAndSealWith { this: Util =>
             if (outs.nonEmpty) {
               configureFrom(c)
               in.xSeal(c)
-              @tailrec def rec(current: OutportStates): Unit =
+              @tailrec def rec(current: OutportCtx): Unit =
                 if (current ne null) { current.out.xSeal(c); rec(current.tail) }
               rec(outs)
               val $ctx = c

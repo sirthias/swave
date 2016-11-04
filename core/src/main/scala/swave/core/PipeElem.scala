@@ -126,9 +126,10 @@ object PipeElem {
     final def inputElems: List[PipeElem] = inputElem :: Nil
   }
   object FanOut {
-    trait Broadcast      extends FanOut
-    trait FirstAvailable extends FanOut
-    trait RoundRobin     extends FanOut
-    trait Switch         extends FanOut
+    trait Broadcast         extends FanOut
+    trait BroadcastBuffered extends FanOut
+    trait FirstAvailable    extends FanOut
+    trait RoundRobin        extends FanOut
+    trait Switch            extends FanOut
   }
 }

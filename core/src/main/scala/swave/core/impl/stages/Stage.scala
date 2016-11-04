@@ -8,7 +8,7 @@ package swave.core.impl.stages
 
 import scala.annotation.{compileTimeOnly, tailrec}
 import scala.concurrent.Promise
-import swave.core.impl.util.{AbstractInportList, AbstractOutportList}
+import swave.core.impl.util.AbstractInportList
 import swave.core.{Module, PipeElem}
 import swave.core.util._
 import swave.core.impl._
@@ -68,7 +68,7 @@ import swave.core.impl._
   * - ignore all signals
   */
 private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
-  import Stage.InportStates
+  import Stage.InportContext
 
   type State = Int // semantic alias
 
@@ -77,7 +77,7 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
   private[this] var _sealed                              = false
   private[this] var _state: State                        = _ // current state; the STOPPED state is always encoded as zero
   private[this] var _mbs: Int                            = _
-  private[this] var _inportState: InportStates           = _
+  private[this] var _inportState: InportContext          = _
   private[this] var _buffer: ResizableRingBuffer[AnyRef] = _
   private[this] var _stopPromise: Promise[Unit]          = _
   private[this] var _lastSubscribed: Outport             = _ // needed by `_request` when `fullInterceptions` is off
@@ -206,8 +206,8 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
   @tailrec
   private def _onNext(elem: AnyRef,
                       from: Inport,
-                      last: InportStates = null,
-                      current: InportStates = _inportState): Unit =
+                      last: InportContext = null,
+                      current: InportContext = _inportState): Unit =
     if (current.nonEmpty) {
       val currentIn = current.in
       if ((from eq null) || (currentIn eq from)) {
@@ -484,11 +484,11 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
     } else _intercepting = false
 
   private def updateInportState(in: Inport, requested: Long): Unit = {
-    @tailrec def rec(current: InportStates): Unit =
+    @tailrec def rec(current: InportContext): Unit =
       if (current ne null) {
         if (current.in eq in) current.remaining = current.remaining ⊹ requested
         else rec(current.tail)
-      } else _inportState = new InportStates(in, _inportState, _mbs, requested - _mbs)
+      } else _inportState = new InportContext(in, _inportState, _mbs, requested - _mbs)
     rec(_inportState)
   }
 
@@ -507,12 +507,9 @@ private[swave] object Stage {
     */
   final case class RegisterStopPromise(promise: Promise[Unit])
 
-  private class InportStates(in: Inport,
-                             tail: InportStates,
-                             var pending: Int, // already requested from `in` but not yet received
-                             var remaining: Long) // already requested by us but not yet forwarded to `in`
-      extends AbstractInportList[InportStates](in, tail)
-
-  private[stages] class OutportStates(out: Outport, tail: OutportStates, var remaining: Long) // requested by this `out` but not yet delivered, i.e. unfulfilled demand
-      extends AbstractOutportList[OutportStates](out, tail)
+  private final class InportContext(in: Inport,
+                                    tail: InportContext,
+                                    var pending: Int, // already requested from `in` but not yet received
+                                    var remaining: Long) // already requested by us but not yet forwarded to `in`
+      extends AbstractInportList[InportContext](in, tail)
 }

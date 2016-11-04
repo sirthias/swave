@@ -19,7 +19,7 @@ import shapeless.ops.hlist.{Fill, ToCoproduct, Tupler}
 import swave.core.impl.stages.Stage
 import swave.core.impl.util.InportList
 import swave.core.impl.stages.fanin.{ConcatStage, FirstNonEmptyStage, MergeStage, ToProductStage}
-import swave.core.impl.stages.fanout.{BroadcastStage, FirstAvailableStage, RoundRobinStage, SwitchStage}
+import swave.core.impl.stages.fanout._
 import swave.core.impl.{Inport, ModuleImpl, TypeLogic}
 import swave.core.impl.stages.inout._
 import swave.core.util._
@@ -131,6 +131,16 @@ trait StreamOps[A] extends Any { self ⇒
 
   final def fanOutBroadcast(eagerCancel: Boolean = false): FanOut[A, HNil, CNil, Nothing, Repr] =
     new FanOut(append(new BroadcastStage(eagerCancel)).base, InportList.empty, wrap)
+
+  final def fanOutBroadcastBuffered(bufferSize: Int,
+                                    requestStrategy: Buffer.RequestStrategy = Buffer.RequestStrategy.WhenHalfEmpty,
+                                    eagerCancel: Boolean = false): FanOut[A, HNil, CNil, Nothing, Repr] = {
+    requireArg(bufferSize >= 0, "`bufferSize` must be >= 0")
+    if (bufferSize > 0) {
+      val stage = new BroadcastBufferedStage(bufferSize, requestStrategy(bufferSize), eagerCancel)
+      new FanOut(append(stage).base, InportList.empty, wrap)
+    } else fanOutBroadcast(eagerCancel)
+  }
 
   final def fanOutFirstAvailable(eagerCancel: Boolean = false): FanOut[A, HNil, CNil, Nothing, Repr] =
     new FanOut(append(new FirstAvailableStage(eagerCancel)).base, InportList.empty, wrap)
@@ -385,7 +395,7 @@ trait StreamOps[A] extends Any { self ⇒
       if (n > 0) {
         Pipe[A]
           .fold(new RingBuffer[A](roundUpToPowerOf2(n))) { (buf, elem) ⇒
-            if (buf.size == n) buf.unsafeDropHead()
+            if (buf.count == n) buf.unsafeDropHead()
             buf.unsafeWrite(elem)
             buf
           }

@@ -15,7 +15,7 @@ import swave.core.macros._
   * Contrary to many other ring buffer implementations this one does not automatically overwrite the oldest
   * elements, rather, if full, the buffer tries to grow and rejects further writes if max capacity is reached.
   */
-private[swave] final class ResizableRingBuffer[T <: AnyRef](initialCap: Int, maxCap: Int) {
+private[swave] final class ResizableRingBuffer[T](initialCap: Int, maxCap: Int) {
   requireArg(isPowerOf2(maxCap) && maxCap > 0) // automatically implies maxCap <= 0x40000000
   requireArg(isPowerOf2(initialCap) && 0 < initialCap && initialCap <= maxCap)
 
@@ -32,7 +32,7 @@ private[swave] final class ResizableRingBuffer[T <: AnyRef](initialCap: Int, max
   /**
     * The number of elements currently in the buffer.
     */
-  def size: Int = writeIx - readIx
+  def count: Int = writeIx - readIx
 
   /**
     * True if no elements are currently in the buffer.
@@ -59,7 +59,7 @@ private[swave] final class ResizableRingBuffer[T <: AnyRef](initialCap: Int, max
     * Returns `true` if the write was successful and false if the buffer is full and cannot grow anymore.
     */
   def write(value: T): Boolean =
-    if (size < currentCapacity) { // if we have space left we can simply write and be done
+    if (count < currentCapacity) { // if we have space left we can simply write and be done
       val w = writeIx
       UNSAFE.putObject(array, calcElementOffset((w & mask).toLong), value)
       writeIx = w + 1
@@ -71,7 +71,7 @@ private[swave] final class ResizableRingBuffer[T <: AnyRef](initialCap: Int, max
     * Returns `true` if the write was successful and false if the buffer is full and cannot grow anymore.
     */
   def write(v1: T, v2: T): Boolean =
-    if (size < currentCapacity - 1) { // if we have space left we can simply write and be done
+    if (count < currentCapacity - 1) { // if we have space left we can simply write and be done
       val w = writeIx
       UNSAFE.putObject(array, calcElementOffset((w & mask).toLong), v1)
       UNSAFE.putObject(array, calcElementOffset(((w + 1) & mask).toLong), v2)
@@ -84,7 +84,7 @@ private[swave] final class ResizableRingBuffer[T <: AnyRef](initialCap: Int, max
     * Returns `true` if the write was successful and false if the buffer is full and cannot grow anymore.
     */
   def write(v1: T, v2: T, v3: T): Boolean =
-    if (size < currentCapacity - 2) { // if we have space left we can simply write and be done
+    if (count < currentCapacity - 2) { // if we have space left we can simply write and be done
       val w = writeIx
       UNSAFE.putObject(array, calcElementOffset((w & mask).toLong), v1)
       UNSAFE.putObject(array, calcElementOffset(((w + 1) & mask).toLong), v2)
@@ -107,7 +107,10 @@ private[swave] final class ResizableRingBuffer[T <: AnyRef](initialCap: Int, max
   def unsafeRead(): T = {
     val r = readIx
     readIx = r + 1
-    UNSAFE.getObject(array, calcElementOffset((r & mask).toLong)).asInstanceOf[T]
+    val ix  = calcElementOffset((r & mask).toLong)
+    val res = UNSAFE.getObject(array, ix).asInstanceOf[T]
+    UNSAFE.putObject(array, ix, null)
+    res
   }
 
   private def grow(): Boolean =
@@ -118,11 +121,11 @@ private[swave] final class ResizableRingBuffer[T <: AnyRef](initialCap: Int, max
       System.arraycopy(array, 0, newArray, array.length - r, r)
       array = newArray
       mask = newArray.length - 1
-      writeIx = size
+      writeIx = count
       readIx = 0
       true
     }
 
   override def toString: String =
-    s"ResizableRingBuffer(len=${array.length}, size=$size, writeIx=$writeIx, readIx=$readIx)"
+    s"ResizableRingBuffer(len=${array.length}, size=$count, writeIx=$writeIx, readIx=$readIx)"
 }

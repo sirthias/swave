@@ -36,7 +36,7 @@ private[core] final class DropLastStage(count: Int) extends InOutStage with Pipe
     cancel = stopCancelF(in),
 
     onNext = (elem, _) ⇒ {
-      if (buffer.size == count) out.onNext(buffer.unsafeRead())
+      if (buffer.count == count) out.onNext(buffer.unsafeRead())
       buffer.write(elem)
       stay()
     },

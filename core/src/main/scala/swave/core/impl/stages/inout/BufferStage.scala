@@ -41,8 +41,6 @@ private[core] final class BufferStage(size: Int, requestThreshold: Int) extends 
 
   /**
     * Upstream and downstream active.
-    * We always have `buffer.available` elements pending from upstream,
-    * i.e. we are trying to always have the buffer filled.
     *
     * @param in        the active upstream
     * @param out       the active downstream
@@ -56,7 +54,7 @@ private[core] final class BufferStage(size: Int, requestThreshold: Int) extends 
         out.onNext(buffer.unsafeRead())
         handleDemand(pend, rem - 1)
       } else {
-        val alreadyRequested = pend ⊹ buffer.size
+        val alreadyRequested = pend ⊹ buffer.count
         val target = rem ⊹ size
         val delta = target - alreadyRequested
         val newPending =
@@ -73,7 +71,7 @@ private[core] final class BufferStage(size: Int, requestThreshold: Int) extends 
 
       onNext = (elem, _) ⇒ {
         requireState(buffer.canWrite)
-        buffer.write(elem)
+        buffer.unsafeWrite(elem)
         handleDemand(pending - 1, remaining)
       },
 

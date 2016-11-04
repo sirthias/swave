@@ -51,7 +51,7 @@ private[testkit] final class TestContext(val runNr: Int,
       val snapshot: Array[ResizableRingBuffer[Task]] = schedulings.toArray
 
       def runSnapshots() = snapshot foreach { buf ⇒
-        runTasks(buf, buf.size)
+        runTasks(buf, buf.count)
       }
 
       @tailrec def runTasks(buf: ResizableRingBuffer[Task], count: Int): Unit =
@@ -79,7 +79,7 @@ private[testkit] final class TestContext(val runNr: Int,
             if (remaining.nonEmpty) {
               random.shuffle_!(remaining)
               rec(remaining flatMap { buf ⇒
-                val jobsSize = buf.size
+                val jobsSize = buf.count
                 runTasks(buf, random.nextInt(jobsSize + 1)) // at least one, at most all
                 if (buf.nonEmpty) buf :: Nil else Nil
               })

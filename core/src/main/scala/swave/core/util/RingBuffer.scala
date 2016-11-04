@@ -6,8 +6,10 @@
 
 package swave.core.util
 
-import swave.core.macros._
+import org.jctools.util.UnsafeAccess.UNSAFE
+import org.jctools.util.UnsafeRefArrayAccess.calcElementOffset
 import scala.annotation.tailrec
+import swave.core.macros._
 
 /**
   * A mutable RingBuffer with a fixed capacity.
@@ -34,17 +36,17 @@ private[swave] final class RingBuffer[T](cap: Int) {
   /**
     * The number of elements currently in the buffer.
     */
-  def size: Int = writeIx - readIx
+  def count: Int = writeIx - readIx
 
   /**
     * The number of elements the buffer can still take in.
     */
-  def available: Int = capacity - size
+  def available: Int = capacity - count
 
   /**
     * True if the next write will succeed.
     */
-  def canWrite: Boolean = capacity > size
+  def canWrite: Boolean = capacity > count
 
   /**
     * True if no elements are currently in the buffer.
@@ -61,7 +63,7 @@ private[swave] final class RingBuffer[T](cap: Int) {
     * Returns `true` if the write was successful and false if the buffer is full.
     */
   def write(value: T): Boolean =
-    (size < capacity) && {
+    canWrite && {
       unsafeWrite(value)
       true
     }
@@ -70,8 +72,9 @@ private[swave] final class RingBuffer[T](cap: Int) {
     * Writes the given value into the buffer without any buffer overflow protection.
     */
   def unsafeWrite(value: T): Unit = {
-    array(writeIx & mask) = value.asInstanceOf[AnyRef]
-    writeIx += 1
+    val w = writeIx
+    UNSAFE.putObject(array, calcElementOffset((w & mask).toLong), value)
+    writeIx = w + 1
   }
 
   /**
@@ -87,35 +90,39 @@ private[swave] final class RingBuffer[T](cap: Int) {
     */
   def unsafeRead(): T = {
     val r = readIx
-    readIx += 1
-    array(r & mask).asInstanceOf[T]
+    readIx = r + 1
+    val ix  = calcElementOffset((r & mask).toLong)
+    val res = UNSAFE.getObject(array, ix).asInstanceOf[T]
+    UNSAFE.putObject(array, ix, null)
+    res
   }
 
   /**
     * Drops the element that would otherwise be read next.
     * CAUTION: Must not be used if buffer is empty! This precondition is not verified!
     */
-  def unsafeDropHead(): Unit = readIx += 1
+  def unsafeDropHead(): Unit = {
+    val r = readIx
+    UNSAFE.putObject(array, calcElementOffset((r & mask).toLong), null)
+    readIx = r + 1
+  }
 
   /**
     * Drops the element that was written last.
     * CAUTION: Must not be used if buffer is empty! This precondition is not verified!
     */
-  def unsafeDropTail(): Unit = writeIx -= 1
-
-  /**
-    * Resets the buffer to "is empty" status without nulling out references.
-    */
-  def softClear(): Unit = {
-    readIx = 0
-    writeIx = 0
+  def unsafeDropTail(): Unit = {
+    val w = writeIx - 1
+    UNSAFE.putObject(array, calcElementOffset((w & mask).toLong), null)
+    writeIx = w
   }
 
   /**
     * Resets the buffer to "is empty" status and nulls out all references.
     */
-  def hardClear(): Unit = {
-    softClear()
+  def clear(): Unit = {
+    readIx = 0
+    writeIx = 0
     java.util.Arrays.fill(array, null)
   }
 
@@ -131,11 +138,12 @@ private[swave] final class RingBuffer[T](cap: Int) {
   def foreach[U](f: T => U): Unit = {
     @tailrec def rec(i: Int): Unit =
       if (i < writeIx) {
-        f(array(i & mask).asInstanceOf[T])
+        val ix = calcElementOffset((i & mask).toLong)
+        f(UNSAFE.getObject(array, ix).asInstanceOf[T])
         rec(i + 1)
       }
     rec(readIx)
   }
 
-  override def toString: String = s"RingBuffer(len=${array.length}, size=$size, writeIx=$writeIx, readIx=$readIx)"
+  override def toString: String = s"RingBuffer(len=${array.length}, size=$count, writeIx=$writeIx, readIx=$readIx)"
 }

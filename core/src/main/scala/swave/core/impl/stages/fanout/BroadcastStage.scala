@@ -9,10 +9,8 @@ package swave.core.impl.stages.fanout
 import scala.annotation.tailrec
 import swave.core.macros.StageImpl
 import swave.core.PipeElem
-import swave.core.impl.stages.Stage
 import swave.core.impl.{Inport, Outport}
 import swave.core.util._
-import Stage.OutportStates
 
 // format: OFF
 @StageImpl(fullInterceptions = true)
@@ -21,6 +19,10 @@ private[core] final class BroadcastStage(eagerCancel: Boolean) extends FanOutSta
   def pipeElemType: String = "fanOutBroadcast"
   def pipeElemParams: List[Any] = eagerCancel :: Nil
 
+  type OutportCtx = FanOutStage.SimpleOutportContext
+  protected def createOutportCtx(out: Outport, tail: OutportCtx): OutportCtx =
+    new FanOutStage.SimpleOutportContext(out, tail)
+
   connectFanOutAndSealWith { (ctx, in, outs) ⇒ running(in, outs, 0) }
 
   /**
@@ -28,9 +30,9 @@ private[core] final class BroadcastStage(eagerCancel: Boolean) extends FanOutSta
     * @param outs      the active downstreams
     * @param pending   number of elements already requested from upstream but not yet received, >= 0
     */
-  def running(in: Inport, outs: OutportStates, pending: Long): State = {
+  def running(in: Inport, outs: OutportCtx, pending: Long): State = {
 
-    @tailrec def handleDemand(n: Int, out: Outport, os: OutportStates, current: OutportStates,
+    @tailrec def handleDemand(n: Int, out: Outport, os: OutportCtx, current: OutportCtx,
                               minRemaining: Long): State =
       if (current ne null) {
         if (current.out eq out) current.remaining = current.remaining ⊹ n
@@ -40,23 +42,23 @@ private[core] final class BroadcastStage(eagerCancel: Boolean) extends FanOutSta
         running(in, os, minRemaining)
       }
 
-    @tailrec def handleOnComplete(current: OutportStates): State =
+    @tailrec def completeAll(current: OutportCtx): State =
       if (current ne null) {
         current.out.onComplete()
-        handleOnComplete(current.tail)
+        completeAll(current.tail)
       } else stop()
 
     state(
       request = (n, out) ⇒ handleDemand(n, out, outs, outs, Long.MaxValue),
 
       cancel = out ⇒ {
-        @tailrec def rec(prev: OutportStates, current: OutportStates): State =
+        @tailrec def rec(prev: OutportCtx, current: OutportCtx): State =
           if (current ne null) {
             if (current.out eq out) {
               val newOuts = if (prev ne null) { prev.tail = current.tail; outs } else current.tail
               if (eagerCancel || (newOuts eq null)) {
                 in.cancel()
-                handleOnComplete(newOuts)
+                completeAll(newOuts)
               } else handleDemand(0, null, newOuts, newOuts, Long.MaxValue)
             } else rec(current, current.tail)
           } else illegalState(s"Unexpected cancel() from out '$out' in $this")
@@ -64,7 +66,7 @@ private[core] final class BroadcastStage(eagerCancel: Boolean) extends FanOutSta
       },
 
       onNext = (elem, _) ⇒ {
-        @tailrec def rec(current: OutportStates): State =
+        @tailrec def rec(current: OutportCtx): State =
           if (current ne null) {
             current.out.onNext(elem)
             current.remaining -= 1
@@ -73,10 +75,10 @@ private[core] final class BroadcastStage(eagerCancel: Boolean) extends FanOutSta
         rec(outs)
       },
 
-      onComplete = _ ⇒ handleOnComplete(outs),
+      onComplete = _ ⇒ completeAll(outs),
 
       onError = (e, _) ⇒ {
-        @tailrec def rec(current: OutportStates): State =
+        @tailrec def rec(current: OutportCtx): State =
           if (current ne null) {
             current.out.onError(e)
             rec(current.tail)
