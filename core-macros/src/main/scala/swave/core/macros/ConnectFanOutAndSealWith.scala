@@ -29,14 +29,14 @@ private[macros] trait ConnectFanOutAndSealWith { this: Util =>
         },
 
         subscribe = from ⇒ {
-          @tailrec def rec(outPort: Outport, current: OutportCtx): State =
+          @tailrec def rec(out: Outport, current: OutportCtx): State =
             if (current.nonEmpty) {
-              if (current.out ne outPort) rec(outPort, current.tail)
-              else illegalState("Double subscribe(" + outPort + ')')
+              if (current.out ne out) rec(out, current.tail)
+              else illegalState("Double subscribe(" + out + ')')
             } else {
-              val newOuts = createOutportCtx(outPort, outs)
+              val newOuts = createOutportCtx(out, outs)
               _outputElems = newOuts
-              outPort.onSubscribe()
+              out.onSubscribe()
               connecting(in, newOuts)
             }
           rec(from, outs)

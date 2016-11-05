@@ -86,7 +86,7 @@ private[core] final class BroadcastBufferedStage(bufferSize: Int, requestThresho
                 handleDemand(0, null, newOuts, newOuts, pending)
               }
             } else rec(current, current.tail)
-          } else illegalState(s"Unexpected cancel() from out '$out' in $this")
+          } else stay()
         rec(null, outs)
       },
 
@@ -125,12 +125,13 @@ private[core] final class BroadcastBufferedStage(bufferSize: Int, requestThresho
             if (current.out eq out) {
               val rem = emitNext(current, n.toLong, outs)
               if (!buffer.canRead(current)) {
+                out.onComplete()
                 val newOuts = if (prev ne null) { prev.tail = current.tail; outs } else current.tail
                 if (newOuts.isEmpty) stop()
                 else draining(newOuts)
               } else { requireState(rem == 0); stay() }
             } else rec(current, current.tail)
-          } else illegalState(s"Unexpected cancel() from out '$out' in $this")
+          } else stay()
         rec(null, outs)
       },
 
@@ -146,7 +147,7 @@ private[core] final class BroadcastBufferedStage(bufferSize: Int, requestThresho
                 } else stop()
               } else completeAll(newOuts)
             } else rec(current, current.tail)
-          } else illegalState(s"Unexpected cancel() from out '$out' in $this")
+          } else stay()
         rec(null, outs)
       })
   }
@@ -169,15 +170,16 @@ private[core] final class BroadcastBufferedStage(bufferSize: Int, requestThresho
   private def completeFullyDrained(outs: OutportCtx): OutportCtx = {
     @tailrec def rec(prev: OutportCtx, current: OutportCtx, result: OutportCtx): OutportCtx =
       if (current ne null) {
-        val res =
-          if (!buffer.canRead(current)) {
-            current.out.onComplete()
-            if (prev ne null) { prev.tail = current.tail; result } else current.tail
-          } else {
-            requireState(current.remaining == 0)
-            result
-          }
-        rec(current, current.tail, res)
+        if (!buffer.canRead(current)) {
+          current.out.onComplete()
+          if (prev ne null) {
+            prev.tail = current.tail
+            rec(prev, current.tail, result)
+          } else rec(null, current.tail, current.tail)
+        } else {
+          requireState(current.remaining == 0)
+          rec(current, current.tail, result)
+        }
       } else result
     rec(null, outs, outs)
   }

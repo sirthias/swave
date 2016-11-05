@@ -102,11 +102,9 @@ private[swave] class MultiReaderRingBuffer[T](cap: Int) {
   def unsafeRead(cursor: Cursor, firstCursor: Cursor): T = {
     val c = cursor.cursor
     cursor.cursor = c + 1
+    val res = UNSAFE.getObject(array, calcElementOffset((c & mask).toLong))
     if (c == readIx) updateReadIx(firstCursor)
-    val ix  = calcElementOffset((c & mask).toLong)
-    val res = UNSAFE.getObject(array, ix).asInstanceOf[T]
-    UNSAFE.putObject(array, ix, null)
-    res
+    res.asInstanceOf[T]
   }
 
   /**

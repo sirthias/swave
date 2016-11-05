@@ -18,7 +18,7 @@ final class FanOutSpec extends SyncPipeSpec with Inspectors {
 
   implicit val integerInput = Gen.chooseNum(0, 999)
 
-  "FanOutBroadcast" in check {
+  "Broadcast" in check {
     testSetup
       .input[Int]
       .fixtures(Gen.chooseNum(1, 3), _.output[Int])
@@ -38,6 +38,31 @@ final class FanOutSpec extends SyncPipeSpec with Inspectors {
 
       forAll(outs) { out ⇒
         out.received shouldEqual in.produced.take(out.scriptedSize)
+      }
+    }
+  }
+
+  "BroadcastBuffered" in check {
+    testSetup
+      .input[Int]
+      .fixtures(Gen.chooseNum(1, 3), _.output[Int])
+      .param(Gen.chooseNum(0, 16))
+      .prop .from { (in, outs, bufferSize) ⇒
+      import TestFixture.State._
+
+      in.spout
+        .fanOutBroadcastBuffered(bufferSize)
+        .subDrains(outs.tail.map(_.drain.dropResult))
+        .subContinue.drainTo(outs.head.drain)
+
+      in.terminalState match {
+        case Cancelled ⇒ forAll(outs) { _.terminalState shouldBe Cancelled }
+        case Completed ⇒ forAll(outs) { _.terminalState should (be(Cancelled) or be(Completed)) }
+        case error     ⇒ forAll(outs) { _.terminalState should (be(error) or be(Cancelled)) }
+      }
+
+      forAll(outs) { out ⇒
+        out.received shouldEqual in.produced.take(out.size)
       }
     }
   }
