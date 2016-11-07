@@ -244,7 +244,7 @@ trait StreamOps[A] extends Any { self ⇒
     append(new LimitStage(max, cost.asInstanceOf[AnyRef ⇒ Long]))
 
   final def logEvent(marker: String, log: (String, StreamEvent[A]) ⇒ Unit = defaultLogEvent): Repr[A] =
-    onEvent(log(marker, _))
+    onSignal(log(marker, _))
 
   final def map[B](f: A ⇒ B): Repr[B] =
     append(new MapStage(f.asInstanceOf[AnyRef ⇒ AnyRef]))
@@ -274,31 +274,31 @@ trait StreamOps[A] extends Any { self ⇒
     append(new NopStage)
 
   final def onCancel(callback: ⇒ Unit): Repr[A] =
-    onEventPF { case StreamEvent.Cancel ⇒ callback }
+    onSignalPF { case StreamEvent.Cancel ⇒ callback }
 
   final def onComplete(callback: ⇒ Unit): Repr[A] =
-    onEventPF { case StreamEvent.OnComplete ⇒ callback }
+    onSignalPF { case StreamEvent.OnComplete ⇒ callback }
 
   final def onElement(callback: A ⇒ Unit): Repr[A] =
-    onEventPF { case StreamEvent.OnNext(element) ⇒ callback(element) }
+    onSignalPF { case StreamEvent.OnNext(element) ⇒ callback(element) }
 
   final def onError(callback: Throwable ⇒ Unit): Repr[A] =
-    onEventPF { case StreamEvent.OnError(cause) ⇒ callback(cause) }
+    onSignalPF { case StreamEvent.OnError(cause) ⇒ callback(cause) }
 
-  final def onEvent(callback: StreamEvent[A] ⇒ Unit): Repr[A] =
-    append(new OnEventStage(callback.asInstanceOf[StreamEvent[Any] ⇒ Unit]))
+  final def onSignal(callback: StreamEvent[A] ⇒ Unit): Repr[A] =
+    append(new OnSignalStage(callback.asInstanceOf[StreamEvent[Any] ⇒ Unit]))
 
-  final def onEventPF(callback: PartialFunction[StreamEvent[A], Unit]): Repr[A] =
-    onEvent(ev ⇒ callback.applyOrElse(ev, dropFunc))
+  final def onSignalPF(callback: PartialFunction[StreamEvent[A], Unit]): Repr[A] =
+    onSignal(ev ⇒ callback.applyOrElse(ev, dropFunc))
 
   final def onRequest(callback: Int ⇒ Unit): Repr[A] =
-    onEventPF { case StreamEvent.Request(count) ⇒ callback(count) }
+    onSignalPF { case StreamEvent.Request(count) ⇒ callback(count) }
 
   final def onStart(callback: () ⇒ Unit): Repr[A] =
     append(new OnStartStage(callback))
 
   final def onTerminate(callback: Option[Throwable] ⇒ Unit): Repr[A] =
-    onEventPF {
+    onSignalPF {
       case StreamEvent.OnComplete     ⇒ callback(None)
       case StreamEvent.OnError(cause) ⇒ callback(Some(cause))
     }

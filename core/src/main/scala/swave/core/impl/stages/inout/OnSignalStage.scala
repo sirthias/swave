@@ -13,7 +13,7 @@ import swave.core.{PipeElem, StreamEvent}
 
 // format: OFF
 @StageImpl
-private[core] final class OnEventStage(callback: StreamEvent[Any] ⇒ Unit) extends InOutStage
+private[core] final class OnSignalStage(callback: StreamEvent[Any] ⇒ Unit) extends InOutStage
   with PipeElem.InOut.OnEvent {
 
   def pipeElemType: String = "onEvent"
