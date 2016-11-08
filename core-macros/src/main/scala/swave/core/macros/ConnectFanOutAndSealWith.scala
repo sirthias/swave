@@ -25,14 +25,14 @@ private[macros] trait ConnectFanOutAndSealWith { this: Util =>
           if (in eq null) {
             _inputPipeElem = from.pipeElem
             connecting(from, outs)
-          } else illegalState("Double onSubscribe(" + from + ')')
+          } else throw illegalState("Double onSubscribe(" + from + ')')
         },
 
         subscribe = from ⇒ {
           @tailrec def rec(out: Outport, current: OutportCtx): State =
             if (current.nonEmpty) {
               if (current.out ne out) rec(out, current.tail)
-              else illegalState("Double subscribe(" + out + ')')
+              else throw illegalState("Double subscribe(" + out + ')')
             } else {
               val newOuts = createOutportCtx(out, outs)
               _outputElems = newOuts
@@ -54,8 +54,8 @@ private[macros] trait ConnectFanOutAndSealWith { this: Util =>
               val $in = in
               val $outs = outs
               $block
-            } else illegalState("Unexpected xSeal(...) (unconnected downstream)")
-          } else illegalState("Unexpected xSeal(...) (unconnected upstream)")
+            } else throw illegalState("Unexpected xSeal(...) (unconnected downstream)")
+          } else throw illegalState("Unexpected xSeal(...) (unconnected upstream)")
         })
      """
   }

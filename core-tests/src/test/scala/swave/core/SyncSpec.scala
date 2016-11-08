@@ -92,6 +92,14 @@ class SyncSpec extends SwaveSpec {
       Spout(1 to 10).inject.map(_ elementAt 1).flattenConcat() should produce(2, 4, 6, 8, 10)
     }
 
+    "illegal 2nd connect" in {
+      val spout = Spout.one(42)
+      val first = spout.map(_.toString)
+      val thrown = the[IllegalReuseException] thrownBy spout.map(_ + 1)
+      thrown.getMessage should startWith("Port already connected in IteratorSpoutStage")
+      thrown.getMessage should endWith("Are you trying to reuse a stage instance?")
+    }
+
     "illegal restart" in {
       val spout = Spout.one(42)
       val first = spout.drainToBlackHole()

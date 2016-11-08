@@ -100,53 +100,53 @@ private[testkit] final class TestSpoutStage(val id: Int,
             } else terminate(out)
           }
           rec(n)
-        } else illegalState(s"Received illegal REQUEST $n from outport '$out'")
-      } else illegalState(s"Received REQUEST $n from unexpected outport '$from' instead of outport '$out'")
+        } else throw illegalState(s"Received illegal REQUEST $n from outport '$out'")
+      } else throw illegalState(s"Received REQUEST $n from unexpected outport '$from' instead of outport '$out'")
     },
 
     cancel = from ⇒ {
       ctx.trace(s"Received CANCEL from $from in state 'producing'")
       fixtureState = TestFixture.State.Cancelled
       if (from eq out) cancelled(out)
-      else illegalState(s"Received CANCEL from unexpected outport '$from' instead of outport '$out'")
+      else throw illegalState(s"Received CANCEL from unexpected outport '$from' instead of outport '$out'")
     })
 
   def cancelled(out: Outport): State = state(
     request = (n, from) ⇒ {
       ctx.trace(s"Received REQUEST $n from $from in state 'cancelled'")
-      if (from eq out) illegalState(s"Received REQUEST $n after CANCEL from outport '$out'")
-      else illegalState(s"Received REQUEST $n from unexpected outport '$from' instead of outport '$out'")
+      if (from eq out) throw illegalState(s"Received REQUEST $n after CANCEL from outport '$out'")
+      else throw illegalState(s"Received REQUEST $n from unexpected outport '$from' instead of outport '$out'")
     },
 
     cancel = from ⇒ {
       ctx.trace(s"Received CANCEL from $from in state 'cancelled'")
-      if (from eq out) illegalState(s"Received double CANCEL from outport '$out'")
-      else illegalState(s"Received CANCEL from unexpected outport '$from' instead of outport '$out'")
+      if (from eq out) throw illegalState(s"Received double CANCEL from outport '$out'")
+      else throw illegalState(s"Received CANCEL from unexpected outport '$from' instead of outport '$out'")
     })
 
   def completed(out: Outport): State = state(
     request = (n, from) ⇒ {
       ctx.trace(s"Received REQUEST $n from $from in state 'completed'")
       if (from eq out) stay()
-      else illegalState(s"Received REQUEST $n from unexpected outport '$from' instead of outport '$out'")
+      else throw illegalState(s"Received REQUEST $n from unexpected outport '$from' instead of outport '$out'")
     },
 
     cancel = from ⇒ {
       ctx.trace(s"Received CANCEL from $from in state 'completed'")
       if (from eq out) cancelled(out)
-      else illegalState(s"Received CANCEL from unexpected outport '$from' instead of outport '$out'")
+      else throw illegalState(s"Received CANCEL from unexpected outport '$from' instead of outport '$out'")
     })
 
   def errored(out: Outport): State = state(
     request = (n, from) ⇒ {
       ctx.trace(s"Received REQUEST $n from $from in state 'errored'")
       if (from eq out) stay()
-      else illegalState(s"Received REQUEST $n from unexpected outport '$from' instead of outport '$out'")
+      else throw illegalState(s"Received REQUEST $n from unexpected outport '$from' instead of outport '$out'")
     },
 
     cancel = from ⇒ {
       ctx.trace(s"Received CANCEL from $from in state 'errored'")
       if (from eq out) cancelled(out)
-      else illegalState(s"Received CANCEL from unexpected outport '$from' instead of outport '$out'")
+      else throw illegalState(s"Received CANCEL from unexpected outport '$from' instead of outport '$out'")
     })
 }

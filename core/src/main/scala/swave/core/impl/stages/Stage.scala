@@ -9,7 +9,7 @@ package swave.core.impl.stages
 import scala.annotation.{compileTimeOnly, tailrec}
 import scala.concurrent.Promise
 import swave.core.impl.util.{AbstractInportList, ResizableRingBuffer}
-import swave.core.{Module, PipeElem}
+import swave.core.{IllegalReuseException, Module, PipeElem}
 import swave.core.util._
 import swave.core.impl._
 
@@ -97,7 +97,7 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
 
   protected final def stay(): State = _state
 
-  protected final def illegalState(msg: String) = throw new IllegalStateException(msg + " in " + this)
+  protected final def illegalState(msg: String) = new IllegalStateException(msg + " in " + this)
 
   protected final def setIntercepting(flag: Boolean): Unit = _intercepting = flag
 
@@ -123,7 +123,10 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
   protected def _subscribe0(from: Outport): State =
     _state match {
       case 0 ⇒ stay()
-      case _ ⇒ illegalState(s"Unexpected subscribe() from out '$from'")
+      case _ ⇒
+        throw new IllegalReuseException(
+          s"Port already connected in $this. Are you trying to reuse a stage instance?",
+          illegalState(s"Unexpected subscribe() from out '$from'"))
     }
 
   /////////////////////////////////////// REQUEST ///////////////////////////////////////
@@ -148,7 +151,7 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
   protected def _request0(n: Int, from: Outport): State =
     _state match {
       case 0 ⇒ stay()
-      case _ ⇒ illegalState(s"Unexpected request($n) from out '$from'")
+      case _ ⇒ throw illegalState(s"Unexpected request($n) from out '$from'")
     }
 
   protected final def requestF(in: Inport)(n: Int, from: Outport): State = {
@@ -174,7 +177,7 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
   protected def _cancel0(from: Outport): State =
     _state match {
       case 0 ⇒ stay()
-      case _ ⇒ illegalState(s"Unexpected cancel() from out '$from'")
+      case _ ⇒ throw illegalState(s"Unexpected cancel() from out '$from'")
     }
 
   /////////////////////////////////////// ONSUBSCRIBE ///////////////////////////////////////
@@ -191,7 +194,10 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
   protected def _onSubscribe0(from: Inport): State =
     _state match {
       case 0 ⇒ stay()
-      case _ ⇒ illegalState(s"Unexpected onSubscribe() from out '$from'")
+      case _ ⇒
+        throw new IllegalReuseException(
+          s"Port already connected in $this. Are you trying to reuse a stage instance?",
+          illegalState(s"Unexpected onSubscribe() from out '$from'"))
     }
 
   /////////////////////////////////////// ONNEXT ///////////////////////////////////////
@@ -232,7 +238,7 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
   protected def _onNext0(elem: AnyRef, from: Inport): State =
     _state match {
       case 0 ⇒ stay()
-      case _ ⇒ illegalState(s"Unexpected onNext($elem) from out '$from'")
+      case _ ⇒ throw illegalState(s"Unexpected onNext($elem) from out '$from'")
     }
 
   protected final def onNextF(out: Outport)(elem: AnyRef, from: Inport): State = {
@@ -257,7 +263,7 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
   protected def _onComplete0(from: Inport): State =
     _state match {
       case 0 ⇒ stay()
-      case _ ⇒ illegalState(s"Unexpected onComplete() from out '$from'")
+      case _ ⇒ throw illegalState(s"Unexpected onComplete() from out '$from'")
     }
 
   /////////////////////////////////////// ONERROR ///////////////////////////////////////
@@ -277,7 +283,7 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
   protected def _onError0(error: Throwable, from: Inport): State =
     _state match {
       case 0 ⇒ stay()
-      case _ ⇒ illegalState(s"Unexpected onError($error) from out '$from'")
+      case _ ⇒ throw illegalState(s"Unexpected onError($error) from out '$from'")
     }
 
   /////////////////////////////////////// XSEAL ///////////////////////////////////////
@@ -302,7 +308,7 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
   protected def _xSeal(ctx: RunContext): State =
     _state match {
       case 0 ⇒ stay()
-      case _ ⇒ illegalState(s"Unexpected xSeal(...)")
+      case _ ⇒ throw illegalState(s"Unexpected xSeal(...)")
     }
 
   /////////////////////////////////////// XSTART ///////////////////////////////////////
@@ -315,7 +321,7 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
   protected def _xStart(): State =
     _state match {
       case 0 ⇒ stay()
-      case _ ⇒ illegalState(s"Unexpected xStart()")
+      case _ ⇒ throw illegalState(s"Unexpected xStart()")
     }
 
   /////////////////////////////////////// XEVENT ///////////////////////////////////////
@@ -338,7 +344,7 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
         } else p.completeWith(_stopPromise.future)
         stay()
       case _ if isStopped ⇒ stay()
-      case _              ⇒ illegalState(s"Unexpected xEvent($ev)")
+      case _              ⇒ throw illegalState(s"Unexpected xEvent($ev)")
     }
 
   final def enqueueXEvent(ev: AnyRef): Unit =
@@ -438,23 +444,23 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
   private def storeInterception(signal: java.lang.Long, from: Port): Unit =
     if (fullInterceptions) {
       if (!buffer.write(signal, from))
-        illegalState(s"Interception buffer overflow on signal $signal($from)'")
+        throw illegalState(s"Interception buffer overflow on signal $signal($from)'")
     } else {
       if (!buffer.write(signal))
-        illegalState(s"Interception buffer overflow on signal $signal()'")
+        throw illegalState(s"Interception buffer overflow on signal $signal()'")
     }
 
   private def storeInterception(signal: java.lang.Long, arg: AnyRef): Unit =
     if (!buffer.write(signal, arg))
-      illegalState(s"Interception buffer overflow on signal $signal($arg)'")
+      throw illegalState(s"Interception buffer overflow on signal $signal($arg)'")
 
   private def storeInterception(signal: java.lang.Long, arg0: AnyRef, from: Port): Unit =
     if (fullInterceptions) {
       if (!buffer.write(signal, arg0, from))
-        illegalState(s"Interception buffer overflow on signal $signal($arg0, $from)")
+        throw illegalState(s"Interception buffer overflow on signal $signal($arg0, $from)")
     } else {
       if (!buffer.write(signal, arg0))
-        illegalState(s"Interception buffer overflow on signal $signal($arg0)")
+        throw illegalState(s"Interception buffer overflow on signal $signal($arg0)")
     }
 
   private def buffer = {

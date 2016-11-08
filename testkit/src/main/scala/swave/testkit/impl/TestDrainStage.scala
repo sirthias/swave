@@ -88,21 +88,21 @@ private[testkit] final class TestDrainStage(val id: Int,
             receiving(ctx, in, n, cancelAfter - 1)
           } else cancel(ctx, in, pending - 1)
         } else receiving(ctx, in, pending - 1, cancelAfter - 1)
-      } else illegalState(s"Received ['$elem'] from unexpected inport '$from' instead of inport '$in'")
+      } else throw illegalState(s"Received ['$elem'] from unexpected inport '$from' instead of inport '$in'")
     },
 
     onComplete = from ⇒ {
       testCtx.trace(s"Received COMPLETE from $from in state 'receiving'")
       fixtureState = TestFixture.State.Completed
       if (from eq in) completed(ctx, in)
-      else illegalState(s"Received COMPLETE from unexpected inport '$from' instead of inport '$in'")
+      else throw illegalState(s"Received COMPLETE from unexpected inport '$from' instead of inport '$in'")
     },
 
     onError = (e, from) ⇒ {
       testCtx.trace(s"Received ERROR [$e] from $from in state 'receiving'")
       fixtureState = TestFixture.State.Error(e)
       if (from eq in) errored(ctx, in)
-      else illegalState(s"Received ERROR [$e] from unexpected inport '$from' instead of inport '$in'")
+      else throw illegalState(s"Received ERROR [$e] from unexpected inport '$from' instead of inport '$in'")
     },
 
     xEvent = { case RunContext.PostRun => handlePostRun(ctx) })
@@ -118,20 +118,20 @@ private[testkit] final class TestDrainStage(val id: Int,
       testCtx.trace(s"Received [$elem] from $from in state 'cancelled'")
       if (from eq in) {
         if (pending > 0) cancelled(ctx, in, pending - 1)
-        else illegalState(s"Received [$elem] from inport '$from' without prior demand")
-      } else illegalState(s"Received [$elem] from unexpected inport '$from' instead of inport '$in'")
+        else throw illegalState(s"Received [$elem] from inport '$from' without prior demand")
+      } else throw illegalState(s"Received [$elem] from unexpected inport '$from' instead of inport '$in'")
     },
 
     onComplete = from ⇒ {
       testCtx.trace(s"Received COMPLETE from $from in state 'cancelled'")
       if (from eq in) completed(ctx, in)
-      else illegalState(s"Received COMPLETE from unexpected inport '$from' instead of inport '$in'")
+      else throw illegalState(s"Received COMPLETE from unexpected inport '$from' instead of inport '$in'")
     },
 
     onError = (e, from) ⇒ {
       testCtx.trace(s"Received ERROR [$e] from $from in state 'cancelled'")
       if (from eq in) errored(ctx, in)
-      else illegalState(s"Received ERROR [$e] from unexpected inport '$from' instead of inport '$in")
+      else throw illegalState(s"Received ERROR [$e] from unexpected inport '$from' instead of inport '$in")
     },
 
     xEvent = { case RunContext.PostRun => handlePostRun(ctx) })
@@ -139,20 +139,20 @@ private[testkit] final class TestDrainStage(val id: Int,
   def completed(ctx: RunContext, in: Inport): State = state(
     onNext = (elem, from) ⇒ {
       testCtx.trace(s"Received [$elem] from $from in state 'completed'")
-      if (from eq in) illegalState(s"Received [$elem] from inport '$from' after completion")
-      else illegalState(s"Received [$elem] from unexpected inport '$from' instead of inport '$in'")
+      if (from eq in) throw illegalState(s"Received [$elem] from inport '$from' after completion")
+      else throw illegalState(s"Received [$elem] from unexpected inport '$from' instead of inport '$in'")
     },
 
     onComplete = from ⇒ {
       testCtx.trace(s"Received COMPLETE from $from in state 'completed'")
-      if (from eq in) illegalState(s"Received double COMPLETE from inport '$from'")
-      else illegalState(s"Received COMPLETE from unexpected inport '$from' instead of inport '$in'")
+      if (from eq in) throw illegalState(s"Received double COMPLETE from inport '$from'")
+      else throw illegalState(s"Received COMPLETE from unexpected inport '$from' instead of inport '$in'")
     },
 
     onError = (e, from) ⇒ {
       testCtx.trace(s"Received ERROR [$e] from $from in state 'completed'")
-      if (from eq in) illegalState(s"Received ERROR [$e] after COMPLETE from inport '$from'")
-      else illegalState(s"Received ERROR [$e] from unexpected inport '$from' instead of inport '$in'")
+      if (from eq in) throw illegalState(s"Received ERROR [$e] after COMPLETE from inport '$from'")
+      else throw illegalState(s"Received ERROR [$e] from unexpected inport '$from' instead of inport '$in'")
     },
 
     xEvent = { case RunContext.PostRun => handlePostRun(ctx) })
@@ -160,20 +160,20 @@ private[testkit] final class TestDrainStage(val id: Int,
   def errored(ctx: RunContext, in: Inport): State = state(
     onNext = (elem, from) ⇒ {
       testCtx.trace(s"Received [$elem] from $from in state 'errored'")
-      if (from eq in) illegalState(s"Received [$elem] after ERROR from inport '$from'")
-      else illegalState(s"Received [$elem] from unexpected inport '$from' instead of inport '$in'")
+      if (from eq in) throw illegalState(s"Received [$elem] after ERROR from inport '$from'")
+      else throw illegalState(s"Received [$elem] from unexpected inport '$from' instead of inport '$in'")
     },
 
     onComplete = from ⇒ {
       testCtx.trace(s"Received COMPLETE from $from in state 'errored'")
-      if (from eq in) illegalState(s"Received COMPLETE after ERROR from inport '$from'")
-      else illegalState(s"Received COMPLETE from unexpected inport '$from' instead of inport '$in'")
+      if (from eq in) throw illegalState(s"Received COMPLETE after ERROR from inport '$from'")
+      else throw illegalState(s"Received COMPLETE from unexpected inport '$from' instead of inport '$in'")
     },
 
     onError = (e, from) ⇒ {
       testCtx.trace(s"Received ERROR [$e] from $from in state 'errored'")
-      if (from eq in) illegalState(s"Received onError($e) after ERROR from inport '$from'")
-      else illegalState(s"Received ERROR [$e] from unexpected inport '$from' instead of inport '$in'")
+      if (from eq in) throw illegalState(s"Received onError($e) after ERROR from inport '$from'")
+      else throw illegalState(s"Received ERROR [$e] from unexpected inport '$from' instead of inport '$in'")
     },
 
     xEvent = { case RunContext.PostRun => handlePostRun(ctx) })

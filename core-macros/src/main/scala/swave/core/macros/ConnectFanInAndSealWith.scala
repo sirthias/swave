@@ -36,7 +36,7 @@ private[macros] trait ConnectFanInAndSealWith { this: Util =>
             from.onSubscribe()
             if (pendingSubs.isEmpty) ready(from)
             else connecting(from, pendingSubs)
-          } else illegalState("Double subscribe(" + from + ')')
+          } else throw illegalState("Double subscribe(" + from + ')')
         })
 
       def ready(out: Outport) = state(
