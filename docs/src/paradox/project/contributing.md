@@ -3,10 +3,10 @@ Contributing
 
 We value all kinds of contributions, not just actual code. Maybe the easiest and yet very good way
 of helping us improve *swave* is to ask questions, voice concerns or propose improvements on the
-@ref:[Mailing List](../support.md#mailing-list).
+@ref[Mailing List](../support.md#mailing-list).
 
 Or simply tell us about you or your organization using *swave* by sending us a small statement for the
-@ref:[References](references.md) page.
+@ref[References](references.md) page.
 
 If you do like to contribute actual code in the form of bug fixes, new features or other patches this page gives
 you more info on how to do it.
@@ -93,7 +93,7 @@ The *swave* team uses the [Issues Page] of the projects [github repository] for 
 If you find a bug and would like to report it please go there and create an issue.
 
 If you are unsure, whether the problem you've found really is a bug please ask on the
-@ref:[Mailing List](../support.md) first.
+@ref[Mailing List](../support.md) first.
 
   [Issues Page]: https://github.com/sirthias/swave/issues
   [github repository]: https://github.com/sirthias/swave/  

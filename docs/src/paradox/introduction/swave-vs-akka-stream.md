@@ -19,8 +19,8 @@ Sync + Async vs. Async only
   [Akka-Stream] always runs its streams on independent Akka Actors (and thus thread-pools).
   
 Shapeless-based DSL vs. Point-to-point Graph DSL
-: While *swave* tries to keep single operations named similarly to [Akka-Stream] the DSL for creating more complex
-  stream setups, with fan-outs, fan-ins, loops, etc. is substantially different between the two.
+: While *swave* tries to keep individual transformations named similarly to [Akka-Stream] the DSL for creating more
+  complex stream setups, with fan-outs, fan-ins, loops, etc. is substantially different between the two.
   
 Quick Evolution vs. Long-term stability
 : Being part of [Akka] Akka-Stream has much tighter requirements on long-term stability and binary compatibility than
@@ -28,7 +28,7 @@ Quick Evolution vs. Long-term stability
   However, the less stringent stability requirements allow us to evolve *swave* faster and incorporate new learnings
   more freely.
 
-Non-blocking, back-pressured stream processing in Scala is an exciting and promising arena, with most of its potential
+Non-blocking, backpressured stream processing in Scala is an exciting and promising arena, with most of its potential
 still untapped. Therefore we don't see *swave* as a head-on competitor to [Akka-Stream], trying to steal away from its
 user base. Rather we regards ourselves as two teams that are exploring this still new field together, learning from one
 another and comparing approaches on numerous levels.

@@ -4,9 +4,9 @@ Overview
 What is *swave*?
 ----------------
 
-*swave* is a library providing a general, @ref:[Reactive-Streams](reactive-streams.md)-compliant streaming infrastructure for applications
+*swave* is a library providing a general, @ref[Reactive-Streams](reactive-streams.md)-compliant streaming infrastructure for applications
 written in [Scala]. As such it plays in the same space as [Akka-Stream], but differs from it in some important
-aspects. (For more info on this check out @ref:[swave vs Akka-Stream](swave-vs-akka-stream.md))
+aspects. (For more info on this check out @ref[swave vs Akka-Stream](swave-vs-akka-stream.md))
 
            
 Motivation
@@ -21,16 +21,16 @@ and advantageous in today computing environments.
 
 One such programming model, albeit hardly a recent invention at its core, is [Stream Processing].
 
-Although [Scala] provides the @scaladoc:[scala.immutable.Stream](scala.immutable.Stream) datatype with its standard
+Although [Scala] provides the @scaladoc[scala.immutable.Stream](scala.immutable.Stream) datatype with its standard
 library this abstraction is quite limited in its functionality and barely scratches the surface of the benefits that
 [Stream Processing] as a programming abstraction is able to provide.
 Therefore a number of stream processing libraries have recently emerged in the [Scala] eco-system, the most prominent
 of which are probably [Akka-Stream] and [FS2] (formally [Scalaz Stream]), which approach the field from two
 different angles.
 
-Since modern stream processing, especially with support for non-blocking back pressure, is both incredibly sexy
+Since modern stream processing, especially with support for non-blocking backpressure, is both incredibly sexy
 and still relatively new, with plenty of learnings still to be unearthed, we believe that there is more than enough
-space for a few more implementations to be tried and tested before settling on one or two "standard implementations".
+space for a few more approaches to be tried and tested before settling on one or two "standard implementations".
     
 *swave* attempts to be just that: A stream processing implementation, purely in and for [Scala], which further explores
 the boundaries of the possible, sometimes by being intentionally different.
@@ -58,8 +58,8 @@ Debuggable
   (yet) quite do what you expect it to. Making this task as easy as possible is one of *swave's* key focus points.
 
 Type-Safe and Concise
-: Being written in and for [Scala] a type-safe API naturally key. *swave* tries to let the compiler statically verify as
-  much of your program logic as possible while reducing necessary boilerplate to the absolute minimum. 
+: Being written in and for [Scala] a type-safe API is naturally key. *swave* tries to let the compiler statically verify
+  as much of your program logic as possible while reducing necessary boilerplate to the absolute minimum. 
 
   [Scala]: http://www.scala-lang.org/
   [Akka-Stream]: http://doc.akka.io/docs/akka/2.4/scala/stream/index.html

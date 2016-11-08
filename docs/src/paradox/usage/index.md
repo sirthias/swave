@@ -5,9 +5,11 @@ User Documentation
 
 * [-](setup.md)
 * [-](quick-start.md)
+* [-](basics.md)
 * [-](spouts.md)
 * [-](drains.md)
 * [-](transformations/index.md)
+* [-](sync-vs-async.md)
 * [-](debugging.md)
 * [-](rendering.md)
 * [-](configuration.md)

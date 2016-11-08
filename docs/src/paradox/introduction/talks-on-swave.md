@@ -12,7 +12,7 @@ All talks in reverse chronological order
 ----------------------------------------
 
 Here we list all known talks and presentations related to *swave*.<br/>
-If you'd like to add one, please @ref:[submit a PR](../project/contributing.md)!
+If you'd like to add one, please @ref[submit a PR](../project/contributing.md)!
 
 "swave - Reactive Streams in Scala" presented at [scala.io 2016](http://scala.io) (Oct 2016)
 :  Slides: [/talks/2016/scala.io/index.html](../talks/2016/scala.io/index.html)

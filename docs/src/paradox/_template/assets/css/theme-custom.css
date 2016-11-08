@@ -6,7 +6,7 @@ ul.nav-main li a { font-size: 1.4rem }
 html.sidebar-light:not(.dark) ul.nav-main li a { color: #555; }
 ul.nav-main li .nav-children li.nav-active > a { color: #0088cc; }
 
-.header .logo { opacity: 0.8; }
+.header .logo img { opacity: 0.8; margin: 0 }
 
 .header #talks-link { float: right; margin: 16px 16px 0; }
 
@@ -76,8 +76,9 @@ pre code { font-size: 14px; line-height: 1.4em; color: #458 }
 dl, dt { margin-top: 1em; line-height: inherit }
 dd { margin-left: 1em; line-height: inherit }
 
-h1 { font-size: 4.2rem }
-h2 { margin-top: 30px }
+h1 { font-size: 4.2rem; margin-top: 0 }
+h2 { margin-top: 40px }
+h3 { margin-top: 30px }
 
 ul, ol { margin-bottom: 10px }
 
@@ -120,6 +121,9 @@ h1:hover > a.anchor, h2:hover > a.anchor, h3:hover > a.anchor, h4:hover > a.anch
 table { margin: 1em auto; }
 table th { font-weight: bold; padding: 8px; }
 table td { padding: 8px; border-top: 1px solid #ddd; }
+
+img { max-width: 100%; margin: 1em 0; }
+p.centered { text-align: center }
 
 /*************************** PAGES **************************/
 

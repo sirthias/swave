@@ -9,13 +9,13 @@ Currently *swave* provides the following modules:
 swave-core
 : The core infrastructure you'll want to add as a dependency on in almost all cases.
 
-@ref:[swave-akka-compat](swave-akka-compat/index.md)
+@ref[swave-akka-compat](swave-akka-compat/index.md)
 : Helpers for seamless integration with [Akka-Stream]
 
-@ref:[swave-scodec-compat](swave-scodec-compat/index.md)
+@ref[swave-scodec-compat](swave-scodec-compat/index.md)
 : Helpers for seamless integration with [Scodec]
 
-@ref:[swave-testkit](swave-testkit/index.md)
+@ref[swave-testkit](swave-testkit/index.md)
 : Testkit for testing *swave* streams
 
 
@@ -43,7 +43,7 @@ Dependencies
 
 *swave-core* has the following dependencies that it will transitively pull into your classpath:
 
-- `org.reactivestreams % reactive-streams` (non-scala, see @ref:[here](../introduction/reactive-streams.md#the-artifact) for more info)
+- `org.reactivestreams % reactive-streams` (non-scala, see @ref[here](../introduction/reactive-streams.md#the-artifact) for more info)
 - `org.jctools % jctools-core` (non-scala)
 - `com.typesafe % config` (non-scala)
 - `com.chuusai %% shapeless`

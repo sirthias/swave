@@ -2,7 +2,7 @@ Reactive Streams
 ================
 
 [Reactive Streams][Reactive Streams] (RS) is an initiative to provide a standard for asynchronous stream processing with
-non-blocking back pressure. At its core it defines a **protocol** for moving streaming data across an asynchronous
+non-blocking backpressure. At its core it defines a **protocol** for moving streaming data across an asynchronous
 boundary (e.g. between threads or machines) in a way that allows both sides to run within bounded memory (no unlimited
 buffering) and without any blocking.
 
@@ -21,8 +21,8 @@ One output of the [Reactive Streams] initiative is a set of Java interfaces that
 library under the [Creative Commons Zero] Public Domain license (group-id `org.reactivestreams`,
 artifact-id `reactive-streams`).
 The interface types defined in this library, most importantly
-@scaladoc:[org.reactivestreams.Publisher](org.reactivestreams.Publisher) and
-@scaladoc:[org.reactivestreams.Subscriber](org.reactivestreams.Publisher), are implemented by RS-compatible
+@scaladoc[org.reactivestreams.Publisher](org.reactivestreams.Publisher) and
+@scaladoc[org.reactivestreams.Subscriber](org.reactivestreams.Publisher), are implemented by RS-compatible
 libraries and thus allow for seamless integration between different RS-implementations on the JVM.
 
 Normally you shouldn't have to define the `reactive-streams` JAR as an explicit dependency of your project.
@@ -36,13 +36,13 @@ RS Support in *swave*
 
 You can:
 
-- Consume @scaladoc:[Publishers](org.reactivestreams.Publisher)
-- Provide @scaladoc:[Publishers](org.reactivestreams.Publisher)
-- Feed into @scaladoc:[Subscribers](org.reactivestreams.Subscriber)
-- Provide @scaladoc:[Subscribers](org.reactivestreams.Subscriber)
+- Consume @scaladoc[Publishers](org.reactivestreams.Publisher)
+- Provide @scaladoc[Publishers](org.reactivestreams.Publisher)
+- Feed into @scaladoc[Subscribers](org.reactivestreams.Subscriber)
+- Provide @scaladoc[Subscribers](org.reactivestreams.Subscriber)
 
-Check the respective documentation on @ref:[Spouts](../usage/spouts.md) and
-@ref:[Drains](../usage/drains.md) for more details. 
+Check the respective documentation on @ref[Spouts](../usage/spouts.md) and
+@ref[Drains](../usage/drains.md) for more details. 
 
   [Reactive Streams]: http://www.reactive-streams.org/
   [Scala]: http://www.scala-lang.org/
