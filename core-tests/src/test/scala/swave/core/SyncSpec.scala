@@ -91,13 +91,31 @@ class SyncSpec extends SwaveSpec {
     "inject" in {
       Spout(1 to 10).inject.map(_ elementAt 1).flattenConcat() should produce(2, 4, 6, 8, 10)
     }
+  }
 
-    "illegal 2nd connect" in {
+  "Illegal usage" - {
+
+    "illegal reconnect" in {
       val spout = Spout.one(42)
-      val first = spout.map(_.toString)
+      spout.map(_.toString)
       val thrown = the[IllegalReuseException] thrownBy spout.map(_ + 1)
       thrown.getMessage should startWith("Port already connected in IteratorSpoutStage")
       thrown.getMessage should endWith("Are you trying to reuse a stage instance?")
+    }
+
+    "illegal reseal" in {
+      val piping = Spout.one(42).to(Drain.head)
+      piping.seal() shouldBe a[Success[_]]
+      inside(piping.seal()) {
+        case Failure(e: IllegalReuseException) ⇒
+          e.getMessage should include("is already sealed. It cannot be sealed a second time. " +
+            "Are you trying to reuse a Spout, Drain, Pipe or Module?")
+      }
+    }
+
+    "illegal open port" in {
+      val thrown = the[UnclosedStreamGraphException] thrownBy Coupling[Int].out.drainToBlackHole().value.get.get
+      thrown.getMessage should startWith("Unconnected Port in CouplingStage")
     }
 
     "illegal restart" in {
@@ -111,13 +129,13 @@ class SyncSpec extends SwaveSpec {
       }
     }
 
-    "non-terminating" in {
+    "illegal non-terminating" in {
       val c = Coupling[Int]
       val result = Spout.one(1)
         .concat(c.out)
         .fanOutBroadcast()
-          .sub.to(c.in)
-          .subContinue.drainToBlackHole()
+        .sub.to(c.in)
+        .subContinue.drainToBlackHole()
       inside(result.value) {
         case Some(Failure(_: UnterminatedSynchronousStreamException)) ⇒ // ok
       }

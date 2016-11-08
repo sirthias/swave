@@ -9,7 +9,7 @@ package swave.core.impl.stages
 import scala.annotation.{compileTimeOnly, tailrec}
 import scala.concurrent.Promise
 import swave.core.impl.util.{AbstractInportList, ResizableRingBuffer}
-import swave.core.{IllegalReuseException, Module, PipeElem}
+import swave.core.{IllegalReuseException, Module, PipeElem, UnclosedStreamGraphException}
 import swave.core.util._
 import swave.core.impl._
 
@@ -308,7 +308,8 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
   protected def _xSeal(ctx: RunContext): State =
     _state match {
       case 0 ⇒ stay()
-      case _ ⇒ throw illegalState(s"Unexpected xSeal(...)")
+      case _ ⇒
+        throw new UnclosedStreamGraphException(s"Unconnected Port in $this", illegalState("Unexpected xSeal(...)"))
     }
 
   /////////////////////////////////////// XSTART ///////////////////////////////////////
