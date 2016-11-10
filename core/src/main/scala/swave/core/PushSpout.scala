@@ -19,7 +19,7 @@ import scala.annotation.tailrec
   * potentially by several threads concurrently.
   *
   * It manages an internal queue which allows for compensation of some fluctuation in demand from downstream
-  * (i.e. back-pressure). If the queue is full all further pushes are rejected, i.e. no elements are being dropped.
+  * (i.e. backpressure). If the queue is full all further pushes are rejected, i.e. no elements are being dropped.
   *
   * @param initialBufferSize the initial buffer size, must be >= 2.
   * @param maxBufferSize the max size the buffer is allowed to grow to if required, must be >= 4, will be rounded up to
@@ -70,7 +70,7 @@ final class PushSpout[+A] private (val initialBufferSize: Int,
   def acceptsNext: Boolean = queueSize < maxBufferSize
 
   /**
-    * Tries to push the given value into the stream, which will succeed if back-pressure
+    * Tries to push the given value into the stream, which will succeed if backpressure
     * from downstream hasn't yet caused the complete buffer space to be filled up.
     *
     * @return true if the element was successfully scheduled, false if the buffer is full and further growth impossible

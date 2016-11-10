@@ -7,6 +7,7 @@
 package swave.docs
 
 import org.scalatest.{FreeSpec, Matchers}
+import scala.concurrent.Future
 import swave.core._
 
 class BasicSpec extends FreeSpec with Matchers {
@@ -24,7 +25,7 @@ class BasicSpec extends FreeSpec with Matchers {
     //#upperFoo
 
     //#piping
-    val piping: Piping[Char] = upperFoo.to(Drain.head)
+    val piping: Piping[Future[Char]] = upperFoo.to(Drain.head)
     //#piping
 
     def `only compiled, not actually run`() = {
@@ -39,7 +40,8 @@ class BasicSpec extends FreeSpec with Matchers {
       println(numberStrings.drop(41).drainToHead())
 
       // concatenate the first hundred
-      val s: String = numberStrings.take(100).drainToMkString(", ")
+      val s: Future[String] =
+        numberStrings.take(100).drainToMkString(", ")
       //#reuse
     }
   }

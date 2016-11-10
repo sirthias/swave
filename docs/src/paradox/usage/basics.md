@@ -80,7 +80,7 @@ automatically by the DSL.
 
 Let's look at this simple example:
 
-@@snip [-](.../BasicSpec.scala) { #foo }
+@@snip [-]($test/BasicSpec.scala) { #foo }
 
 @@@ p { .centered }
 ![Spout foo](.../foo-spout.svg)
@@ -89,7 +89,7 @@ Let's look at this simple example:
 The spout instance `foo` has no downstream attached yet, i.e. it has one open port. We can attach
 a @ref[transformation] to connect the open port to a downstream stage:
 
-@@snip [-](.../BasicSpec.scala) { #upperFoo }
+@@snip [-]($test/BasicSpec.scala) { #upperFoo }
 
 @@@ p { .centered }
 ![Spout upperFoo](.../upper-foo.svg)
@@ -103,7 +103,7 @@ As you can see attaching @ref[transformations] to @ref[spouts] will always conne
 produce new unconnected ones. Only by attaching @ref[drains] can a graph become fully **closed**, without any ports
 left unconnected:
 
-@@snip [-](.../BasicSpec.scala) { #piping }
+@@snip [-]($test/BasicSpec.scala) { #piping }
 
 @@@ p { .centered }
 ![Simple Piping](.../simple-piping.svg)
@@ -196,7 +196,7 @@ Prefer `def` over `val`
 One simple way to deal with the non-reusability of *swave's* stream components is to model them as a `def` rather than
 a `val` wherever reuse is desired, e.g. like this:
 
-@@snip [-](.../BasicSpec.scala) { #reuse }
+@@snip [-]($test/BasicSpec.scala) { #reuse }
 
 Apart from ensuring that you'll never see an @scaladoc[IllegalReuseException] it also has the benefit that
 parameterizing your higher-level stream constructs becomes trivial (as all that's required is giving the `def` a

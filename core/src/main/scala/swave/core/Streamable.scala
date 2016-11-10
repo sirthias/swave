@@ -16,10 +16,12 @@ import scala.util.Try
 @implicitNotFound(
   msg =
     "Don't know how to create a stream from instances of type ${T}. Maybe you'd like to provide an `implicit Streamable[${T}]`?")
+//#source-quote
 abstract class Streamable[-T] {
   type Out
   def apply(value: T): Spout[Out]
 }
+//#source-quote
 
 object Streamable {
   type Aux[T, Out0] = Streamable[T] { type Out = Out0 }

@@ -218,6 +218,9 @@ trait StreamOps[A] extends Any { self ⇒
         if (prefix.isEmpty) throw new NoSuchElementException("head of empty stream") else prefix.head → tail
     } named "headAndTail")
 
+  /**
+    * The underlying representation without additional stage appended.
+    */
   def identity: Repr[A]
 
   final def inject: Repr[Spout[A]] =

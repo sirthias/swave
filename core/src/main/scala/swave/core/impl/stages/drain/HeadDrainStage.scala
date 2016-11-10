@@ -43,7 +43,7 @@ private[core] final class HeadDrainStage(headPromise: Promise[AnyRef]) extends D
     },
 
     onComplete = _ ⇒ {
-      headPromise.failure(new NoSuchElementException())
+      headPromise.failure(new NoSuchElementException)
       stop()
     },
 
