@@ -85,6 +85,7 @@
                           <ul class="nav nav-children">
                             <li><a href="../usage/setup.html">Setup</a></li>
                             <li><a href="../usage/quick-start.html">Quick Start</a></li>
+                            <li><a href="../usage/basics.html">Basics</a></li>
                             <li><a href="../usage/spouts.html">Spouts</a></li>
                             <li class="nav-expanded nav-active"><a href="../usage/drains.html">Drains</a></li>
                             <li class="nav-parent"><a>Transformations</a>
@@ -95,7 +96,9 @@
                               <li><a href="../usage/transformations/fan-ins.html">Fan-Ins</a></li>
                               <li><a href="../usage/transformations/pipes.html">Pipes</a></li>
                               <li><a href="../usage/transformations/modules.html">Modules</a></li>
+                              <li><a href="../usage/transformations/couplings.html">Couplings</a></li>
                             </ul></li>
+                            <li><a href="../usage/sync-vs-async.html">Sync vs. Async</a></li>
                             <li><a href="../usage/debugging.html">Debugging</a></li>
                             <li><a href="../usage/rendering.html">Rendering</a></li>
                             <li><a href="../usage/configuration.html">Configuration</a></li>
@@ -145,8 +148,36 @@
             <div id="main-content">
                 <!-- start: page -->
 <h1><a href="#drains" name="drains" class="anchor"><span class="anchor-link"></span></a>Drains</h1>
-<p>.. TODO &hellip;</p>
-<p>For now we simply point you to the (still somewhat anemic) <a href="http://swave.io/api/core/latest/#swave.core.Drain">Scaladoc</a> as well as the <a href="https://github.com/sirthias/swave/tree/master/core/src/main/scala/swave/core/Drain.scala">implementation</a>.</p>
+<p>A <a href="http://swave.io/api/core/latest/#swave.core.Drain">Drain</a> is a <a href="basics.html#streams-as-graphs">stream graph component</a> with one input port and a no output port. As such it serves as a &ldquo;point of exit&rdquo; from a stream setup to other destinations (e.g. to memory, disk or the network).</p><p class="centered"><img src="../assets/img/drain.svg" alt="A Drain" /></p>
+<p><em>swave</em> provides constructors for the most frequently used <a href="http://swave.io/api/core/latest/#swave.core.Drain">Drains</a> on the <a href="http://swave.io/api/core/latest/#swave.core.Spout$">Drain companion object</a>. You can also look directly into <a href="https://github.com/sirthias/swave/tree/master/core/src/main/scala/swave/core/Drain.scala">the sources</a> for the complete reference.</p>
+<h2><a href="#drain-result" name="drain-result" class="anchor"><span class="anchor-link"></span></a>Drain Result</h2>
+<p>The type <code>Drain[-T, +R]</code> carries two type parameters. The first specifies the type of stream elements that the drain is ready to receive and the second is the drain&rsquo;s &ldquo;Result Type&rdquo;. A drain&rsquo;s <em>result</em> is the vehicle for getting data out of a stream.</p>
+<p>When a drain is used to close a stream graph, e.g. via the <code>to(...)</code> method of a <a href="spouts.html">Spout</a>, the result type is carried over to the <a href="http://swave.io/api/core/latest/#swave.core.Piping">Piping</a> where it defines the type of the <code>run()</code> call, i.e. what you get back when the stream is started.</p>
+<p>For example:</p>
+<pre><code class="scala">import scala.concurrent.Future
+import swave.core._
+
+implicit val env = StreamEnv()
+
+// a drain, which produces the sum of all `Int` elements it receives
+def sumDrain: Drain[Int, Future[Int]] =
+  Drain.fold(0)(_ + _)
+
+Spout(1 to 100)  // Spout[Int]
+  .to(sumDrain)  // Piping[Int]
+  .run()         // Future[Int]
+  .value         // Option[Try[Int]]
+  .get           // Try[Int]
+  .get shouldEqual 5050
+
+// same but shorter
+Spout(1 to 100)
+  .drainTo(sumDrain) // shortcut for `to(drain).run(
+  .value.get.get shouldEqual 5050</code></pre>
+<h2><a href="#result-types-are-async" name="result-types-are-async" class="anchor"><span class="anchor-link"></span></a>Result Types are Async</h2>
+<p>One consequence of the fact that every stage must be able to run asynchronously, off the caller thread, is that the drain result (which is returned by the <code>run()</code> call on a <a href="http://swave.io/api/core/latest/#swave.core.Piping">Piping</a>) cannot directly contain stream elements. As blocking is not an option the <code>run()</code> call must return right away if the stream is running asynchronously, often before the first data elements have even begun their traversal of the stream graph.<br/></p>
+<p>In consequence most kinds of drains have a result type of <code>Future[Something]</code> rather than just <code>Something</code>.</p>
+<p>However, if you know that a stream runs synchronously (because it doesn&rsquo;t contain asynchronous stages) the <code>Future</code> instance you&rsquo;ll get back from the <code>run()</code> call will be already fulfilled. This is because, in those cases, the complete stream execution will happen &ldquo;inside&rdquo; the <code>run()</code> call. Then, and only then, it&rsquo;s fine to directly access the future&rsquo;s value via <code>future.value.get</code> directly after the <code>run()</code> call.</p>
                 <div class="nav-next">
                     <p><strong>Next:</strong> <a href="../usage/transformations/index.html">Transformations</a></p>
                 </div>

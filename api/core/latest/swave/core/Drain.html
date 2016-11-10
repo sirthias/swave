@@ -51,7 +51,9 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A <code>Drain</code> is a streaming component] with one input port and a no output port. As such it serves
+as a &quot;point of exit&quot; from a stream graph to other destinations (e.g. to memory, disk or the network).
+</p></div><dl class="paramcmts block"><dt class="tparam">T</dt><dd class="cmt"><p>the type of the data elements consumed</p></dd><dt class="tparam">R</dt><dd class="cmt"><p>the type of &quot;results&quot; that the drain provides</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
@@ -180,14 +182,14 @@
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Marks all primary drains in the graph behind this drain's <code>outport</code> as
-&quot;to be run on the dispatcher with the given id&quot;.</p><div class="fullcomment"><div class="comment cmt"><p>Marks all primary drains in the graph behind this drain's <code>outport</code> as
-&quot;to be run on the dispatcher with the given id&quot;.
-If the <code>dispatcherId</code> is empty the default dispatcher will be assigned
-if no other non-default assignment has previously been made.</p><p>Note that the graph behind this drain's <code>outport</code> must not contain any explicit async boundaries!
+      <p class="shortcomment cmt">Turns this <a href="" class="extype" name="swave.core.Drain">Drain</a> into one that causes the stream graph it's incorporated into to run asynchronously.</p><div class="fullcomment"><div class="comment cmt"><p>Turns this <a href="" class="extype" name="swave.core.Drain">Drain</a> into one that causes the stream graph it's incorporated into to run asynchronously.
+If the given <code>dispatcherId</code> is empty the default dispatcher will be assigned if no other non-default
+assignment has been made for the async region the drain is placed in.</p><p>Since this <a href="" class="extype" name="swave.core.Drain">Drain</a> might internally consist of a whole other stream graph the full description of
+this method's effect is: Marks all primary drains in the graph behind this drain's stage as
+&quot;to be run on the dispatcher with the given id&quot; or the default-dispatcher.</p><p>NOTE: The (internal) graph behind this drain's stage must not contain any explicit async boundaries.
 Otherwise an <span class="extype" name="IllegalStateException">IllegalStateException</span> will be thrown.
 </p></div></div>
-    </li><li name="swave.core.Drain#capture" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="swave.core.Drain#capture" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="capture[P](promise:scala.concurrent.Promise[P])(implicitcapture:swave.core.Drain.Capture[R,P]):swave.core.Drain[T,Unit]"></a>
       <a id="capture[P](Promise[P])(Capture[R,P]):Drain[T,Unit]"></a>
       <h4 class="signature">
@@ -203,7 +205,11 @@ Otherwise an <span class="extype" name="IllegalStateException">IllegalStateExcep
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">Turns this <a href="" class="extype" name="swave.core.Drain">Drain</a> into one that produces no result.</p><div class="fullcomment"><div class="comment cmt"><p>Turns this <a href="" class="extype" name="swave.core.Drain">Drain</a> into one that produces no result.
+Rather the result of this drain fulfills the given <span class="extype" name="Promise">Promise</span> as soon as it becomes available.
+If the result of this drain is a <span class="extype" name="Future">Future</span>, the <span class="extype" name="Future">Future</span> layer is unwrapped.</p><p>NOTE: The result of this call and the underlying drain share the same stage.
+This means that only one of them can be used (once) in any stream setup.
+</p></div></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
       <a id="clone():AnyRef"></a>
@@ -227,7 +233,7 @@ Otherwise an <span class="extype" name="IllegalStateException">IllegalStateExcep
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="swave.core.Drain#dropResult" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="swave.core.Drain#dropResult" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="dropResult:swave.core.Drain[T,Unit]"></a>
       <a id="dropResult:Drain[T,Unit]"></a>
       <h4 class="signature">
@@ -243,7 +249,9 @@ Otherwise an <span class="extype" name="IllegalStateException">IllegalStateExcep
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">Turns this <a href="" class="extype" name="swave.core.Drain">Drain</a> into one that produces no result by simply dropping the result value.</p><div class="fullcomment"><div class="comment cmt"><p>Turns this <a href="" class="extype" name="swave.core.Drain">Drain</a> into one that produces no result by simply dropping the result value.</p><p>NOTE: The result of this call and the underlying drain share the same stage.
+This means that only one of them can be used (once) in any stream setup.
+</p></div></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a>
       <a id="eq(AnyRef):Boolean"></a>
@@ -352,7 +360,7 @@ Otherwise an <span class="extype" name="IllegalStateException">IllegalStateExcep
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="swave.core.Drain#mapResult" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="swave.core.Drain#mapResult" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="mapResult[P](f:R=&gt;P):swave.core.Drain[T,P]"></a>
       <a id="mapResult[P]((R)⇒P):Drain[T,P]"></a>
       <h4 class="signature">
@@ -368,7 +376,9 @@ Otherwise an <span class="extype" name="IllegalStateException">IllegalStateExcep
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">Turns this <a href="" class="extype" name="swave.core.Drain">Drain</a> into one with a different result by mapping over the result value.</p><div class="fullcomment"><div class="comment cmt"><p>Turns this <a href="" class="extype" name="swave.core.Drain">Drain</a> into one with a different result by mapping over the result value.</p><p>NOTE: The result of this call and the underlying drain share the same stage.
+This means that only one of them can be used (once) in any stream setup.
+</p></div></div>
     </li><li name="swave.core.Drain#named" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="named(name:String):Drain.this.type"></a>
       <a id="named(String):Drain.this.type"></a>
@@ -385,7 +395,7 @@ Otherwise an <span class="extype" name="IllegalStateException">IllegalStateExcep
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">Explicitly attaches the given name to this <a href="" class="extype" name="swave.core.Drain">Drain</a>.</p>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>
@@ -453,7 +463,7 @@ Otherwise an <span class="extype" name="IllegalStateException">IllegalStateExcep
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">The <a href="PipeElem.html" class="extype" name="swave.core.PipeElem">PipeElem</a> representation of this <a href="" class="extype" name="swave.core.Drain">Drain</a>.</p>
     </li><li name="swave.core.Drain#result" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="result:R"></a>
       <a id="result:R"></a>

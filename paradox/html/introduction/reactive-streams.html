@@ -85,6 +85,7 @@
                           <ul class="nav nav-children">
                             <li><a href="../usage/setup.html">Setup</a></li>
                             <li><a href="../usage/quick-start.html">Quick Start</a></li>
+                            <li><a href="../usage/basics.html">Basics</a></li>
                             <li><a href="../usage/spouts.html">Spouts</a></li>
                             <li><a href="../usage/drains.html">Drains</a></li>
                             <li class="nav-parent"><a>Transformations</a>
@@ -95,7 +96,9 @@
                               <li><a href="../usage/transformations/fan-ins.html">Fan-Ins</a></li>
                               <li><a href="../usage/transformations/pipes.html">Pipes</a></li>
                               <li><a href="../usage/transformations/modules.html">Modules</a></li>
+                              <li><a href="../usage/transformations/couplings.html">Couplings</a></li>
                             </ul></li>
+                            <li><a href="../usage/sync-vs-async.html">Sync vs. Async</a></li>
                             <li><a href="../usage/debugging.html">Debugging</a></li>
                             <li><a href="../usage/rendering.html">Rendering</a></li>
                             <li><a href="../usage/configuration.html">Configuration</a></li>
@@ -145,7 +148,7 @@
             <div id="main-content">
                 <!-- start: page -->
 <h1><a href="#reactive-streams" name="reactive-streams" class="anchor"><span class="anchor-link"></span></a>Reactive Streams</h1>
-<p><a href="http://www.reactive-streams.org/">Reactive Streams</a> (<abbr title="Reactive Streams">RS</abbr>) is an initiative to provide a standard for asynchronous stream processing with non-blocking back pressure. At its core it defines a <strong>protocol</strong> for moving streaming data across an asynchronous boundary (e.g. between threads or machines) in a way that allows both sides to run within bounded memory (no unlimited buffering) and without any blocking.</p>
+<p><a href="http://www.reactive-streams.org/">Reactive Streams</a> (<abbr title="Reactive Streams">RS</abbr>) is an initiative to provide a standard for asynchronous stream processing with non-blocking backpressure. At its core it defines a <strong>protocol</strong> for moving streaming data across an asynchronous boundary (e.g. between threads or machines) in a way that allows both sides to run within bounded memory (no unlimited buffering) and without any blocking.</p>
 <p>Like many other protocols this <abbr title="Reactive Streams">RS</abbr> protocol is not something that developers of higher-level applications typically implement themselves (HTTP, for example, is another protocol that you don&rsquo;t want to implement yourself only to be able to use it). Rather one normally relies on a specific implementation (e.g. in the form of a library) which provides higher-level interfaces idiomatic to the respective (language) environment.</p>
 <p><em>swave</em> is such an implementation of the <abbr title="Reactive Streams">RS</abbr> protocol for <a href="http://www.scala-lang.org/">Scala</a>.</p>
 <h2><a href="#the-artifact" name="the-artifact" class="anchor"><span class="anchor-link"></span></a>The &ldquo;org.reactivestreams&rdquo; % &ldquo;reactive-streams&rdquo; Artifact</h2>

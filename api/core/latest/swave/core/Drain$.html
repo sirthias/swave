@@ -234,7 +234,7 @@
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">A <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a> which signals no demand but immediately cancels its upstream and produces no result.</p>
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
       <a id="clone():AnyRef"></a>
@@ -331,8 +331,8 @@
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
-    </li><li name="swave.core.Drain#fold" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">A <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a> which demands <code>n</code> elements, collects them and produces an <span class="extype" name="immutable.Seq">immutable.Seq</span>.</p>
+    </li><li name="swave.core.Drain#fold" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="fold[T,R](zero:R)(f:(R,T)=&gt;R):swave.core.Drain[T,scala.concurrent.Future[R]]"></a>
       <a id="fold[T,R](R)((R,T)⇒R):Drain[T,Future[R]]"></a>
       <h4 class="signature">
@@ -348,8 +348,9 @@
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
-    </li><li name="swave.core.Drain#foreach" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">A <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a> which signals infinite demand and executes the given folding function over the received elements.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a> which signals infinite demand and executes the given folding function over the received elements.</p><p>CAUTION: <code>f</code> will be called from another thread if the stream is asynchronous!
+</p></div></div>
+    </li><li name="swave.core.Drain#foreach" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="foreach[T](callback:T=&gt;Unit):swave.core.Drain[T,scala.concurrent.Future[Unit]]"></a>
       <a id="foreach[T]((T)⇒Unit):Drain[T,Future[Unit]]"></a>
       <h4 class="signature">
@@ -365,8 +366,9 @@
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
-    </li><li name="swave.core.Drain#fromSubscriber" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">A <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a> which signals infinite demand and executes the given callback for each received element.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a> which signals infinite demand and executes the given callback for each received element.</p><p>CAUTION: <code>callback</code> will be called from another thread if the stream is asynchronous!
+</p></div></div>
+    </li><li name="swave.core.Drain#fromSubscriber" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="fromSubscriber[T](subscriber:org.reactivestreams.Subscriber[T]):swave.core.Drain[T,Unit]"></a>
       <a id="fromSubscriber[T](Subscriber[T]):Drain[T,Unit]"></a>
       <h4 class="signature">
@@ -382,24 +384,31 @@
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
-    </li><li name="swave.core.Drain#generalSeq" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="generalSeq[M[+_],T](limit:Long)(implicitcbf:scala.collection.generic.CanBuildFrom[M[T],T,M[T]]):swave.core.Drain[T,scala.concurrent.Future[M[T]]]"></a>
-      <a id="generalSeq[M[+_],T](Long)(CanBuildFrom[M[T],T,M[T]]):Drain[T,Future[M[T]]]"></a>
+      <p class="shortcomment cmt">A <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a> which drains the stream into the given <span class="extype" name="Subscriber">Subscriber</span>.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a> which drains the stream into the given <span class="extype" name="Subscriber">Subscriber</span>.
+Both are directly linked to each other and thereby allow for connecting *swave* with other
+Reactive Streams implementations.</p><p>The returned <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a> instance cannot run synchronously.
+</p></div></div>
+    </li><li name="swave.core.Drain#generalSeq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="generalSeq[M[+_],T](limit:Int)(implicitcbf:scala.collection.generic.CanBuildFrom[M[T],T,M[T]]):swave.core.Drain[T,scala.concurrent.Future[M[T]]]"></a>
+      <a id="generalSeq[M[+_],T](Int)(CanBuildFrom[M[T],T,M[T]]):Drain[T,Future[M[T]]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">generalSeq</span><span class="tparams">[<span name="M">M<span class="tparams">[<span name="_">+_</span>]</span></span>, <span name="T">T</span>]</span><span class="params">(<span name="limit">limit: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="cbf">cbf: <span class="extype" name="scala.collection.generic.CanBuildFrom">CanBuildFrom</span>[<span class="extype" name="swave.core.Drain.generalSeq.M">M</span>[<span class="extype" name="swave.core.Drain.generalSeq.T">T</span>], <span class="extype" name="swave.core.Drain.generalSeq.T">T</span>, <span class="extype" name="swave.core.Drain.generalSeq.M">M</span>[<span class="extype" name="swave.core.Drain.generalSeq.T">T</span>]]</span>)</span><span class="result">: <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a>[<span class="extype" name="swave.core.Drain.generalSeq.T">T</span>, <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="swave.core.Drain.generalSeq.M">M</span>[<span class="extype" name="swave.core.Drain.generalSeq.T">T</span>]]]</span>
+        <span class="name">generalSeq</span><span class="tparams">[<span name="M">M<span class="tparams">[<span name="_">+_</span>]</span></span>, <span name="T">T</span>]</span><span class="params">(<span name="limit">limit: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="cbf">cbf: <span class="extype" name="scala.collection.generic.CanBuildFrom">CanBuildFrom</span>[<span class="extype" name="swave.core.Drain.generalSeq.M">M</span>[<span class="extype" name="swave.core.Drain.generalSeq.T">T</span>], <span class="extype" name="swave.core.Drain.generalSeq.T">T</span>, <span class="extype" name="swave.core.Drain.generalSeq.M">M</span>[<span class="extype" name="swave.core.Drain.generalSeq.T">T</span>]]</span>)</span><span class="result">: <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a>[<span class="extype" name="swave.core.Drain.generalSeq.T">T</span>, <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="swave.core.Drain.generalSeq.M">M</span>[<span class="extype" name="swave.core.Drain.generalSeq.T">T</span>]]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#swave.core.Drain$@generalSeq[M[+_],T](limit:Long)(implicitcbf:scala.collection.generic.CanBuildFrom[M[T],T,M[T]]):swave.core.Drain[T,scala.concurrent.Future[M[T]]]" title="Permalink" target="_top">
+      <a href="../../index.html#swave.core.Drain$@generalSeq[M[+_],T](limit:Int)(implicitcbf:scala.collection.generic.CanBuildFrom[M[T],T,M[T]]):swave.core.Drain[T,scala.concurrent.Future[M[T]]]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">A <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a> which signals demand of <code>Integer.MAX_VALUE</code> and buffers incoming elements in a collection
+of type <code>M[+_]</code>.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a> which signals demand of <code>Integer.MAX_VALUE</code> and buffers incoming elements in a collection
+of type <code>M[+_]</code>. The given <code>limit</code> protects against an overflow beyond the expected maximum number
+of elements by failing the stream with a <a href="StreamLimitExceeded.html" class="extype" name="swave.core.StreamLimitExceeded">StreamLimitExceeded</a> if more elements are received.
+</p></div></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <a id="getClass():Class[_]"></a>
@@ -434,7 +443,7 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="swave.core.Drain#head" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="swave.core.Drain#head" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="head[T]:swave.core.Drain[T,scala.concurrent.Future[T]]"></a>
       <a id="head[T]:Drain[T,Future[T]]"></a>
       <h4 class="signature">
@@ -450,7 +459,10 @@
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">A <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a> which only requests and produces the very first stream element.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a> which only requests and produces the very first stream element.
+If the stream completes without having produced a single element the result future is completed with
+a <span class="extype" name="NoSuchElementException">NoSuchElementException</span>.
+</p></div></div>
     </li><li name="swave.core.Drain#headOption" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="headOption[T]:swave.core.Drain[T,scala.concurrent.Future[Option[T]]]"></a>
       <a id="headOption[T]:Drain[T,Future[Option[T]]]"></a>
@@ -467,8 +479,8 @@
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
-    </li><li name="swave.core.Drain#ignore" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">A <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a> which only requests and produces the very first stream element as an <span class="extype" name="Option">Option</span>.</p>
+    </li><li name="swave.core.Drain#ignore" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ignore:swave.core.Drain[Any,scala.concurrent.Future[Unit]]"></a>
       <a id="ignore:Drain[Any,Future[Unit]]"></a>
       <h4 class="signature">
@@ -484,7 +496,9 @@
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">A <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a> which signals infinite demand and simply drops all received elements.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a> which signals infinite demand and simply drops all received elements.
+The produced <span class="extype" name="Future">Future</span> is completed with the stream's termination.
+</p></div></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -502,7 +516,7 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="swave.core.Drain#last" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="swave.core.Drain#last" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="last[T]:swave.core.Drain[T,scala.concurrent.Future[T]]"></a>
       <a id="last[T]:Drain[T,Future[T]]"></a>
       <h4 class="signature">
@@ -518,7 +532,10 @@
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">A <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a> which signals infinite demand and drops all but the last of the received elements.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a> which signals infinite demand and drops all but the last of the received elements.
+If the stream completes without having produced a single element the result future is completed with
+a <span class="extype" name="NoSuchElementException">NoSuchElementException</span>.
+</p></div></div>
     </li><li name="swave.core.Drain#lastOption" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="lastOption[T]:swave.core.Drain[T,scala.concurrent.Future[Option[T]]]"></a>
       <a id="lastOption[T]:Drain[T,Future[Option[T]]]"></a>
@@ -535,8 +552,9 @@
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
-    </li><li name="swave.core.Drain#lazyStart" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">A <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a> which signals infinite demand and drops all but the last of the received elements,
+which it produces as an <span class="extype" name="Option">Option</span>.</p>
+    </li><li name="swave.core.Drain#lazyStart" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="lazyStart[T,R](onStart:()=&gt;swave.core.Drain[T,R])(implicittf:swave.core.impl.TypeLogic.ToFuture[R]):swave.core.Drain[T,scala.concurrent.Future[tf.Out]]"></a>
       <a id="lazyStart[T,R](()⇒Drain[T,R])(ToFuture[R]):Drain[T,Future[Out]]"></a>
       <h4 class="signature">
@@ -552,7 +570,11 @@
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">A <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a> which forward the stream to the <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a> instance returned by the given
+function.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a> which forward the stream to the <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a> instance returned by the given
+function. The given function is only executed when the outer stream is started.</p><p>If the outer stream is synchronous the <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a> returned by <code>onStart</code> must be able to run synchronously
+as well. If it doesn't the stream will fail with an <a href="IllegalAsyncBoundaryException.html" class="extype" name="swave.core.IllegalAsyncBoundaryException">IllegalAsyncBoundaryException</a>.
+</p></div></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>
@@ -604,7 +626,7 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="swave.core.Drain#parallelForeach" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="swave.core.Drain#parallelForeach" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="parallelForeach[T](parallelism:Int)(f:T=&gt;Unit)(implicitec:scala.concurrent.ExecutionContext):swave.core.Drain[T,scala.concurrent.Future[Unit]]"></a>
       <a id="parallelForeach[T](Int)((T)⇒Unit)(ExecutionContext):Drain[T,Future[Unit]]"></a>
       <h4 class="signature">
@@ -620,24 +642,31 @@
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
-    </li><li name="swave.core.Drain#seq" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="seq[T](limit:Long):swave.core.Drain[T,scala.concurrent.Future[scala.collection.immutable.Seq[T]]]"></a>
-      <a id="seq[T](Long):Drain[T,Future[Seq[T]]]"></a>
+      <p class="shortcomment cmt">A <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a> which signals infinite demand and executes the given callback for each received element.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a> which signals infinite demand and executes the given callback for each received element.
+Depending on the arrival rate of the stream elements as well as the runtime of the callback up to
+<code>parallelism</code> invocations of the callback function will be run in parallel, i.e. in an overlapping fashion.</p><p>CAUTION: <code>callback</code> will be called from another thread if the stream is asynchronous!
+</p></div></div>
+    </li><li name="swave.core.Drain#seq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="seq[T](limit:Int):swave.core.Drain[T,scala.concurrent.Future[scala.collection.immutable.Seq[T]]]"></a>
+      <a id="seq[T](Int):Drain[T,Future[Seq[T]]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">seq</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="limit">limit: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a>[<span class="extype" name="swave.core.Drain.seq.T">T</span>, <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="scala.collection.immutable.Seq">Seq</span>[<span class="extype" name="swave.core.Drain.seq.T">T</span>]]]</span>
+        <span class="name">seq</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="limit">limit: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a>[<span class="extype" name="swave.core.Drain.seq.T">T</span>, <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="scala.collection.immutable.Seq">Seq</span>[<span class="extype" name="swave.core.Drain.seq.T">T</span>]]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#swave.core.Drain$@seq[T](limit:Long):swave.core.Drain[T,scala.concurrent.Future[scala.collection.immutable.Seq[T]]]" title="Permalink" target="_top">
+      <a href="../../index.html#swave.core.Drain$@seq[T](limit:Int):swave.core.Drain[T,scala.concurrent.Future[scala.collection.immutable.Seq[T]]]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">A <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a> which signals demand of <code>Integer.MAX_VALUE</code> and buffers incoming elements in an
+<span class="extype" name="immutable.Seq">immutable.Seq</span>.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a> which signals demand of <code>Integer.MAX_VALUE</code> and buffers incoming elements in an
+<span class="extype" name="immutable.Seq">immutable.Seq</span>. The given <code>limit</code> protects against an overflow beyond the expected maximum number
+of elements by failing the stream with a <a href="StreamLimitExceeded.html" class="extype" name="swave.core.StreamLimitExceeded">StreamLimitExceeded</a> if more elements are received.
+</p></div></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>
@@ -655,7 +684,7 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="swave.core.Drain#toPublisher" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="swave.core.Drain#toPublisher" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toPublisher[T](fanoutSupport:Boolean):swave.core.Drain[T,org.reactivestreams.Publisher[T]]"></a>
       <a id="toPublisher[T](Boolean):Drain[T,Publisher[T]]"></a>
       <h4 class="signature">
@@ -671,7 +700,11 @@
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">A <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a> which produces an associated <span class="extype" name="Publisher">Publisher</span>.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a> which produces an associated <span class="extype" name="Publisher">Publisher</span>.
+Both are directly linked to each other and thereby allow for connecting *swave* with other
+Reactive Streams implementations.</p><p>The <span class="extype" name="Publisher">Publisher</span> produces all elements received by the <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a> and
+the <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a> forwards all request and cancel signals received by the <span class="extype" name="Publisher">Publisher</span>.</p><p>The returned <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a> instance cannot run synchronously.
+</p></div></div>
     </li><li name="scala.AnyRef#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
       <a id="toString():String"></a>

@@ -208,7 +208,7 @@ when the buffer is full and a new element arrives.</p>
       </a>
     </span>
       
-    </li><li name="swave.core.Drain" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="swave.core.Drain" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="Drain[-T,+R]extendsAnyRef"></a>
       <a id="Drain[-T,+R]:Drain[T,R]"></a>
       <h4 class="signature">
@@ -224,7 +224,9 @@ when the buffer is full and a new element arrives.</p>
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">A <code>Drain</code> is a streaming component] with one input port and a no output port.</p><div class="fullcomment"><div class="comment cmt"><p>A <code>Drain</code> is a streaming component] with one input port and a no output port. As such it serves
+as a &quot;point of exit&quot; from a stream graph to other destinations (e.g. to memory, disk or the network).
+</p></div><dl class="paramcmts block"><dt class="tparam">T</dt><dd class="cmt"><p>the type of the data elements consumed</p></dd><dt class="tparam">R</dt><dd class="cmt"><p>the type of &quot;results&quot; that the drain provides</p></dd></dl></div>
     </li><li name="swave.core.Extension" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="ExtensionextendsAnyRef"></a>
       <a id="Extension:Extension"></a>
@@ -350,7 +352,7 @@ when the buffer is full and a new element arrives.</p>
       </a>
     </span>
       
-    </li><li name="swave.core.Piping" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="swave.core.Piping" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="Piping[A]extendsAnyRef"></a>
       <a id="Piping[A]:Piping[A]"></a>
       <h4 class="signature">
@@ -366,8 +368,10 @@ when the buffer is full and a new element arrives.</p>
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">A <a href="Piping.html" class="extype" name="swave.core.Piping">Piping</a> represents a system or network of connected pipes in which all inlet and outlets
-have been properly connected and which is therefore ready to be started.</p>
+      <p class="shortcomment cmt">A <a href="Piping.html" class="extype" name="swave.core.Piping">Piping</a> represents a stream graph in which the ports of all stages
+have been properly connected and which is therefore ready to be started.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="Piping.html" class="extype" name="swave.core.Piping">Piping</a> represents a stream graph in which the ports of all stages
+have been properly connected and which is therefore ready to be started.
+</p></div><dl class="paramcmts block"><dt class="tparam">A</dt><dd class="cmt"><p>the result type of the <code>run</code> call</p></dd></dl></div>
     </li><li name="swave.core.PushSpout" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="PushSpout[+A]extendsAnyRef"></a>
       <a id="PushSpout[+A]:PushSpout[A]"></a>
@@ -387,7 +391,7 @@ have been properly connected and which is therefore ready to be started.</p>
       <p class="shortcomment cmt">A <a href="PushSpout.html" class="extype" name="swave.core.PushSpout">PushSpout</a> provides a <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> that can be &quot;manually&quot; pushed into from the outside,
 potentially by several threads concurrently.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="PushSpout.html" class="extype" name="swave.core.PushSpout">PushSpout</a> provides a <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> that can be &quot;manually&quot; pushed into from the outside,
 potentially by several threads concurrently.</p><p>It manages an internal queue which allows for compensation of some fluctuation in demand from downstream
-(i.e. back-pressure). If the queue is full all further pushes are rejected, i.e. no elements are being dropped.
+(i.e. backpressure). If the queue is full all further pushes are rejected, i.e. no elements are being dropped.
 </p></div></div>
     </li><li name="swave.core.Scheduler" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="SchedulerextendsAnyRef"></a>
@@ -406,7 +410,7 @@ potentially by several threads concurrently.</p><p>It manages an internal queue 
       </a>
     </span>
       
-    </li><li name="swave.core.SealedPiping" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="swave.core.SealedPiping" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="SealedPiping[A]extendsAnyRef"></a>
       <a id="SealedPiping[A]:SealedPiping[A]"></a>
       <h4 class="signature">
@@ -422,7 +426,8 @@ potentially by several threads concurrently.</p><p>It manages an internal queue 
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">A <a href="SealedPiping.html" class="extype" name="swave.core.SealedPiping">SealedPiping</a> represents a stream graph that has already been sealed and that is ready to be run.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="SealedPiping.html" class="extype" name="swave.core.SealedPiping">SealedPiping</a> represents a stream graph that has already been sealed and that is ready to be run.
+</p></div><dl class="paramcmts block"><dt class="tparam">A</dt><dd class="cmt"><p>the result type of the <code>run</code> call</p></dd></dl></div>
     </li><li name="swave.core.Split" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="SplitextendsAnyRef"></a>
       <a id="Split:Split"></a>
@@ -440,7 +445,7 @@ potentially by several threads concurrently.</p><p>It manages an internal queue 
       </a>
     </span>
       
-    </li><li name="swave.core.Spout" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="swave.core.Spout" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="Spout[+A]extendsAnyValwithStreamOps[A@scala.annotation.unchecked.uncheckedVariance]"></a>
       <a id="Spout[+A]:Spout[A]"></a>
       <h4 class="signature">
@@ -456,7 +461,10 @@ potentially by several threads concurrently.</p><p>It manages an internal queue 
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">A <code>Spout</code> is a streaming component with no input port and a single output port.</p><div class="fullcomment"><div class="comment cmt"><p>A <code>Spout</code> is a streaming component with no input port and a single output port.
+As such it serves as a &quot;point of entry&quot; into a stream graph for data elements from other sources
+(e.g. from memory, disk or the network).
+</p></div><dl class="paramcmts block"><dt class="tparam">A</dt><dd class="cmt"><p>the type of the data elements produced</p></dd></dl></div>
     </li><li name="swave.core.StreamEnv" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="StreamEnvextendsAnyRef"></a>
       <a id="StreamEnv:StreamEnv"></a>
@@ -578,6 +586,23 @@ potentially by several threads concurrently.</p><p>It manages an internal queue 
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#swave.core.package@SubscriptionTimeoutExceptionextendsRuntimeException" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="swave.core.UnclosedStreamGraphException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="UnclosedStreamGraphExceptionextendsRuntimeException"></a>
+      <a id="UnclosedStreamGraphException:UnclosedStreamGraphException"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="UnclosedStreamGraphException.html"><span class="name">UnclosedStreamGraphException</span></a><span class="result"> extends <span class="extype" name="scala.RuntimeException">RuntimeException</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.package@UnclosedStreamGraphExceptionextendsRuntimeException" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>

@@ -85,6 +85,7 @@
                           <ul class="nav nav-children">
                             <li><a href="../usage/setup.html">Setup</a></li>
                             <li><a href="../usage/quick-start.html">Quick Start</a></li>
+                            <li><a href="../usage/basics.html">Basics</a></li>
                             <li class="nav-expanded nav-active"><a href="../usage/spouts.html">Spouts</a></li>
                             <li><a href="../usage/drains.html">Drains</a></li>
                             <li class="nav-parent"><a>Transformations</a>
@@ -95,7 +96,9 @@
                               <li><a href="../usage/transformations/fan-ins.html">Fan-Ins</a></li>
                               <li><a href="../usage/transformations/pipes.html">Pipes</a></li>
                               <li><a href="../usage/transformations/modules.html">Modules</a></li>
+                              <li><a href="../usage/transformations/couplings.html">Couplings</a></li>
                             </ul></li>
+                            <li><a href="../usage/sync-vs-async.html">Sync vs. Async</a></li>
                             <li><a href="../usage/debugging.html">Debugging</a></li>
                             <li><a href="../usage/rendering.html">Rendering</a></li>
                             <li><a href="../usage/configuration.html">Configuration</a></li>
@@ -145,8 +148,76 @@
             <div id="main-content">
                 <!-- start: page -->
 <h1><a href="#spouts" name="spouts" class="anchor"><span class="anchor-link"></span></a>Spouts</h1>
-<p>.. TODO &hellip;</p>
-<p>For now we simply point you to the (still somewhat anemic) <a href="http://swave.io/api/core/latest/#swave.core.Spout">Scaladoc</a> as well as the <a href="https://github.com/sirthias/swave/tree/master/core/src/main/scala/swave/core/Spout.scala">implementation</a>.</p>
+<p>A <a href="http://swave.io/api/core/latest/#swave.core.Spout">Spout</a> is a <a href="basics.html#streams-as-graphs">stream graph component</a> with no input port and a single output port. As such it serves as a &ldquo;point of entry&rdquo; into a stream setup for data elements from other sources (e.g. from memory, disk or the network).</p><p class="centered"><img src="../assets/img/spout.svg" alt="A Spout" /></p>
+<p><em>swave</em> predefines quite a few ways to create <a href="http://swave.io/api/core/latest/#swave.core.Spout">Spouts</a> from other types and constructs.<br/> Check out the <a href="http://swave.io/api/core/latest/#swave.core.Spout$">API docs of the Spout companion object</a> or its <a href="https://github.com/sirthias/swave/tree/master/core/src/main/scala/swave/core/Spout.scala">Source Code</a> for the complete reference.</p>
+<h2><a href="#streamable" name="streamable" class="anchor"><span class="anchor-link"></span></a>Streamable[T]</h2>
+<p><em>swave</em> defines a type-class <a href="http://swave.io/api/core/latest/#swave.core.Streamable">Streamable</a> which encapsulates the ability to create <code>Spout</code> instances from values of type <code>T</code>:</p>
+<pre><code class="scala">abstract class Streamable[-T] {
+  type Out
+  def apply(value: T): Spout[Out]
+}</code></pre>
+<p>If an implicit <code>Streamable[T]</code> instance can be found (or created) for a type <code>T</code> then values of type <code>T</code> can be turned into spouts with a simply <code>Spout(value)</code> call:</p>
+<pre><code class="scala">val foo: T = ...
+
+// the element type of the spout is defined by the
+// implicitly available `Streamable[T]` instance.
+val fooSpout = Spout(foo)
+</code></pre>
+<p>Maybe more importantly, certain <a href="transformations/index.html">transformations</a> like <code>flatmap</code>, <code>flatConcat</code> or <code>flattenMerge</code> will then automatically work on streams of type <code>T</code>.</p>
+<h3><a href="#predefined-streamables" name="predefined-streamables" class="anchor"><span class="anchor-link"></span></a>Predefined Streamables</h3>
+<p><em>swave</em> <a href="https://github.com/sirthias/swave/tree/master/core/src/main/scala/swave/core/Streamable.scala">predefines</a> <code>Streamable</code> instances for these types:</p>
+<ul>
+  <li><code>Spout[T]</code> (spouts can be trivially turned into spouts)</li>
+  <li><code>Option[T]</code></li>
+  <li><code>immutable.Iterable[T]</code></li>
+  <li><code>Iterator[T]</code></li>
+  <li><code>Publisher[T]</code></li>
+  <li><code>Future[T]</code></li>
+  <li><code>Try[T]</code></li>
+  <li><code>() =&gt; T</code> (for all <code>T: Streamable</code>)</li>
+</ul>
+<p>The following snippet, for example, shows, that flatmapping <code>Spout[Option[Int]]</code> to <code>Spout[Int]</code> works as expected without further ado:</p>
+<pre><code class="scala">import scala.concurrent.Future
+import swave.core._
+
+implicit val env = StreamEnv()
+
+def evenIntsViaFlatmap =
+  Spout.from(0)
+    .flatmap(i =&gt; if (i % 2 == 0) Some(i) else None)
+
+def evenIntsViaFilter =
+  Spout.from(0)
+    .filter(_ % 2 == 0)
+
+val a: Future[List[Int]] = evenIntsViaFlatmap.take(5).drainToList(5)
+val b: Future[List[Int]] = evenIntsViaFilter.take(5).drainToList(5)
+
+// since both streams in this example run synchronously
+// both futures are already fulfilled and we can access
+// their `value` members to compare results
+a.value.get shouldEqual b.value.get</code></pre>
+<h3><a href="#custom-streamable-example" name="custom-streamable-example" class="anchor"><span class="anchor-link"></span></a>Custom Streamable Example</h3>
+<p>You can easily make a custom type <code>T</code> fully &ldquo;streamable&rdquo; by defining the semantics for how instances of <code>T</code> can be turned into a <code>Spout</code>. The way to do this is through a custom <code>Streamable[T]</code> implementation.</p>
+<p>For example, suppose we&rsquo;d like to be able to flatten streams of <code>Either[A, B]</code> instances into a stream of the most specific common super-type of <code>A</code> and <code>B</code>. Here is how this could be done:</p>
+<pre><code class="scala">import scala.util.Success
+import swave.core._
+
+implicit val env = StreamEnv()
+
+implicit def forEither[C, A &lt;: C, B &lt;: C] =
+  new Streamable[Either[A, B]] {
+    type Out = C
+    def apply(value: Either[A, B]): Spout[C] =
+      value.fold(Spout.one[C], Spout.one[C])
+  }
+
+def eitherStream: Spout[Either[(Char, Int), String]] =
+  Spout(Left(&#39;0&#39; -&gt; 0), Right(&quot;1&quot;), Right(&quot;2&quot;))
+
+eitherStream
+  .flattenConcat() // = Spout[AnyRef]
+  .drainToList(5).value.get shouldEqual Success(List(&#39;0&#39; -&gt; 0, &quot;1&quot;, &quot;2&quot;))</code></pre>
                 <div class="nav-next">
                     <p><strong>Next:</strong> <a href="../usage/drains.html">Drains</a></p>
                 </div>

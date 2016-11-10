@@ -53,7 +53,7 @@
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A <a href="" class="extype" name="swave.core.PushSpout">PushSpout</a> provides a <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> that can be &quot;manually&quot; pushed into from the outside,
 potentially by several threads concurrently.</p><p>It manages an internal queue which allows for compensation of some fluctuation in demand from downstream
-(i.e. back-pressure). If the queue is full all further pushes are rejected, i.e. no elements are being dropped.
+(i.e. backpressure). If the queue is full all further pushes are rejected, i.e. no elements are being dropped.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
@@ -471,8 +471,8 @@ the result of this method is essentially meaningless.
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Tries to push the given value into the stream, which will succeed if back-pressure
-from downstream hasn't yet caused the complete buffer space to be filled up.</p><div class="fullcomment"><div class="comment cmt"><p>Tries to push the given value into the stream, which will succeed if back-pressure
+      <p class="shortcomment cmt">Tries to push the given value into the stream, which will succeed if backpressure
+from downstream hasn't yet caused the complete buffer space to be filled up.</p><div class="fullcomment"><div class="comment cmt"><p>Tries to push the given value into the stream, which will succeed if backpressure
 from downstream hasn't yet caused the complete buffer space to be filled up.
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if the element was successfully scheduled, false if the buffer is full and further growth impossible</p></dd></dl></div>
     </li><li name="swave.core.PushSpout#offerMany" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">

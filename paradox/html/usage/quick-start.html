@@ -85,6 +85,7 @@
                           <ul class="nav nav-children">
                             <li><a href="../usage/setup.html">Setup</a></li>
                             <li class="nav-expanded nav-active"><a href="../usage/quick-start.html">Quick Start</a></li>
+                            <li><a href="../usage/basics.html">Basics</a></li>
                             <li><a href="../usage/spouts.html">Spouts</a></li>
                             <li><a href="../usage/drains.html">Drains</a></li>
                             <li class="nav-parent"><a>Transformations</a>
@@ -95,7 +96,9 @@
                               <li><a href="../usage/transformations/fan-ins.html">Fan-Ins</a></li>
                               <li><a href="../usage/transformations/pipes.html">Pipes</a></li>
                               <li><a href="../usage/transformations/modules.html">Modules</a></li>
+                              <li><a href="../usage/transformations/couplings.html">Couplings</a></li>
                             </ul></li>
+                            <li><a href="../usage/sync-vs-async.html">Sync vs. Async</a></li>
                             <li><a href="../usage/debugging.html">Debugging</a></li>
                             <li><a href="../usage/rendering.html">Rendering</a></li>
                             <li><a href="../usage/configuration.html">Configuration</a></li>
@@ -145,7 +148,7 @@
             <div id="main-content">
                 <!-- start: page -->
 <h1><a href="#quick-start" name="quick-start" class="anchor"><span class="anchor-link"></span></a>Quick Start</h1>
-<p>After having added <em>swave</em> to your build (as described in the <a href="setup.html">Setup</a> chapter) you can bring all the key identifiers into scope with:</p>
+<p>After having added <em>swave</em> to your build (as described in the <a href="setup.html">Setup</a> chapter) you bring all the key identifiers into scope with:</p>
 <pre><code class="scala">import swave.core._</code></pre>
 <h2><a href="#creating-spouts" name="creating-spouts" class="anchor"><span class="anchor-link"></span></a>Creating Spouts</h2>
 <p>With this in place we can create a simple source of stream elements, which are called <a href="spouts.html">Spouts</a> in <em>swave</em>:</p>
@@ -157,7 +160,7 @@
   .map(_ * 2)
   .filter(_ &gt; 6)
   .take(3)</code></pre>
-<p>Most <a href="transformations/overview.html">transformations</a> give you back another <code>Spout</code> of the same or a different type, but some, especially the <a href="transformations/fan-outs.html">fan-outs</a> and <a href="transformations/fan-ins.html">transformations</a> work a bit differently.<br/> The predefined <a href="transformations/overview.html">transformations</a> represent the real &ldquo;meat&rdquo; of <em>swave</em>. They encode most of the logic that is typically required when working with streams. A central part of learning to program with streams is understanding which transformations exist and how a given piece of business logic might be encoded by combining them in the right way. As with most programs there are usually many ways to achieve the same thing. For example, here are ten ways of producing the same stream (the first 100 natural numbers) with <em>swave</em>:</p>
+<p>Most <a href="transformations/overview.html">transformations</a> give you back another <code>Spout</code> of the same or a different type, but some, especially the <a href="transformations/fan-outs.html">fan-outs</a> and <a href="transformations/fan-ins.html">fan-ins</a> work a bit differently.<br/> The predefined <a href="transformations/overview.html">transformations</a> represent the real &ldquo;meat&rdquo; of <em>swave</em>. They encode a lot of the general logic that is typically required when working with streams. The power of stream-processing stems in large parts from being able to nicely assemble higher-level logic from lower-level primitives in a concise and elegant fashion. Therefore a central part of learning to program with streams is understanding which transformations already exist and how a given piece of business logic might be encoded by combining them in the right way. As with most programs there are usually many ways to achieve the same thing. For example, here are ten ways of producing the same stream (the first 100 natural numbers) with <em>swave</em>:</p>
 <pre><code class="scala">def a = Spout(1 to 100)
 
 def b = Spout(1, 2, 3 to 100: _*)
@@ -197,16 +200,16 @@ def drain2[T]: Drain[T, Future[Unit]] = Drain.foreach(println)</code></pre>
 <p>As you can see, even the drains that produce &ldquo;no&rdquo; result, still produce one :).<br/> For example the <code>Drain.foreach</code>, which runs a stream to completion only for side-effects, produces a<code>Future[Unit]</code>. Even though in the happy case the future&rsquo;s value isn&rsquo;t very interesting (the <code>Unit</code> value), it still signals two things:</p>
 <ul>
   <li>if and when the stream completed</li>
-  <li>did it terminated successfully or with an error</li>
+  <li>whether it terminated successfully or with an error</li>
 </ul>
 <p>Once you have a drain you can attach it to a matching (type-wise) <code>Spout</code> with <code>to(...)</code>, e.g.: </p>
 <pre><code class="scala">def piping: Piping[Future[Unit]] =
   Spout(1 to 100).to(Drain.foreach(println))</code></pre>
 <p>The result of attaching a <code>Drain</code> to a <code>Spout</code> is a <a href="http://swave.io/api/core/latest/#swave.core.Piping">Piping</a>, a type you&rsquo;ll probably use less frequently in your own code. A <code>Piping</code> represents a complete stream pipeline or graph setup, which is ready to be run. Its single type parameter is the result type of the <code>Drain</code> that was used to &ldquo;close&rdquo; the stream pipeline.</p>
-<p>Note that up until this point, i.e. including the attachment of a <code>Drain</code>, nothing has really happened apart from <em>describing</em> what your stream setup looks like. No data has started to flow and no resources (apart from the memory for the pipeline) has been claimed.</p>
+<p>Note that up until this point, including the attachment of a <code>Drain</code>, nothing has really happened apart from <em>describing</em> what your stream setup looks like. No data has started to flow and no resources (apart from the memory for the pipeline) have been claimed.</p>
 <h2><a href="#running-a-stream" name="running-a-stream" class="anchor"><span class="anchor-link"></span></a>Running a Stream</h2>
-<p>It is only when you call <code>.run()</code> on a <code>Piping</code> that the whole stream machinery kicks into motion and data elements start to flow.<br/> Thereby one very important thing to have in mind is that you can only ever call <code>.run()</code> <strong>once</strong> on any given stream setup. After the first <code>.run()</code> call all elements of the stream setup, i.e. all involved spouts and drains (as well as, potentially, <a href="transformations/pipes.html">Pipes</a> and <a href="transformations/modules.html">Modules</a>) have been &ldquo;spent&rdquo;. They cannot be used again and will cause all subsequent streams that they are incorporated into to fail with an <a href="http://swave.io/api/core/latest/#swave.core.IllegalReuseException">IllegalReuseException</a>.</p>
-<p><em>swave</em> streams can run synchronously (yet without any blocking!) purely on the caller thread. All the examples we&rsquo;ve looked at so far are of this kind. However, there might be components in your stream setup that require asynchronous dispatch and therefore cannot run purely on the caller thread in a non-blocking fashion. For example, a spout or drain might be connected to a network socket and thus must be &ldquo;woken up&rdquo; when new data arrive or the kernel signals that the socket is now ready to accept data. Or the stream might contain a transformation that requires the concept of &ldquo;time&rdquo; in order to do its thing (like <code>throttle</code> or <code>takeWithin</code>). Or you might want to introduce an asynchronous boundary manually (see the <code>async</code> transformation), in order to allow for different parts of your pipeline to be run in parallel. In all of these cases the stream will be started asynchronously when you call <code>.run()</code>, i.e. on another thread.</p>
+<p>It is only when you call <code>.run()</code> on a <code>Piping</code> that the whole stream machinery kicks into motion and data elements start to flow. Thereby one very important thing to have in mind is that you can only ever call <code>.run()</code> <strong>once</strong> on any given stream setup. After the first <code>.run()</code> call all elements of the stream setup, i.e. all involved spouts and drains (as well as, potentially, <a href="transformations/pipes.html">Pipes</a> and <a href="transformations/modules.html">Modules</a>) have been &ldquo;spent&rdquo;. They cannot be used again and will cause all subsequent streams that they are incorporated into to fail with an <a href="http://swave.io/api/core/latest/#swave.core.IllegalReuseException">IllegalReuseException</a>.</p>
+<p><em>swave</em> streams can run synchronously (yet without any blocking!) purely on the caller thread. All the examples we&rsquo;ve looked at so far are of this kind. However, there might be components in your stream setup that require asynchronous dispatch and therefore cannot run purely on the caller thread in a non-blocking fashion. For example, a spout or drain might be connected to a network socket and thus must be &ldquo;woken up&rdquo; when new data arrive or the kernel signals that the socket is now ready to accept data. Or the stream might contain a transformation that requires the concept of &ldquo;time&rdquo; in order to do its thing (like <code>throttle</code> or <code>takeWithin</code>). Or you might want to introduce an asynchronous boundary manually (see the <code>async</code> transformation), in order to allow for different parts of your pipeline to be run in parallel. In all of these cases the stream will be started asynchronously when you call <code>.run()</code>, which means it will be started and run on another thread.</p>
 <h2><a href="#streamenv" name="streamenv" class="anchor"><span class="anchor-link"></span></a>StreamEnv</h2>
 <p>When you try to run a stream now, only with what we&rsquo;ve talked about so far, you&rsquo;ll see that there is still one final thing missing. For example if we try to compile this snippet:</p>
 <pre><code class="scala">val result: Future[Unit] =
@@ -237,7 +240,7 @@ val result2: Future[Int] = spout.drainToHead()
 val result3: Future[List[Int]] = spout.drainToList(limit = 1000)</code></pre>
 <p>There are more <code>drain...</code> variants available on <a href="http://swave.io/api/core/latest/#swave.core.Spout">Spout</a>, you might want to check them out as well.</p>
                 <div class="nav-next">
-                    <p><strong>Next:</strong> <a href="../usage/spouts.html">Spouts</a></p>
+                    <p><strong>Next:</strong> <a href="../usage/basics.html">Basics</a></p>
                 </div>
                 <!-- end: page -->
             </div>

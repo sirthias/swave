@@ -49,9 +49,9 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A <a href="" class="extype" name="swave.core.Piping">Piping</a> represents a system or network of connected pipes in which all inlet and outlets
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A <a href="" class="extype" name="swave.core.Piping">Piping</a> represents a stream graph in which the ports of all stages
 have been properly connected and which is therefore ready to be started.
-</p></div><div class="toggleContainer block">
+</p></div><dl class="paramcmts block"><dt class="tparam">A</dt><dd class="cmt"><p>the result type of the <code>run</code> call</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
@@ -295,7 +295,7 @@ have been properly connected and which is therefore ready to be started.
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="swave.core.Piping#mapResult" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="swave.core.Piping#mapResult" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="mapResult[B](f:A=&gt;B):swave.core.Piping[B]"></a>
       <a id="mapResult[B]((A)⇒B):Piping[B]"></a>
       <h4 class="signature">
@@ -311,7 +311,9 @@ have been properly connected and which is therefore ready to be started.
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">Turns this <a href="" class="extype" name="swave.core.Piping">Piping</a> into one with a different result by mapping over the result value.</p><div class="fullcomment"><div class="comment cmt"><p>Turns this <a href="" class="extype" name="swave.core.Piping">Piping</a> into one with a different result by mapping over the result value.</p><p>NOTE: The result of this call and the underlying piping share the same stages.
+This means that only one of them can be sealed and/or run (once).
+</p></div></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>
@@ -363,7 +365,7 @@ have been properly connected and which is therefore ready to be started.
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="swave.core.Piping#pipeElem" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="swave.core.Piping#pipeElem" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="pipeElem:swave.core.PipeElem"></a>
       <a id="pipeElem:PipeElem"></a>
       <h4 class="signature">
@@ -379,7 +381,9 @@ have been properly connected and which is therefore ready to be started.
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">A <a href="PipeElem.html" class="extype" name="swave.core.PipeElem">PipeElem</a> of the graph that can serve as a basis for exploring the graph's stage layout.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="PipeElem.html" class="extype" name="swave.core.PipeElem">PipeElem</a> of the graph that can serve as a basis for exploring the graph's stage layout.
+Often used for rendering via the <a href="Graph$.html#render(pipeElem:swave.core.PipeElem,expandModules:swave.core.Graph.ExpandModules,glyphSet:swave.core.graph.GlyphSet,showParams:Boolean,showRunners:Boolean,showNops:Boolean):String" class="extmbr" name="swave.core.Graph#render">Graph.render</a> method.
+</p></div></div>
     </li><li name="swave.core.Piping#result" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="result:A"></a>
       <a id="result:A"></a>
@@ -397,7 +401,7 @@ have been properly connected and which is therefore ready to be started.
       </a>
     </span>
       
-    </li><li name="swave.core.Piping#run" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="swave.core.Piping#run" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="run()(implicitenv:swave.core.StreamEnv,implicitev:swave.core.impl.TypeLogic.ToTryOrFuture[A]):ev.Out"></a>
       <a id="run()(StreamEnv,ToTryOrFuture[A]):Out"></a>
       <h4 class="signature">
@@ -413,7 +417,13 @@ have been properly connected and which is therefore ready to be started.
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">Starts this <a href="" class="extype" name="swave.core.Piping">Piping</a> and returns either the result of type <code>A</code> if <code>A</code> is a <span class="extype" name="scala.concurrent.Future">scala.concurrent.Future</span>,
+or otherwise <code>Try[A]</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Starts this <a href="" class="extype" name="swave.core.Piping">Piping</a> and returns either the result of type <code>A</code> if <code>A</code> is a <span class="extype" name="scala.concurrent.Future">scala.concurrent.Future</span>,
+or otherwise <code>Try[A]</code>.</p><p>If the stream runs synchronously the call will not return before the stream has finished running completely.
+In this case any returned <span class="extype" name="scala.concurrent.Future">scala.concurrent.Future</span> will be already completed.
+Otherwise, if the stream runs asynchronously, it will return (more or less) immediately and the stream
+will run detached from the caller thread.
+</p></div></div>
     </li><li name="swave.core.Piping#seal" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="seal()(implicitenv:swave.core.StreamEnv):scala.util.Try[swave.core.SealedPiping[A]]"></a>
       <a id="seal()(StreamEnv):Try[SealedPiping[A]]"></a>
@@ -430,7 +440,7 @@ have been properly connected and which is therefore ready to be started.
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">Prepares this piping for starting and verifies that the ports of all stages are properly connected.</p>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>

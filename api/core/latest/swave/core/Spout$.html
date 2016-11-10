@@ -108,7 +108,7 @@
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">Simple helper ADT for <a href="#unfold[S,T](s:S)(f:S=&gt;swave.core.Spout.Unfolding[S,T]):swave.core.Spout[T]" class="extmbr" name="swave.core.Spout#unfold">unfold</a>.</p>
     </li></ol>
             </div>
 
@@ -200,7 +200,7 @@
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">A <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> which produces the given elements.</p>
     </li><li name="swave.core.Spout#apply" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="apply[T](value:T)(implicitev:swave.core.Streamable[T]):swave.core.Spout[ev.Out]"></a>
       <a id="apply[T](T)(Streamable[T]):Spout[Out]"></a>
@@ -217,7 +217,8 @@
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">Turns the given value into a <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> provided an implicit <a href="Streamable.html" class="extype" name="swave.core.Streamable">Streamable</a> instance can be
+found or constructed for it.</p>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <a id="asInstanceOf[T0]:T0"></a>
@@ -258,7 +259,7 @@
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="swave.core.Spout#continually" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="swave.core.Spout#continually" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="continually[T](elem:=&gt;T):swave.core.Spout[T]"></a>
       <a id="continually[T](⇒T):Spout[T]"></a>
       <h4 class="signature">
@@ -274,7 +275,10 @@
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">A <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> which will evaluate the given call-by-name argument to produce an infinite stream
+of data elements.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> which will evaluate the given call-by-name argument to produce an infinite stream
+of data elements.</p><p>CAUTION: The call-by-name argument might be executed from another thread if the stream is asynchronous!
+</p></div></div>
     </li><li name="swave.core.Spout#empty" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="empty[T]:swave.core.Spout[T]"></a>
       <a id="empty[T]:Spout[T]"></a>
@@ -291,7 +295,7 @@
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">A <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> which never produces any elements but completes immediately.</p>
     </li><li name="swave.core.Spout#emptyFrom" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="emptyFrom[T](future:scala.concurrent.Future[Unit]):swave.core.Spout[T]"></a>
       <a id="emptyFrom[T](Future[Unit]):Spout[T]"></a>
@@ -308,7 +312,7 @@
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">A <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> which never produces any elements but terminates when the given future is fulfilled.</p>
     </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a>
       <a id="eq(AnyRef):Boolean"></a>
@@ -343,7 +347,7 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="swave.core.Spout#failing" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="swave.core.Spout#failing" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="failing[T](cause:Throwable,eager:Boolean):swave.core.Spout[T]"></a>
       <a id="failing[T](Throwable,Boolean):Spout[T]"></a>
       <h4 class="signature">
@@ -359,7 +363,10 @@
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">A <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> which never produces any elements but terminates with the given error.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> which never produces any elements but terminates with the given error.
+If <code>eager</code> is true the error is produced immediately after stream start,
+otherwise the error is delayed until the first request signal is received from downstream.
+</p></div></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <a id="finalize():Unit"></a>
@@ -399,8 +406,9 @@
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
-    </li><li name="swave.core.Spout#fromFuture" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">A <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> which produces an infinite stream of <code>Int</code> elements starting
+with the given <code>start</code> and increments of <code>step</code>.</p>
+    </li><li name="swave.core.Spout#fromFuture" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="fromFuture[T](future:scala.concurrent.Future[T]):swave.core.Spout[T]"></a>
       <a id="fromFuture[T](Future[T]):Spout[T]"></a>
       <h4 class="signature">
@@ -416,7 +424,11 @@
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">A <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> which produces either one or zero elements when the given <span class="extype" name="Future">Future</span> is
+completed.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> which produces either one or zero elements when the given <span class="extype" name="Future">Future</span> is
+completed. If the <span class="extype" name="Future">Future</span> is completed with an error no element is produced and the stream
+is failed with the exception in the future.</p><p>The returned <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> instance cannot run synchronously.
+</p></div></div>
     </li><li name="swave.core.Spout#fromIterable" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="fromIterable[T](iterable:Iterable[T]):swave.core.Spout[T]"></a>
       <a id="fromIterable[T](Iterable[T]):Spout[T]"></a>
@@ -433,8 +445,8 @@
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
-    </li><li name="swave.core.Spout#fromIterator" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">A <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> which produces the same elements as the given <span class="extype" name="Iterable">Iterable</span>.</p>
+    </li><li name="swave.core.Spout#fromIterator" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="fromIterator[T](iterator:Iterator[T]):swave.core.Spout[T]"></a>
       <a id="fromIterator[T](Iterator[T]):Spout[T]"></a>
       <h4 class="signature">
@@ -450,7 +462,8 @@
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">A <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> which produces the same elements as the given <span class="extype" name="Iterator">Iterator</span>.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> which produces the same elements as the given <span class="extype" name="Iterator">Iterator</span>.</p><p>CAUTION: <code>iterator</code> might be drained from another thread if the stream is asynchronous!
+</p></div></div>
     </li><li name="swave.core.Spout#fromOption" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="fromOption[T](option:Option[T]):swave.core.Spout[T]"></a>
       <a id="fromOption[T](Option[T]):Spout[T]"></a>
@@ -467,8 +480,8 @@
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
-    </li><li name="swave.core.Spout#fromPublisher" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">A <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> which produces either one or zero elements depending on the given <span class="extype" name="Option">Option</span> instance.</p>
+    </li><li name="swave.core.Spout#fromPublisher" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="fromPublisher[T](publisher:org.reactivestreams.Publisher[T]):swave.core.Spout[T]"></a>
       <a id="fromPublisher[T](Publisher[T]):Spout[T]"></a>
       <h4 class="signature">
@@ -484,24 +497,8 @@
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
-    </li><li name="swave.core.Spout#fromRingBuffer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="fromRingBuffer[T](buffer:swave.core.util.RingBuffer[T]):swave.core.Spout[T]"></a>
-      <a id="fromRingBuffer[T](RingBuffer[T]):Spout[T]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">fromRingBuffer</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="buffer">buffer: <span class="extype" name="swave.core.util.RingBuffer">RingBuffer</span>[<span class="extype" name="swave.core.Spout.fromRingBuffer.T">T</span>]</span>)</span><span class="result">: <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a>[<span class="extype" name="swave.core.Spout.fromRingBuffer.T">T</span>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.Spout$@fromRingBuffer[T](buffer:swave.core.util.RingBuffer[T]):swave.core.Spout[T]" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
+      <p class="shortcomment cmt">A <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> which produces the same elements as the given <span class="extype" name="Publisher">Publisher</span>.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> which produces the same elements as the given <span class="extype" name="Publisher">Publisher</span>.</p><p>The returned <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> instance cannot run synchronously.
+</p></div></div>
     </li><li name="swave.core.Spout#fromTry" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="fromTry[T](value:scala.util.Try[T]):swave.core.Spout[T]"></a>
       <a id="fromTry[T](Try[T]):Spout[T]"></a>
@@ -518,7 +515,7 @@
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">A <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> which produces either one or zero elements depending on the given <span class="extype" name="Try">Try</span> instance.</p>
     </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <a id="getClass():Class[_]"></a>
@@ -570,7 +567,7 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="swave.core.Spout#iterate" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="swave.core.Spout#iterate" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="iterate[T](start:T)(f:T=&gt;T):swave.core.Spout[T]"></a>
       <a id="iterate[T](T)((T)⇒T):Spout[T]"></a>
       <h4 class="signature">
@@ -586,8 +583,11 @@
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
-    </li><li name="swave.core.Spout#lazyStart" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">A <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> which will iterate via the given function to produce an infinite stream
+of data elements.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> which will iterate via the given function to produce an infinite stream
+of data elements.</p><p>CAUTION: <code>f</code> will be called from another thread if the stream is asynchronous!
+</p></div></div>
+    </li><li name="swave.core.Spout#lazyStart" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="lazyStart[T](onStart:()=&gt;swave.core.Spout[T]):swave.core.Spout[T]"></a>
       <a id="lazyStart[T](()⇒Spout[T]):Spout[T]"></a>
       <h4 class="signature">
@@ -603,7 +603,11 @@
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">A <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> which produces the same elements as the <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> instance returned by the given
+function.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> which produces the same elements as the <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> instance returned by the given
+function. The given function is only executed when the outer stream is started.</p><p>If the outer stream is synchronous the <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> returned by <code>onStart</code> must be able to run synchronously
+as well. If it doesn't the stream will fail with an <a href="IllegalAsyncBoundaryException.html" class="extype" name="swave.core.IllegalAsyncBoundaryException">IllegalAsyncBoundaryException</a>.
+</p></div></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>
@@ -671,7 +675,7 @@
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">A <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> which produces only the given element.</p>
     </li><li name="swave.core.Spout#push" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="push[T](initialBufferSize:Int,maxBufferSize:Int,growByInitialSize:Boolean,notifyOnDequeued:(swave.core.PushSpout[T],Int)=&gt;Unit,notifyOnCancel:swave.core.PushSpout[T]=&gt;Unit):swave.core.PushSpout[T]"></a>
       <a id="push[T](Int,Int,Boolean,(PushSpout[T],Int)⇒Unit,(PushSpout[T])⇒Unit):PushSpout[T]"></a>
@@ -688,7 +692,7 @@
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">Convenience constructor for <a href="PushSpout.html" class="extype" name="swave.core.PushSpout">PushSpout</a> instances.</p>
     </li><li name="swave.core.Spout#repeat" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="repeat[T](element:T):swave.core.Spout[T]"></a>
       <a id="repeat[T](T):Spout[T]"></a>
@@ -705,7 +709,7 @@
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">A <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> which produced an infinite stream of identical elements.</p>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>
@@ -723,7 +727,7 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="swave.core.Spout#tick" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="swave.core.Spout#tick" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="tick[T](value:T,elements:Int,per:scala.concurrent.duration.FiniteDuration):swave.core.Spout[T]"></a>
       <a id="tick[T](T,Int,FiniteDuration):Spout[T]"></a>
       <h4 class="signature">
@@ -739,8 +743,9 @@
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
-    </li><li name="swave.core.Spout#tick" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">A <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> which produces the given element <code>elements</code> times per given interval.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> which produces the given element <code>elements</code> times per given interval.</p><p>The returned <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> instance cannot run synchronously.
+</p></div></div>
+    </li><li name="swave.core.Spout#tick" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="tick[T](value:T,interval:scala.concurrent.duration.FiniteDuration):swave.core.Spout[T]"></a>
       <a id="tick[T](T,FiniteDuration):Spout[T]"></a>
       <h4 class="signature">
@@ -756,7 +761,8 @@
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">A <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> which produces the given element once per given interval.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> which produces the given element once per given interval.</p><p>The returned <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> instance cannot run synchronously.
+</p></div></div>
     </li><li name="scala.AnyRef#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
       <a id="toString():String"></a>
@@ -795,7 +801,7 @@ the subsequent states and output elements of type <code>T</code>.</p><div class=
 the subsequent states and output elements of type <code>T</code>.</p><p>For example, all the Fibonacci numbers under 1M:</p><pre>Spout.unfold(<span class="num">0</span> → <span class="num">1</span>) {
  <span class="kw">case</span> (a, b) <span class="kw">if</span> b &gt; <span class="num">1000000</span> ⇒ Spout.Unfolding.EmitFinal(a)
  <span class="kw">case</span> (a, b) ⇒ Spout.Unfolding.Emit(a, b → (a + b))
-}</pre><p>CAUTION: <code>f</code> might be called from another thread if the stream is asynchronous!
+}</pre><p>CAUTION: <code>f</code> will be called from another thread if the stream is asynchronous!
 </p></div></div>
     </li><li name="swave.core.Spout#unfoldAsync" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="unfoldAsync[S,T](s:S)(f:S=&gt;scala.concurrent.Future[swave.core.Spout.Unfolding[S,T]]):swave.core.Spout[T]"></a>
@@ -813,7 +819,7 @@ the subsequent states and output elements of type <code>T</code>.</p><p>For exam
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Same as <a href="#unfold[S,T](s:S)(f:S=&gt;swave.core.Spout.Unfolding[S,T]):swave.core.Spout[T]" class="extmbr" name="swave.core.Spout#unfold">unfold</a>, but asynchronous.</p><div class="fullcomment"><div class="comment cmt"><p>Same as <a href="#unfold[S,T](s:S)(f:S=&gt;swave.core.Spout.Unfolding[S,T]):swave.core.Spout[T]" class="extmbr" name="swave.core.Spout#unfold">unfold</a>, but asynchronous.</p><p>CAUTION: <code>f</code> will be called from another thread!
+      <p class="shortcomment cmt">Same as <a href="#unfold[S,T](s:S)(f:S=&gt;swave.core.Spout.Unfolding[S,T]):swave.core.Spout[T]" class="extmbr" name="swave.core.Spout#unfold">unfold</a>, but asynchronous.</p><div class="fullcomment"><div class="comment cmt"><p>Same as <a href="#unfold[S,T](s:S)(f:S=&gt;swave.core.Spout.Unfolding[S,T]):swave.core.Spout[T]" class="extmbr" name="swave.core.Spout#unfold">unfold</a>, but asynchronous.</p><p>The returned <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> instance cannot run synchronously.</p><p>CAUTION: <code>f</code> will be called from another thread!
 </p></div></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
@@ -884,7 +890,7 @@ the subsequent states and output elements of type <code>T</code>.</p><p>For exam
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="swave.core.Spout#withSubscriber" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="swave.core.Spout#withSubscriber" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withSubscriber[T]:(swave.core.Spout[T],org.reactivestreams.Subscriber[T])"></a>
       <a id="withSubscriber[T]:(Spout[T],Subscriber[T])"></a>
       <h4 class="signature">
@@ -900,7 +906,11 @@ the subsequent states and output elements of type <code>T</code>.</p><p>For exam
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">A <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> and an associated <span class="extype" name="Subscriber">Subscriber</span>.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> and an associated <span class="extype" name="Subscriber">Subscriber</span>.
+Both are directly linked to each other and thereby allow for connecting *swave* with other
+Reactive Streams implementations.</p><p>The <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> produces all elements received by the <span class="extype" name="Subscriber">Subscriber</span> and
+the <span class="extype" name="Subscriber">Subscriber</span> forwards all request and cancel signals received by the <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a>.</p><p>The returned <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> instance cannot run synchronously.
+</p></div></div>
     </li></ol>
             </div>
 
