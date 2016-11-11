@@ -268,7 +268,7 @@ trait StreamOps[A] extends Any { self ⇒
     map(Left[A, B]).attach(other.map(Right[A, B])).fanInToSum[Either[A, B]]()
 
   final def multiply(factor: Int): Repr[A] =
-    via(Pipe[A].map(x ⇒ Iterator.fill(factor)(x)).flattenConcat() named "multiply")
+    via(Pipe[A].flatmap(x ⇒ Iterator.fill(factor)(x)) named "multiply")
 
   final def nonEmptyOr[B >: A](other: Spout[B]): Repr[B] =
     attach(other).fanInFirstNonEmpty

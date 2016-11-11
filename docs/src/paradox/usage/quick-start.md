@@ -160,5 +160,5 @@ several shortcuts that allow you to do both in one single step. For example:
 
 @@snip [-]($test/QuickStartSpec.scala) { #shortcuts }
 
-There are more `drain...` variants available on @scaladoc[Spout](swave.core.Spout), you might want to check them out as
-well.
+There are more `drain...` variants available on `Spout`, you might want to
+@scaladoc[check them out as](swave.core.Spout) well.

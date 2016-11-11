@@ -1,0 +1,4 @@
+mergeToEither
+=============
+
+... TODO ...

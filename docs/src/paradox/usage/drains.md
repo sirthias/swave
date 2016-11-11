@@ -17,7 +17,7 @@ Drain Result
 ------------
 
 The type `Drain[-T, +R]` carries two type parameters. The first specifies the type of stream elements that the drain
-is ready to receive and the second is the drain's "Result Type". A drain's *result* is the vehicle for getting data out
+is ready to receive and the second is the drain's "result type". A drain's *result* is the vehicle for getting data out
 of a stream.
 
 When a drain is used to close a stream graph, e.g. via the `to(...)` method of a @ref[Spout](spouts.md), the result type
@@ -48,4 +48,4 @@ future's value via `future.value.get` directly after the `run()` call.
   [Piping]: swave.core.Piping
   [Drain]: swave.core.Drain
   [Drains]: swave.core.Drain
-  [Drain companion object]: swave.core.Spout$
+  [Drain companion object]: swave.core.Drain$

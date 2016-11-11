@@ -29,4 +29,4 @@ it's a great tool for implementing any type of stream-based logic in [Scala][1].
 
 @@@
 
-@@toc { depth=2 }
+@@toc { depth=3 }

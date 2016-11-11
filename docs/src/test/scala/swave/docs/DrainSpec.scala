@@ -32,7 +32,7 @@ class DrainSpec extends FreeSpec with Matchers {
 
       // same but shorter
       Spout(1 to 100)
-        .drainTo(sumDrain) // shortcut for `to(drain).run(
+        .drainTo(sumDrain) // shortcut for `.to(sumDrain).run()`
         .value.get.get shouldEqual 5050
       //#examples
     }
