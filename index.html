@@ -94,9 +94,12 @@
                               <li><a href="usage/transformations/simple.html">Simple Transformations</a></li>
                               <li><a href="usage/transformations/fan-outs.html">Fan-Outs</a></li>
                               <li><a href="usage/transformations/fan-ins.html">Fan-Ins</a></li>
+                              <li><a href="usage/transformations/injecting.html">Injecting</a></li>
+                              <li><a href="usage/transformations/flattening.html">Flattening</a></li>
                               <li><a href="usage/transformations/pipes.html">Pipes</a></li>
                               <li><a href="usage/transformations/modules.html">Modules</a></li>
                               <li><a href="usage/transformations/couplings.html">Couplings</a></li>
+                              <li><a href="usage/transformations/reference/index.html">Transformation Reference</a></li>
                             </ul></li>
                             <li><a href="usage/sync-vs-async.html">Sync vs. Async</a></li>
                             <li><a href="usage/debugging.html">Debugging</a></li>
@@ -155,33 +158,102 @@
 <ul>
   <li><a href="introduction/index.html">Introduction</a>
   <ul>
-    <li><a href="introduction/overview.html">Overview</a></li>
-    <li><a href="introduction/reactive-streams.html">Reactive Streams</a></li>
+    <li><a href="introduction/overview.html">Overview</a>
+    <ul>
+      <li><a href="introduction/overview.html#what-is-">What is <em>swave</em>?</a></li>
+      <li><a href="introduction/overview.html#motivation">Motivation</a></li>
+      <li><a href="introduction/overview.html#design-principles">Design Principles</a></li>
+    </ul></li>
+    <li><a href="introduction/reactive-streams.html">Reactive Streams</a>
+    <ul>
+      <li><a href="introduction/reactive-streams.html#the-artifact">The &ldquo;org.reactivestreams&rdquo; % &ldquo;reactive-streams&rdquo; Artifact</a></li>
+      <li><a href="introduction/reactive-streams.html#rs-support-in-">RS Support in <em>swave</em></a></li>
+    </ul></li>
     <li><a href="introduction/swave-vs-akka-stream.html"><em>swave</em> vs. Akka-Stream</a></li>
-    <li><a href="introduction/talks-on-swave.html">Talks on <em>swave</em></a></li>
+    <li><a href="introduction/talks-on-swave.html">Talks on <em>swave</em></a>
+    <ul>
+      <li><a href="introduction/talks-on-swave.html#all-talks-in-reverse-chronological-order">All talks in reverse chronological order</a></li>
+    </ul></li>
   </ul></li>
   <li><a href="usage/index.html">User Documentation</a>
   <ul>
-    <li><a href="usage/setup.html">Setup</a></li>
-    <li><a href="usage/quick-start.html">Quick Start</a></li>
-    <li><a href="usage/basics.html">Basics</a></li>
-    <li><a href="usage/spouts.html">Spouts</a></li>
-    <li><a href="usage/drains.html">Drains</a></li>
-    <li><a href="usage/transformations/index.html">Transformations</a></li>
+    <li><a href="usage/setup.html">Setup</a>
+    <ul>
+      <li><a href="usage/setup.html#modules">Modules</a></li>
+      <li><a href="usage/setup.html#using-with-">Using <em>swave</em> with [SBT]</a></li>
+      <li><a href="usage/setup.html#dependencies">Dependencies</a></li>
+    </ul></li>
+    <li><a href="usage/quick-start.html">Quick Start</a>
+    <ul>
+      <li><a href="usage/quick-start.html#creating-spouts">Creating Spouts</a></li>
+      <li><a href="usage/quick-start.html#attaching-transformations">Attaching Transformations</a></li>
+      <li><a href="usage/quick-start.html#attaching-drains">Attaching Drains</a></li>
+      <li><a href="usage/quick-start.html#running-a-stream">Running a Stream</a></li>
+      <li><a href="usage/quick-start.html#streamenv">StreamEnv</a></li>
+      <li><a href="usage/quick-start.html#shortcuts">Shortcuts</a></li>
+    </ul></li>
+    <li><a href="usage/basics.html">Basics</a>
+    <ul>
+      <li><a href="usage/basics.html#streams-as-graphs">Streams as Graphs</a></li>
+      <li><a href="usage/basics.html#the-core-signals">The Core Signals</a></li>
+      <li><a href="usage/basics.html#stream-life-cycle">Stream Life-Cycle</a></li>
+      <li><a href="usage/basics.html#prefer-def-over-val">Prefer <code>def</code> over <code>val</code></a></li>
+      <li><a href="usage/basics.html#execution-model">Execution Model</a></li>
+      <li><a href="usage/basics.html#thread-safety">Thread Safety</a></li>
+    </ul></li>
+    <li><a href="usage/spouts.html">Spouts</a>
+    <ul>
+      <li><a href="usage/spouts.html#streamable">Streamable[T]</a></li>
+    </ul></li>
+    <li><a href="usage/drains.html">Drains</a>
+    <ul>
+      <li><a href="usage/drains.html#drain-result">Drain Result</a></li>
+      <li><a href="usage/drains.html#result-types-are-async">Result Types are Async</a></li>
+    </ul></li>
+    <li><a href="usage/transformations/index.html">Transformations</a>
+    <ul>
+      <li><a href="usage/transformations/overview.html">Transformations Overview</a></li>
+      <li><a href="usage/transformations/simple.html">Simple Transformations</a></li>
+      <li><a href="usage/transformations/fan-outs.html">Fan-Outs</a></li>
+      <li><a href="usage/transformations/fan-ins.html">Fan-Ins</a></li>
+      <li><a href="usage/transformations/injecting.html">Injecting</a></li>
+      <li><a href="usage/transformations/flattening.html">Flattening</a></li>
+      <li><a href="usage/transformations/pipes.html">Pipes</a></li>
+      <li><a href="usage/transformations/modules.html">Modules</a></li>
+      <li><a href="usage/transformations/couplings.html">Couplings</a></li>
+      <li><a href="usage/transformations/reference/index.html">Transformation Reference</a></li>
+    </ul></li>
     <li><a href="usage/sync-vs-async.html">Sync vs. Async</a></li>
     <li><a href="usage/debugging.html">Debugging</a></li>
     <li><a href="usage/rendering.html">Rendering</a></li>
     <li><a href="usage/configuration.html">Configuration</a></li>
     <li><a href="usage/swave-core-api.html">API Docs (ScalaDoc)</a></li>
-    <li><a href="usage/swave-akka-compat/index.html">swave-akka-compat</a></li>
-    <li><a href="usage/swave-scodec-compat/index.html">swave-scodec-compat</a></li>
-    <li><a href="usage/swave-testkit/index.html">swave-testkit</a></li>
+    <li><a href="usage/swave-akka-compat/index.html">swave-akka-compat</a>
+    <ul>
+      <li><a href="usage/swave-akka-compat/index.html#api-docs-scaladoc-">API Docs (ScalaDoc)</a></li>
+    </ul></li>
+    <li><a href="usage/swave-scodec-compat/index.html">swave-scodec-compat</a>
+    <ul>
+      <li><a href="usage/swave-scodec-compat/index.html#api-docs-scaladoc-">API Docs (ScalaDoc)</a></li>
+    </ul></li>
+    <li><a href="usage/swave-testkit/index.html">swave-testkit</a>
+    <ul>
+      <li><a href="usage/swave-testkit/index.html#api-docs-scaladoc-">API Docs (ScalaDoc)</a></li>
+    </ul></li>
   </ul></li>
   <li><a href="dev/index.html">Developer Documentation</a></li>
   <li><a href="project/index.html">Project Info</a>
   <ul>
     <li><a href="project/license.html">License</a></li>
-    <li><a href="project/contributing.html">Contributing</a></li>
+    <li><a href="project/contributing.html">Contributing</a>
+    <ul>
+      <li><a href="project/contributing.html#cooperation-process">Cooperation Process</a></li>
+      <li><a href="project/contributing.html#building-">Building <em>swave</em></a></li>
+      <li><a href="project/contributing.html#contributing-fixing-documentation">Contributing/Fixing Documentation</a></li>
+      <li><a href="project/contributing.html#issue-tracking">Issue Tracking</a></li>
+      <li><a href="project/contributing.html#git-branching-model">GIT Branching Model</a></li>
+      <li><a href="project/contributing.html#git-commit-messages">GIT Commit Messages</a></li>
+    </ul></li>
     <li><a href="project/changelog.html">Changelog</a></li>
     <li><a href="project/sponsors.html">Sponsors</a></li>
     <li><a href="project/references.html">References</a></li>

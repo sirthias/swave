@@ -1,0 +1,268 @@
+<!doctype html>
+<html class="fixed sidebar-light">
+<head>
+    <meta charset="UTF-8">
+
+    <title>Transformation Reference · swave</title>
+    <meta name="keywords" content="scala, streams, streaming, reactive, asynchronous, non-blocking" />
+    <meta name="description" content='A Reactive Streams infrastructure implementation in Scala'>
+    <meta name="author" content="The swave team">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700,800|Shadows+Into+Light" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" />
+    <link rel="stylesheet" href="../../../assets/css/theme.css" />
+    <link rel="stylesheet" href="../../../assets/css/skins/default.css" />
+    <link rel="stylesheet" href="../../../assets/css/theme-custom.css">
+    <link rel="stylesheet" href="../../../assets/vendor/highlight/github.css">
+
+    <!-- favicon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="apple-mobile-web-app-title" content="swave.io">
+    <meta name="application-name" content="swave.io">
+    <meta name="theme-color" content="#ffffff">
+
+    <script src="../../../assets/vendor/modernizr/modernizr.js"></script>
+</head>
+<body >
+<section class="body">
+
+    <header class="header">
+        <div class="logo-container">
+            <a href="../../../index.html" class="logo">
+                <img src="../../../assets/img/swave-logo.svg" height="35" alt="swave" />
+            </a>
+            <div class="visible-xs toggle-sidebar-left" data-toggle-class="sidebar-left-opened" data-target="html" data-fire-event="sidebar-left-opened">
+                <i class="fa fa-bars" aria-label="Toggle sidebar"></i>
+            </div>
+        </div>
+
+        <div class="header-right hidden-xs">
+            <ul class="social-icons">
+                <li class="social-icons-github"><a href="https://github.com/sirthias/swave/" target="_blank" title="Github"><i class="fa fa-github"></i></a></li>
+                <li class="social-icons-email"><a href="https://groups.google.com/forum/#!forum/swave-user" target="_blank" title="Mailing List"><i class="fa fa-envelope"></i></a></li>
+                <li class="social-icons-twitter"><a href="https://twitter.com/swaveio/" target="_blank" title="Twitter"><i class="fa fa-twitter"></i></a></li>
+            </ul>
+            <div id="talks-link">
+                <a href="../../../introduction/talks-on-swave.html" title="Watch the latest introductory talks for swave!">
+                    <i class="fa fa-chevron-right" aria-hidden="true"></i>&nbsp;
+                    <i class="fa fa-video-camera" aria-hidden="true"></i>&nbsp;Watch an intro talk on swave!&nbsp;
+                    <i class="fa fa-chevron-left" aria-hidden="true"></i>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="inner-wrapper">
+        <aside id="sidebar-left" class="sidebar-left">
+
+            <div class="sidebar-header">
+                <div class="sidebar-title">
+                    Content
+                </div>
+                <div class="sidebar-toggle hidden-xs" data-toggle-class="sidebar-left-collapsed" data-target="html" data-fire-event="sidebar-left-toggle">
+                    <i class="fa fa-bars" aria-label="Toggle sidebar"></i>
+                </div>
+            </div>
+
+            <div class="nano">
+                <div class="nano-content">
+                    <nav id="menu" class="nav-main" role="navigation">
+                        <ul class="nav nav-main">
+                          <li class="nav-parent"><a><i class="fa fa-blind" aria-hidden="true"></i><span>Introduction</span></a>
+                          <ul class="nav nav-children">
+                            <li><a href="../../../introduction/overview.html">Overview</a></li>
+                            <li><a href="../../../introduction/reactive-streams.html">Reactive Streams</a></li>
+                            <li><a href="../../../introduction/swave-vs-akka-stream.html"><em>swave</em> vs. Akka-Stream</a></li>
+                            <li><a href="../../../introduction/talks-on-swave.html">Talks on <em>swave</em></a></li>
+                          </ul></li>
+                          <li class="nav-parent nav-expanded nav-active"><a><i class="fa fa-book" aria-hidden="true"></i><span>User Documentation</span></a>
+                          <ul class="nav nav-children">
+                            <li><a href="../../../usage/setup.html">Setup</a></li>
+                            <li><a href="../../../usage/quick-start.html">Quick Start</a></li>
+                            <li><a href="../../../usage/basics.html">Basics</a></li>
+                            <li><a href="../../../usage/spouts.html">Spouts</a></li>
+                            <li><a href="../../../usage/drains.html">Drains</a></li>
+                            <li class="nav-parent nav-expanded nav-active"><a>Transformations</a>
+                            <ul class="nav nav-children">
+                              <li><a href="../../../usage/transformations/overview.html">Transformations Overview</a></li>
+                              <li><a href="../../../usage/transformations/simple.html">Simple Transformations</a></li>
+                              <li><a href="../../../usage/transformations/fan-outs.html">Fan-Outs</a></li>
+                              <li><a href="../../../usage/transformations/fan-ins.html">Fan-Ins</a></li>
+                              <li><a href="../../../usage/transformations/injecting.html">Injecting</a></li>
+                              <li><a href="../../../usage/transformations/flattening.html">Flattening</a></li>
+                              <li><a href="../../../usage/transformations/pipes.html">Pipes</a></li>
+                              <li><a href="../../../usage/transformations/modules.html">Modules</a></li>
+                              <li><a href="../../../usage/transformations/couplings.html">Couplings</a></li>
+                              <li class="nav-expanded nav-active"><a href="../../../usage/transformations/reference/index.html">Transformation Reference</a></li>
+                            </ul></li>
+                            <li><a href="../../../usage/sync-vs-async.html">Sync vs. Async</a></li>
+                            <li><a href="../../../usage/debugging.html">Debugging</a></li>
+                            <li><a href="../../../usage/rendering.html">Rendering</a></li>
+                            <li><a href="../../../usage/configuration.html">Configuration</a></li>
+                            <li><a href="../../../usage/swave-core-api.html">API Docs (ScalaDoc)</a></li>
+                            <li><a href="../../../usage/swave-akka-compat/index.html">swave-akka-compat</a></li>
+                            <li><a href="../../../usage/swave-scodec-compat/index.html">swave-scodec-compat</a></li>
+                            <li><a href="../../../usage/swave-testkit/index.html">swave-testkit</a></li>
+                          </ul></li>
+                          <li><a href="../../../dev/index.html"><i class="fa fa-cogs" aria-hidden="true"></i><span>Developer Documentation</span></a></li>
+                          <li class="nav-parent"><a><i class="fa fa-info-circle" aria-hidden="true"></i><span>Project Info</span></a>
+                          <ul class="nav nav-children">
+                            <li><a href="../../../project/license.html">License</a></li>
+                            <li><a href="../../../project/contributing.html">Contributing</a></li>
+                            <li><a href="../../../project/changelog.html">Changelog</a></li>
+                            <li><a href="../../../project/sponsors.html">Sponsors</a></li>
+                            <li><a href="../../../project/references.html">References</a></li>
+                          </ul></li>
+                          <li><a href="../../../support.html"><i class="fa fa-users" aria-hidden="true"></i><span>Support</span></a></li>
+                        </ul>
+                    </nav>
+                </div>
+
+                <script>
+                    // Maintain Scroll Position
+                    if (typeof localStorage !== 'undefined') {
+                        if (localStorage.getItem('sidebar-left-position') !== null) {
+                            var initialPosition = localStorage.getItem('sidebar-left-position'),
+                                    sidebarLeft = document.querySelector('#sidebar-left .nano-content');
+
+                            sidebarLeft.scrollTop = initialPosition;
+                        }
+                    }
+                </script>
+
+            </div>
+
+        </aside>
+
+        <section role="main" class="content-body">
+            <header class="page-header">
+                <ul class="breadcrumbs">
+                  <li><a href="../../../index.html"><i class="fa fa-home"></i></a></li>
+                  <li><a href="../../../usage/index.html">User Documentation</a></li>
+                  <li><a href="../../../usage/transformations/index.html">Transformations</a></li>
+                  <li>Transformation Reference</li>
+                </ul>
+            </header>
+            <div id="main-content">
+                <!-- start: page -->
+<h1><a href="#transformation-reference" name="transformation-reference" class="anchor"><span class="anchor-link"></span></a>Transformation Reference</h1>
+<p>This is the alphabetical list of all predefined transformation currently offered by <em>swave</em>:</p>
+<div class="toc ">
+<ul>
+  <li><a href="../../../usage/transformations/reference/async.html">async</a></li>
+  <li><a href="../../../usage/transformations/reference/attach.html">attach</a></li>
+  <li><a href="../../../usage/transformations/reference/attachAll.html">attachAll</a></li>
+  <li><a href="../../../usage/transformations/reference/attachLeft.html">attachLeft</a></li>
+  <li><a href="../../../usage/transformations/reference/attachN.html">attachN</a></li>
+  <li><a href="../../../usage/transformations/reference/buffer.html">buffer</a></li>
+  <li><a href="../../../usage/transformations/reference/bufferDropping.html">bufferDropping</a></li>
+  <li><a href="../../../usage/transformations/reference/collect.html">collect</a></li>
+  <li><a href="../../../usage/transformations/reference/concat.html">concat</a></li>
+  <li><a href="../../../usage/transformations/reference/conflate.html">conflate</a></li>
+  <li><a href="../../../usage/transformations/reference/conflateWithSeed.html">conflateWithSeed</a></li>
+  <li><a href="../../../usage/transformations/reference/deduplicate.html">deduplicate</a></li>
+  <li><a href="../../../usage/transformations/reference/delay.html">delay</a></li>
+  <li><a href="../../../usage/transformations/reference/drop.html">drop</a></li>
+  <li><a href="../../../usage/transformations/reference/dropAll.html">dropAll</a></li>
+  <li><a href="../../../usage/transformations/reference/dropLast.html">dropLast</a></li>
+  <li><a href="../../../usage/transformations/reference/dropWhile.html">dropWhile</a></li>
+  <li><a href="../../../usage/transformations/reference/dropWithin.html">dropWithin</a></li>
+  <li><a href="../../../usage/transformations/reference/duplicate.html">duplicate</a></li>
+  <li><a href="../../../usage/transformations/reference/elementAt.html">elementAt</a></li>
+  <li><a href="../../../usage/transformations/reference/expand.html">expand</a></li>
+  <li><a href="../../../usage/transformations/reference/fanOutBroadcast.html">fanOutBroadcast</a></li>
+  <li><a href="../../../usage/transformations/reference/fanOutBroadcastBuffered.html">fanOutBroadcastBuffered</a></li>
+  <li><a href="../../../usage/transformations/reference/fanOutFirstAvailable.html">fanOutFirstAvailable</a></li>
+  <li><a href="../../../usage/transformations/reference/fanOutRoundRobin.html">fanOutRoundRobin</a></li>
+  <li><a href="../../../usage/transformations/reference/filter.html">filter</a></li>
+  <li><a href="../../../usage/transformations/reference/filterNot.html">filterNot</a></li>
+  <li><a href="../../../usage/transformations/reference/first.html">first</a></li>
+  <li><a href="../../../usage/transformations/reference/flatmap.html">flatmap</a></li>
+  <li><a href="../../../usage/transformations/reference/flattenConcat.html">flattenConcat</a></li>
+  <li><a href="../../../usage/transformations/reference/flattenMerge.html">flattenMerge</a></li>
+  <li><a href="../../../usage/transformations/reference/fold.html">fold</a></li>
+  <li><a href="../../../usage/transformations/reference/groupBy.html">groupBy</a></li>
+  <li><a href="../../../usage/transformations/reference/grouped.html">grouped</a></li>
+  <li><a href="../../../usage/transformations/reference/groupedTo.html">groupedTo</a></li>
+  <li><a href="../../../usage/transformations/reference/groupedWithin.html">groupedWithin</a></li>
+  <li><a href="../../../usage/transformations/reference/headAndTail.html">headAndTail</a></li>
+  <li><a href="../../../usage/transformations/reference/inject.html">inject</a></li>
+  <li><a href="../../../usage/transformations/reference/interleave.html">interleave</a></li>
+  <li><a href="../../../usage/transformations/reference/intersperse.html">intersperse</a></li>
+  <li><a href="../../../usage/transformations/reference/last.html">last</a></li>
+  <li><a href="../../../usage/transformations/reference/limit.html">limit</a></li>
+  <li><a href="../../../usage/transformations/reference/limitIdleTime.html">limitIdleTime</a></li>
+  <li><a href="../../../usage/transformations/reference/limitWeighted.html">limitWeighted</a></li>
+  <li><a href="../../../usage/transformations/reference/logEvent.html">logEvent</a></li>
+  <li><a href="../../../usage/transformations/reference/map.html">map</a></li>
+  <li><a href="../../../usage/transformations/reference/mapAsync.html">mapAsync</a></li>
+  <li><a href="../../../usage/transformations/reference/mapAsyncUnordered.html">mapAsyncUnordered</a></li>
+  <li><a href="../../../usage/transformations/reference/merge.html">merge</a></li>
+  <li><a href="../../../usage/transformations/reference/mergeSorted.html">mergeSorted</a></li>
+  <li><a href="../../../usage/transformations/reference/mergeToEither.html">mergeToEither</a></li>
+  <li><a href="../../../usage/transformations/reference/multiply.html">multiply</a></li>
+  <li><a href="../../../usage/transformations/reference/nonEmptyOr.html">nonEmptyOr</a></li>
+  <li><a href="../../../usage/transformations/reference/nop.html">nop</a></li>
+  <li><a href="../../../usage/transformations/reference/onCancel.html">onCancel</a></li>
+  <li><a href="../../../usage/transformations/reference/onComplete.html">onComplete</a></li>
+  <li><a href="../../../usage/transformations/reference/onElement.html">onElement</a></li>
+  <li><a href="../../../usage/transformations/reference/onError.html">onError</a></li>
+  <li><a href="../../../usage/transformations/reference/onRequest.html">onRequest</a></li>
+  <li><a href="../../../usage/transformations/reference/onSignal.html">onSignal</a></li>
+  <li><a href="../../../usage/transformations/reference/onSignalPF.html">onSignalPF</a></li>
+  <li><a href="../../../usage/transformations/reference/onStart.html">onStart</a></li>
+  <li><a href="../../../usage/transformations/reference/onTerminate.html">onTerminate</a></li>
+  <li><a href="../../../usage/transformations/reference/prefixAndTail.html">prefixAndTail</a></li>
+  <li><a href="../../../usage/transformations/reference/prefixAndTailTo.html">prefixAndTailTo</a></li>
+  <li><a href="../../../usage/transformations/reference/protect.html">protect</a></li>
+  <li><a href="../../../usage/transformations/reference/recover.html">recover</a></li>
+  <li><a href="../../../usage/transformations/reference/recoverToTry.html">recoverToTry</a></li>
+  <li><a href="../../../usage/transformations/reference/recoverWith.html">recoverWith</a></li>
+  <li><a href="../../../usage/transformations/reference/reduce.html">reduce</a></li>
+  <li><a href="../../../usage/transformations/reference/sample.html">sample</a></li>
+  <li><a href="../../../usage/transformations/reference/scan.html">scan</a></li>
+  <li><a href="../../../usage/transformations/reference/slice.html">slice</a></li>
+  <li><a href="../../../usage/transformations/reference/sliding.html">sliding</a></li>
+  <li><a href="../../../usage/transformations/reference/slidingTo.html">slidingTo</a></li>
+  <li><a href="../../../usage/transformations/reference/split.html">split</a></li>
+  <li><a href="../../../usage/transformations/reference/splitAfter.html">splitAfter</a></li>
+  <li><a href="../../../usage/transformations/reference/splitWhen.html">splitWhen</a></li>
+  <li><a href="../../../usage/transformations/reference/switch.html">switch</a></li>
+  <li><a href="../../../usage/transformations/reference/switchIf.html">switchIf</a></li>
+  <li><a href="../../../usage/transformations/reference/take.html">take</a></li>
+  <li><a href="../../../usage/transformations/reference/takeLast.html">takeLast</a></li>
+  <li><a href="../../../usage/transformations/reference/takeWhile.html">takeWhile</a></li>
+  <li><a href="../../../usage/transformations/reference/takeWithin.html">takeWithin</a></li>
+  <li><a href="../../../usage/transformations/reference/tee.html">tee</a></li>
+  <li><a href="../../../usage/transformations/reference/throttle.html">throttle</a></li>
+  <li><a href="../../../usage/transformations/reference/withCompletionTimeout.html">withCompletionTimeout</a></li>
+  <li><a href="../../../usage/transformations/reference/withIdleTimeout.html">withIdleTimeout</a></li>
+  <li><a href="../../../usage/transformations/reference/withInitialTimeout.html">withInitialTimeout</a></li>
+  <li><a href="../../../usage/transformations/reference/zip.html">zip</a></li>
+</ul>
+</div>
+                <div class="nav-next">
+                    <p><strong>Next:</strong> <a href="../../../usage/transformations/reference/async.html">async</a></p>
+                </div>
+                <!-- end: page -->
+            </div>
+        </section>
+    </div>
+</section>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="../../../assets/vendor/jquery.browser.mobile/jquery.browser.mobile.js"></script>
+<script src="../../../assets/vendor/nanoscroller/nanoscroller.js"></script>
+<script src="../../../assets/vendor/highlight/highlight.js"></script>
+<script src="../../../assets/js/theme.js"></script>
+<script src="../../../assets/js/theme.init.js"></script>
+
+</body>
+</html>

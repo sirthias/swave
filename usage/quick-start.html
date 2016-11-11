@@ -94,9 +94,12 @@
                               <li><a href="../usage/transformations/simple.html">Simple Transformations</a></li>
                               <li><a href="../usage/transformations/fan-outs.html">Fan-Outs</a></li>
                               <li><a href="../usage/transformations/fan-ins.html">Fan-Ins</a></li>
+                              <li><a href="../usage/transformations/injecting.html">Injecting</a></li>
+                              <li><a href="../usage/transformations/flattening.html">Flattening</a></li>
                               <li><a href="../usage/transformations/pipes.html">Pipes</a></li>
                               <li><a href="../usage/transformations/modules.html">Modules</a></li>
                               <li><a href="../usage/transformations/couplings.html">Couplings</a></li>
+                              <li><a href="../usage/transformations/reference/index.html">Transformation Reference</a></li>
                             </ul></li>
                             <li><a href="../usage/sync-vs-async.html">Sync vs. Async</a></li>
                             <li><a href="../usage/debugging.html">Debugging</a></li>
@@ -238,7 +241,7 @@ val result1: Future[Unit] = spout.foreach(println)
 val result2: Future[Int] = spout.drainToHead()
 
 val result3: Future[List[Int]] = spout.drainToList(limit = 1000)</code></pre>
-<p>There are more <code>drain...</code> variants available on <a href="http://swave.io/api/core/latest/#swave.core.Spout">Spout</a>, you might want to check them out as well.</p>
+<p>There are more <code>drain...</code> variants available on <code>Spout</code>, you might want to <a href="http://swave.io/api/core/latest/#swave.core.Spout">check them out as</a> well.</p>
                 <div class="nav-next">
                     <p><strong>Next:</strong> <a href="../usage/basics.html">Basics</a></p>
                 </div>
