@@ -36,10 +36,10 @@ lazy val publishingSettings = Seq(
   publishMavenStyle := true,
   publishArtifact in Test := false,
   pomIncludeRepository := { _ => false },
-  publishTo <<= version { v: String =>
+  publishTo := Some {
     val nexus = "https://oss.sonatype.org/"
-    if (v.trim endsWith "SNAPSHOT") Some("snapshots" at nexus + "content/repositories/snapshots")
-    else                            Some("releases" at nexus + "service/local/staging/deploy/maven2")
+    if (version.value.trim endsWith "SNAPSHOT") "snapshots" at nexus + "content/repositories/snapshots"
+    else "releases" at nexus + "service/local/staging/deploy/maven2"
   },
   pomExtra :=
     <developers>
@@ -122,7 +122,7 @@ val `scodec-bits`          = "org.scodec"                 %%  "scodec-bits"     
 
 // test
 val scalatest              = "org.scalatest"              %%  "scalatest"             % "2.2.6"   % "test"
-val scalacheck             = "org.scalacheck"             %%  "scalacheck"            % "1.12.5"
+val scalacheck             = "org.scalacheck"             %%  "scalacheck"            % "1.12.6"
 val `reactive-streams-tck` = "org.reactivestreams"        %   "reactive-streams-tck"  % "1.0.0"   % "test"
 
 // examples
@@ -233,9 +233,12 @@ lazy val docs = project
       "scaladoc.swave.core.base_url" -> "http://swave.io/api/core/latest/",
       "scaladoc.swave.testkit.base_url" -> "http://swave.io/api/testkit/latest/"))
   .settings({
-    def apiDocs(p: Project) = siteMappings <++= (mappings in (p, Compile, packageDoc), name in p) map { (m, n) =>
-      for ((f, d) <- m) yield f -> s"api/$n/latest/$d"
-    }
+    def apiDocs(p: Project) =
+      siteMappings ++= {
+        val n = (name in p).value
+        for ((f, d) <- (mappings in (p, Compile, packageDoc)).value)
+          yield f -> s"api/$n/latest/$d"
+      }
     List(apiDocs(`compat-akka`), apiDocs(core), apiDocs(`compat-scodec`), apiDocs(testkit))}: _*)
 
 lazy val examples = project
