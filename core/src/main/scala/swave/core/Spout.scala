@@ -15,7 +15,7 @@ import scala.concurrent.duration.FiniteDuration
 import shapeless._
 import swave.core.impl.util.{InportList, RingBuffer}
 import swave.core.impl.{Inport, ModuleImpl, TypeLogic}
-import swave.core.impl.stages.Stage
+import swave.core.impl.stages.StageImpl
 import swave.core.impl.stages.spout._
 import swave.core.util._
 
@@ -31,15 +31,15 @@ final class Spout[+A](private[swave] val inport: Inport) extends AnyVal with Str
 
   protected def base: Inport           = inport
   protected def wrap: Inport ⇒ Repr[_] = Spout.wrap
-  protected[core] def append[B](stage: Stage): Spout[B] = {
+  protected[core] def append[B](stage: StageImpl): Spout[B] = {
     inport.subscribe()(stage)
     new Spout(stage)
   }
 
   /**
-    * The [[PipeElem]] representation of this spout.
+    * The [[Stage]] of this spout.
     */
-  def pipeElem: PipeElem = inport.pipeElem
+  def stage: Stage = inport.stage
 
   /**
     * Returns this [[Spout]] instance.
@@ -153,7 +153,7 @@ final class Spout[+A](private[swave] val inport: Inport) extends AnyVal with Str
     * Explicitly attaches the given name to this [[Spout]].
     */
   def named(name: String): Spout[A] = {
-    Module.ID(name).markAsInnerExit(inport)
+    Module.ID(name).addBoundary(Module.Boundary.InnerExit(inport.stage))
     this
   }
 }

@@ -19,10 +19,10 @@ import swave.core.impl.{Port, RunContext, TypeLogic}
 final class Piping[A] private[core] (port: Port, val result: A) {
 
   /**
-    * A [[PipeElem]] of the graph that can serve as a basis for exploring the graph's stage layout.
+    * A [[Stage]] of the graph that can serve as a basis for exploring the graph's stage layout.
     * Often used for rendering via the [[Graph.render]] method.
     */
-  def pipeElem: PipeElem = port.pipeElem
+  def stage: Stage = port.stage
 
   /**
     * Turns this [[Piping]] into one with a different result by mapping over the result value.
@@ -66,10 +66,10 @@ final class Piping[A] private[core] (port: Port, val result: A) {
 final class SealedPiping[A] private[core] (ctx: RunContext, val result: A) {
 
   /**
-    * A [[PipeElem]] of the graph that can serve as a basis for exploring the graph's stage layout.
+    * A [[Stage]] of the graph that can serve as a basis for exploring the graph's stage layout.
     * Often used for rendering via the [[Graph.render]] method.
     */
-  def pipeElem: PipeElem = ctx.port.pipeElem
+  def stage: Stage = ctx.port.stage
 
   /**
     * Turns this [[SealedPiping]] into one with a different result by mapping over the result value.

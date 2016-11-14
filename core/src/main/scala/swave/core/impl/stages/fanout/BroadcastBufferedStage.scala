@@ -7,21 +7,20 @@
 package swave.core.impl.stages.fanout
 
 import scala.annotation.tailrec
-import swave.core.PipeElem
+import swave.core.Stage
 import swave.core.impl.util.MultiReaderRingBuffer
 import swave.core.impl.{Inport, Outport}
 import swave.core.macros._
 import swave.core.util._
 
 // format: OFF
-@StageImpl(fullInterceptions = true)
+@StageImplementation(fullInterceptions = true)
 private[core] final class BroadcastBufferedStage(bufferSize: Int, requestThreshold: Int, eagerCancel: Boolean)
-  extends FanOutStage with PipeElem.FanOut.BroadcastBuffered {
+  extends FanOutStage {
 
   requireArg(bufferSize > 0, "`bufferSize` must be > 0")
 
-  def pipeElemType: String = "fanOutBroadcastBuffered"
-  def pipeElemParams: List[Any] = eagerCancel :: Nil
+  def kind = Stage.Kind.FanOut.BroadcastBuffered(bufferSize, requestThreshold, eagerCancel)
 
   type OutportCtx = BroadcastBufferedStage.OutportContextWithCursor
 

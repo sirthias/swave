@@ -13,11 +13,13 @@ import scala.annotation.{compileTimeOnly, StaticAnnotation}
   * @param dump if true printlns the generates code on the console
   * @param trace if true printlns tracing log statements around event handlers
   */
-@compileTimeOnly("Unresolved @StageImpl")
-private[swave] final class StageImpl(fullInterceptions: Boolean = false, dump: Boolean = false, trace: Boolean = false)
+@compileTimeOnly("Unresolved @StageImplementation")
+private[swave] final class StageImplementation(fullInterceptions: Boolean = false,
+                                               dump: Boolean = false,
+                                               trace: Boolean = false)
     extends StaticAnnotation {
 
-  def macroTransform(annottees: Any*): Any = macro StageImplMacro.generateStage
+  def macroTransform(annottees: Any*): Any = macro StageImplementationMacro.generateStage
 }
 
 /**
@@ -83,7 +85,7 @@ private[swave] final class StageImpl(fullInterceptions: Boolean = false, dump: B
   */
 // TODO
 // - improve hygiene (e.g. naming resilience)
-private[swave] class StageImplMacro(val c: scala.reflect.macros.whitebox.Context)
+private[swave] class StageImplementationMacro(val c: scala.reflect.macros.whitebox.Context)
     extends Util
     with ConnectFanInAndSealWith
     with ConnectFanOutAndSealWith
@@ -99,7 +101,7 @@ private[swave] class StageImplMacro(val c: scala.reflect.macros.whitebox.Context
 
   private def annotationFlag(flag: String) =
     c.prefix.tree match {
-      case q"new StageImpl(..$params)" ⇒
+      case q"new StageImplementation(..$params)" ⇒
         params.collectFirst { case AssignOrNamedArg(Ident(TermName(`flag`)), Literal(Constant(true))) ⇒ }.isDefined
       case _ ⇒ false
     }
@@ -112,7 +114,7 @@ private[swave] class StageImplMacro(val c: scala.reflect.macros.whitebox.Context
       case other :: Nil ⇒
         c.abort(
           c.enclosingPosition,
-          "@StageImpl can only be applied to classes inheriting from swave.core.impl.stages.Stage")
+          "@StageImplementation can only be applied to classes inheriting from swave.core.impl.stages.Stage")
     }
 
   def transformStageImpl(stageImpl: ImplDef, companion: Option[ModuleDef]): c.Expr[Any] = {
@@ -142,12 +144,12 @@ private[swave] class StageImplMacro(val c: scala.reflect.macros.whitebox.Context
     mapTemplate(stageImpl) {
       mapBody {
         _ flatMap {
-          case q"connectFanInAndSealWith($subs) { $f }" ⇒ connectFanInAndSealWith(subs, f)
-          case q"connectFanOutAndSealWith { $f }"       ⇒ connectFanOutAndSealWith(f)
-          case q"connectInAndSealWith { $f }"           ⇒ connectInAndSealWith(f)
-          case q"connectInOutAndSealWith { $f }"        ⇒ connectInOutAndSealWith(f)
-          case q"connectOutAndSealWith { $f }"          ⇒ connectOutAndSealWith(f)
-          case x                                        ⇒ x :: Nil
+          case q"connectFanInAndSealWith { $f }"  ⇒ connectFanInAndSealWith(f)
+          case q"connectFanOutAndSealWith { $f }" ⇒ connectFanOutAndSealWith(f)
+          case q"connectInAndSealWith { $f }"     ⇒ connectInAndSealWith(f)
+          case q"connectInOutAndSealWith { $f }"  ⇒ connectInOutAndSealWith(f)
+          case q"connectOutAndSealWith { $f }"    ⇒ connectOutAndSealWith(f)
+          case x                                  ⇒ x :: Nil
         }
       }
     }

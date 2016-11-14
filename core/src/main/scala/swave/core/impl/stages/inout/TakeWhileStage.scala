@@ -6,18 +6,17 @@
 
 package swave.core.impl.stages.inout
 
-import swave.core.PipeElem
+import swave.core.Stage
 import swave.core.impl.{Inport, Outport}
-import swave.core.macros.StageImpl
+import swave.core.macros.StageImplementation
 
 import scala.util.control.NonFatal
 
 // format: OFF
-@StageImpl
-private[core] final class TakeWhileStage(predicate: Any ⇒ Boolean) extends InOutStage with PipeElem.InOut.TakeWhile {
+@StageImplementation
+private[core] final class TakeWhileStage(predicate: Any ⇒ Boolean) extends InOutStage {
 
-  def pipeElemType: String = "takeWhile"
-  def pipeElemParams: List[Any] = predicate :: Nil
+  def kind = Stage.Kind.InOut.TakeWhile(predicate)
 
   connectInOutAndSealWith { (ctx, in, out) ⇒ running(in, out) }
 

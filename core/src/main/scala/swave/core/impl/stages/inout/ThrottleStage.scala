@@ -8,16 +8,16 @@ package swave.core.impl.stages.inout
 
 import scala.util.control.NonFatal
 import scala.concurrent.duration._
-import swave.core.{Cancellable, PipeElem}
+import swave.core.{Cancellable, Stage}
 import swave.core.impl.{Inport, Outport, StreamRunner}
 import swave.core.impl.util.NanoTimeTokenBucket
 import swave.core.macros._
 import swave.core.util._
 
 // format: OFF
-@StageImpl
+@StageImplementation
 private[core] final class ThrottleStage(cost: Int, per: FiniteDuration, burst: Int, costFn: AnyRef ⇒ Int)
-  extends InOutStage with PipeElem.InOut.Throttle {
+  extends InOutStage {
 
   requireArg(cost > 0, "cost must be > 0")
   requireArg(per > Duration.Zero, "per time must be > 0")
@@ -27,8 +27,7 @@ private[core] final class ThrottleStage(cost: Int, per: FiniteDuration, burst: I
   private[this] val nanosBetweenTokens = per.toNanos / cost // we accept the small loss in precision due to rounding
   private[this] val tokenBucket = new NanoTimeTokenBucket(burst.toLong, nanosBetweenTokens)
 
-  def pipeElemType: String = "throttle"
-  def pipeElemParams: List[Any] = cost :: per :: burst :: costFn :: Nil
+  def kind = Stage.Kind.InOut.Throttle(cost, per, burst, costFn)
 
   connectInOutAndSealWith { (ctx, in, out) ⇒
     ctx.registerForRunnerAssignment(this)

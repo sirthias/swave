@@ -6,21 +6,19 @@
 
 package swave.core.impl.stages.inout
 
-import swave.core.PipeElem
 import swave.core.impl.stages.spout.SubSpoutStage
 import swave.core.impl.{Inport, Outport, RunContext}
 import swave.core.macros._
 import swave.core._
 
 // format: OFF
-@StageImpl
+@StageImplementation
 private[core] final class PrefixAndTailStage(prefixSize: Int, prefixBuilder: scala.collection.mutable.Builder[Any, AnyRef])
-  extends InOutStage with PipeElem.InOut.PrefixAndTail {
+  extends InOutStage {
 
   requireArg(prefixSize > 0, "`prefixSize` must be > 0")
 
-  def pipeElemType: String = "prefixAndTail"
-  def pipeElemParams: List[Any] = prefixSize :: Nil
+  def kind = Stage.Kind.InOut.PrefixAndTail(prefixSize)
 
   connectInOutAndSealWith { (ctx, in, out) ⇒
     ctx.registerForXStart(this)

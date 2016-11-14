@@ -7,17 +7,15 @@
 package swave.core.impl.stages.inout
 
 import scala.util.control.NonFatal
-import swave.core.PipeElem
+import swave.core.Stage
 import swave.core.impl.{Inport, Outport}
-import swave.core.macros.StageImpl
+import swave.core.macros.StageImplementation
 
 // format: OFF
-@StageImpl
-private[core] final class ScanStage(zero: AnyRef, f: (AnyRef, AnyRef) ⇒ AnyRef)
-  extends InOutStage with PipeElem.InOut.Scan {
+@StageImplementation
+private[core] final class ScanStage(zero: AnyRef, f: (AnyRef, AnyRef) ⇒ AnyRef) extends InOutStage {
 
-  def pipeElemType: String = "scan"
-  def pipeElemParams: List[Any] = zero :: f :: Nil
+  def kind = Stage.Kind.InOut.Scan(zero, f)
 
   connectInOutAndSealWith { (ctx, in, out) ⇒ awaitingDemand(in, out) }
 

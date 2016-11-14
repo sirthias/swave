@@ -6,22 +6,21 @@
 
 package swave.core.impl.stages.fanin
 
-import swave.core.PipeElem
+import swave.core.Stage
 import swave.core.impl.Outport
 import swave.core.impl.util.InportList
 import swave.core.macros._
 import swave.core.util._
 
 // format: OFF
-@StageImpl(fullInterceptions = true)
-private[core] final class ConcatStage(subs: InportList) extends FanInStage with PipeElem.FanIn.Concat {
+@StageImplementation(fullInterceptions = true)
+private[core] final class ConcatStage(subs: InportList) extends FanInStage(subs) {
 
   requireArg(subs.nonEmpty, "Cannot `concat` an empty set of sub-streams")
 
-  def pipeElemType: String = "fanInConcat"
-  def pipeElemParams: List[Any] = Nil
+  def kind = Stage.Kind.FanIn.Concat
 
-  connectFanInAndSealWith(subs) { (ctx, out) ⇒ running(out, subs, 0) }
+  connectFanInAndSealWith { (ctx, out) ⇒ running(out, subs, 0) }
 
   /**
     * @param out     the active downstream

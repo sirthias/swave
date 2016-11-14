@@ -7,21 +7,19 @@
 package swave.core.impl.stages.inout
 
 import scala.annotation.tailrec
-import swave.core.PipeElem
+import swave.core.Stage
 import swave.core.impl.util.RingBuffer
 import swave.core.impl.{Inport, Outport}
 import swave.core.macros._
 import swave.core.util._
 
 // format: OFF
-@StageImpl
-private[core] final class BufferStage(size: Int, requestThreshold: Int) extends InOutStage
-  with PipeElem.InOut.BufferWithBackpressure {
+@StageImplementation
+private[core] final class BufferStage(size: Int, requestThreshold: Int) extends InOutStage {
 
   requireArg(size > 0, "`size` must be > 0")
 
-  def pipeElemType: String = "buffer"
-  def pipeElemParams: List[Any] = size :: Nil
+  def kind = Stage.Kind.InOut.BufferWithBackpressure(size, requestThreshold)
 
   private[this] val buffer = new RingBuffer[AnyRef](roundUpToPowerOf2(size))
 

@@ -7,18 +7,16 @@
 package swave.core.impl.stages.drain
 
 import org.reactivestreams.Subscriber
-import swave.core.PipeElem
+import swave.core.Stage
 import swave.core.impl.Inport
 import swave.core.impl.rs.ForwardToRunnerSubscription
-import swave.core.macros.StageImpl
+import swave.core.macros.StageImplementation
 
 // format: OFF
-@StageImpl
-private[core] final class SubscriberDrainStage(subscriber: Subscriber[AnyRef])
-  extends DrainStage with PipeElem.Drain.Subscriber {
+@StageImplementation
+private[core] final class SubscriberDrainStage(subscriber: Subscriber[AnyRef]) extends DrainStage {
 
-  def pipeElemType: String = "Drain.fromSubscriber"
-  def pipeElemParams: List[Any] = subscriber :: Nil
+  def kind = Stage.Kind.Drain.FromSubscriber(subscriber)
 
   connectInAndSealWith { (ctx, in) ⇒
     ctx.registerForRunnerAssignment(this)

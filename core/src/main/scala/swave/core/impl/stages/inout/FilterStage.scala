@@ -7,16 +7,15 @@
 package swave.core.impl.stages.inout
 
 import scala.util.control.NonFatal
-import swave.core.PipeElem
+import swave.core.Stage
 import swave.core.impl.{Inport, Outport}
-import swave.core.macros.StageImpl
+import swave.core.macros.StageImplementation
 
 // format: OFF
-@StageImpl
-private[core] final class FilterStage(predicate: Any ⇒ Boolean, negated: Boolean) extends InOutStage with PipeElem.InOut.Filter {
+@StageImplementation
+private[core] final class FilterStage(predicate: Any ⇒ Boolean, negated: Boolean) extends InOutStage {
 
-  def pipeElemType: String = "filter"
-  def pipeElemParams: List[Any] = predicate :: Nil
+  def kind = Stage.Kind.InOut.Filter(predicate, negated)
 
   connectInOutAndSealWith { (ctx, in, out) ⇒ running(in, out) }
 

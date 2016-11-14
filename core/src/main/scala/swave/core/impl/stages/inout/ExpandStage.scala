@@ -8,18 +8,17 @@ package swave.core.impl.stages.inout
 
 import scala.annotation.tailrec
 import scala.util.control.NonFatal
-import swave.core.PipeElem
+import swave.core.Stage
 import swave.core.impl.{Inport, Outport}
 import swave.core.macros._
 import swave.core.util._
 
 // format: OFF
-@StageImpl
+@StageImplementation
 private[core] final class ExpandStage(zero: Iterator[AnyRef], extrapolate: AnyRef => Iterator[AnyRef])
-  extends InOutStage with PipeElem.InOut.Expand {
+  extends InOutStage {
 
-  def pipeElemType: String = "expand"
-  def pipeElemParams: List[Any] = zero :: extrapolate :: Nil
+  def kind = Stage.Kind.InOut.Expand(zero, extrapolate)
 
   connectInOutAndSealWith { (ctx, in, out) ⇒
     ctx.registerForXStart(this)

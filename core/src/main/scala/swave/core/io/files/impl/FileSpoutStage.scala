@@ -12,7 +12,7 @@ import java.nio.channels.FileChannel
 import java.nio.file.Path
 import com.typesafe.scalalogging.Logger
 import scala.annotation.tailrec
-import swave.core.PipeElem
+import swave.core.Stage
 import swave.core.impl.Outport
 import swave.core.impl.stages.spout.SpoutStage
 import swave.core.io.Bytes
@@ -20,12 +20,11 @@ import swave.core.io.files.quietClose
 import swave.core.macros._
 
 // format: OFF
-@StageImpl
+@StageImplementation
 private[core] final class FileSpoutStage[T](path: Path, _chunkSize: Int)(implicit bytes: Bytes[T])
-  extends SpoutStage with PipeElem.Spout.File {
+  extends SpoutStage {
 
-  def pipeElemType: String = "Spout.fromPath"
-  def pipeElemParams: List[Any] = path :: _chunkSize :: Nil
+  def kind = Stage.Kind.Spout.FromFile(path, _chunkSize)
 
   private[this] val log = Logger(getClass)
   private implicit def decorator(value: T): Bytes.Decorator[T] = Bytes.decorator(value)

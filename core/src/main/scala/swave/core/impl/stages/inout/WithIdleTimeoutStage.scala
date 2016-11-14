@@ -8,19 +8,17 @@ package swave.core.impl.stages.inout
 
 import scala.concurrent.duration._
 import swave.core.impl.{Inport, Outport, StreamRunner}
-import swave.core.{Cancellable, PipeElem, StreamTimeoutException}
+import swave.core.{Cancellable, Stage, StreamTimeoutException}
 import swave.core.macros._
 import swave.core.util._
 
 // format: OFF
-@StageImpl
-private[core] final class WithIdleTimeoutStage(timeout: FiniteDuration) extends InOutStage
-  with PipeElem.InOut.WithIdleTimeout {
+@StageImplementation
+private[core] final class WithIdleTimeoutStage(timeout: FiniteDuration) extends InOutStage {
 
   requireArg(timeout > Duration.Zero, "The `timeout` must be > 0")
 
-  def pipeElemType: String = "withIdleTimeout"
-  def pipeElemParams: List[Any] = timeout :: Nil
+  def kind = Stage.Kind.InOut.WithIdleTimeout(timeout)
 
   connectInOutAndSealWith { (ctx, in, out) ⇒
     ctx.registerForRunnerAssignment(this)

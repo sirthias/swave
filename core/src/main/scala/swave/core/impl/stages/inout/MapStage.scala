@@ -7,16 +7,15 @@
 package swave.core.impl.stages.inout
 
 import scala.util.control.NonFatal
-import swave.core.PipeElem
+import swave.core.Stage
 import swave.core.impl.{Inport, Outport}
-import swave.core.macros.StageImpl
+import swave.core.macros.StageImplementation
 
 // format: OFF
-@StageImpl
-private[core] final class MapStage(f: AnyRef ⇒ AnyRef) extends InOutStage with PipeElem.InOut.Map {
+@StageImplementation
+private[core] final class MapStage(f: AnyRef ⇒ AnyRef) extends InOutStage {
 
-  def pipeElemType: String = "map"
-  def pipeElemParams: List[Any] = f :: Nil
+  def kind = Stage.Kind.InOut.Map(f)
 
   connectInOutAndSealWith { (ctx, in, out) ⇒ running(in, out) }
 

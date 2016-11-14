@@ -7,16 +7,19 @@
 package swave.core.impl.stages.spout
 
 import scala.annotation.compileTimeOnly
-import swave.core.PipeElem
+import swave.core.Stage
 import swave.core.impl.{Outport, RunContext}
-import swave.core.impl.stages.Stage
+import swave.core.impl.stages.StageImpl
 
 // format: OFF
-private[swave] abstract class SpoutStage extends Stage { this: PipeElem.Spout ⇒
+private[swave] abstract class SpoutStage extends StageImpl {
 
-  protected final var _outputPipeElem: PipeElem = PipeElem.Unconnected
+  def kind: Stage.Kind.Spout
 
-  final def outputElem = _outputPipeElem
+  protected var _outputStages: List[Stage] = Nil
+
+  final def inputStages: List[Stage] = Nil
+  override def outputStages: List[Stage] = _outputStages
 
   @compileTimeOnly("Unresolved `connectOutAndSealWith` call")
   protected final def connectOutAndSealWith(f: (RunContext, Outport) ⇒ State): Unit = ()

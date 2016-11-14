@@ -16,7 +16,7 @@ import scala.util.{Failure, Success, Try}
 import shapeless._
 import shapeless.ops.nat.ToInt
 import shapeless.ops.hlist.{Fill, ToCoproduct, Tupler}
-import swave.core.impl.stages.Stage
+import swave.core.impl.stages.StageImpl
 import swave.core.impl.util.{InportList, RingBuffer}
 import swave.core.impl.stages.fanin.{ConcatStage, FirstNonEmptyStage, MergeStage, ToProductStage}
 import swave.core.impl.stages.fanout._
@@ -36,7 +36,7 @@ trait StreamOps[A] extends Any { self ⇒
 
   protected def base: Inport
   protected def wrap: Inport ⇒ Repr[_]
-  protected def append[T](stage: Stage): Repr[T]
+  protected def append[T](stage: StageImpl): Repr[T]
 
   final def async(dispatcherId: String = "", bufferSize: Int = 16): Repr[A] =
     append(new AsyncBoundaryStage(dispatcherId)).buffer(bufferSize)
@@ -438,7 +438,7 @@ trait StreamOps[A] extends Any { self ⇒
 
   final def zip[B](other: Spout[B]): Repr[(A, B)] = {
     val moduleID = Module.ID("zip")
-    moduleID.markAsOuterEntry(other.inport)
+    moduleID.addBoundary(Module.Boundary.OuterEntry(other.inport.stage))
     via(Pipe[A].attach(other).fanInToTuple named moduleID)
   }
 }
@@ -528,9 +528,9 @@ object StreamOps {
       ???
 
     final def fanInToTuple(implicit ev: FanInReq[L], t: Tuplable[L]): Repr[t.Out] =
-      wrap(new ToProductStage("fanInToTuple", subs, _.toTuple))
+      wrap(new ToProductStage(Stage.Kind.FanIn.ToTuple, subs, _.toTuple))
     final def fanInToHList(implicit ev: FanInReq[L]): Repr[L] =
-      wrap(new ToProductStage("fanInToHList", subs, _.toHList()))
+      wrap(new ToProductStage(Stage.Kind.FanIn.ToHList, subs, _.toHList()))
     final def fanInToCoproduct(eagerComplete: Boolean = true)(implicit ev: FanInReq[L]): Repr[C] =
       ???
     final def fanInToProduct[T](implicit ev: FanInReq[L], gen: Productable[T, L]): Repr[T] =
@@ -639,9 +639,9 @@ object StreamOps {
       extends StreamOps[A] {
     type Repr[X] = SubStreamOps[X, L, C, Sup, FRepr, F]
 
-    protected def base: Inport                     = spout.inport
-    protected def wrap: Inport ⇒ Repr[_]           = in ⇒ new SubStreamOps(fo, new Spout(in))
-    protected def append[B](stage: Stage): Repr[B] = new SubStreamOps(fo, spout.append(stage))
+    protected def base: Inport                         = spout.inport
+    protected def wrap: Inport ⇒ Repr[_]               = in ⇒ new SubStreamOps(fo, new Spout(in))
+    protected def append[B](stage: StageImpl): Repr[B] = new SubStreamOps(fo, spout.append(stage))
 
     def identity: Repr[A] = this
 

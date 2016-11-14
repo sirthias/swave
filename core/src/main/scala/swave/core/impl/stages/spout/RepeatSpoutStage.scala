@@ -7,16 +7,15 @@
 package swave.core.impl.stages.spout
 
 import scala.annotation.tailrec
-import swave.core.macros.StageImpl
-import swave.core.PipeElem
+import swave.core.macros.StageImplementation
+import swave.core.Stage
 import swave.core.impl.Outport
 
 // format: OFF
-@StageImpl
-private[core] final class RepeatSpoutStage(element: AnyRef) extends SpoutStage with PipeElem.Spout.Repeat {
+@StageImplementation
+private[core] final class RepeatSpoutStage(element: AnyRef) extends SpoutStage {
 
-  def pipeElemType: String = "Spout.repeat"
-  def pipeElemParams: List[Any] = element :: Nil
+  def kind = Stage.Kind.Spout.Repeat(element)
 
   connectOutAndSealWith { (ctx, out) ⇒ running(out) }
 

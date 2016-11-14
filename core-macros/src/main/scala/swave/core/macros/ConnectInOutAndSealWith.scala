@@ -24,12 +24,12 @@ private[macros] trait ConnectInOutAndSealWith { this: Util =>
         intercept = false,
 
         onSubscribe = from ⇒ {
-          _inputPipeElem = from.pipeElem
+          _inputStages = from.stage :: Nil
           awaitingSubscribe(from)
         },
 
         subscribe = from ⇒ {
-          _outputPipeElem = from.pipeElem
+          _outputStages = from.stage :: Nil
           from.onSubscribe()
           awaitingOnSubscribe(from)
         })
@@ -38,7 +38,7 @@ private[macros] trait ConnectInOutAndSealWith { this: Util =>
         intercept = false,
 
         subscribe = from ⇒ {
-          _outputPipeElem = from.pipeElem
+          _outputStages = from.stage :: Nil
           from.onSubscribe()
           ready(in, from)
         })
@@ -47,7 +47,7 @@ private[macros] trait ConnectInOutAndSealWith { this: Util =>
         intercept = false,
 
         onSubscribe = from ⇒ {
-          _inputPipeElem = from.pipeElem
+          _inputStages = from.stage :: Nil
           ready(from, out)
         })
 

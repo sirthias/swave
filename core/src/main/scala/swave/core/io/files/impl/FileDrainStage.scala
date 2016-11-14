@@ -12,20 +12,19 @@ import java.nio.file.{Path, StandardOpenOption}
 import scala.collection.JavaConverters._
 import scala.concurrent.Promise
 import com.typesafe.scalalogging.Logger
-import swave.core.PipeElem
+import swave.core.Stage
 import swave.core.impl.Inport
 import swave.core.impl.stages.drain.DrainStage
 import swave.core.io.Bytes
-import swave.core.macros.StageImpl
+import swave.core.macros.StageImplementation
 
 // format: OFF
-@StageImpl
+@StageImplementation
 private[core] final class FileDrainStage[T](path: Path, options: Set[StandardOpenOption], _chunkSize: Int,
                                             resultPromise: Promise[Long])(implicit bytes: Bytes[T])
-  extends DrainStage with PipeElem.Drain.File {
+  extends DrainStage {
 
-  def pipeElemType: String = "Drain.file"
-  def pipeElemParams: List[Any] = path :: options :: _chunkSize :: Nil
+  def kind = Stage.Kind.Drain.ToFile(path, options, _chunkSize, resultPromise)
 
   private[this] val log = Logger(getClass)
   private implicit def decorator(value: T): Bytes.Decorator[T] = Bytes.decorator(value)

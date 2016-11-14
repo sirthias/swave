@@ -7,16 +7,15 @@
 package swave.core.impl.stages.drain
 
 import scala.concurrent.Promise
-import swave.core.macros.StageImpl
-import swave.core.PipeElem
+import swave.core.macros.StageImplementation
+import swave.core.Stage
 import swave.core.impl.Inport
 
 // format: OFF
-@StageImpl
-private[core] final class HeadDrainStage(headPromise: Promise[AnyRef]) extends DrainStage with PipeElem.Drain.Head {
+@StageImplementation
+private[core] final class HeadDrainStage(headPromise: Promise[AnyRef]) extends DrainStage {
 
-  def pipeElemType: String = "Drain.head"
-  def pipeElemParams: List[Any] = Nil
+  def kind = Stage.Kind.Drain.Head
 
   connectInAndSealWith { (ctx, in) ⇒
     registerForRunnerAssignmentIfRequired(ctx)

@@ -7,21 +7,19 @@
 package swave.core.impl.stages.inout
 
 import scala.annotation.tailrec
-import swave.core.{Buffer, BufferOverflowFailure, PipeElem}
+import swave.core.{Buffer, BufferOverflowFailure, Stage}
 import swave.core.impl.{Inport, Outport}
 import swave.core.impl.util.RingBuffer
 import swave.core.macros._
 import swave.core.util._
 
 // format: OFF
-@StageImpl
-private[core] final class BufferDroppingStage(size: Int, overflowStrategy: Buffer.OverflowStrategy) extends InOutStage
-  with PipeElem.InOut.BufferDropping {
+@StageImplementation
+private[core] final class BufferDroppingStage(size: Int, overflowStrategy: Buffer.OverflowStrategy) extends InOutStage {
 
   requireArg(size > 0, "`size` must be > 0")
 
-  def pipeElemType: String = "bufferDropping"
-  def pipeElemParams: List[Any] = size :: overflowStrategy :: Nil
+  def kind = Stage.Kind.InOut.BufferDropping(size, overflowStrategy)
 
   private[this] val buffer = new RingBuffer[AnyRef](roundUpToPowerOf2(size))
 

@@ -8,16 +8,15 @@ package swave.core.impl.stages.spout
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
-import swave.core.PipeElem
+import swave.core.Stage
 import swave.core.impl.{CallingThreadExecutionContext, Outport}
-import swave.core.macros.StageImpl
+import swave.core.macros.StageImplementation
 
 // format: OFF
-@StageImpl
-private[core] final class FutureSpoutStage(future: Future[AnyRef]) extends SpoutStage with PipeElem.Spout.Future {
+@StageImplementation
+private[core] final class FutureSpoutStage(future: Future[AnyRef]) extends SpoutStage {
 
-  def pipeElemType: String = "Spout.fromFuture"
-  def pipeElemParams: List[Any] = future :: Nil
+  def kind = Stage.Kind.Spout.FromFuture(future)
 
   connectOutAndSealWith { (ctx, out) ⇒
     ctx.registerForRunnerAssignment(this)

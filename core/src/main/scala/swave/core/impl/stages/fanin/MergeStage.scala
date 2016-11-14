@@ -7,26 +7,24 @@
 package swave.core.impl.stages.fanin
 
 import scala.annotation.tailrec
-import swave.core.PipeElem
+import swave.core.Stage
 import swave.core.impl.util.{InportAnyRefList, InportList, RingBuffer}
 import swave.core.impl.Outport
 import swave.core.macros._
 import swave.core.util._
 
 // format: OFF
-@StageImpl(fullInterceptions = true)
-private[core] final class MergeStage(subs: InportList, eagerComplete: Boolean)
-  extends FanInStage with PipeElem.FanIn.Concat {
+@StageImplementation(fullInterceptions = true)
+private[core] final class MergeStage(subs: InportList, eagerComplete: Boolean) extends FanInStage(subs) {
 
   requireArg(subs.nonEmpty, "Cannot `merge` an empty set of sub-streams")
 
-  def pipeElemType: String = "fanInMerge"
-  def pipeElemParams: List[Any] = Nil
+  def kind = Stage.Kind.FanIn.Merge
 
   // stores (sub, elem) records in the order they arrived so we can dispatch them quickly when they are requested
   private[this] val buffer: RingBuffer[InportAnyRefList] = new RingBuffer(roundUpToPowerOf2(subs.size))
 
-  connectFanInAndSealWith(subs) { (ctx, out) ⇒
+  connectFanInAndSealWith { (ctx, out) ⇒
     ctx.registerForXStart(this)
     awaitingXStart(out)
   }

@@ -8,18 +8,16 @@ package swave.core.impl.stages.spout
 
 import scala.annotation.tailrec
 import scala.util.control.NonFatal
-import swave.core.PipeElem
+import swave.core.Stage
 import swave.core.impl.Outport
-import swave.core.macros.StageImpl
+import swave.core.macros.StageImplementation
 import swave.core.Spout.Unfolding
 
 // format: OFF
-@StageImpl
-private[core] final class UnfoldSpoutStage(zero: AnyRef, f: AnyRef => Unfolding[AnyRef, AnyRef])
-  extends SpoutStage with PipeElem.Spout.Unfold {
+@StageImplementation
+private[core] final class UnfoldSpoutStage(zero: AnyRef, f: AnyRef => Unfolding[AnyRef, AnyRef]) extends SpoutStage {
 
-  def pipeElemType: String = "Spout.unfold"
-  def pipeElemParams: List[Any] = zero :: f :: Nil
+  def kind = Stage.Kind.Spout.Unfold(zero, f)
 
   connectOutAndSealWith { (ctx, out) ⇒ running(out, zero) }
 

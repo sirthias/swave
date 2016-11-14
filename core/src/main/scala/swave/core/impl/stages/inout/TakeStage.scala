@@ -6,18 +6,17 @@
 
 package swave.core.impl.stages.inout
 
-import swave.core.PipeElem
+import swave.core.Stage
 import swave.core.impl.{Inport, Outport}
 import swave.core.macros._
 
 // format: OFF
-@StageImpl
-private[core] final class TakeStage(count: Long) extends InOutStage with PipeElem.InOut.Take {
+@StageImplementation
+private[core] final class TakeStage(count: Long) extends InOutStage {
 
   requireArg(count >= 0, "`count` must be >= 0")
 
-  def pipeElemType: String = "take"
-  def pipeElemParams: List[Any] = count :: Nil
+  def kind = Stage.Kind.InOut.Take(count)
 
   connectInOutAndSealWith { (ctx, in, out) ⇒
     if (count == 0) {

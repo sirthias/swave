@@ -12,7 +12,7 @@ import org.scalatest.{FreeSpec, Matchers}
 import swave.core.macros._
 
 // format: OFF
-class PipeElemSpec extends FreeSpec with Matchers {
+class RenderingSpec extends FreeSpec with Matchers {
 
   "Example 1" tests {
     Spout.repeat(42).to(Drain.head)
@@ -65,7 +65,7 @@ class PipeElemSpec extends FreeSpec with Matchers {
   }
 
   val examples: Map[String, String] =
-    Source.fromInputStream(getClass.getResourceAsStream("/PipeElemSpec.examples.txt"))
+    Source.fromInputStream(getClass.getResourceAsStream("/RenderingSpec.examples.txt"))
       .getLines()
       .scanLeft(Left(Nil): Either[List[String], List[String]]) {
         case (Left(lines), "")   ⇒ Right(lines.reverse)
@@ -86,7 +86,7 @@ class PipeElemSpec extends FreeSpec with Matchers {
       name in {
         val expectedRendering =
           examples.getOrElse(name + ':', sys.error(s"Section for '$name' not found in examples.txt"))
-        val s = Graph.render(pipeNet.pipeElem, showParams = true)
+        val s = Graph.render(pipeNet.stage, showParams = true)
         try s shouldEqual expectedRendering
         catch {
           case NonFatal(e) ⇒

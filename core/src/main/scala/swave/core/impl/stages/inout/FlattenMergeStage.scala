@@ -9,20 +9,19 @@ package swave.core.impl.stages.inout
 import scala.annotation.tailrec
 import swave.core.impl.util.{InportAnyRefList, InportList, RingBuffer}
 import swave.core.impl.stages.drain.SubDrainStage
-import swave.core.{PipeElem, Streamable}
+import swave.core.{Stage, Streamable}
 import swave.core.macros._
 import swave.core.util._
 import swave.core.impl._
 
 // format: OFF
-@StageImpl(fullInterceptions = true)
+@StageImplementation(fullInterceptions = true)
 private[core] final class FlattenMergeStage(streamable: Streamable.Aux[AnyRef, AnyRef], parallelism: Int)
-  extends InOutStage with PipeElem.InOut.FlattenMerge {
+  extends InOutStage {
 
   requireArg(parallelism > 0, "`parallelism` must be > 0")
 
-  def pipeElemType: String = "flattenMerge"
-  def pipeElemParams: List[Any] = parallelism :: Nil
+  def kind = Stage.Kind.InOut.FlattenMerge(parallelism)
 
   // stores (sub, elem) records in the order they arrived so we can dispatch them quickly when they are requested
   private[this] val buffer: RingBuffer[InportAnyRefList] = new RingBuffer(roundUpToPowerOf2(parallelism))

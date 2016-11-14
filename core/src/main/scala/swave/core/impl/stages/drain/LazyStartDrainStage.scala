@@ -9,16 +9,15 @@ package swave.core.impl.stages.drain
 import scala.util.control.NonFatal
 import swave.core.impl.stages.spout.SubSpoutStage
 import swave.core.impl.{Inport, Outport, RunContext}
-import swave.core.macros.StageImpl
+import swave.core.macros.StageImplementation
 import swave.core._
 
 // format: OFF
-@StageImpl
+@StageImplementation
 private[core] final class LazyStartDrainStage(onStart: () => Drain[AnyRef, AnyRef],
-                                              connectResult: AnyRef => Unit) extends DrainStage with PipeElem.Drain.Lazy {
+                                              connectResult: AnyRef => Unit) extends DrainStage {
 
-  def pipeElemType: String = "Drain.lazyStart"
-  def pipeElemParams: List[Any] = onStart :: Nil
+  def kind = Stage.Kind.Drain.LazyStart(onStart)
 
   connectInAndSealWith { (ctx, in) ⇒
     ctx.registerForXStart(this)

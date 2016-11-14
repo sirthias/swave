@@ -6,26 +6,24 @@
 
 package swave.core.impl.stages.spout
 
-import swave.core.{Cancellable, PipeElem}
+import swave.core.{Cancellable, Stage}
 import swave.core.impl.{Outport, RunContext}
-import swave.core.impl.stages.{Stage, StreamTermination}
-import swave.core.macros.StageImpl
+import swave.core.impl.stages.{StageImpl, StreamTermination}
+import swave.core.macros.StageImplementation
 import SubSpoutStage._
 
 // format: OFF
-@StageImpl
-private[core] class SubSpoutStage(ctx: RunContext, val in: Stage) extends SpoutStage
-  with PipeElem.Spout.Sub {
+@StageImplementation
+private[core] class SubSpoutStage(ctx: RunContext, val in: StageImpl) extends SpoutStage {
 
-  final def pipeElemType: String = "sub"
-  final def pipeElemParams: List[Any] = in :: Nil
+  def kind = Stage.Kind.Spout.Sub(in)
 
   initialState(awaitingSubscribe(StreamTermination.None, null))
 
   def awaitingSubscribe(term: StreamTermination, timer: Cancellable): State = state(
     subscribe = from ⇒ {
       if (timer ne null) timer.cancel()
-      _outputPipeElem = from.pipeElem
+      _outputStages = from.stage :: Nil
       from.onSubscribe()
       ready(from, term)
     },

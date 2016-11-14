@@ -8,17 +8,15 @@ package swave.core.impl.stages.spout
 
 import scala.util.control.NonFatal
 import scala.annotation.tailrec
-import swave.core.macros.StageImpl
-import swave.core.PipeElem
+import swave.core.macros.StageImplementation
+import swave.core.Stage
 import swave.core.impl.Outport
 
 // format: OFF
-@StageImpl
-private[core] final class IteratorSpoutStage(iterator: Iterator[AnyRef])
-  extends SpoutStage with PipeElem.Spout.Iterator {
+@StageImplementation
+private[core] final class IteratorSpoutStage(iterator: Iterator[AnyRef]) extends SpoutStage {
 
-  def pipeElemType: String = "Spout.fromIterator"
-  def pipeElemParams: List[Any] = iterator :: Nil
+  def kind = Stage.Kind.Spout.FromIterator(iterator)
 
   connectOutAndSealWith { (ctx, out) ⇒
     if (!iterator.hasNext) {

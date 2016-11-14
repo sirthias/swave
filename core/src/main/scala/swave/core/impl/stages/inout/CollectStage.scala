@@ -7,16 +7,15 @@
 package swave.core.impl.stages.inout
 
 import scala.util.control.NonFatal
-import swave.core.PipeElem
+import swave.core.Stage
 import swave.core.impl.{Inport, Outport}
-import swave.core.macros.StageImpl
+import swave.core.macros.StageImplementation
 
 // format: OFF
-@StageImpl
-private[core] final class CollectStage(pf: PartialFunction[AnyRef, AnyRef]) extends InOutStage with PipeElem.InOut.Collect {
+@StageImplementation
+private[core] final class CollectStage(pf: PartialFunction[AnyRef, AnyRef]) extends InOutStage {
 
-  def pipeElemType: String = "collect"
-  def pipeElemParams: List[Any] = pf :: Nil
+  def kind = Stage.Kind.InOut.Collect(pf)
 
   connectInOutAndSealWith { (ctx, in, out) ⇒
     val mismatchF: AnyRef => this.type = { elem =>

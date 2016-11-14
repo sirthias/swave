@@ -8,20 +8,19 @@ package swave.core.impl.stages.inout
 
 import swave.core.impl.stages.drain.SubDrainStage
 import swave.core.impl.util.InportAnyRefList
-import swave.core.{ PipeElem, Streamable }
+import swave.core.{ Stage, Streamable }
 import swave.core.macros._
 import swave.core.util._
 import swave.core.impl._
 
 // format: OFF
-@StageImpl(fullInterceptions = true)
+@StageImplementation(fullInterceptions = true)
 private[core] final class FlattenConcatStage(streamable: Streamable.Aux[AnyRef, AnyRef], parallelism: Int)
-  extends InOutStage with PipeElem.InOut.FlattenConcat {
+  extends InOutStage {
 
   requireArg(parallelism > 0, "`parallelism` must be > 0")
 
-  def pipeElemType: String = "flattenConcat"
-  def pipeElemParams: List[Any] = parallelism :: Nil
+  def kind = Stage.Kind.InOut.FlattenConcat(parallelism)
 
   connectInOutAndSealWith { (ctx, in, out) ⇒
     ctx.registerForXStart(this)

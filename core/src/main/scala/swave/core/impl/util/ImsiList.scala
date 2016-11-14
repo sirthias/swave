@@ -7,7 +7,6 @@
 package swave.core.impl.util
 
 import scala.annotation.tailrec
-import scala.collection.mutable.ListBuffer
 import swave.core.macros._
 
 /**
@@ -137,14 +136,6 @@ private[swave] object ImsiList {
           } else rec(current.tail, current)
         } else null // return empty list
       rec(underlying, null)
-    }
-
-    def toList: List[L] = {
-      val buf = ListBuffer.empty[L]
-      foreach { node ⇒
-        buf += node; ()
-      }
-      buf.toList
     }
   }
 }

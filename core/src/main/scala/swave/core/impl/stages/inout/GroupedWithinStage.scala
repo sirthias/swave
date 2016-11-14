@@ -9,20 +9,18 @@ package swave.core.impl.stages.inout
 import scala.concurrent.duration._
 import scala.collection.immutable.VectorBuilder
 import swave.core.impl.{Inport, Outport, StreamRunner}
-import swave.core.{Cancellable, PipeElem}
+import swave.core.{Cancellable, Stage}
 import swave.core.macros._
 import swave.core.util._
 
 // format: OFF
-@StageImpl
-private[core] final class GroupedWithinStage(maxSize: Int, duration: FiniteDuration)
-  extends InOutStage with PipeElem.InOut.GroupedWithin {
+@StageImplementation
+private[core] final class GroupedWithinStage(maxSize: Int, duration: FiniteDuration) extends InOutStage {
 
   requireArg(maxSize > 0, "`maxSize` must be > 0")
   requireArg(duration > Duration.Zero, "`duration` must be > 0")
 
-  def pipeElemType: String = "groupedWithin"
-  def pipeElemParams: List[Any] = maxSize :: duration :: Nil
+  def kind = Stage.Kind.InOut.GroupedWithin(maxSize, duration)
 
   private[this] val builder = new VectorBuilder[AnyRef]
   private[this] var builderSize = 0 // TODO: remove when https://issues.scala-lang.org/browse/SI-9904 is fixed

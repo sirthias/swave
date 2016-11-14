@@ -7,18 +7,17 @@
 package swave.core.impl.stages.inout
 
 import scala.util.control.NonFatal
-import swave.core.{PipeElem, StreamLimitExceeded}
+import swave.core.{Stage, StreamLimitExceeded}
 import swave.core.impl.{Inport, Outport}
 import swave.core.macros._
 
 // format: OFF
-@StageImpl
-private[core] final class LimitStage(max: Long, cost: AnyRef ⇒ Long) extends InOutStage with PipeElem.InOut.Limit {
+@StageImplementation
+private[core] final class LimitStage(max: Long, cost: AnyRef ⇒ Long) extends InOutStage {
 
   requireArg(max >= 0, "`max` must be >= 0")
 
-  def pipeElemType: String = "limit"
-  def pipeElemParams: List[Any] = max :: cost :: Nil
+  def kind = Stage.Kind.InOut.Limit(max, cost)
 
   connectInOutAndSealWith { (ctx, in, out) ⇒ running(in, out, max) }
 

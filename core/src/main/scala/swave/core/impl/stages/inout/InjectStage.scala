@@ -7,7 +7,7 @@
 package swave.core.impl.stages.inout
 
 import scala.annotation.tailrec
-import swave.core.{PipeElem, Spout}
+import swave.core.{Spout, Stage}
 import swave.core.impl.stages.spout.SubSpoutStage
 import swave.core.impl.util.RingBuffer
 import swave.core.impl.{Inport, Outport, RunContext}
@@ -17,11 +17,10 @@ import swave.core.util._
 // TODO: reduce buffer to one single element, like in the SplitStage
 
 // format: OFF
-@StageImpl(fullInterceptions = true)
-private[core] final class InjectStage extends InOutStage with PipeElem.InOut.Inject { stage =>
+@StageImplementation(fullInterceptions = true)
+private[core] final class InjectStage extends InOutStage { stage =>
 
-  def pipeElemType: String = "inject"
-  def pipeElemParams: List[Any] = Nil
+  def kind = Stage.Kind.InOut.Inject
 
   private[this] var buffer: RingBuffer[AnyRef] = _
 

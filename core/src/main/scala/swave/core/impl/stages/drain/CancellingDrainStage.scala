@@ -6,16 +6,15 @@
 
 package swave.core.impl.stages.drain
 
-import swave.core.PipeElem
+import swave.core.Stage
 import swave.core.impl.Inport
-import swave.core.macros.StageImpl
+import swave.core.macros.StageImplementation
 
 // format: OFF
-@StageImpl
-private[core] final class CancellingDrainStage extends DrainStage with PipeElem.Drain.Cancelling {
+@StageImplementation
+private[core] final class CancellingDrainStage extends DrainStage {
 
-  def pipeElemType: String = "Drain.cancelling"
-  def pipeElemParams: List[Any] = Nil
+  def kind = Stage.Kind.Drain.Cancelling
 
   connectInAndSealWith { (ctx, in) ⇒
     registerForRunnerAssignmentIfRequired(ctx)

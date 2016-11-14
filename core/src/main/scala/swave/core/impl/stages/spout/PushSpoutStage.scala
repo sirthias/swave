@@ -8,20 +8,21 @@ package swave.core.impl.stages.spout
 
 import org.jctools.queues.MpscChunkedArrayQueue
 import scala.annotation.tailrec
-import swave.core.PipeElem
+import swave.core.Stage
 import swave.core.impl.Outport
 import swave.core.impl.stages.StreamTermination
-import swave.core.macros.StageImpl
+import swave.core.macros.StageImplementation
 import swave.core.util._
 
 // format: OFF
-@StageImpl
-private[core] final class PushSpoutStage(queue: MpscChunkedArrayQueue[AnyRef], notifyOnDequeued: Int => Unit,
-                                         notifyOnCancel: () => Unit) extends SpoutStage with PipeElem.Spout.Push {
+@StageImplementation
+private[core] final class PushSpoutStage(initialBufferSize: Int, maxBufferSize: Int, growByInitialSize: Boolean,
+                                         notifyOnDequeued: Int => Unit, notifyOnCancel: () => Unit) extends SpoutStage {
   import PushSpoutStage._
 
-  def pipeElemType: String = "Spout.push"
-  def pipeElemParams: List[Any] = Nil
+  private[core] val queue = new MpscChunkedArrayQueue[AnyRef](initialBufferSize, maxBufferSize, growByInitialSize)
+
+  def kind = Stage.Kind.Spout.Push(initialBufferSize, maxBufferSize, growByInitialSize, notifyOnDequeued, notifyOnCancel)
 
   initialState(awaitingSubscribe(StreamTermination.None))
 
@@ -29,7 +30,7 @@ private[core] final class PushSpoutStage(queue: MpscChunkedArrayQueue[AnyRef], n
     intercept = false,
 
     subscribe = from ⇒ {
-      _outputPipeElem = from.pipeElem
+      _outputStages = from.stage :: Nil
       from.onSubscribe()
       ready(from, term)
     },

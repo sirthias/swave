@@ -14,7 +14,7 @@ import scala.collection.immutable
 import scala.concurrent.{Await, Future, Promise, TimeoutException}
 import scala.concurrent.duration._
 import swave.testkit.impl.TestkitExtension
-import swave.core.impl.stages.Stage
+import swave.core.impl.stages.StageImpl
 import swave.core.impl.stages.drain.DrainStage
 import swave.core.impl.{Inport, Outport}
 import swave.core.impl.stages.spout.SpoutStage
@@ -41,10 +41,9 @@ trait Probes {
     def totalDemand: Long = _totalDemand.get
 
     // format: OFF
-    @StageImpl
-    protected object stage extends SpoutStage with PipeElem.Spout.Test with ProbeStage {
-      def pipeElemType = "SpoutProbe"
-      def pipeElemParams = Nil
+    @StageImplementation
+    protected object stage extends SpoutStage with ProbeStage {
+      def kind = Stage.Kind.Spout.TestProbe
       override def toString = s"SpoutProbe.stage@${identityHash(this)}/$stateName"
 
       connectOutAndSealWith { (ctx, out) ⇒
@@ -149,10 +148,9 @@ trait Probes {
   final class DrainProbe[T] private (_ext: TestkitExtension)(implicit env: StreamEnv) extends Probe(_ext) {
 
     // format: OFF
-    @StageImpl
-    protected object stage extends DrainStage with PipeElem.Drain.Test with ProbeStage {
-      def pipeElemType = "DrainProbe"
-      def pipeElemParams = Nil
+    @StageImplementation
+    protected object stage extends DrainStage with ProbeStage {
+      def kind = Stage.Kind.Drain.TestProbe
       override def toString = s"DrainProbe.stage@${identityHash(this)}/$stateName"
 
       connectInAndSealWith { (ctx, in) ⇒
@@ -256,13 +254,12 @@ trait Probes {
 
     final def verifyCleanStop(): Unit =
       if (stage.isAsync) {
-        val futures: List[(Stage, Future[Unit])] = Graph
-          .explore(stage.stage.pipeElem)
-          .map { pe ⇒
-            val stage = pe.asInstanceOf[Stage]
-            val p     = Promise[Unit]()
-            stage.runner.enqueueXEvent(stage, Stage.RegisterStopPromise(p))
-            stage → p.future
+        val futures: List[(StageImpl, Future[Unit])] = Graph
+          .explore(stage)
+          .map { stage ⇒
+            val p = Promise[Unit]()
+            stage.stageImpl.runner.enqueueXEvent(stage.stageImpl, StageImpl.RegisterStopPromise(p))
+            stage.stageImpl → p.future
           }(collection.breakOut)
         import env.defaultDispatcher
         try {
@@ -280,8 +277,8 @@ trait Probes {
           deadlineNanos.value == 0L,
           "`verifyCleanStop` wrapped by `within` doesn't make sense for sync runs")
         Graph
-          .explore(stage.stage.pipeElem)
-          .find(!_.asInstanceOf[Stage].isStopped)
+          .explore(stage)
+          .find(!_.stageImpl.isStopped)
           .foreach(stage ⇒ throw ExpectationFailedException(s"Stage `$stage` is still running when it shouldn't be."))
       }
 
@@ -315,11 +312,10 @@ trait Probes {
       rec(maxSignals, Nil)
     }
 
-    protected trait ProbeStage { this: Stage ⇒
+    protected trait ProbeStage extends StageImpl {
       val log                       = new LinkedBlockingQueue[Signal]
       def streamRunner              = runner
       def onSignal(s: Signal): Unit = xEvent(s)
-      def stage: Stage              = this
       def isSync                    = streamRunner eq null
       def isAsync                   = streamRunner ne null
     }
@@ -329,7 +325,7 @@ trait Probes {
     protected final def runOrEnqueue(signals: Signal*): this.type = {
       signals.foreach {
         if (stage.isSync) stage.onSignal
-        else stage.streamRunner.scheduleEvent(stage.stage, Duration.Zero, _)
+        else stage.streamRunner.scheduleEvent(stage, Duration.Zero, _)
       }
       this
     }

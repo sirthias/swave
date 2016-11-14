@@ -7,19 +7,19 @@
 package swave.core.impl.stages.fanout
 
 import scala.annotation.tailrec
-import swave.core.macros.StageImpl
-import swave.core.PipeElem
+import swave.core.macros.StageImplementation
+import swave.core.Stage
 import swave.core.impl.{Inport, Outport}
 import swave.core.util._
 
 // format: OFF
-@StageImpl(fullInterceptions = true)
-private[core] final class BroadcastStage(eagerCancel: Boolean) extends FanOutStage with PipeElem.FanOut.Broadcast {
+@StageImplementation(fullInterceptions = true)
+private[core] final class BroadcastStage(eagerCancel: Boolean) extends FanOutStage {
 
-  def pipeElemType: String = "fanOutBroadcast"
-  def pipeElemParams: List[Any] = eagerCancel :: Nil
+  def kind = Stage.Kind.FanOut.Broadcast(eagerCancel)
 
   type OutportCtx = FanOutStage.SimpleOutportContext
+
   protected def createOutportCtx(out: Outport, tail: OutportCtx): OutportCtx =
     new FanOutStage.SimpleOutportContext(out, tail)
 

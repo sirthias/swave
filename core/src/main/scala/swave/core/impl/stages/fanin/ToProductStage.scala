@@ -7,25 +7,22 @@
 package swave.core.impl.stages.fanin
 
 import scala.annotation.tailrec
-import swave.core.PipeElem
+import swave.core.Stage
 import swave.core.impl.util.InportList
 import swave.core.impl.Outport
 import swave.core.macros._
 import swave.core.util._
 
 // format: OFF
-@StageImpl(fullInterceptions = true)
-private[core] final class ToProductStage(val pipeElemType: String,
-                                         subs: InportList, f: Array[AnyRef] ⇒ AnyRef) extends FanInStage
-  with PipeElem.FanIn.ToProduct {
+@StageImplementation(fullInterceptions = true)
+private[core] final class ToProductStage(val kind: Stage.Kind.FanIn,
+                                         subs: InportList, f: Array[AnyRef] ⇒ AnyRef) extends FanInStage(subs) {
 
   requireArg(subs.nonEmpty, "Cannot fan-in with `toProduct` when the set of sub-streams is empty")
 
-  def pipeElemParams: List[Any] = Nil
-
   val members = {
     val size = subs.size
-    requireArg(size <= 64, "fanInToProduct is not supported for types with more than 64 members")
+    requireArg(size <= 64, s"$kind is not supported for types with more than 64 members")
     new Array[AnyRef](size)
   }
 
@@ -39,7 +36,7 @@ private[core] final class ToProductStage(val pipeElemType: String,
       cancelStillActive(rem.tail, compMask >> 1)
     }
 
-  connectFanInAndSealWith(subs) { (ctx, out) ⇒
+  connectFanInAndSealWith { (ctx, out) ⇒
     ctx.registerForXStart(this)
     awaitingXStart(out)
   }

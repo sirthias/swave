@@ -7,20 +7,21 @@
 package swave.core.impl.stages.drain
 
 import scala.annotation.compileTimeOnly
-import swave.core.{IllegalAsyncBoundaryException, PipeElem}
+import swave.core.IllegalAsyncBoundaryException
+import swave.core.Stage
 import swave.core.impl.{Inport, RunContext}
-import swave.core.impl.stages.Stage
+import swave.core.impl.stages.StageImpl
 
 // format: OFF
-private[swave] abstract class DrainStage extends Stage { this: PipeElem.Drain =>
+private[swave] abstract class DrainStage extends StageImpl {
 
-  protected final var _inputPipeElem: PipeElem = PipeElem.Unconnected
+  def kind: Stage.Kind.Drain
+
   private[this] var _dispatcherId: String = null
+  protected var _inputStages: List[Stage] = Nil
 
-  final def inputElem = _inputPipeElem
-
-  protected final def setInputElem(elem: PipeElem): Unit =
-    _inputPipeElem = elem
+  override def inputStages: List[Stage] = _inputStages
+  final def outputStages: List[Stage] = Nil
 
   final def assignDispatcherId(dispatcherId: String): Unit =
     if ((_dispatcherId eq null) || _dispatcherId.isEmpty) _dispatcherId = dispatcherId

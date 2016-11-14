@@ -6,16 +6,15 @@
 
 package swave.core.impl.stages.inout
 
-import swave.core.PipeElem
+import swave.core.Stage
 import swave.core.impl.{Inport, Outport}
-import swave.core.macros.StageImpl
+import swave.core.macros.StageImplementation
 
 // format: OFF
-@StageImpl
-private[core] final class DeduplicateStage extends InOutStage with PipeElem.InOut.Deduplicate {
+@StageImplementation
+private[core] final class DeduplicateStage extends InOutStage {
 
-  def pipeElemType: String = "deduplicate"
-  def pipeElemParams: List[Any] = Nil
+  def kind = Stage.Kind.InOut.Deduplicate
 
   connectInOutAndSealWith { (ctx, in, out) ⇒ running(in, out, this) }
 

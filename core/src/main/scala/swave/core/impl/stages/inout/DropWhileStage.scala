@@ -7,16 +7,15 @@
 package swave.core.impl.stages.inout
 
 import scala.util.control.NonFatal
-import swave.core.PipeElem
+import swave.core.Stage
 import swave.core.impl.{Inport, Outport}
-import swave.core.macros.StageImpl
+import swave.core.macros.StageImplementation
 
 // format: OFF
-@StageImpl
-private[core] final class DropWhileStage(predicate: Any ⇒ Boolean) extends InOutStage with PipeElem.InOut.DropWhile {
+@StageImplementation
+private[core] final class DropWhileStage(predicate: Any ⇒ Boolean) extends InOutStage {
 
-  def pipeElemType: String = "dropWhile"
-  def pipeElemParams: List[Any] = predicate :: Nil
+  def kind = Stage.Kind.InOut.DropWhile(predicate)
 
   connectInOutAndSealWith { (ctx, in, out) ⇒ running(in, out) }
 

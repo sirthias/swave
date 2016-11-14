@@ -14,7 +14,7 @@ import scala.annotation.tailrec
 import scala.annotation.unchecked.{uncheckedVariance ⇒ uV}
 import shapeless._
 import swave.core.impl.rs.SubPubProcessor
-import swave.core.impl.stages.Stage
+import swave.core.impl.stages.StageImpl
 import swave.core.impl.stages.inout.NopStage
 import swave.core.impl._
 
@@ -22,8 +22,6 @@ final class Pipe[-A, +B] private (private[core] val firstStage: Outport, private
     extends StreamOps[B @uV] {
 
   type Repr[T] = Pipe[A @uV, T]
-
-  def pipeElem: PipeElem = firstStage.pipeElem
 
   def inputAsDrain: Drain[A, Unit] = Drain(firstStage)
   def outputAsSpout: Spout[B]      = new Spout(lastStage)
@@ -36,7 +34,7 @@ final class Pipe[-A, +B] private (private[core] val firstStage: Outport, private
   protected def base: Inport           = lastStage
   protected def wrap: Inport ⇒ Repr[_] = in ⇒ new Pipe(firstStage, in)
 
-  protected[core] def append[T](stage: Stage): Repr[T] = {
+  protected[core] def append[T](stage: StageImpl): Repr[T] = {
     lastStage.subscribe()(stage)
     new Pipe(firstStage, stage)
   }
@@ -72,7 +70,9 @@ final class Pipe[-A, +B] private (private[core] val firstStage: Outport, private
   def named(name: String): A =>> B = named(Module.ID(name))
 
   def named(moduleID: Module.ID): A =>> B = {
-    moduleID.markAsInnerEntry(firstStage).markAsInnerExit(lastStage)
+    moduleID
+      .addBoundary(Module.Boundary.InnerEntry(firstStage.stage))
+      .addBoundary(Module.Boundary.InnerExit(lastStage.stage))
     this
   }
 }

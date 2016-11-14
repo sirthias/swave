@@ -8,16 +8,14 @@ package swave.core.impl.stages.inout
 
 import scala.util.control.NonFatal
 import swave.core.impl.{Inport, Outport}
-import swave.core.macros.StageImpl
-import swave.core.{PipeElem, StreamEvent}
+import swave.core.macros.StageImplementation
+import swave.core.{Stage, StreamEvent}
 
 // format: OFF
-@StageImpl
-private[core] final class OnSignalStage(callback: StreamEvent[Any] ⇒ Unit) extends InOutStage
-  with PipeElem.InOut.OnEvent {
+@StageImplementation
+private[core] final class OnSignalStage(callback: StreamEvent[Any] ⇒ Unit) extends InOutStage {
 
-  def pipeElemType: String = "onEvent"
-  def pipeElemParams: List[Any] = callback :: Nil
+  def kind = Stage.Kind.InOut.OnSignal(callback)
 
   connectInOutAndSealWith { (ctx, in, out) ⇒ running(in, out) }
 

@@ -9,14 +9,13 @@ package swave.core
 import scala.annotation.tailrec
 import scala.collection.immutable.BitSet
 import scala.collection.mutable
-import swave.core.impl.stages.Stage
 import swave.core.graph.{Digraph, GlyphSet}
 import swave.core.macros._
 import swave.core.util._
 
 object Graph {
 
-  type Vertex = Either[Module.ID, PipeElem]
+  type Vertex = Either[Module.ID, Stage]
 
   trait ExpandModules extends (Module.ID ⇒ Boolean)
   object ExpandModules {
@@ -29,27 +28,27 @@ object Graph {
     def Some(names: List[String]) = ExpandModules(id ⇒ names contains id.name)
   }
 
-  def render(pipeElem: PipeElem,
+  def render(stage: Stage,
              expandModules: ExpandModules = ExpandModules.None,
              glyphSet: GlyphSet = GlyphSet.`3x3 ASCII`,
              showParams: Boolean = false,
              showRunners: Boolean = false,
              showNops: Boolean = false) = {
 
-    val graph = create(pipeElem, expandModules)
-    if (!showNops) graph.markHidden { case Right(_: PipeElem.InOut.Nop) ⇒ true; case _ ⇒ false }
+    val graph = create(stage, expandModules)
+    if (!showNops) graph.markHidden { case Right(x) if x.kind == Stage.Kind.InOut.Nop ⇒ true; case _ ⇒ false }
     graph.render(glyphSet).format {
-      case x @ Right(elem) ⇒
+      case x @ Right(st) ⇒
         val label =
           if (showParams || showRunners) {
-            val sb = new java.lang.StringBuilder(elem.pipeElemType)
-            if (showParams) sb.append(elem.pipeElemParams.mkString("(", ", ", ")"))
+            val sb = new java.lang.StringBuilder(st.kind.name)
+            if (showParams) sb.append(st.kind.productIterator.mkString("(", ", ", ")"))
             if (showRunners) {
-              val runner = elem.asInstanceOf[Stage].runner
+              val runner = st.stageImpl.runner
               sb.append(" ^").append(if (runner ne null) runner else "none")
             }
             sb.toString
-          } else elem.pipeElemType
+          } else st.kind.name
         graph.attributes(x) match {
           case Nil     ⇒ label
           case modules ⇒ label + modules.mkString(" [", ", ", "]")
@@ -58,27 +57,27 @@ object Graph {
     }
   }
 
-  def explore(entryElem: PipeElem): Set[PipeElem] = {
-    final class Rec extends (PipeElem ⇒ Unit) {
-      var result                     = Set.empty[PipeElem]
+  def explore(entryStage: Stage): Set[Stage] = {
+    final class Rec extends (Stage ⇒ Unit) {
+      var result                     = Set.empty[Stage]
       var seenModules                = Set.empty[Module.ID]
-      var remainingEntryPoints       = Iterator.single(entryElem)
-      def _apply(pe: PipeElem): Unit = apply(pe)
-      @tailrec def apply(pe: PipeElem): Unit = {
-        val newResult = result + pe
+      var remainingEntryPoints       = Iterator.single(entryStage)
+      def _apply(stage: Stage): Unit = apply(stage)
+      @tailrec def apply(stage: Stage): Unit = {
+        val newResult = result + stage
         if (newResult ne result) {
           result = newResult
-          enqueueModuleBoundaries(pe.boundaryOf)
-          3 * pe.inputElems.size012 + pe.outputElems.size012 match {
+          enqueueModuleBoundaries(stage.boundaryOf)
+          3 * stage.inputStages.size012 + stage.outputStages.size012 match {
             case 0 /* 0:0 */ ⇒ throw new IllegalStateException // no input and no output?
-            case 1 /* 0:1 */ ⇒ apply(pe.outputElems.head)
-            case 2 /* 0:x */ ⇒ pe.outputElems.foreach(this)
-            case 3 /* 1:0 */ ⇒ apply(pe.inputElems.head)
-            case 4 /* 1:1 */ ⇒ { _apply(pe.inputElems.head); apply(pe.outputElems.head) }
-            case 5 /* 1:x */ ⇒ { _apply(pe.inputElems.head); pe.outputElems.foreach(this) }
-            case 6 /* x:0 */ ⇒ pe.inputElems.foreach(this)
-            case 7 /* x:1 */ ⇒ { pe.inputElems.foreach(this); apply(pe.outputElems.head) }
-            case 8 /* x:x */ ⇒ { pe.inputElems.foreach(this); pe.outputElems.foreach(this) }
+            case 1 /* 0:1 */ ⇒ apply(stage.outputStages.head)
+            case 2 /* 0:x */ ⇒ stage.outputStages.foreach(this)
+            case 3 /* 1:0 */ ⇒ apply(stage.inputStages.head)
+            case 4 /* 1:1 */ ⇒ { _apply(stage.inputStages.head); apply(stage.outputStages.head) }
+            case 5 /* 1:x */ ⇒ { _apply(stage.inputStages.head); stage.outputStages.foreach(this) }
+            case 6 /* x:0 */ ⇒ stage.inputStages.foreach(this)
+            case 7 /* x:1 */ ⇒ { stage.inputStages.foreach(this); apply(stage.outputStages.head) }
+            case 8 /* x:x */ ⇒ { stage.inputStages.foreach(this); stage.outputStages.foreach(this) }
           }
         }
       }
@@ -88,12 +87,12 @@ object Graph {
             val newSeenModules = seenModules + head
             if (newSeenModules ne seenModules) {
               seenModules = newSeenModules
-              remainingEntryPoints ++= head.boundaries.iterator.map(_.elem)
+              remainingEntryPoints ++= head.boundaries.iterator.map(_.stage)
             }
             enqueueModuleBoundaries(tail)
           case _ ⇒ // done
         }
-      @tailrec def run(): Set[PipeElem] =
+      @tailrec def run(): Set[Stage] =
         if (remainingEntryPoints.hasNext) {
           apply(remainingEntryPoints.next())
           run()
@@ -102,13 +101,13 @@ object Graph {
     new Rec().run()
   }
 
-  def create(entryElem: PipeElem, expandModules: ExpandModules = ExpandModules.None): Digraph[Vertex] = {
+  def create(entryStage: Stage, expandModules: ExpandModules = ExpandModules.None): Digraph[Vertex] = {
     import Digraph.EdgeAttributes._
 
     ///////////////// STEP 1: discover complete graph ///////////////////////
 
-    val allElems = explore(entryElem)
-    val graph0   = Digraph[PipeElem](entryElem :: allElems.toList, _.inputElems, _.outputElems)
+    val allElems = explore(entryStage)
+    val graph0   = Digraph[Stage](entryStage :: allElems.toList, _.inputStages, _.outputStages)
 
     ///////////////// STEP 2: identify modules, apply markers //////////////////////
 
@@ -116,20 +115,20 @@ object Graph {
       graph0.vertices
         .flatMap(_.boundaryOf)(BreakOutTo[Set].here) // similar to .flatMap(...).distinct but faster
         .flatMap { moduleID ⇒
-          val regionBoundaries = moduleID.boundaries.map {
-            case Module.Boundary(elem, isEntry, isInner) ⇒ Digraph.RegionBoundary(elem, isEntry, isInner)
+          val regionBoundaries = moduleID.boundaries.map { x ⇒
+            Digraph.RegionBoundary(x.stage, x.isEntry, x.isInner)
           }
           val regionBitSet = graph0.discoverRegion(regionBoundaries)
           if (regionBitSet.nonEmpty) {
-            val modulePreds: List[PipeElem] = regionBoundaries.flatMap {
-              case Digraph.RegionBoundary(elem, true, true)  ⇒ elem.inputElems
-              case Digraph.RegionBoundary(elem, true, false) ⇒ elem :: Nil
-              case _                                         ⇒ Nil
-            }
-            val moduleSuccs: List[PipeElem] = regionBoundaries.flatMap {
-              case Digraph.RegionBoundary(elem, false, true)  ⇒ elem.outputElems
-              case Digraph.RegionBoundary(elem, false, false) ⇒ elem :: Nil
+            val modulePreds: List[Stage] = regionBoundaries.flatMap {
+              case Digraph.RegionBoundary(stage, true, true)  ⇒ stage.inputStages
+              case Digraph.RegionBoundary(stage, true, false) ⇒ stage :: Nil
               case _                                          ⇒ Nil
+            }
+            val moduleSuccs: List[Stage] = regionBoundaries.flatMap {
+              case Digraph.RegionBoundary(stage, false, true)  ⇒ stage.outputStages
+              case Digraph.RegionBoundary(stage, false, false) ⇒ stage :: Nil
+              case _                                           ⇒ Nil
             }
             ModuleInfo(moduleID, regionBitSet, modulePreds, moduleSuccs) :: Nil
           } else Nil
@@ -158,12 +157,12 @@ object Graph {
 
     ////////////// STEP 4: construct new graph with the collapsed modules ////////////
 
-    def moduleOf(elem: PipeElem): Option[Module.ID] =
-      visibleCollapsed collectFirst { case info if graph0.isMarked(elem, info.vertices) ⇒ info.id }
+    def moduleOf(stage: Stage): Option[Module.ID] =
+      visibleCollapsed collectFirst { case info if graph0.isMarked(stage, info.vertices) ⇒ info.id }
 
     if (visibleCollapsed.nonEmpty) {
       implicit val ordering = graph0.xRankOrdering // ordering for the .sortBy calls we have below
-      var needSuccsPatched  = Set.empty[PipeElem]
+      var needSuccsPatched  = Set.empty[Stage]
       val modulePreds = visibleCollapsed.foldLeft(Map.empty[Module.ID, List[Vertex]]) {
         case (map, ModuleInfo(moduleID, _, mpreds, _)) ⇒
           val preds = mpreds map { p ⇒
@@ -176,7 +175,7 @@ object Graph {
           }
           map.updated(moduleID, preds.sortBy(_._2).map(_._1))
       }
-      var needPredsPatched = Set.empty[PipeElem]
+      var needPredsPatched = Set.empty[Stage]
       val moduleSuccs = visibleCollapsed.foldLeft(Map.empty[Module.ID, List[Vertex]]) {
         case (map, ModuleInfo(moduleID, _, _, msuccs)) ⇒
           val succs = msuccs map { s ⇒
@@ -189,18 +188,18 @@ object Graph {
           }
           map.updated(moduleID, succs.sortBy(_._2).map(_._1))
       }
-      val elemSuccs = needSuccsPatched.foldLeft(Map.empty[PipeElem, List[Vertex]]) { (map, elem) ⇒
-        map.updated(elem, elem.outputElems.map(s ⇒ moduleOf(s).fold[Vertex](Right(s))(Left(_))))
+      val elemSuccs = needSuccsPatched.foldLeft(Map.empty[Stage, List[Vertex]]) { (map, stage) ⇒
+        map.updated(stage, stage.outputStages.map(s ⇒ moduleOf(s).fold[Vertex](Right(s))(Left(_))))
       }
-      val elemPreds = needPredsPatched.foldLeft(Map.empty[PipeElem, List[Vertex]]) { (map, elem) ⇒
-        map.updated(elem, elem.inputElems.map(p ⇒ moduleOf(p).fold[Vertex](Right(p))(Left(_))))
+      val elemPreds = needPredsPatched.foldLeft(Map.empty[Stage, List[Vertex]]) { (map, stage) ⇒
+        map.updated(stage, stage.inputStages.map(p ⇒ moduleOf(p).fold[Vertex](Right(p))(Left(_))))
       }
       def preds: Vertex ⇒ Seq[Vertex] = {
-        case Right(x) ⇒ elemPreds.getOrElse(x, x.inputElems.map(Right(_)))
+        case Right(x) ⇒ elemPreds.getOrElse(x, x.inputStages.map(Right(_)))
         case Left(x)  ⇒ modulePreds(x)
       }
       def succs: Vertex ⇒ Seq[Vertex] = {
-        case Right(x) ⇒ elemSuccs.getOrElse(x, x.outputElems.map(Right(_)))
+        case Right(x) ⇒ elemSuccs.getOrElse(x, x.outputStages.map(Right(_)))
         case Left(x)  ⇒ moduleSuccs(x)
       }
 
@@ -209,7 +208,7 @@ object Graph {
         collapsedGraph.addVertexAttributes(collapsedGraph.migrateVertexSet(graph0, info.vertices), info.id.name)
       }
       collapsedGraph.vertices.foreach {
-        case x @ Right(_: PipeElem.InOut.Coupling) ⇒
+        case x @ Right(stage) if stage.kind == Stage.Kind.InOut.Coupling ⇒
           collapsedGraph.markPaths(preds(x).head, succs(x).head, Reversaphile | Fusable)
         case _ ⇒
       }
@@ -217,14 +216,14 @@ object Graph {
     } else {
       // all modules are expanded
       for (info ← allModuleInfos) graph0.addVertexAttributes(info.vertices, info.id.name)
-      graph0.vertices.foreach {
-        case x: PipeElem.InOut.Coupling ⇒ graph0.markPaths(x.inputElem, x.outputElem, Reversaphile | Fusable)
-        case _                          ⇒
+      graph0.vertices.foreach { x =>
+        if (x.kind == Stage.Kind.InOut.Coupling && x.inputStages.nonEmpty && x.outputStages.nonEmpty)
+          graph0.markPaths(x.inputStages.head, x.outputStages.head, Reversaphile | Fusable)
       }
       graph0.mapVertices(Right(_))
     }
   }
 
-  private case class ModuleInfo(id: Module.ID, vertices: BitSet, preds: List[PipeElem], succs: List[PipeElem])
+  private case class ModuleInfo(id: Module.ID, vertices: BitSet, preds: List[Stage], succs: List[Stage])
 
 }

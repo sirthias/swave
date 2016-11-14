@@ -80,7 +80,7 @@ private[graph] object XRanking {
             rank.succs.foreach(assignLevel(_, level + 1))
             bitSet -= rank.id
             ()
-          } else println("XRank crossing!")
+          } // else println("XRank crossing!")
         groupRanks.withFilter(_.preds.isEmpty).foreach(assignLevel(_, 0))
 
         def compactLevels(rank: XRank): Boolean =

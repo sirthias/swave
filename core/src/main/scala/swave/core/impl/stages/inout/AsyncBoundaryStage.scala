@@ -6,27 +6,26 @@
 
 package swave.core.impl.stages.inout
 
-import swave.core.PipeElem
-import swave.core.impl.stages.Stage
+import swave.core.Stage
+import swave.core.impl.stages.StageImpl
 import swave.core.impl.{Inport, Outport}
-import swave.core.macros.StageImpl
+import swave.core.macros.StageImplementation
 
 // format: OFF
-@StageImpl
-private[core] final class AsyncBoundaryStage(dispatcherId: String) extends InOutStage with PipeElem.InOut.AsyncBoundary {
+@StageImplementation
+private[core] final class AsyncBoundaryStage(dispatcherId: String) extends InOutStage {
 
-  def pipeElemType: String = "asyncBoundary"
-  def pipeElemParams: List[Any] = dispatcherId :: Nil
+  def kind = Stage.Kind.InOut.AsyncBoundary(dispatcherId)
 
   connectInOutAndSealWith { (ctx, inport, outport) ⇒
-    val ins = inport.asInstanceOf[Stage]
-    val outs = outport.asInstanceOf[Stage]
+    val ins = inport.stageImpl
+    val outs = outport.stageImpl
     ctx.registerForRunnerAssignment(ins, dispatcherId)
     ctx.registerForRunnerAssignment(outs) // fallback assignment of default StreamRunner
     running(ins, outs)
   }
 
-  def running(ins: Stage, outs: Stage) = state(
+  def running(ins: StageImpl, outs: StageImpl) = state(
     intercept = false,
 
     request = (n, _) ⇒ {

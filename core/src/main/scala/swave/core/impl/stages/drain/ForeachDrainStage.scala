@@ -8,18 +8,16 @@ package swave.core.impl.stages.drain
 
 import scala.util.control.NonFatal
 import scala.concurrent.Promise
-import swave.core.macros.StageImpl
-import swave.core.PipeElem
+import swave.core.macros.StageImplementation
+import swave.core.Stage
 import swave.core.impl.Inport
 
 // format: OFF
-@StageImpl
-private[core] final class ForeachDrainStage(
-    callback: AnyRef ⇒ Unit,
-    terminationPromise: Promise[Unit]) extends DrainStage with PipeElem.Drain.Foreach {
+@StageImplementation
+private[core] final class ForeachDrainStage(callback: AnyRef ⇒ Unit, terminationPromise: Promise[Unit])
+  extends DrainStage {
 
-  def pipeElemType: String = "Drain.foreach"
-  def pipeElemParams: List[Any] = callback :: terminationPromise :: Nil
+  def kind = Stage.Kind.Drain.Foreach(callback, terminationPromise)
 
   connectInAndSealWith { (ctx, in) ⇒
     registerForRunnerAssignmentIfRequired(ctx)

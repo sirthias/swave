@@ -9,24 +9,22 @@ package swave.testkit.impl
 import swave.testkit.gen.TestFixture
 
 import scala.annotation.tailrec
-import swave.core.macros.StageImpl
-import swave.core.PipeElem
+import swave.core.macros.StageImplementation
+import swave.core.Stage
 import swave.core.impl.Outport
 import swave.core.impl.stages.spout.SpoutStage
 
-@StageImpl(fullInterceptions = true)
+@StageImplementation(fullInterceptions = true)
 private[testkit] final class TestSpoutStage(val id: Int,
                                             val elemsIterable: Iterable[AnyRef],
                                             val termination: Option[Throwable],
                                             ctx: TestContext)
     extends SpoutStage
-    with TestStage
-    with PipeElem.Spout.Test {
+    with TestStage {
 
   private[this] val elems: Iterator[AnyRef] = elemsIterable.iterator
 
-  def pipeElemType: String      = "Spout.test"
-  def pipeElemParams: List[Any] = id :: Nil
+  def kind = Stage.Kind.Spout.Test(id)
 
   override def toString: String = "Input  " + id
 
@@ -45,7 +43,7 @@ private[testkit] final class TestSpoutStage(val id: Int,
     subscribe = from ⇒ {
       ctx.trace(s"Received SUBSCRIBE from $from in 'initialState'")
       ctx.trace("⇢ ONSUBSCRIBE")
-      _outputPipeElem = from.pipeElem
+      _outputStages = from.stage :: Nil
       from.onSubscribe()
       ready(from)
     })

@@ -7,18 +7,16 @@
 package swave.core.impl.stages.spout
 
 import scala.annotation.tailrec
-import swave.core.PipeElem
+import swave.core.Stage
 import swave.core.impl.Outport
 import swave.core.impl.util.RingBuffer
-import swave.core.macros.StageImpl
+import swave.core.macros.StageImplementation
 
 // format: OFF
-@StageImpl
-private[core] final class RingBufferSpoutStage(buffer: RingBuffer[AnyRef])
-  extends SpoutStage with PipeElem.Spout.RingBuffer {
+@StageImplementation
+private[core] final class RingBufferSpoutStage(buffer: RingBuffer[AnyRef]) extends SpoutStage {
 
-  def pipeElemType: String = "Spout.fromRingBuffer"
-  def pipeElemParams: List[Any] = buffer :: Nil
+  def kind = Stage.Kind.Spout.FromRingBuffer(buffer)
 
   connectOutAndSealWith { (ctx, out) ⇒
     if (buffer.isEmpty) {

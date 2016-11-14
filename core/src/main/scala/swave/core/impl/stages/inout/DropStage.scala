@@ -6,18 +6,17 @@
 
 package swave.core.impl.stages.inout
 
-import swave.core.PipeElem
+import swave.core.Stage
 import swave.core.impl.{Inport, Outport}
 import swave.core.macros._
 
 // format: OFF
-@StageImpl
-private[core] final class DropStage(count: Long) extends InOutStage with PipeElem.InOut.Drop {
+@StageImplementation
+private[core] final class DropStage(count: Long) extends InOutStage {
 
   requireArg(count > 0, "`count` must be > 0")
 
-  def pipeElemType: String = "drop"
-  def pipeElemParams: List[Any] = count :: Nil
+  def kind = Stage.Kind.InOut.Drop(count)
 
   connectInOutAndSealWith { (ctx, in, out) ⇒
     ctx.registerForXStart(this)

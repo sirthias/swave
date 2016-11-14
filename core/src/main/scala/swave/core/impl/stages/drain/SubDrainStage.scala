@@ -7,20 +7,17 @@
 package swave.core.impl.stages.drain
 
 import scala.util.control.NonFatal
-import swave.core.impl.stages.Stage
+import swave.core.impl.stages.StageImpl
 import swave.core.impl.{Inport, RunContext}
-import swave.core.macros.StageImpl
-import swave.core.{Cancellable, PipeElem, SubscriptionTimeoutException}
+import swave.core.macros.StageImplementation
+import swave.core.{Cancellable, Stage, SubscriptionTimeoutException}
 
 // format: OFF
-@StageImpl(fullInterceptions = true)
-private[core] final class SubDrainStage(ctx: RunContext, val out: Stage) extends DrainStage
-  with PipeElem.Drain.Sub {
-
+@StageImplementation(fullInterceptions = true)
+private[core] final class SubDrainStage(ctx: RunContext, val out: StageImpl) extends DrainStage {
   import SubDrainStage._
 
-  def pipeElemType: String = "sub"
-  def pipeElemParams: List[Any] = out :: Nil
+  def kind = Stage.Kind.Drain.Sub(out)
 
   initialState(awaitingOnSubscribe(false, null))
 
@@ -35,7 +32,7 @@ private[core] final class SubDrainStage(ctx: RunContext, val out: Stage) extends
 
     onSubscribe = from ⇒ {
       if (timer ne null) timer.cancel()
-      _inputPipeElem = from.pipeElem
+      _inputStages = from.stage :: Nil
       xEvent(DoOnSubscribe) // schedule event for after the state transition
       ready(from, cancelled)
     },

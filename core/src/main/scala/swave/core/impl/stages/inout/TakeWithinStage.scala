@@ -7,18 +7,17 @@
 package swave.core.impl.stages.inout
 
 import scala.concurrent.duration._
-import swave.core.{Cancellable, PipeElem}
+import swave.core.{Cancellable, Stage}
 import swave.core.impl.{Inport, Outport, StreamRunner}
 import swave.core.macros._
 
 // format: OFF
-@StageImpl
-private[core] final class TakeWithinStage(duration: FiniteDuration) extends InOutStage with PipeElem.InOut.TakeWithin {
+@StageImplementation
+private[core] final class TakeWithinStage(duration: FiniteDuration) extends InOutStage {
 
   requireArg(duration >= Duration.Zero, "The `duration` must be non-negative")
 
-  def pipeElemType: String = "takeWithin"
-  def pipeElemParams: List[Any] = duration :: Nil
+  def kind = Stage.Kind.InOut.TakeWithin(duration)
 
   connectInOutAndSealWith { (ctx, in, out) ⇒
     ctx.registerForRunnerAssignment(this)

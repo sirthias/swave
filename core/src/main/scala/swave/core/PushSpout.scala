@@ -6,13 +6,10 @@
 
 package swave.core
 
-import org.jctools.queues.MpscChunkedArrayQueue
-
+import scala.annotation.tailrec
 import scala.collection.immutable
 import swave.core.impl.stages.spout.PushSpoutStage
 import swave.core.util._
-
-import scala.annotation.tailrec
 
 /**
   * A [[PushSpout]] provides a [[Spout]] that can be "manually" pushed into from the outside,
@@ -42,8 +39,12 @@ final class PushSpout[+A] private (val initialBufferSize: Int,
                                    notifyOnDequeued: (PushSpout[A], Int) ⇒ Unit,
                                    notifyOnCancel: PushSpout[A] ⇒ Unit) {
 
-  private[this] val queue = new MpscChunkedArrayQueue[AnyRef](initialBufferSize, maxBufferSize, growByInitialSize)
-  private[this] val stage = new PushSpoutStage(queue, notifyOnDequeued(this, _), () ⇒ notifyOnCancel(this))
+  private[this] val stage = new PushSpoutStage(
+    initialBufferSize,
+    maxBufferSize,
+    growByInitialSize,
+    notifyOnDequeued(this, _),
+    () ⇒ notifyOnCancel(this))
 
   /**
     * The actual spout instance.
@@ -59,7 +60,7 @@ final class PushSpout[+A] private (val initialBufferSize: Int,
     * NOTE: If more than one thread push elements in an unsynchronized fashion
     * the result of this method is essentially meaningless.
     */
-  def queueSize: Int = queue.size()
+  def queueSize: Int = stage.queue.size()
 
   /**
     * Returns true if the queue still has buffer space available.
@@ -76,7 +77,7 @@ final class PushSpout[+A] private (val initialBufferSize: Int,
     * @return true if the element was successfully scheduled, false if the buffer is full and further growth impossible
     */
   def offer[B >: A](element: B): Boolean = {
-    val wasAdded = queue.offer(element.asInstanceOf[AnyRef])
+    val wasAdded = stage.queue.offer(element.asInstanceOf[AnyRef])
     if (wasAdded) stage.enqueueXEvent(PushSpoutStage.Signal.NewAvailable)
     wasAdded
   }
@@ -90,7 +91,7 @@ final class PushSpout[+A] private (val initialBufferSize: Int,
   def offerMany[B >: A](elements: immutable.Iterable[B]): Int = {
     val iter = elements.iterator
     @tailrec def rec(count: Int): Int =
-      if (iter.hasNext && queue.offer(iter.next().asInstanceOf[AnyRef])) {
+      if (iter.hasNext && stage.queue.offer(iter.next().asInstanceOf[AnyRef])) {
         rec(count + 1)
       } else {
         if (count > 0) stage.enqueueXEvent(PushSpoutStage.Signal.NewAvailable)

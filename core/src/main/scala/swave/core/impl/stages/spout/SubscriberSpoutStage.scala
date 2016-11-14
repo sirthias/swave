@@ -9,18 +9,17 @@ package swave.core.impl.stages.spout
 import java.util.concurrent.atomic.AtomicReference
 import scala.annotation.tailrec
 import org.reactivestreams.{Subscriber, Subscription}
-import swave.core.PipeElem
+import swave.core.Stage
 import swave.core.impl.{Outport, StreamRunner}
 import swave.core.impl.rs.RSCompliance
-import swave.core.macros.StageImpl
+import swave.core.macros.StageImplementation
 import swave.core.util._
 
 // format: OFF
-@StageImpl
-private[core] final class SubscriberSpoutStage extends SpoutStage with PipeElem.Spout.Subscriber { stage =>
+@StageImplementation
+private[core] final class SubscriberSpoutStage extends SpoutStage { stage =>
 
-  def pipeElemType: String = "Spout.withSubscriber"
-  def pipeElemParams: List[Any] = Nil
+  def kind = Stage.Kind.Spout.WithSubscriber
 
   // holds exactly one of these values:
   // - `null`, when the stage is unstarted and no subscription has been received yet

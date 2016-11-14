@@ -9,20 +9,19 @@ package swave.core.impl.stages.drain
 import java.util.concurrent.atomic.AtomicReference
 import org.reactivestreams.{Publisher, Subscriber, Subscription}
 import scala.annotation.tailrec
-import swave.core.{PipeElem, UnsupportedSecondSubscriptionException}
+import swave.core.{Stage, UnsupportedSecondSubscriptionException}
 import swave.core.impl.{Inport, StreamRunner}
 import swave.core.impl.rs.{ForwardToRunnerSubscription, RSCompliance}
 import swave.core.impl.stages.StreamTermination
-import swave.core.macros.StageImpl
+import swave.core.macros.StageImplementation
 import swave.core.util._
 
 // format: OFF
-@StageImpl
-private[core] final class PublisherDrainStage extends DrainStage with PipeElem.Drain.Publisher {
+@StageImplementation
+private[core] final class PublisherDrainStage extends DrainStage {
   import PublisherDrainStage.SyncSubscription
 
-  def pipeElemType: String = "Drain.toPublisher"
-  def pipeElemParams: List[Any] = Nil
+  def kind = Stage.Kind.Drain.WithPublisher
 
   // holds exactly one of these values:
   // - `null`, when the stage is unstarted and no subscription requests has been received yet

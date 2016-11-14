@@ -184,16 +184,17 @@ object Module {
       }
   }
 
-  final case class Boundary(elem: PipeElem, isEntry: Boolean, isInner: Boolean) {
-    override def toString = {
-      val tpe = (isEntry, isInner) match {
-        case (false, false) ⇒ "OuterExit"
-        case (false, true)  ⇒ "InnerExit"
-        case (true, false)  ⇒ "OuterEntry"
-        case (true, true)   ⇒ "InnerEntry"
-      }
-      s"Boundary(${elem.pipeElemType}, type=$tpe)"
-    }
+  sealed abstract class Boundary(val isEntry: Boolean, val isInner: Boolean) {
+    def stage: Stage
+    final def isExit: Boolean = !isEntry
+    final def isOuter: Boolean = !isInner
+  }
+
+  object Boundary {
+    final case class InnerEntry(stage: Stage) extends Boundary(true, true)
+    final case class OuterEntry(stage: Stage) extends Boundary(true, false)
+    final case class InnerExit(stage: Stage) extends Boundary(false, true)
+    final case class OuterExit(stage: Stage) extends Boundary(false, false)
   }
 
   def ID(name: String = "") = new ID(name)
@@ -203,16 +204,9 @@ object Module {
     private[this] var _sealed = false
     def boundaries: List[Boundary] = _boundaries
 
-    private[swave] def markAsOuterEntry(inport: Inport): this.type = mark(inport, asEntry = true, asInner = false)
-    private[swave] def markAsInnerEntry(outport: Outport): this.type = mark(outport, asEntry = true, asInner = true)
-    private[swave] def markAsInnerExit(inport: Inport): this.type = mark(inport, asEntry = false, asInner = true)
-    private[swave] def markAsOuterExit(outport: Outport): this.type = mark(outport, asEntry = false, asInner = false)
-
-    private def mark(port: Port, asEntry: Boolean, asInner: Boolean): this.type = {
-      val elem = port.asInstanceOf[PipeElem with PipeElemImpl]
-      val boundary = Boundary(elem, asEntry, asInner)
+    private[swave] def addBoundary(boundary: Boundary): this.type = {
       _boundaries ::= boundary
-      elem.markAsBoundaryOf(this)
+      boundary.stage.asInstanceOf[PortImpl].markAsBoundaryOf(this)
       this
     }
 

@@ -23,7 +23,7 @@ private[macros] trait ConnectInAndSealWith { this: Util =>
         intercept = false,
 
         onSubscribe = from ⇒ {
-          _inputPipeElem = from.pipeElem
+          _inputStages = from.stage :: Nil
           ready(from)
         })
 

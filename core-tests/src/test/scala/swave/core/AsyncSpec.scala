@@ -97,7 +97,6 @@ class AsyncSpec extends SwaveSpec {
           .to(Drain.head.async("disp2"))
           .seal()
           .get
-      // println(PipeElem.render(piping.pipeElem, showDispatchers = true))
       val ((threadName0, threadName1), threadName2) = piping.run().await(20.millis)
 
       threadName0 shouldEqual "swave-disp0-1"

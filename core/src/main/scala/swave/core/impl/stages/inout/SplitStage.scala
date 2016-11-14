@@ -11,15 +11,14 @@ import swave.core.impl.stages.spout.SubSpoutStage
 import swave.core.impl.{Inport, Outport, RunContext}
 import swave.core.macros._
 import swave.core.util._
-import swave.core.{PipeElem, Split, Spout}
+import swave.core.{Split, Spout, Stage}
 
 // format: OFF
-@StageImpl(fullInterceptions = true)
-private[core] final class SplitStage(commandFor: AnyRef ⇒ Split.Command, eagerCancel: Boolean) extends InOutStage
-  with PipeElem.InOut.Split { stage =>
+@StageImplementation(fullInterceptions = true)
+private[core] final class SplitStage(commandFor: AnyRef ⇒ Split.Command, eagerCancel: Boolean)
+  extends InOutStage { stage =>
 
-  def pipeElemType: String = "split"
-  def pipeElemParams: List[Any] = eagerCancel :: commandFor :: Nil
+  def kind = Stage.Kind.InOut.Split(commandFor, eagerCancel)
 
   connectInOutAndSealWith { (ctx, in, out) ⇒
     ctx.registerForXStart(this)

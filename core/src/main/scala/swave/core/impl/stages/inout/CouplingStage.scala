@@ -6,16 +6,15 @@
 
 package swave.core.impl.stages.inout
 
-import swave.core.PipeElem
+import swave.core.Stage
 import swave.core.impl.{Inport, Outport}
-import swave.core.macros.StageImpl
+import swave.core.macros.StageImplementation
 
 // format: OFF
-@StageImpl
-private[core] final class CouplingStage extends InOutStage with PipeElem.InOut.Coupling {
+@StageImplementation
+private[core] final class CouplingStage extends InOutStage {
 
-  def pipeElemType: String = "Coupling"
-  def pipeElemParams: List[Any] = Nil
+  def kind = Stage.Kind.InOut.Coupling
 
   connectInOutAndSealWith { (ctx, in, out) ⇒ running(in, out) }
 

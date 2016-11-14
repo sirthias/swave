@@ -14,6 +14,8 @@ import org.reactivestreams.{Publisher, Subscriber}
 import swave.core.impl.TypeLogic.ToFuture
 import swave.core.impl.Outport
 import swave.core.impl.stages.drain._
+import swave.core.impl.stages.inout.AsyncBoundaryStage
+import swave.core.macros._
 
 /**
   * A `Drain` is a streaming component] with one input port and a no output port. As such it serves
@@ -25,9 +27,9 @@ import swave.core.impl.stages.drain._
 final class Drain[-T, +R] private[swave] (private[swave] val outport: Outport, val result: R) {
 
   /**
-    * The [[PipeElem]] representation of this [[Drain]].
+    * The [[Stage]] representation of this [[Drain]].
     */
-  def pipeElem: PipeElem = outport.pipeElem
+  def stage: Stage = outport.stage
 
   /**
     * Turns this [[Drain]] into one that produces no result.
@@ -62,7 +64,7 @@ final class Drain[-T, +R] private[swave] (private[swave] val outport: Outport, v
     * Explicitly attaches the given name to this [[Drain]].
     */
   def named(name: String): this.type = {
-    Module.ID(name).markAsInnerEntry(outport)
+    Module.ID(name).addBoundary(Module.Boundary.InnerEntry(outport.stage))
     this
   }
 
@@ -84,20 +86,25 @@ final class Drain[-T, +R] private[swave] (private[swave] val outport: Outport, v
         stage.assignDispatcherId(dispatcherId)
         this
 
-      case x: PipeElem ⇒
-        val assign = new (PipeElem ⇒ Unit) {
-          var visited                    = Set.empty[PipeElem]
-          def _apply(pe: PipeElem): Unit = apply(pe)
-          @tailrec def apply(pe: PipeElem): Unit =
-            if (!visited.contains(pe)) {
-              visited += pe
-              pe match {
-                case _: PipeElem.InOut.AsyncBoundary ⇒ fail()
-                case x: PipeElem.InOut               ⇒ { _apply(x.inputElem); apply(x.outputElem) }
-                case x: PipeElem.FanIn               ⇒ { x.inputElems.foreach(this); apply(x.outputElem) }
-                case x: PipeElem.FanOut              ⇒ { x.outputElems.foreach(this); apply(x.inputElem) }
-                case x: DrainStage                   ⇒ x.assignDispatcherId(dispatcherId)
-                case _                               ⇒ ()
+      case x: Stage ⇒
+        val assign = new (Stage ⇒ Unit) {
+          var visited                    = Set.empty[Stage]
+          def _apply(stage: Stage): Unit = apply(stage)
+          @tailrec def apply(stage: Stage): Unit =
+            if (!visited.contains(stage)) {
+              visited += stage
+              stage match {
+                case _: AsyncBoundaryStage ⇒ fail()
+                case x: DrainStage         ⇒ x.assignDispatcherId(dispatcherId)
+                case x ⇒
+                  if (x.inputStages.nonEmpty && x.inputStages.tail.isEmpty) {
+                    x.outputStages.foreach(this)
+                    apply(x.inputStages.head)
+                  } else {
+                    requireState(x.outputStages.nonEmpty && x.outputStages.tail.isEmpty, "Unexpected stage shape")
+                    x.inputStages.foreach(this)
+                    apply(x.outputStages.head)
+                  }
               }
             }
           def fail() =

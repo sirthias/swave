@@ -9,7 +9,7 @@ package swave.core.impl.stages
 import scala.annotation.{compileTimeOnly, tailrec}
 import scala.concurrent.Promise
 import swave.core.impl.util.{AbstractInportList, ResizableRingBuffer}
-import swave.core.{IllegalReuseException, Module, PipeElem, UnclosedStreamGraphException}
+import swave.core.{IllegalReuseException, Module, UnclosedStreamGraphException}
 import swave.core.util._
 import swave.core.impl._
 
@@ -67,8 +67,8 @@ import swave.core.impl._
   * STOPPED (single state)
   * - ignore all signals
   */
-private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
-  import Stage.InportContext
+private[swave] abstract class StageImpl extends PortImpl {
+  import StageImpl.InportContext
 
   type State = Int // semantic alias
 
@@ -104,6 +104,9 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
   override def toString = s"${getClass.getSimpleName}@${identityHash(this)}/$stateName"
 
   def stateName: String = s"<unknown id ${_state}>"
+
+  final def stage: StageImpl     = this
+  final def stageImpl: StageImpl = this
 
   final def isSealed: Boolean  = _sealed
   final def isStopped: Boolean = _state == 0
@@ -142,7 +145,7 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
     val count =
       if (n > _mbs) {
         val effectiveFrom = if (from ne null) from else _lastSubscribed
-        effectiveFrom.asInstanceOf[Stage].updateInportState(this, n)
+        effectiveFrom.stageImpl.updateInportState(this, n)
         _mbs
       } else n.toInt
     _state = _request0(count, from)
@@ -164,11 +167,11 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
   final def cancel()(implicit from: Outport): Unit =
     if (!_intercepting) {
       _intercepting = interceptionNeeded
-      from.asInstanceOf[Stage].clearInportState(this)
+      from.stageImpl.clearInportState(this)
       _cancel(from)
       handleInterceptions()
     } else {
-      from.asInstanceOf[Stage].clearInportState(this)
+      from.stageImpl.clearInportState(this)
       storeInterception(Statics._2L, from)
     }
 
@@ -293,7 +296,7 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
       _sealed = true
       @tailrec def sealBoundaries(remaining: List[Module.Boundary]): Unit =
         if (remaining.nonEmpty) {
-          remaining.head.elem.asInstanceOf[Stage].xSeal(ctx)
+          remaining.head.stage.stageImpl.xSeal(ctx)
           sealBoundaries(remaining.tail)
         }
       @tailrec def sealModules(remaining: List[Module.ID]): Unit =
@@ -338,7 +341,7 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
 
   protected def _xEvent0(ev: AnyRef): State =
     ev match {
-      case Stage.RegisterStopPromise(p) ⇒
+      case StageImpl.RegisterStopPromise(p) ⇒
         if (_stopPromise eq null) {
           if (isStopped) p.success(())
           else _stopPromise = p
@@ -476,7 +479,7 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
     if ((_buffer ne null) && _buffer.nonEmpty) {
       def read() = _buffer.unsafeRead()
       val signal = read().asInstanceOf[java.lang.Long].intValue()
-      def from() = if (fullInterceptions) read().asInstanceOf[Stage] else null
+      def from() = if (fullInterceptions) read().asInstanceOf[StageImpl] else null
       signal match {
         case 0 ⇒ _subscribe(from())
         case 1 ⇒ _request(read().asInstanceOf[java.lang.Long].longValue(), from())
@@ -503,7 +506,7 @@ private[swave] abstract class Stage extends PipeElemImpl { this: PipeElem ⇒
     _inportState = _inportState.remove(in)
 }
 
-private[swave] object Stage {
+private[swave] object StageImpl {
 
   /**
     * Can be sent as an `xEvent` to register the given promise for completion when the stage is stopped.

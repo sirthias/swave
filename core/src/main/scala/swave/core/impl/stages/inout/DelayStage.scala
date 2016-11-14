@@ -9,16 +9,15 @@ package swave.core.impl.stages.inout
 import scala.concurrent.duration._
 import scala.util.control.NonFatal
 import swave.core.impl.{Inport, Outport, StreamRunner}
-import swave.core.{Cancellable, PipeElem}
+import swave.core.{Cancellable, Stage}
 import swave.core.macros._
 import swave.core.util._
 
 // format: OFF
-@StageImpl
-private[core] final class DelayStage(delayFor: AnyRef => FiniteDuration) extends InOutStage with PipeElem.InOut.Delay {
+@StageImplementation
+private[core] final class DelayStage(delayFor: AnyRef => FiniteDuration) extends InOutStage {
 
-  def pipeElemType: String = "delay"
-  def pipeElemParams: List[Any] = delayFor :: Nil
+  def kind = Stage.Kind.InOut.Delay(delayFor)
 
   connectInOutAndSealWith { (ctx, in, out) ⇒
     ctx.registerForRunnerAssignment(this)

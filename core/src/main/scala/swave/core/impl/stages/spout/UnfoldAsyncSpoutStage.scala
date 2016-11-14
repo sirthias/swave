@@ -9,19 +9,18 @@ package swave.core.impl.stages.spout
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 import scala.util.control.NonFatal
-import swave.core.PipeElem
+import swave.core.Stage
 import swave.core.Spout.Unfolding
 import swave.core.impl.{CallingThreadExecutionContext, Outport}
 import swave.core.macros._
 import swave.core.util._
 
 // format: OFF
-@StageImpl
+@StageImplementation
 private[core] final class UnfoldAsyncSpoutStage(zero: AnyRef, f: AnyRef => Future[Unfolding[AnyRef, AnyRef]])
-  extends SpoutStage with PipeElem.Spout.UnfoldAsync {
+  extends SpoutStage {
 
-  def pipeElemType: String = "Spout.unfoldAsync"
-  def pipeElemParams: List[Any] = zero :: f :: Nil
+  def kind = Stage.Kind.Spout.UnfoldAsync(zero, f)
 
   connectOutAndSealWith { (ctx, out) ⇒
     ctx.registerForRunnerAssignment(this)

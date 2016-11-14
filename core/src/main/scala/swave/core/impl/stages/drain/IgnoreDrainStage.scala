@@ -7,17 +7,16 @@
 package swave.core.impl.stages.drain
 
 import scala.concurrent.Promise
-import swave.core.PipeElem
+import swave.core.Stage
 import swave.core.impl.Inport
-import swave.core.macros.StageImpl
+import swave.core.macros.StageImplementation
 
 // format: OFF
-@StageImpl
+@StageImplementation
 private[core] final class IgnoreDrainStage(terminationPromise: Promise[Unit])
-  extends DrainStage with PipeElem.Drain.Ignore {
+  extends DrainStage {
 
-  def pipeElemType: String = "Drain.ignore"
-  def pipeElemParams: List[Any] = terminationPromise :: Nil
+  def kind = Stage.Kind.Drain.Ignore(terminationPromise)
 
   connectInAndSealWith { (ctx, in) ⇒
     registerForRunnerAssignmentIfRequired(ctx)

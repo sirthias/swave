@@ -7,17 +7,15 @@
 package swave.core.impl.stages.inout
 
 import scala.util.control.NonFatal
-import swave.core.PipeElem
+import swave.core.Stage
 import swave.core.impl.{Inport, Outport}
-import swave.core.macros.StageImpl
+import swave.core.macros.StageImplementation
 
 // format: OFF
-@StageImpl
-private[core] final class FoldStage(zero: AnyRef, f: (AnyRef, AnyRef) ⇒ AnyRef) extends InOutStage
-  with PipeElem.InOut.Fold {
+@StageImplementation
+private[core] final class FoldStage(zero: AnyRef, f: (AnyRef, AnyRef) ⇒ AnyRef) extends InOutStage {
 
-  def pipeElemType: String = "fold"
-  def pipeElemParams: List[Any] = zero :: f :: Nil
+  def kind = Stage.Kind.InOut.Fold(zero, f)
 
   connectInOutAndSealWith { (ctx, in, out) ⇒ running(in, out) }
 

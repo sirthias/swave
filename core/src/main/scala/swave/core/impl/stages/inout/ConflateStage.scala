@@ -7,18 +7,17 @@
 package swave.core.impl.stages.inout
 
 import scala.util.control.NonFatal
-import swave.core.PipeElem
+import swave.core.Stage
 import swave.core.impl.{Inport, Outport}
-import swave.core.macros.StageImpl
+import swave.core.macros.StageImplementation
 import swave.core.util._
 
 // format: OFF
-@StageImpl
+@StageImplementation
 private[core] final class ConflateStage(lift: AnyRef => AnyRef, aggregate: (AnyRef, AnyRef) => AnyRef)
-  extends InOutStage with PipeElem.InOut.Conflate {
+  extends InOutStage {
 
-  def pipeElemType: String = "conflate"
-  def pipeElemParams: List[Any] = lift :: aggregate :: Nil
+  def kind = Stage.Kind.InOut.Conflate(lift, aggregate)
 
   connectInOutAndSealWith { (ctx, in, out) ⇒
     ctx.registerForXStart(this)

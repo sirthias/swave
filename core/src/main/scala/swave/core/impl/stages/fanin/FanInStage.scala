@@ -7,28 +7,21 @@
 package swave.core.impl.stages.fanin
 
 import scala.annotation.compileTimeOnly
-import scala.collection.mutable.ListBuffer
-import swave.core.PipeElem
+import swave.core.Stage
 import swave.core.impl.util.InportList
-import swave.core.impl.stages.Stage
+import swave.core.impl.stages.StageImpl
 import swave.core.impl.{Outport, RunContext}
 
 // format: OFF
-private[core] abstract class FanInStage extends Stage { this: PipeElem.FanIn =>
+private[core] abstract class FanInStage(subs: InportList) extends StageImpl {
 
-  protected final var _outputPipeElem: PipeElem = PipeElem.Unconnected
-  protected final var _inputElems = InportList.empty
+  override def kind: Stage.Kind.FanIn
 
-  final def outputElem = _outputPipeElem
-  final def inputElems = {
-    val buf = new ListBuffer[PipeElem]
-    for (i <- _inputElems) {
-      buf += i.in.asInstanceOf[PipeElem]
-      ()
-    }
-    buf.result()
-  }
+  protected final var _outputStages: List[Stage] = Nil
+
+  final val inputStages: List[Stage] = subs.toStageList
+  final def outputStages: List[Stage] = _outputStages
 
   @compileTimeOnly("Unresolved `connectFanInAndSealWith` call")
-  protected final def connectFanInAndSealWith(subs: InportList)(f: (RunContext, Outport) ⇒ State): Unit = ()
+  protected final def connectFanInAndSealWith(f: (RunContext, Outport) ⇒ State): Unit = ()
 }

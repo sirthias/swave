@@ -28,7 +28,8 @@ private[core] final class ModuleImpl[I <: Module.Input, O <: Module.Output] priv
   def apply(inports: InportList): Any = {
     requireState(id.boundaries.isEmpty, "Illegal module reuse")
     inports.foreach { ins ⇒
-      id.markAsOuterEntry(ins.in); ()
+      id.addBoundary(Boundary.OuterEntry(ins.in.stage))
+      ()
     }
     val outs = construct(inports)
     outs match {
@@ -41,7 +42,7 @@ private[core] final class ModuleImpl[I <: Module.Input, O <: Module.Output] priv
               ins.in.subscribe()(nop)
               nop
             } else ins.in
-          id.markAsInnerExit(exit)
+          id.addBoundary(Boundary.InnerExit(exit.stage))
           InportList(exit)
         }
       case result ⇒ result // output is `Module.Output.None` or `Module.Output.Result[_]`, i.e. nothing to do here

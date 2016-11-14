@@ -8,17 +8,19 @@ package swave.core.impl.stages.inout
 
 import scala.annotation.compileTimeOnly
 import swave.core.impl.{Inport, Outport, RunContext}
-import swave.core.PipeElem
-import swave.core.impl.stages.Stage
+import swave.core.Stage
+import swave.core.impl.stages.StageImpl
 
 // format: OFF
-private[core] abstract class InOutStage extends Stage { this: PipeElem.InOut =>
+private[core] abstract class InOutStage extends StageImpl {
 
-  protected final var _inputPipeElem: PipeElem = PipeElem.Unconnected
-  protected final var _outputPipeElem: PipeElem = PipeElem.Unconnected
+  override def kind: Stage.Kind.InOut
 
-  final def inputElem = _inputPipeElem
-  final def outputElem =  _outputPipeElem
+  protected final var _inputStages: List[Stage] = Nil
+  protected final var _outputStages: List[Stage] = Nil
+
+  final def inputStages: List[Stage] = _inputStages
+  final def outputStages: List[Stage] = _outputStages
 
   @compileTimeOnly("Unresolved `connectInOutAndSealWith` call")
   protected final def connectInOutAndSealWith(f: (RunContext, Inport, Outport) ⇒ State): Unit = ()

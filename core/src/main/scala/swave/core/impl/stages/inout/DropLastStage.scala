@@ -6,18 +6,17 @@
 
 package swave.core.impl.stages.inout
 
-import swave.core.PipeElem
+import swave.core.Stage
 import swave.core.impl.util.RingBuffer
 import swave.core.impl.{Inport, Outport}
-import swave.core.macros.StageImpl
+import swave.core.macros.StageImplementation
 import swave.core.util._
 
 // format: OFF
-@StageImpl
-private[core] final class DropLastStage(count: Int) extends InOutStage with PipeElem.InOut.DropLast {
+@StageImplementation
+private[core] final class DropLastStage(count: Int) extends InOutStage {
 
-  def pipeElemType: String = "dropLast"
-  def pipeElemParams: List[Any] = count :: Nil
+  def kind = Stage.Kind.InOut.DropLast(count)
 
   private[this] val buffer = new RingBuffer[AnyRef](roundUpToPowerOf2(count))
 

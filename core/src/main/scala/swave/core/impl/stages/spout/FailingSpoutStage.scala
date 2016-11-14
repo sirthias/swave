@@ -6,17 +6,15 @@
 
 package swave.core.impl.stages.spout
 
-import swave.core.PipeElem
+import swave.core.Stage
 import swave.core.impl.Outport
-import swave.core.macros.StageImpl
+import swave.core.macros.StageImplementation
 
 // format: OFF
-@StageImpl
-private[core] final class FailingSpoutStage(error: Throwable, eager: Boolean)
-  extends SpoutStage with PipeElem.Spout.Failing {
+@StageImplementation
+private[core] final class FailingSpoutStage(error: Throwable, eager: Boolean) extends SpoutStage {
 
-  def pipeElemType: String = "Spout.failing"
-  def pipeElemParams: List[Any] = error :: Nil
+  def kind = Stage.Kind.Spout.Failing(error, eager)
 
   connectOutAndSealWith { (ctx, out) ⇒
     if (eager) {

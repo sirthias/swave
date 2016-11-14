@@ -9,21 +9,20 @@ package swave.core.impl.stages.inout
 import scala.util.control.NonFatal
 import swave.core.impl.stages.drain.SubDrainStage
 import swave.core.impl.{ Inport, Outport, RunContext }
-import swave.core.{ PipeElem, Spout }
+import swave.core.{ Stage, Spout }
 import swave.core.macros._
 import swave.core.util._
 
 // format: OFF
-@StageImpl(fullInterceptions = true)
+@StageImplementation(fullInterceptions = true)
 private[core] final class RecoverWithStage(maxRecoveries: Long, pf: PartialFunction[Throwable, Spout[AnyRef]])
-  extends InOutStage with PipeElem.InOut.RecoverWith {
+  extends InOutStage {
 
   import RecoverWithStage._
 
   requireArg(maxRecoveries >= 0, "`maxRecoveries` must be >= 0")
 
-  def pipeElemType: String = "recoverWith"
-  def pipeElemParams: List[Any] = maxRecoveries :: pf :: Nil
+  def kind = Stage.Kind.InOut.RecoverWith(maxRecoveries, pf)
 
   connectInOutAndSealWith { (ctx, in, out) ⇒
     active(ctx, in, out, 0L, maxRecoveries)

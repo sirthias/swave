@@ -8,24 +8,22 @@ package swave.core.impl.stages.inout
 
 import java.util.function.BiConsumer
 import scala.util.control.NonFatal
-import swave.core.impl.stages.Stage
+import swave.core.impl.stages.StageImpl
 import swave.core.impl.stages.spout.SubSpoutStage
 import swave.core.impl.{Inport, Outport, RunContext}
-import swave.core.{PipeElem, Spout}
+import swave.core.{Spout, Stage}
 import swave.core.macros._
 import swave.core.util._
 import GroupByStage.Sub
 
 // format: OFF
-@StageImpl(fullInterceptions = true)
+@StageImplementation(fullInterceptions = true)
 private[core] final class GroupByStage(maxSubstreams: Int, reopenCancelledSubs: Boolean, eagerComplete: Boolean,
-                                       keyFun: AnyRef ⇒ AnyRef)
-  extends InOutStage with PipeElem.InOut.GroupBy { stage =>
+                                       keyFun: AnyRef ⇒ AnyRef) extends InOutStage { stage =>
 
   require(maxSubstreams > 0, "`maxSubStreams` must be > 0")
 
-  def pipeElemType: String = "groupBy"
-  def pipeElemParams: List[Any] = maxSubstreams :: reopenCancelledSubs :: eagerComplete :: keyFun :: Nil
+  def kind = Stage.Kind.InOut.GroupBy(maxSubstreams, reopenCancelledSubs, eagerComplete, keyFun)
 
   private[this] val subMap = new java.util.HashMap[Any, Sub]()
 
@@ -468,7 +466,7 @@ private[core] final class GroupByStage(maxSubstreams: Int, reopenCancelledSubs: 
 
 private object GroupByStage {
 
-  private final class Sub(var key: AnyRef, _ctx: RunContext, _in: Stage) extends SubSpoutStage(_ctx, _in) {
+  private final class Sub(var key: AnyRef, _ctx: RunContext, _in: StageImpl) extends SubSpoutStage(_ctx, _in) {
 
     var remaining = 0L // the number of elements already requested by this sub but not yet delivered to it
 

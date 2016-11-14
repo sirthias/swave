@@ -7,7 +7,7 @@
 package swave.core.impl
 
 import scala.concurrent.duration.{Duration, FiniteDuration}
-import swave.core.impl.stages.Stage
+import swave.core.impl.stages.StageImpl
 import swave.core.impl.StreamRunner._
 import swave.core.macros._
 import swave.core.util._
@@ -48,13 +48,13 @@ private[swave] final class RunContext(val port: Port)(implicit val env: StreamEn
     * If the `dispatcherId` is empty the default dispatcher will be assigned
     * if no other non-default assignment has previously been made.
     */
-  def registerForRunnerAssignment(stage: Stage, dispatcherId: String = ""): Unit =
+  def registerForRunnerAssignment(stage: StageImpl, dispatcherId: String = ""): Unit =
     data.needRunner = StageDispatcherIdListMap(stage, dispatcherId, data.needRunner)
 
   /**
     * Registers the stage for receiving `xStart` signals.
     */
-  def registerForXStart(stage: Stage): Unit = data.needXStart ::= stage
+  def registerForXStart(stage: StageImpl): Unit = data.needXStart ::= stage
 
   /**
     * Registers the stage for receiving `xEvent(RunContext.PostRun)` signals.
@@ -63,9 +63,9 @@ private[swave] final class RunContext(val port: Port)(implicit val env: StreamEn
     *
     * Note: This event is only available for synchronous runs!
     */
-  def registerForPostRunEvent(stage: Stage): Unit = data.syncNeedPostRun ::= stage
+  def registerForPostRunEvent(stage: StageImpl): Unit = data.syncNeedPostRun ::= stage
 
-  def scheduleSubscriptionTimeout(stage: Stage, delay: Duration): Cancellable =
+  def scheduleSubscriptionTimeout(stage: StageImpl, delay: Duration): Cancellable =
     delay match {
       case d: FiniteDuration ⇒
         if (isAsyncRun) {
@@ -133,15 +133,15 @@ private[swave] object RunContext {
   case object PostRun
   case object SubscriptionTimeout
 
-  private val dispatchAsyncXStart: Stage ⇒ Unit    = stage ⇒ stage.runner.enqueueXStart(stage)
-  private val dispatchSyncXStart: Stage ⇒ Unit     = _.xStart()
-  private val dispatchSyncPostRun: Stage ⇒ Unit    = _.xEvent(PostRun)
-  private val dispatchSyncCleanup: Runnable ⇒ Unit = _.run()
+  private val dispatchAsyncXStart: StageImpl ⇒ Unit = stage ⇒ stage.runner.enqueueXStart(stage)
+  private val dispatchSyncXStart: StageImpl ⇒ Unit  = _.xStart()
+  private val dispatchSyncPostRun: StageImpl ⇒ Unit = _.xEvent(PostRun)
+  private val dispatchSyncCleanup: Runnable ⇒ Unit  = _.run()
 
   private class Data {
     var needRunner         = StageDispatcherIdListMap.empty
-    var needXStart         = List.empty[Stage]
-    var syncNeedPostRun    = List.empty[Stage]
+    var needXStart         = List.empty[StageImpl]
+    var syncNeedPostRun    = List.empty[StageImpl]
     var syncCleanup        = List.empty[Runnable]
     var allowSyncUnstopped = false
   }

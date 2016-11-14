@@ -6,15 +6,15 @@
 
 package swave.core.impl.stages.fanout
 
-import swave.core.PipeElem
+import swave.core.Stage
 import swave.core.impl.Outport
 
-private[core] final class RoundRobinStage(eagerCancel: Boolean) extends FanOutStage with PipeElem.FanOut.RoundRobin {
+private[core] final class RoundRobinStage(eagerCancel: Boolean) extends FanOutStage {
 
-  def pipeElemType: String      = "fanOutRoundRobin"
-  def pipeElemParams: List[Any] = eagerCancel :: Nil
+  def kind = Stage.Kind.FanOut.RoundRobin(eagerCancel)
 
   type OutportCtx = FanOutStage.SimpleOutportContext
+
   protected def createOutportCtx(out: Outport, tail: OutportCtx): OutportCtx =
     new FanOutStage.SimpleOutportContext(out, tail)
 }

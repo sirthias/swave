@@ -8,19 +8,20 @@ package swave.testkit.impl
 
 import scala.util.control.NonFatal
 import swave.testkit.gen.TestFixture
-import swave.core.PipeElem
+import swave.core.Stage
 import swave.core.impl.stages.drain.DrainStage
 import swave.core.impl.{Inport, RunContext}
 import swave.core.macros._
 
-@StageImpl(fullInterceptions = true)
+@StageImplementation(fullInterceptions = true)
 private[testkit] final class TestDrainStage(val id: Int,
                                             val requestsIterable: Iterable[Long],
                                             val cancelAfterOpt: Option[Int],
                                             testCtx: TestContext)
     extends DrainStage
-    with TestStage
-    with PipeElem.Drain.Test {
+    with TestStage {
+
+  def kind = Stage.Kind.Drain.Test(id)
 
   private[this] val requests: Iterator[Long] = requestsIterable.iterator
 
@@ -45,7 +46,7 @@ private[testkit] final class TestDrainStage(val id: Int,
   def awaitingOnSubscribe() = state(
     onSubscribe = from ⇒ {
       testCtx.trace(s"Received ONSUBSCRIBE from $from in 'initialState'")
-      _inputPipeElem = from.pipeElem
+      _inputStages = from.stage :: Nil
       ready(from)
     })
 

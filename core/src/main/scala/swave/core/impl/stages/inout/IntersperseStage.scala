@@ -6,18 +6,16 @@
 
 package swave.core.impl.stages.inout
 
-import swave.core.PipeElem
+import swave.core.Stage
 import swave.core.impl.{Inport, Outport}
 import swave.core.macros._
 import swave.core.util._
 
 // format: OFF
-@StageImpl
-private[core] final class IntersperseStage(start: AnyRef, inject: AnyRef, end: AnyRef)
-  extends InOutStage with PipeElem.InOut.Intersperse {
+@StageImplementation
+private[core] final class IntersperseStage(start: AnyRef, inject: AnyRef, end: AnyRef) extends InOutStage  {
 
-  def pipeElemType: String = "intersperse"
-  def pipeElemParams: List[Any] = start :: inject :: end :: Nil
+  def kind = Stage.Kind.InOut.Intersperse(start, inject, end)
 
   connectInOutAndSealWith { (ctx, in, out) ⇒ running(in, out) }
 

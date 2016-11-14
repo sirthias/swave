@@ -6,13 +6,12 @@
 
 package swave.testkit.impl
 
-import swave.testkit.gen.TestFixture
-
 import scala.collection.immutable.VectorBuilder
 import scala.concurrent.{Future, Promise}
-import swave.core.impl.stages.Stage
+import swave.core.impl.stages.StageImpl
+import swave.testkit.gen.TestFixture
 
-private[testkit] trait TestStage { this: Stage ⇒
+private[testkit] trait TestStage extends StageImpl {
 
   private[this] val resultBuilder = new VectorBuilder[AnyRef]
   private[this] var _resultSize   = 0

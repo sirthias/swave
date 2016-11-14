@@ -1,38 +1,38 @@
 Example 1:
- o Spout.repeat(42)
+ o Spout.Repeat(42)
  |
  |
- o Drain.head()
+ o Drain.Head()
 
 Example 2:
  o {Spout.apply}
  |
  |
- o map(<function1>)
+ o Map(<function1>)
  |
  |
- o Drain.foreach(<function1>, List())
+ o Drain.Foreach(<function1>, List())
 
 Example 3:
  o {Spout.apply}
  |
  |
- o-----+ fanInConcat()
- |     |
- |     ^
- o--+  ^ fanOutBroadcast(false)
- |  |  ^
- |  |  ^
- o  |  ^ Drain.head()
-    |  ^
-    |  ^
- o--+  ^ {first}
- |     ^
- |     ^
- o  >>>^ buffer(1)
+ o--+ FanIn.Concat()
+ |  |
+ |  ^
+ o--^--+ FanOut.Broadcast(false)
+ |  ^  |
+ |  ^  |
+ |  ^  o Drain.Head()
  |  ^
  |  ^
- o  ^ map(<function1>)
+ o  ^ {first}
+ |  ^
+ |  ^
+ o  ^ BufferWithBackpressure(1, 0)
+ |  ^
+ |  ^
+ o  ^ Map(<function1>)
  |  ^
  |  |
  o--+ Coupling()
@@ -50,10 +50,10 @@ Example 4:
  o--+--+ {foo}
  |  |  |
  |  |  |
- o--+--+ fanInConcat()
+ o--+--+ FanIn.Concat()
  |
  |
- o map(<function1>)
+ o Map(<function1>)
  |
  |
  o {Drain.first}
@@ -62,19 +62,19 @@ Example 5:
  o {Spout.apply}
  |
  |
- o--+ fanOutBroadcast(false)
+ o--+ FanOut.Broadcast(false)
  |  |
  |  |
- o--+ fanInConcat()
+ o--+ FanIn.Concat()
  |
  |
- o Drain.head()
+ o Drain.Head()
 
 Example 6:
  o {Spout.from}
  |
  |
- o deduplicate()
+ o Deduplicate()
  |
  |
  |  o {Spout.apply}
@@ -83,7 +83,7 @@ Example 6:
  o--+ {zip}
  |
  |
- o Drain.head()
+ o Drain.Head()
 
 Example 7:
  o {Spout.apply}
@@ -92,24 +92,24 @@ Example 7:
  o--+ {tee}
  |  |
  |  |
- o  | Drain.head()
-    |
-    |
-    o Drain.ignore(List())
+ |  o Drain.Head()
+ |
+ |
+ o Drain.Ignore(List())
 
 Example 8:
  o {Spout.from}
  |
  |
- o map(<function1>)
+ o Map(<function1>)
  |
  |
  o {Pipe.fromDrainAndSpout}
  |
  |
- o filter(<function1>)
+ o Filter(<function1>, true)
  |
  |
- o Drain.head()
+ o Drain.Head()
 
 -- last line -- do not remove --

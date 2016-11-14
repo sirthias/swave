@@ -6,22 +6,21 @@
 
 package swave.core.impl.stages.fanin
 
-import swave.core.PipeElem
+import swave.core.Stage
 import swave.core.impl.util.InportList
 import swave.core.impl.{Inport, Outport}
 import swave.core.macros._
 import swave.core.util._
 
 // format: OFF
-@StageImpl(fullInterceptions = true)
-private[core] final class FirstNonEmptyStage(subs: InportList) extends FanInStage with PipeElem.FanIn.FirstNonEmpty {
+@StageImplementation(fullInterceptions = true)
+private[core] final class FirstNonEmptyStage(subs: InportList) extends FanInStage(subs) {
 
   requireArg(subs.nonEmpty, "Cannot fan-in with `firstNonEmpty` when the set of sub-streams is empty")
 
-  def pipeElemType: String = "fanInFirstNonEmpty"
-  def pipeElemParams: List[Any] = Nil
+  def kind = Stage.Kind.FanIn.FirstNonEmpty
 
-  connectFanInAndSealWith(subs) { (ctx, out) ⇒ awaitingFirstElement(subs, out, 0) }
+  connectFanInAndSealWith { (ctx, out) ⇒ awaitingFirstElement(subs, out, 0) }
 
   /**
     * Waiting for the first element to arrive from the ins head.
