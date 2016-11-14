@@ -1,4 +1,4 @@
-flatmap
+flatMap
 =======
 
 ... TODO ...

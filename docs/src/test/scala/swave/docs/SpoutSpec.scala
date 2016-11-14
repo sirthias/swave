@@ -21,7 +21,7 @@ class SpoutSpec extends FreeSpec with Matchers {
 
       def evenIntsViaFlatmap =
         Spout.from(0)
-          .flatmap(i => if (i % 2 == 0) Some(i) else None)
+          .flatMap(i => if (i % 2 == 0) Some(i) else None)
 
       def evenIntsViaFilter =
         Spout.from(0)

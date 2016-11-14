@@ -33,7 +33,7 @@ This is the alphabetical list of all predefined transformation currently offered
 * [-](filter.md)
 * [-](filterNot.md)
 * [-](first.md)
-* [-](flatmap.md)
+* [-](flatMap.md)
 * [-](flattenConcat.md)
 * [-](flattenMerge.md)
 * [-](fold.md)

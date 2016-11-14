@@ -160,7 +160,7 @@ trait StreamOps[A] extends Any { self ⇒
   final def first: Repr[A] =
     via(Pipe[A] take 1 named "first")
 
-  final def flatmap[B, C](f: A ⇒ B, parallelism: Int = 1)(implicit ev: Streamable.Aux[B, C]): Repr[C] =
+  final def flatMap[B, C](f: A ⇒ B, parallelism: Int = 1)(implicit ev: Streamable.Aux[B, C]): Repr[C] =
     via(Pipe[A] map f flattenConcat parallelism named "flatmap")
 
   final def flattenConcat[B](parallelism: Int = 1)(implicit ev: Streamable.Aux[A, B]): Repr[B] =
@@ -268,7 +268,7 @@ trait StreamOps[A] extends Any { self ⇒
     map(Left[A, B]).attach(other.map(Right[A, B])).fanInToSum[Either[A, B]]()
 
   final def multiply(factor: Int): Repr[A] =
-    via(Pipe[A].flatmap(x ⇒ Iterator.fill(factor)(x)) named "multiply")
+    via(Pipe[A].flatMap(x ⇒ Iterator.fill(factor)(x)) named "multiply")
 
   final def nonEmptyOr[B >: A](other: Spout[B]): Repr[B] =
     attach(other).fanInFirstNonEmpty
@@ -341,7 +341,7 @@ trait StreamOps[A] extends Any { self ⇒
                                                ev: M[A] <:< immutable.Seq[A]): Repr[M[A]] = {
     requireArg(windowSize > 0, "windowSize must be > 0")
     val builder = cbf.apply()
-    prefixAndTailTo[M](windowSize) flatmap {
+    prefixAndTailTo[M](windowSize) flatMap {
       case (prefix, tail) =>
         val p = ev(prefix)
         p.size match {
