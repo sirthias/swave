@@ -8,8 +8,8 @@ package swave.core.impl.stages
 
 import org.scalacheck.Gen
 import swave.core._
+import swave.core.internal.testkit.TestError
 import swave.testkit.Probes._
-import swave.testkit.TestError
 
 /**
   * Almost directly transcribed from akka-stream's FlowRecoverWithSpec which carries this copyright:

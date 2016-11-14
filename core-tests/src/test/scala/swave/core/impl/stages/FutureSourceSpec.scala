@@ -7,9 +7,9 @@
 package swave.core.impl.stages
 
 import scala.concurrent.{Future, Promise}
-import swave.testkit.TestError
 import swave.testkit.Probes._
 import swave.core._
+import swave.core.internal.testkit.TestError
 
 class FutureSourceSpec extends SwaveSpec {
 

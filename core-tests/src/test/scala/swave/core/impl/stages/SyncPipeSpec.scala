@@ -8,6 +8,6 @@ package swave.core.impl.stages
 
 import org.scalatest.prop.Checkers
 import swave.core.SwaveSpec
-import swave.testkit.TestGeneration
+import swave.core.internal.testkit.TestGeneration
 
 abstract class SyncPipeSpec extends SwaveSpec with Checkers with TestGeneration

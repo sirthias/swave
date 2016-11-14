@@ -4,12 +4,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package swave.testkit.impl
+package swave.core.internal.testkit
 
 import scala.collection.immutable.VectorBuilder
 import scala.concurrent.{Future, Promise}
 import swave.core.impl.stages.StageImpl
-import swave.testkit.gen.TestFixture
 
 private[testkit] trait TestStage extends StageImpl {
 

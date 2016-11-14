@@ -4,9 +4,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package swave.testkit.impl
-
-import swave.testkit.gen.TestFixture
+package swave.core.internal.testkit
 
 import scala.annotation.tailrec
 import swave.core.macros.StageImplementation
@@ -18,9 +16,7 @@ import swave.core.impl.stages.spout.SpoutStage
 private[testkit] final class TestSpoutStage(val id: Int,
                                             val elemsIterable: Iterable[AnyRef],
                                             val termination: Option[Throwable],
-                                            ctx: TestContext)
-    extends SpoutStage
-    with TestStage {
+                                            ctx: TestContext) extends SpoutStage with TestStage {
 
   private[this] val elems: Iterator[AnyRef] = elemsIterable.iterator
 

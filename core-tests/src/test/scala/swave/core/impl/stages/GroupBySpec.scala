@@ -11,8 +11,7 @@ import scala.util.Failure
 import org.scalacheck.Gen
 import org.scalatest.Inspectors
 import swave.core._
-import swave.testkit.TestError
-import swave.testkit.gen.{TestFixture, TestOutput, TestSetup}
+import swave.core.internal.testkit._
 
 final class GroupBySpec extends SyncPipeSpec with Inspectors {
 
@@ -24,8 +23,8 @@ final class GroupBySpec extends SyncPipeSpec with Inspectors {
   "GroupBy" in check {
     testSetup
       .input[Int]
-      .fixture(_.output[Spout[Int]](TestSetup.Default.nonDroppingOutputScripts))
-      .fixture(fd ⇒ Gen.listOfN(16, fd.output[Int](TestSetup.Default.nonDroppingOutputScripts)))
+      .fixture(_.output[Spout[Int]](TestGeneration.Default.nonDroppingOutputScripts))
+      .fixture(fd ⇒ Gen.listOfN(16, fd.output[Int](TestGeneration.Default.nonDroppingOutputScripts)))
       .param(Gen.oneOf(false, true))
       .param(Gen.oneOf(false, true))
       .prop.from { (in, out, allSubOuts, reopenCancelledSubs, eagerCancel) ⇒

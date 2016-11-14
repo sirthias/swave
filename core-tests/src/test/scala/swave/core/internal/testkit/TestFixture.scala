@@ -4,13 +4,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package swave.testkit.gen
+package swave.core.internal.testkit
 
-import swave.core._
-import swave.testkit.impl.{TestDrainStage, TestSpoutStage, TestStage}
-
-import scala.concurrent.Future
 import scala.util.{Failure, Success}
+import scala.concurrent.Future
+import swave.core._
 
 sealed abstract class TestFixture {
   private[testkit] def stage: TestStage

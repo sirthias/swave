@@ -9,7 +9,7 @@ package swave.core.impl.stages
 import org.scalacheck.Gen
 import org.scalatest.Inspectors
 import swave.core.StreamEnv
-import swave.testkit.gen.TestFixture
+import swave.core.internal.testkit.TestFixture
 
 final class FanOutSpec extends SyncPipeSpec with Inspectors {
 

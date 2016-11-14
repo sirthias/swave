@@ -122,7 +122,7 @@ val `scodec-bits`          = "org.scodec"                 %%  "scodec-bits"     
 
 // test
 val scalatest              = "org.scalatest"              %%  "scalatest"             % "2.2.6"   % "test"
-val scalacheck             = "org.scalacheck"             %%  "scalacheck"            % "1.12.6"
+val scalacheck             = "org.scalacheck"             %%  "scalacheck"            % "1.12.6"  % "test"
 val `reactive-streams-tck` = "org.reactivestreams"        %   "reactive-streams-tck"  % "1.0.0"   % "test"
 
 // examples
@@ -173,7 +173,7 @@ lazy val core = project
     moduleName := "swave-core",
     macroParadise,
     libraryDependencies ++= Seq(`reactive-streams`,  `jctools-core`, `typesafe-config`, shapeless, `scala-logging`,
-      scalatest, scalacheck % "test"))
+      scalatest, scalacheck))
 
 lazy val `core-macros` = project
   .enablePlugins(AutomateHeaderPlugin)
@@ -190,7 +190,8 @@ lazy val `core-tests` = project
   .settings(noPublishingSettings: _*)
   .settings(
     noScalaFmtFormatting,
-    libraryDependencies ++= Seq(shapeless, scalatest, `reactive-streams-tck`, scalacheck % "test", logback % "test"))
+    macroParadise,
+    libraryDependencies ++= Seq(shapeless, scalatest, `reactive-streams-tck`, scalacheck, logback % "test"))
 
 lazy val docs = project
   .dependsOn(`compat-akka`, `compat-scodec`, core, testkit)
@@ -261,5 +262,4 @@ lazy val testkit = project
   .settings(publishingSettings: _*)
   .settings(
     moduleName := "swave-testkit",
-    macroParadise,
-    libraryDependencies ++= Seq(scalacheck))
+    macroParadise)

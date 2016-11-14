@@ -11,8 +11,7 @@ import scala.util.Failure
 import org.scalacheck.Gen
 import org.scalatest.Inspectors
 import swave.core._
-import swave.testkit.TestError
-import swave.testkit.gen.{TestFixture, TestOutput, TestSetup}
+import swave.core.internal.testkit._
 
 final class InjectSpec extends SyncPipeSpec with Inspectors {
 
@@ -25,7 +24,7 @@ final class InjectSpec extends SyncPipeSpec with Inspectors {
     testSetup
       .input[Int]
       .output[Spout[Int]]
-      .fixture(fd ⇒ Gen.listOfN(10, fd.output[Int](TestSetup.Default.nonDroppingOutputScripts)))
+      .fixture(fd ⇒ Gen.listOfN(10, fd.output[Int](TestGeneration.Default.nonDroppingOutputScripts)))
       .prop.from { (in, out, allSubOuts) ⇒
         import TestFixture.State._
 

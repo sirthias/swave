@@ -7,11 +7,11 @@
 package swave.core.impl.stages
 
 import java.util.concurrent.ThreadLocalRandom
-import swave.testkit.TestError
 
 import scala.util.Try
 import scala.concurrent.duration._
 import swave.core._
+import swave.core.internal.testkit.TestError
 import swave.core.util._
 import swave.testkit.Probes._
 

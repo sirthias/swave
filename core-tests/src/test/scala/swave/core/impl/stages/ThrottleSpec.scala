@@ -8,10 +8,10 @@ package swave.core.impl.stages
 
 import scala.util.Success
 import scala.concurrent.duration._
-import swave.testkit.TestError
 import swave.testkit.Probes._
 import swave.core.util.XorShiftRandom
 import swave.core._
+import swave.core.internal.testkit.TestError
 
 /**
   * Almost directly transcribed from akka-stream's FlowThrottleSpec which carries this copyright:

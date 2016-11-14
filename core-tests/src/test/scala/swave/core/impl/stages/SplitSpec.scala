@@ -6,14 +6,12 @@
 
 package swave.core.impl.stages
 
+import scala.collection.mutable.ListBuffer
+import scala.util.Failure
 import org.scalacheck.Gen
 import org.scalatest.Inspectors
 import swave.core._
-import swave.testkit.TestError
-import swave.testkit.gen.{TestFixture, TestOutput}
-
-import scala.collection.mutable.ListBuffer
-import scala.util.Failure
+import swave.core.internal.testkit._
 
 final class SplitSpec extends SyncPipeSpec with Inspectors {
 

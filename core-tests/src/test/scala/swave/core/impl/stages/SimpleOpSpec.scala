@@ -8,9 +8,8 @@ package swave.core.impl.stages
 
 import org.scalacheck.Gen
 import org.scalatest.Inspectors
+import swave.core.internal.testkit.{ TestError, TestFixture }
 import swave.core.{Buffer, StreamEnv, StreamLimitExceeded}
-import swave.testkit.TestError
-import swave.testkit.gen.TestFixture
 
 final class SimpleOpSpec extends SyncPipeSpec with Inspectors {
 

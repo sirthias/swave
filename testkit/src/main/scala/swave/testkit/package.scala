@@ -7,7 +7,6 @@
 package swave
 
 import scala.concurrent.duration._
-import swave.testkit.impl.TestkitExtension
 import swave.core.StreamEnv
 import swave.core.util._
 

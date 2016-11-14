@@ -4,10 +4,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package swave.testkit.impl
+package swave.core.internal.testkit
 
 import scala.util.control.NonFatal
-import swave.testkit.gen.TestFixture
 import swave.core.Stage
 import swave.core.impl.stages.drain.DrainStage
 import swave.core.impl.{Inport, RunContext}
@@ -17,9 +16,7 @@ import swave.core.macros._
 private[testkit] final class TestDrainStage(val id: Int,
                                             val requestsIterable: Iterable[Long],
                                             val cancelAfterOpt: Option[Int],
-                                            testCtx: TestContext)
-    extends DrainStage
-    with TestStage {
+                                            testCtx: TestContext) extends DrainStage with TestStage {
 
   def kind = Stage.Kind.Drain.Test(id)
 

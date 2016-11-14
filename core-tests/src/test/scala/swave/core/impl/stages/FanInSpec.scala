@@ -9,8 +9,7 @@ package swave.core.impl.stages
 import org.scalacheck.Gen
 import org.scalatest.Inspectors
 import swave.core.StreamEnv
-import swave.testkit.TestError
-import swave.testkit.gen.TestFixture
+import swave.core.internal.testkit.{ TestError, TestFixture }
 
 final class FanInSpec extends SyncPipeSpec with Inspectors {
 

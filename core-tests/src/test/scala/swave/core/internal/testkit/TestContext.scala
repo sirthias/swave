@@ -4,19 +4,17 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package swave.testkit.impl
+package swave.core.internal.testkit
 
 import scala.annotation.tailrec
 import scala.collection.mutable.ArrayBuffer
 import swave.core.macros._
-import swave.core.util._
-import swave.testkit.gen.TestSetup
-import TestSetup.AsyncScheduling
 import swave.core.impl.util.ResizableRingBuffer
+import swave.core.util._
 
 private[testkit] final class TestContext(val runNr: Int,
                                          val asyncRate: Double,
-                                         val asyncScheduling: AsyncScheduling,
+                                         val asyncScheduling: TestGeneration.AsyncScheduling,
                                          random: XorShiftRandom,
                                          tracing: Boolean) {
 
@@ -64,18 +62,18 @@ private[testkit] final class TestContext(val runNr: Int,
         }
 
       asyncScheduling match {
-        case AsyncScheduling.InOrder ⇒
+        case TestGeneration.AsyncScheduling.InOrder ⇒
           runSnapshots()
 
-        case AsyncScheduling.RandomOrder ⇒
+        case TestGeneration.AsyncScheduling.RandomOrder ⇒
           random.shuffle_!(snapshot)
           runSnapshots()
 
-        case AsyncScheduling.ReversedOrder ⇒
+        case TestGeneration.AsyncScheduling.ReversedOrder ⇒
           snapshot.reverse_!()
           runSnapshots()
 
-        case AsyncScheduling.Mixed ⇒
+        case TestGeneration.AsyncScheduling.Mixed ⇒
           @tailrec def rec(remaining: Array[ResizableRingBuffer[Task]]): Unit =
             if (remaining.nonEmpty) {
               random.shuffle_!(remaining)

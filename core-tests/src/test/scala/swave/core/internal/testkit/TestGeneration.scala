@@ -4,22 +4,65 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package swave.testkit.gen
+package swave.core.internal.testkit
 
 import org.scalacheck.{Gen, Prop}
-import swave.testkit.TestError
-import scala.util.control.NonFatal
+
+import scala.util.control.{NoStackTrace, NonFatal}
 import shapeless.ops.function.FnToProduct
 import shapeless.ops.hlist.{Reverse, Tupler}
 import shapeless._
-import swave.testkit.impl._
 import swave.core.Graph
 import swave.core.util._
 import swave.core.macros._
 
-object TestSetup {
+trait TestGeneration {
+  import TestGeneration._
 
-  def newDslRoot: TestSetupDef = new TestSetupDefImpl(Default.asyncRates, Default.asyncSchedulings, tracing = false)
+  def testSetup: TestSetupDef = new TestSetupDefImpl(Default.asyncRates, Default.asyncSchedulings, tracing = false)
+
+  def asScripted(in: TestInput[_]): TestFixture.TerminalStateValidation = { outTermination ⇒
+    import TestFixture.State._
+    val inTermination = in.terminalState
+    outTermination match {
+      case Cancelled ⇒ // input can be in any state
+      case Completed ⇒
+        if (inTermination == Error(TestError)) sys.error(s"Input error didn't propagate to stream output")
+      case x @ Error(e) ⇒ if (inTermination != x) throw e
+    }
+  }
+
+  def likeThis(pf: PartialFunction[TestFixture.State.Terminal, Unit]): TestFixture.TerminalStateValidation =
+    outTermination ⇒
+      pf.applyOrElse(outTermination, {
+        case TestFixture.State.Error(e)      ⇒ throw e
+        case (x: TestFixture.State.Terminal) ⇒ sys.error(s"Stream termination `$x` did not match expected pattern!")
+      }: (TestFixture.State.Terminal ⇒ Nothing))
+
+  def withError(expected: Throwable): TestFixture.TerminalStateValidation = {
+    case TestFixture.State.Error(`expected`) ⇒ // ok
+    case x                                   ⇒ sys.error(s"Stream termination `$x` did not hold expected error `$expected`")
+  }
+
+  def withErrorLike(pf: PartialFunction[Throwable, Unit]): TestFixture.TerminalStateValidation = {
+    case TestFixture.State.Error(e) if pf.isDefinedAt(e) ⇒ pf(e)
+    case x                                               ⇒ sys.error(s"Stream termination `$x` did not match expected error pattern!")
+  }
+
+  def scriptedElementCount(in: TestInput[_], out: TestOutput[_]): Int =
+    math.min(in.scriptedSize, out.scriptedSize)
+
+  private val baseIntegerInput = Gen.chooseNum(0, 999)
+  def nonOverlappingIntTestInputs(fd: FixtureDef, minCount: Int, maxCount: Int): Gen[List[TestInput[Int]]] =
+    Gen
+      .chooseNum(2, 4)
+      .flatMap(count ⇒ {
+        val list = List.tabulate(count)(ix ⇒ fd.input(baseIntegerInput.map(_ + ix * 1000)))
+        Gen.sequence[List[TestInput[Int]], TestInput[Int]](list)
+      })
+}
+
+object TestGeneration {
 
   sealed abstract class TestSetupDef extends MainDef0[HNil] {
     def withAsyncRates(asyncRates: Gen[Double]): TestSetupDef
@@ -122,7 +165,7 @@ object TestSetup {
   ////////////////////////////////// DSL IMPLEMENTATION ///////////////////////////////////////////
 
   private class TestSetupDefImpl(asyncRates: Gen[Double], asyncSchedulings: Gen[AsyncScheduling], tracing: Boolean)
-      extends TestSetupDef {
+    extends TestSetupDef {
     private[this] val runCounter = Iterator from 0
 
     def withAsyncRates(asyncRates: Gen[Double]) = new TestSetupDefImpl(asyncRates, asyncSchedulings, tracing)
@@ -151,7 +194,7 @@ object TestSetup {
   }
 
   private class DefImpl[L <: HList](contexts: Gen[TestContext], creatorsList: List[FixtureDef ⇒ Gen[Any]])
-      extends MainDef[L] {
+    extends MainDef[L] {
 
     def param[T](implicit gen: Gen[T]): MainDef[T :: L] = fixture(_ ⇒ gen)
 
@@ -200,7 +243,7 @@ object TestSetup {
   }
 
   private class PropperImpl[L <: HList, F](gen: Gen[(TestContext, L)], convertF: F ⇒ L ⇒ Unit, seed: String)
-      extends Propper[F] {
+    extends Propper[F] {
     def withRandomSeed(seed: String): Propper[F] = new PropperImpl[L, F](gen, convertF, seed)
 
     def from(f: F): Prop = Prop { params ⇒
@@ -248,16 +291,16 @@ object TestSetup {
               })
               .distinct
             println(s"""|Error Context
-                  |  randomSeed     : ${XorShiftRandom.formatSeed(randomSeed)}
-                  |  runNr          : ${ctx.runNr}
-                  |  asyncScheduling: ${ctx.asyncScheduling}
-                  |  asyncRate      : ${ctx.asyncRate}
-                  |  params         : [${params.mkString(", ")}]
-                  |  fixtures:
-                  |  ${fixtures.mkString("\n\n  ")}
-                  |
+                        |  randomSeed     : ${XorShiftRandom.formatSeed(randomSeed)}
+                        |  runNr          : ${ctx.runNr}
+                        |  asyncScheduling: ${ctx.asyncScheduling}
+                        |  asyncRate      : ${ctx.asyncRate}
+                        |  params         : [${params.mkString(", ")}]
+                        |  fixtures:
+                        |  ${fixtures.mkString("\n\n  ")}
+                        |
                   |  specimens:
-                  |    ${specimens.mkString("\n\n    ")}""".stripMargin)
+                        |    ${specimens.mkString("\n\n    ")}""".stripMargin)
             Prop.exception(e)
         }
     }
@@ -268,3 +311,5 @@ object TestSetup {
       }
   }
 }
+
+object TestError extends RuntimeException("TEST-ERROR") with NoStackTrace

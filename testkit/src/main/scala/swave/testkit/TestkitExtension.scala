@@ -4,14 +4,13 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package swave.testkit.impl
+package swave.testkit
 
 import swave.core.{Extension, ExtensionId, StreamEnv}
-import swave.testkit.Testkit
 
 object TestkitExtension extends ExtensionId[TestkitExtension] {
   def createExtension(env: StreamEnv) =
     new TestkitExtension(Testkit.Settings(env.config))
 }
 
-class TestkitExtension(val settings: Testkit.Settings) extends Extension {}
+class TestkitExtension(val settings: Testkit.Settings) extends Extension

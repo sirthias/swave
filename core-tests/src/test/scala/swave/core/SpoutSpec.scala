@@ -6,9 +6,10 @@
 
 package swave.core
 
+import swave.core.internal.testkit.TestError
+
 import scala.concurrent.Future
 import scala.concurrent.duration._
-import swave.testkit.TestError
 
 class SpoutSpec extends SwaveSpec {
 
