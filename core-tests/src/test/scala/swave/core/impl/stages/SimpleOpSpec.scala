@@ -215,7 +215,7 @@ final class SimpleOpSpec extends SyncPipeSpec with Inspectors {
       .param(Gen.chooseNum(0, 5))
       .prop.from { (in, out, param) ⇒
 
-      def pipeline = in.spout.limit(param.toLong).drainTo(out.drain)
+      def pipeline = in.spout.withLimit(param.toLong).drainTo(out.drain)
 
       if (scriptedElementCount(in, out) <= param) {
         pipeline shouldTerminate asScripted(in)

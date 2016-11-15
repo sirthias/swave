@@ -13,7 +13,7 @@ import swave.core.macros._
 
 // format: OFF
 @StageImplementation
-private[core] final class LimitStage(max: Long, cost: AnyRef ⇒ Long) extends InOutStage {
+private[core] final class WithLimitStage(max: Long, cost: AnyRef ⇒ Long) extends InOutStage {
 
   requireArg(max >= 0, "`max` must be >= 0")
 

@@ -46,8 +46,6 @@ This is the alphabetical list of all predefined transformation currently offered
 * [-](interleave.md)
 * [-](intersperse.md)
 * [-](last.md)
-* [-](limit.md)
-* [-](limitWeighted.md)
 * [-](logEvent.md)
 * [-](map.md)
 * [-](mapAsync.md)
@@ -95,6 +93,8 @@ This is the alphabetical list of all predefined transformation currently offered
 * [-](withCompletionTimeout.md)
 * [-](withIdleTimeout.md)
 * [-](withInitialTimeout.md)
+* [-](withLimit.md)
+* [-](withLimitWeighted.md)
 * [-](zip.md)
 
 @@@

@@ -238,12 +238,6 @@ trait StreamOps[A] extends Any { self ⇒
   final def last: Repr[A] =
     takeLast(1)
 
-  final def limit(maxElements: Long): Repr[A] =
-    limitWeighted(maxElements, _ ⇒ 1)
-
-  final def limitWeighted(max: Long, cost: A ⇒ Long): Repr[A] =
-    append(new LimitStage(max, cost.asInstanceOf[AnyRef ⇒ Long]))
-
   final def logEvent(marker: String, log: (String, StreamEvent[A]) ⇒ Unit = defaultLogEvent): Repr[A] =
     onSignal(log(marker, _))
 
@@ -430,17 +424,23 @@ trait StreamOps[A] extends Any { self ⇒
 
   def via[B](pipe: A =>> B): Repr[B]
 
-  // timeout = time after demand signalling for element or previous element, whatever happened later
+  // timeout = time after demand signal for first element
+  final def withCompletionTimeout(timeout: FiniteDuration): Repr[A] =
+    append(new WithCompletionTimeoutStage(timeout))
+
+  // timeout = time after demand signal for element or previous element, whatever happened later
   final def withIdleTimeout(timeout: FiniteDuration): Repr[A] =
     append(new WithIdleTimeoutStage(timeout))
 
-  // timeout = time after demand signalling for first element
+  // timeout = time after demand signal for first element
   final def withInitialTimeout(timeout: FiniteDuration): Repr[A] =
     append(new WithInitialTimeoutStage(timeout))
 
-  // timeout = time after demand signalling for first element
-  final def withCompletionTimeout(timeout: FiniteDuration): Repr[A] =
-    append(new WithCompletionTimeoutStage(timeout))
+  final def withLimit(maxElements: Long): Repr[A] =
+    withLimitWeighted(maxElements, _ ⇒ 1)
+
+  final def withLimitWeighted(max: Long, cost: A ⇒ Long): Repr[A] =
+    append(new WithLimitStage(max, cost.asInstanceOf[AnyRef ⇒ Long]))
 
   final def zip[B](other: Spout[B]): Repr[(A, B)] = {
     val moduleID = Module.ID("zip")

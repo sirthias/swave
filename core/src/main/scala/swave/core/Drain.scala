@@ -172,7 +172,7 @@ object Drain {
     * of elements by failing the stream with a [[StreamLimitExceeded]] if more elements are received.
     */
   def generalSeq[M[+ _], T](limit: Int)(implicit cbf: CanBuildFrom[M[T], T, M[T]]): Drain[T, Future[M[T]]] =
-    Pipe[T].limit(limit.toLong).groupedTo[M](Integer.MAX_VALUE, emitSingleEmpty = true).to(head) named "Drain.seq"
+    Pipe[T].withLimit(limit.toLong).groupedTo[M](Integer.MAX_VALUE, emitSingleEmpty = true).to(head) named "Drain.seq"
 
   /**
     * A [[Drain]] which only requests and produces the very first stream element.
