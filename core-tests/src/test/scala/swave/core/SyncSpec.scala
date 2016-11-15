@@ -70,7 +70,11 @@ class SyncSpec extends SwaveSpec {
     }
 
     "double direct fanout" in {
-      Spout(1, 2, 3).fanOutBroadcast().sub.end.sub.end.fanInMerge() should produce(1, 1, 2, 2, 3, 3)
+      Spout(1, 2, 3)
+        .fanOutBroadcast()
+        .sub.end
+        .sub.end
+        .fanInMerge() should produce(1, 1, 2, 2, 3, 3)
     }
 
     "standalone pipes" in {
@@ -89,7 +93,7 @@ class SyncSpec extends SwaveSpec {
     }
 
     "inject" in {
-      Spout(1 to 10).inject.map(_ elementAt 1).flattenConcat() should produce(2, 4, 6, 8, 10)
+      Spout(1 to 50).takeEveryNth(10) should produce(10, 20, 30, 40, 50)
     }
   }
 

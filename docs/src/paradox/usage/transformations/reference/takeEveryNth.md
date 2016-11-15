@@ -1,0 +1,4 @@
+takeEveryNth
+============
+
+... TODO ...

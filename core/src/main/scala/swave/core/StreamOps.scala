@@ -241,8 +241,6 @@ trait StreamOps[A] extends Any { self ⇒
   final def limit(maxElements: Long): Repr[A] =
     limitWeighted(maxElements, _ ⇒ 1)
 
-  final def limitIdleTime(timeout: FiniteDuration): Repr[A] = ???
-
   final def limitWeighted(max: Long, cost: A ⇒ Long): Repr[A] =
     append(new LimitStage(max, cost.asInstanceOf[AnyRef ⇒ Long]))
 
@@ -334,6 +332,9 @@ trait StreamOps[A] extends Any { self ⇒
   final def slice(startIndex: Long, length: Long): Repr[A] =
     via(Pipe[A] drop startIndex take length named "slice")
 
+  final def sliceEvery(dropLen: Long, takeLen: Long): Repr[A] =
+    via(Pipe[A].inject.flatMap(_.slice(dropLen, takeLen)) named "sliceEvery")
+
   final def sliding(windowSize: Int): Repr[immutable.Seq[A]] =
     slidingTo[immutable.Seq](windowSize)
 
@@ -392,6 +393,11 @@ trait StreamOps[A] extends Any { self ⇒
 
   final def take(count: Long): Repr[A] =
     append(new TakeStage(count))
+
+  final def takeEveryNth(n: Long): Repr[A] = {
+    requireArg(n > 0, "`count` must be > 0")
+    via(Pipe[A].inject.flatMap(_.elementAt(n - 1)) named "takeEvery")
+  }
 
   final def takeLast(n: Int): Repr[A] = {
     val pipe =
