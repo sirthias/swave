@@ -35,7 +35,7 @@ class RenderingSpec extends FreeSpec with Matchers {
     val foo = Module.Forward.from2[Int, String] { (a, b) ⇒
       a.attachN(2, b.fanOutBroadcast())
     } named "foo"
-    Spout.from(0)
+    Spout.ints(0)
       .duplicate
       .attach(Spout("x", "y", "z"))
       .fromFanInVia(foo)
@@ -49,7 +49,7 @@ class RenderingSpec extends FreeSpec with Matchers {
   }
 
   "Example 6" tests {
-    Spout.from(0).deduplicate.zip(Spout(4, 5, 6)).to(Drain.head)
+    Spout.ints(0).deduplicate.zip(Spout(4, 5, 6)).to(Drain.head)
   }
 
   "Example 7" tests {
@@ -57,7 +57,7 @@ class RenderingSpec extends FreeSpec with Matchers {
   }
 
   "Example 8" tests {
-    Spout.from(0)
+    Spout.ints(0)
       .map(_ * 2)
       .via(Pipe.fromDrainAndSpout[Int, String](Drain.cancelling, Spout.empty))
       .filterNot(_.isEmpty)

@@ -15,5 +15,5 @@ class ToPublisherDrainSpec(ignore: Any) // disabled by default, remove parameter
   implicit val env = StreamEnv()
 
   def createPublisher(elements: Long): Publisher[Int] =
-    Spout.from(0).take(elements).drainTo(Drain.toPublisher()).get
+    Spout.ints(0).take(elements).drainTo(Drain.toPublisher()).get
 }

@@ -220,8 +220,22 @@ object Spout {
     * A [[Spout]] which produces an infinite stream of `Int` elements starting
     * with the given `start` and increments of `step`.
     */
-  def from(start: Int, step: Int = 1): Spout[Int] =
-    fromIterator(Iterator.from(start, step)) named "Spout.from"
+  def ints(start: Int, step: Int = 1): Spout[Int] =
+    fromIterator(Iterator.from(start, step)) named "Spout.ints"
+
+  /**
+    * A [[Spout]] which produces an infinite stream of `Long` elements starting
+    * with the given `start` and increments of `step`.
+    */
+  def longs(start: Long, step: Long = 1): Spout[Long] =
+    iterate(start)(_ + step) named "Spout.longs"
+
+  /**
+    * A [[Spout]] which produces an infinite stream of `Double` elements starting
+    * with the given `start` and increments of `step`.
+    */
+  def doubles(start: Double, step: Double): Spout[Double] =
+    iterate(start)(_ + step) named "Spout.doubles"
 
   /**
     * A [[Spout]] which produces either one or zero elements when the given [[Future]] is

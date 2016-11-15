@@ -142,7 +142,7 @@ class AsyncSpec extends SwaveSpec {
 
     "sync sub-stream in async parent stream" taggedAs NotOnTravis in {
       Spout
-        .from(0)
+        .ints(0)
         .inject
         .map(_ elementAt 1)
         .flattenConcat()
@@ -153,7 +153,7 @@ class AsyncSpec extends SwaveSpec {
 
     "async sub-stream in async parent stream" taggedAs NotOnTravis in {
       Spout
-        .from(0)
+        .ints(0)
         .inject
         .map(_.async(bufferSize = 0).elementAt(1))
         .flattenConcat()
@@ -164,7 +164,7 @@ class AsyncSpec extends SwaveSpec {
 
     "async sub-stream in sync parent stream" taggedAs NotOnTravis in {
       Spout
-        .from(0)
+        .ints(0)
         .inject
         .map(_.tee(Drain.ignore.dropResult.async(), eagerCancel = true).elementAt(1))
         .flattenConcat()
@@ -179,7 +179,7 @@ class AsyncSpec extends SwaveSpec {
 
     "conflicting runners in sub-stream setup" taggedAs NotOnTravis in {
       Spout
-        .from(0)
+        .ints(0)
         .inject
         .map(_.async("disp0").elementAt(1))
         .flattenConcat()
