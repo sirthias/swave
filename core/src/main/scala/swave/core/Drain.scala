@@ -39,7 +39,7 @@ final class Drain[-T, +R] private[swave] (private[swave] val outport: Outport, v
     * NOTE: The result of this call and the underlying drain share the same stage.
     * This means that only one of them can be used (once) in any stream setup.
     */
-  def capture[P](promise: Promise[P])(implicit capture: Drain.Capture[R, P]): Drain[T, Unit] = {
+  def resultTo[P](promise: Promise[P])(implicit capture: Drain.Capture[R, P]): Drain[T, Unit] = {
     capture(result, promise)
     dropResult
   }
@@ -228,6 +228,34 @@ object Drain {
       promise.completeWith(tf(x.asInstanceOf[R])); ()
     })
     new Drain(stage, promise.future)
+  }
+
+  /**
+    * A [[Drain]] which produces a single string representation of the stream by concatenating
+    * the `toString` result of all elements, optionally separated by `sep`.
+    *
+    * The given `limit` protects against an overflow beyond the expected maximum number
+    * of elements by failing the stream with a [[StreamLimitExceeded]] if more elements are received.
+    */
+  def mkString[T](limit: Int, sep: String = ""): Drain[T, Future[String]] =
+    mkString(limit, "", sep, "")
+
+  /**
+    * A [[Drain]] which produces a single string representation of the stream by concatenating
+    * the `toString` result of all elements with the given `start`, `sep` and `end` strings.
+    *
+    * The given `limit` protects against an overflow beyond the expected maximum number
+    * of elements by failing the stream with a [[StreamLimitExceeded]] if more elements are received.
+    */
+  def mkString[T](limit: Int, start: String, sep: String, end: String): Drain[T, Future[String]] = {
+    var first = true
+    val pipe = Pipe[T]
+      .fold(new java.lang.StringBuilder(start)) { (sb, elem) =>
+        if (first) first = false else sb.append(sep)
+        sb.append(elem)
+      }
+      .map(_.append(end).toString)
+    pipe to Drain.head
   }
 
   /**

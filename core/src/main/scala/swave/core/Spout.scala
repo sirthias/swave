@@ -129,25 +129,21 @@ final class Spout[+A](private[swave] val inport: Inport) extends AnyVal with Str
 
   /**
     * Attaches a [[Drain]] which produces a single string representation of all stream elements.
+    * If the stream produces more than `limit` elements it will be error-terminated with
+    * a [[StreamLimitExceeded]] exception.
     * The stream is immediately started.
     */
-  def drainToMkString(sep: String = "")(implicit env: StreamEnv): Future[String] =
-    drainToMkString("", sep, "")
+  def drainToMkString(limit: Int, sep: String = "")(implicit env: StreamEnv): Future[String] =
+    drainToMkString(limit, "", sep, "")
 
   /**
     * Attaches a [[Drain]] which produces a single string representation of all stream elements.
+    * If the stream produces more than `limit` elements it will be error-terminated with
+    * a [[StreamLimitExceeded]] exception.
     * The stream is immediately started.
     */
-  def drainToMkString(start: String, sep: String, end: String)(implicit env: StreamEnv): Future[String] = {
-    var first = true
-    val pipe = Pipe[A]
-      .fold(new java.lang.StringBuilder(start)) { (sb, elem) =>
-        if (first) first = false else sb.append(sep)
-        sb.append(elem)
-      }
-      .map(_.append(end).toString)
-    drainTo(pipe to Drain.head)
-  }
+  def drainToMkString(limit: Int, start: String, sep: String, end: String)(implicit env: StreamEnv): Future[String] =
+    drainTo(Drain.mkString(limit, start, sep, end))
 
   /**
     * Explicitly attaches the given name to this [[Spout]].
@@ -220,22 +216,22 @@ object Spout {
     * A [[Spout]] which produces an infinite stream of `Int` elements starting
     * with the given `start` and increments of `step`.
     */
-  def ints(start: Int, step: Int = 1): Spout[Int] =
-    fromIterator(Iterator.from(start, step)) named "Spout.ints"
+  def ints(from: Int, step: Int = 1): Spout[Int] =
+    fromIterator(Iterator.from(from, step)) named "Spout.ints"
 
   /**
     * A [[Spout]] which produces an infinite stream of `Long` elements starting
     * with the given `start` and increments of `step`.
     */
-  def longs(start: Long, step: Long = 1): Spout[Long] =
-    iterate(start)(_ + step) named "Spout.longs"
+  def longs(from: Long, step: Long = 1): Spout[Long] =
+    iterate(from)(_ + step) named "Spout.longs"
 
   /**
     * A [[Spout]] which produces an infinite stream of `Double` elements starting
     * with the given `start` and increments of `step`.
     */
-  def doubles(start: Double, step: Double): Spout[Double] =
-    iterate(start)(_ + step) named "Spout.doubles"
+  def doubles(from: Double, step: Double): Spout[Double] =
+    iterate(from)(_ + step) named "Spout.doubles"
 
   /**
     * A [[Spout]] which produces either one or zero elements when the given [[Future]] is

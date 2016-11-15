@@ -256,8 +256,8 @@ trait StreamOps[A] extends Any { self ⇒
   final def mergeSorted[B >: A: Ordering](other: Spout[B], eagerComplete: Boolean = false): Repr[B] =
     attach(other).fanInMergeSorted(eagerComplete)
 
-  final def mergeToEither[B](other: Spout[B]): Repr[Either[A, B]] =
-    map(Left[A, B]).attach(other.map(Right[A, B])).fanInToSum[Either[A, B]]()
+  final def mergeToEither[B](right: Spout[B]): Repr[Either[A, B]] =
+    map(Left[A, B]).attach(right.map(Right[A, B])).fanInToSum[Either[A, B]]()
 
   final def multiply(factor: Int): Repr[A] =
     via(Pipe[A].flatMap(x ⇒ Iterator.fill(factor)(x)) named "multiply")

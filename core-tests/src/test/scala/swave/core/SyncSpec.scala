@@ -65,7 +65,7 @@ class SyncSpec extends SwaveSpec {
 
     "fanout to drain" in {
       val promise = Promise[Seq[Int]]()
-      Spout(1, 2, 3).tee(Drain.seq(10).capture(promise)) should produce(1, 2, 3)
+      Spout(1, 2, 3).tee(Drain.seq(10).resultTo(promise)) should produce(1, 2, 3)
       promise.future.await() shouldEqual Seq(1, 2, 3)
     }
 
@@ -86,7 +86,11 @@ class SyncSpec extends SwaveSpec {
       val foo = Module.Forward.from2[Int, String] { (a, b) ⇒
         a.attachN(2, b.fanOutBroadcast())
       } named "foo"
-      Spout(1, 2, 3).attach(Spout("x", "y", "z")).fromFanInVia(foo).fanInToTuple.map(_.toString) should produce(
+      Spout(1, 2, 3)
+        .attach(Spout("x", "y", "z"))
+        .fromFanInVia(foo)
+        .fanInToTuple
+        .map(_.toString) should produce(
         "(1,x,x)",
         "(2,y,y)",
         "(3,z,z)")
