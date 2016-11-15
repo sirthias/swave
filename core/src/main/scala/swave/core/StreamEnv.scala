@@ -54,6 +54,20 @@ object StreamEnv {
 
     requireArg(throughput > 0, "`throughput` must be > 0")
     requireArg(0 < maxBatchSize && maxBatchSize <= 1024 * 1024, "`maxBatchSize` must be > 0 and <= 1M")
+
+    def withThroughput(throughput: Int)                        = copy(throughput = throughput)
+    def withMaxBatchSize(maxBatchSize: Int)                    = copy(maxBatchSize = maxBatchSize)
+    def withLogConfigOnStart(logConfigOnStart: Boolean = true) = copy(logConfigOnStart = logConfigOnStart)
+    def withSubscriptionTimeout(subscriptionTimeout: Duration) = copy(subscriptionTimeout = subscriptionTimeout)
+
+    def withDispatcherSettingsMapped(f: Dispatchers.Settings => Dispatchers.Settings) =
+      copy(dispatcherSettings = f(dispatcherSettings))
+    def withSchedulerSettingsMapped(f: Scheduler.Settings => Scheduler.Settings) =
+      copy(schedulerSettings = f(schedulerSettings))
+    def withFileIOSettingsMapped(f: FileIO.Settings => FileIO.Settings) =
+      copy(fileIOSettings = f(fileIOSettings))
+    def withExtensionSettingsMapped(f: Extension.Settings => Extension.Settings) =
+      copy(extensionSettings = f(extensionSettings))
   }
   object Settings extends SettingsCompanion[Settings]("swave.core") {
     def fromSubConfig(c: Config): Settings =
@@ -71,10 +85,11 @@ object StreamEnv {
   def apply(name: String = "default",
             config: Option[Config] = None,
             settings: Option[Settings] = None,
+            mapSettings: Settings => Settings = identityFunc,
             classLoader: Option[ClassLoader] = None): StreamEnv = {
     val cl   = classLoader getOrElse getClass.getClassLoader
     val conf = config getOrElse ConfigFactory.empty withFallback ConfigFactory.load(cl)
-    val sets = settings getOrElse Settings(conf)
+    val sets = mapSettings(settings getOrElse Settings(conf))
     new StreamEnvImpl(name, conf, sets, cl)
   }
 

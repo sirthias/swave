@@ -23,6 +23,11 @@ object FileIO extends SpoutFromFiles with DrainToFiles {
   final case class Settings(defaultFileReadingChunkSize: Int, defaultFileWritingChunkSize: Int) {
     requireArg(defaultFileReadingChunkSize > 0, "`defaultFileChunkSize` must be > 0")
     requireArg(defaultFileWritingChunkSize >= 0, "`defaultFileWritingChunkSize` must be >= 0")
+
+    def withDefaultFileReadingChunkSize(defaultFileReadingChunkSize: Int) =
+      copy(defaultFileReadingChunkSize = defaultFileReadingChunkSize)
+    def withDefaultFileWritingChunkSize(defaultFileWritingChunkSize: Int) =
+      copy(defaultFileWritingChunkSize = defaultFileWritingChunkSize)
   }
 
   object Settings extends SettingsCompanion[Settings]("swave.core.file-io") {
