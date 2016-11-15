@@ -14,7 +14,7 @@ class BasicSpec extends FreeSpec with Matchers {
 
   implicit val env = StreamEnv()
 
-  "the examples in the basic chapter should work as expected" in {
+  "the examples in the `basics` chapter should work as expected" in {
 
     //#foo
     val foo: Spout[Char] = Spout('f', 'o', 'o')
@@ -31,7 +31,7 @@ class BasicSpec extends FreeSpec with Matchers {
     def `only compiled, not actually run`() = {
       //#reuse
       // the stream of all natural numbers as Strings
-      def numberStrings = Spout.from(1).map(_.toString)
+      def numberStrings = Spout.ints(from = 1).map(_.toString)
 
       // print the first 10
       numberStrings.take(10).foreach(println)
@@ -41,7 +41,8 @@ class BasicSpec extends FreeSpec with Matchers {
 
       // concatenate the first hundred
       val s: Future[String] =
-        numberStrings.take(100).drainToMkString(", ")
+        numberStrings.take(100)
+          .drainToMkString(limit = 1000, ", ")
       //#reuse
     }
   }

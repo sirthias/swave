@@ -10,7 +10,7 @@ import org.scalatest.{FreeSpec, Matchers}
 
 class DrainSpec extends FreeSpec with Matchers {
 
-  "the examples in the Drains chapter should work as expected" - {
+  "the examples in the `drains` chapter should work as expected" - {
 
     "examples" in {
       //#examples

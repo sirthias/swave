@@ -38,6 +38,10 @@ Therefore the question, which of two transformations is more basic, cannot be de
 look at the particular *implementation* in order to find out, which transformation has a **primary** implementation and
 which might be a **compound** of other, more basic ones.
 
+In order to make it easy to quickly understand the nature of a particular transformation we organize the transformation
+docs primarily by the first two axes described above and clearly show group membership for the two latter axes on the
+individual pages.
+
  
 Documentation Entry-Points
 --------------------------
@@ -46,7 +50,7 @@ Here are the entry points to the documentation of all transformations, organized
 streams-of-streams:
  
 * [Simple Transformations](simple.md)
-* [Fan-outs](fan-outs.md)
+* [Fan-Outs](fan-outs.md)
 * [Fan-Ins](fan-ins.md)
 * [Creating Streams-of-Streams](injecting.md)
 * [Flattening Streams-of-Streams](flattening.md)

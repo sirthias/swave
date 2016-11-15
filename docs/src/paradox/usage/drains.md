@@ -37,7 +37,7 @@ drain result (which is returned by the `run()` call on a @scaladoc[Piping]) cann
 As blocking is not an option the `run()` call must return right away if the stream is running asynchronously,
 often before the first data elements have even begun their traversal of the stream graph.<br/>
 
-In consequence most kinds of drains have a result type of `Future[Something]` rather than just `Something`.
+In consequence most kinds of drains have a result type of `Future[T]` rather than just `T`.
 
 However, if you know that a stream runs synchronously (because it doesn't contain asynchronous stages) the `Future`
 instance you'll get back from the `run()` call will be already fulfilled. This is because, in those cases, the

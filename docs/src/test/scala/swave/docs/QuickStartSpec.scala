@@ -21,7 +21,7 @@ class QuickStartSpec extends FreeSpec with Matchers {
   implicit val env = StreamEnv()
   //#env
 
-  "the examples in the quick start chapter should work as expected" in {
+  "the examples in the `quick-start` chapter should work as expected" in {
 
     //#spout
     def tenInts: Spout[Int] = Spout(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
@@ -43,7 +43,7 @@ class QuickStartSpec extends FreeSpec with Matchers {
 
     def c = Spout(100 to 1 by -1).map(101 - _)
 
-    def d = Spout.from(1, step = 1).take(100)
+    def d = Spout.ints(from = 1, step = 1).take(100)
 
     def e = Spout.iterate(1)(_ + 1).takeWhile(_ <= 100)
 

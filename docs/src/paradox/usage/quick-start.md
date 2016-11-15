@@ -95,7 +95,7 @@ It is only when you call `.run()` on a `Piping` that the whole stream machinery 
 start to flow.
 Thereby one very important thing to have in mind is that you can only ever call `.run()` **once** on any given
 stream setup. After the first `.run()` call all elements of the stream setup, i.e. all involved spouts and drains
-(as well as, potentially, @ref[Pipes](transformations/pipes.md) and @ref[Modules](transformations/modules.md)) have
+(as well as, potentially, @ref[Pipes](pipes.md) and @ref[Modules](modules.md)) have
 been "spent". They cannot be used again and will cause all subsequent streams that they are incorporated into to fail
 with an @scaladoc[IllegalReuseException](swave.core.IllegalReuseException).
 

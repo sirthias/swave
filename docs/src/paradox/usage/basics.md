@@ -38,20 +38,22 @@ tick and which almost directly correspond to their counterparts in the
 @@@
  
 Request(n: `Long`)
-: Signals that the downstream stage is ready to receive the next `n` data elements.<br/>
-The total number of requested elements is called **demand** and the lack thereof **backpressure**.
+: Signal flowing upstream which indicates that the downstream stage is ready to receive the next `n` data elements.
+The total number of requested elements is called **demand** and the lack thereof is called **backpressure**.
   
 Cancel
-: Signals that the downstream stage is no longer interested in receiving data elements and will (potentially) shut down.
+: Signal flowing upstream which indicates that the downstream stage is no longer interested in receiving data elements
+and will (potentially) shut down.
 
 OnNext(element)
-: Delivers the next data element to the downstream stage.
+: Signal flowing downstream which delivers the next data element to the downstream stage.
 
 OnComplete
-: Signals that the upstream stage will deliver no more data elements and will (potentially) shut down.
+: Signal flowing downstream which indicates that the upstream stage will not deliver any more data elements and will
+(potentially) shut down.
 
 OnError(error: `Throwable`)
-: Signals that the upstream stage has encountered an error and will shut down.
+: Signal flowing downstream which indicates that the upstream stage has encountered an error and will shut down.
 
 
 After a stream is started the machinery is kicked into motion by the first `Request` signal dispatched (in most cases)
@@ -97,7 +99,7 @@ a @ref[transformation] to connect the open port to a downstream stage:
 
 After we've done this the `foo` instance is fully connected. Any attempt to reuse it (e.g. by trying to attach another
 transformation) will fail with an @scaladoc[IllegalReuseException]. However, attaching the `map` transformation to the
-`foo` instance produces another spout (called `upperFoo` in this case), which itself has an unconnected (open) port.
+`foo` instance produces another spout (called `upperFoo` in this case), which itself has now an unconnected (open) port.
 
 As you can see attaching @ref[transformations] to @ref[spouts] will always connect up some ports but at the same time
 produce new unconnected ones. Only by attaching @ref[drains] can a graph become fully **closed**, without any ports

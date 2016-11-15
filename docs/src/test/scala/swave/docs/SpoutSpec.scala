@@ -10,7 +10,7 @@ import org.scalatest.{FreeSpec, Matchers}
 
 class SpoutSpec extends FreeSpec with Matchers {
 
-  "the examples in the Spouts chapter should work as expected" - {
+  "the examples in the `spouts` chapter should work as expected" - {
 
     "option-flatmap" in {
       //#option-flatmap
@@ -20,11 +20,11 @@ class SpoutSpec extends FreeSpec with Matchers {
       implicit val env = StreamEnv()
 
       def evenIntsViaFlatmap =
-        Spout.from(0)
+        Spout.ints(from = 0)
           .flatMap(i => if (i % 2 == 0) Some(i) else None)
 
       def evenIntsViaFilter =
-        Spout.from(0)
+        Spout.ints(from = 0)
           .filter(_ % 2 == 0)
 
       val a: Future[List[Int]] = evenIntsViaFlatmap.take(5).drainToList(5)

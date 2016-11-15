@@ -1,4 +1,4 @@
-attachLeft
+fanInToSum
 ==========
 
 ... TODO ...

@@ -10,6 +10,8 @@ User Documentation
 * [-](drains.md)
 * [-](transformations/index.md)
 * [-](sync-vs-async.md)
+* [-](pipes.md)
+* [-](modules.md)
 * [-](debugging.md)
 * [-](rendering.md)
 * [-](configuration.md)
