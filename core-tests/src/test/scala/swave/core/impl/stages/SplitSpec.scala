@@ -30,7 +30,7 @@ final class SplitSpec extends SyncPipeSpec with Inspectors {
         .splitWhen(_ % 4 == 0)
         .map(_.map(_.toString).reduce(_ + _))
         .flattenConcat()
-        .drainToMkString(",")
+        .drainToMkString(100, ",")
         .value.get.get shouldEqual "123,4567,89"
     }
   }
@@ -44,7 +44,7 @@ final class SplitSpec extends SyncPipeSpec with Inspectors {
         .splitAfter(_ % 4 == 0)
         .map(_.map(_.toString).reduce(_ + _))
         .flattenConcat()
-        .drainToMkString(",")
+        .drainToMkString(100, ",")
         .value.get.get shouldEqual "1234,5678,9"
     }
   }
