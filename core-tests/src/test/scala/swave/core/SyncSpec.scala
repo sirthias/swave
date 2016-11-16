@@ -65,7 +65,7 @@ class SyncSpec extends SwaveSpec {
 
     "fanout to drain" in {
       val promise = Promise[Seq[Int]]()
-      Spout(1, 2, 3).tee(Drain.seq(10).resultTo(promise)) should produce(1, 2, 3)
+      Spout(1, 2, 3).tee(Drain.seq(10).captureResult(promise)) should produce(1, 2, 3)
       promise.future.await() shouldEqual Seq(1, 2, 3)
     }
 

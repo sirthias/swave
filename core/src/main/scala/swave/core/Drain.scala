@@ -39,7 +39,7 @@ final class Drain[-T, +R] private[swave] (private[swave] val outport: Outport, v
     * NOTE: The result of this call and the underlying drain share the same stage.
     * This means that only one of them can be used (once) in any stream setup.
     */
-  def resultTo[P](promise: Promise[P])(implicit capture: Drain.Capture[R, P]): Drain[T, Unit] = {
+  def captureResult[P](promise: Promise[P])(implicit capture: Drain.Capture[R, P]): Drain[T, Unit] = {
     capture(result, promise)
     dropResult
   }
