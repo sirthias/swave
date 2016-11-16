@@ -7,8 +7,7 @@ Transformations
 * [-](simple.md)
 * [-](fan-ins.md)
 * [-](fan-outs.md)
-* [-](injecting.md)
-* [-](flattening.md)
+* [-](streams-of-streams.md)
 * [-](couplings.md)
 * [-](reference/index.md)
 

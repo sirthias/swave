@@ -65,7 +65,7 @@ can.
 The key thing to realize here is that **nothing will happen unless sufficient demand is signalled from downstream**
 via one or more `Request` signals. In most cases you won't have to worry about all the details of this process, but
 especially when things don't work as expected you might have to understand these lower-level principles in order to
-@ref[debug the problem](debugging.md).  
+@ref[debug the problem](further/debugging.md).  
 
  
 Stream Life-Cycle
@@ -191,19 +191,6 @@ Many times you are only interested in completion of the result `Future` that a f
 depending on the stream's execution mode, this might well be before all stages have terminated. It could even be that
 the stream continues to run indefinitely afterwards if it's set up in a way that allows this.
  
- 
-Prefer `def` over `val`
------------------------ 
-
-One simple way to deal with the non-reusability of *swave's* stream components is to model them as a `def` rather than
-a `val` wherever reuse is desired, e.g. like this:
-
-@@snip [-]($test/BasicSpec.scala) { #reuse }
-
-Apart from ensuring that you'll never see an @scaladoc[IllegalReuseException] it also has the benefit that
-parameterizing your higher-level stream constructs becomes trivial (as all that's required is giving the `def` a
-parameter list). 
- 
 
 Execution Model
 ---------------
@@ -245,8 +232,8 @@ to properly synchronize all accesses yourself.
   [UnclosedStreamGraphException]: swave.core.UnclosedStreamGraphException
   [Piping]: swave.core.Piping
   [Quick-Start]: quick-start.md
-  [render]: rendering.md
+  [render]: further/rendering.md
   [Couplings]: transformations/couplings.md
   [fan-in]: transformations/fan-ins.md 
   [fan-out]: transformations/fan-outs.md 
-  [Sync vs. Async Execution]: sync-vs-async.md
+  [Sync vs. Async Execution]: further/sync-vs-async.md

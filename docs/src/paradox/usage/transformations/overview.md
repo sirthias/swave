@@ -52,8 +52,7 @@ streams-of-streams:
 * [Simple Transformations](simple.md)
 * [Fan-Outs](fan-outs.md)
 * [Fan-Ins](fan-ins.md)
-* [Creating Streams-of-Streams](injecting.md)
-* [Flattening Streams-of-Streams](flattening.md)
+* [Streams-of-Streams](streams-of-streams.md)
 
 If you'd like to get closer to the source, most transformations are defined in the `swave.core.StreamOps` trait:
 

@@ -21,17 +21,17 @@ class FanOutSpec extends FreeSpec with Matchers {
 
       val promise1 = Promise[Seq[String]]()
       val drain1 =
-        Drain.seq(limit = 10).resultTo(promise1)
+        Drain.seq(limit = 10).captureResult(promise1)
 
       val promise2 = Promise[Seq[Int]]()
       val drain2 =
-        Drain.seq(limit = 10).resultTo(promise2)
+        Drain.seq(limit = 10).captureResult(promise2)
 
       Spout.ints(from = 0)
         .fanOutBroadcast(eagerCancel = true)
           .sub.filter(_ > 45).map(_.toString).to(drain1)
           .sub.map(_.toString).end
-          .sub.slice(42, 7).to(drain2)
+          .sub.slice(42, 7).to(drain2) // terminates the stream by cancelling after the 48th element
         .continue
         .drop(10)
         .drainToMkString(limit = 100)
