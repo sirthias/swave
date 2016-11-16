@@ -83,6 +83,11 @@
                           </ul></li>
                           <li class="nav-parent nav-expanded nav-active"><a><i class="fa fa-book" aria-hidden="true"></i><span>User Documentation</span></a>
                           <ul class="nav nav-children">
+                            <li class="nav-parent"><a>Show-Off</a>
+                            <ul class="nav nav-children">
+                              <li><a href="../usage/show-off/overview.html">Show-Off Overview</a></li>
+                              <li><a href="../usage/show-off/fibonacci.html">Fibonacci Example</a></li>
+                            </ul></li>
                             <li><a href="../usage/setup.html">Setup</a></li>
                             <li class="nav-expanded nav-active"><a href="../usage/quick-start.html">Quick Start</a></li>
                             <li><a href="../usage/basics.html">Basics</a></li>
@@ -92,19 +97,27 @@
                             <ul class="nav nav-children">
                               <li><a href="../usage/transformations/overview.html">Transformations Overview</a></li>
                               <li><a href="../usage/transformations/simple.html">Simple Transformations</a></li>
-                              <li><a href="../usage/transformations/fan-outs.html">Fan-Outs</a></li>
                               <li><a href="../usage/transformations/fan-ins.html">Fan-Ins</a></li>
-                              <li><a href="../usage/transformations/injecting.html">Injecting</a></li>
-                              <li><a href="../usage/transformations/flattening.html">Flattening</a></li>
-                              <li><a href="../usage/transformations/pipes.html">Pipes</a></li>
-                              <li><a href="../usage/transformations/modules.html">Modules</a></li>
+                              <li><a href="../usage/transformations/fan-outs.html">Fan-Outs</a></li>
+                              <li><a href="../usage/transformations/streams-of-streams.html">Streams-of-Streams</a></li>
                               <li><a href="../usage/transformations/couplings.html">Couplings</a></li>
                               <li><a href="../usage/transformations/reference/index.html">Transformation Reference</a></li>
                             </ul></li>
-                            <li><a href="../usage/sync-vs-async.html">Sync vs. Async</a></li>
-                            <li><a href="../usage/debugging.html">Debugging</a></li>
-                            <li><a href="../usage/rendering.html">Rendering</a></li>
-                            <li><a href="../usage/configuration.html">Configuration</a></li>
+                            <li class="nav-parent"><a>Further Topics</a>
+                            <ul class="nav nav-children">
+                              <li><a href="../usage/further/sync-vs-async.html">Sync vs. Async</a></li>
+                              <li><a href="../usage/further/pipes.html">Pipes</a></li>
+                              <li><a href="../usage/further/modules.html">Modules</a></li>
+                              <li><a href="../usage/further/debugging.html">Debugging</a></li>
+                              <li><a href="../usage/further/rendering.html">Rendering</a></li>
+                              <li><a href="../usage/further/configuration.html">Configuration</a></li>
+                              <li><a href="../usage/further/best-practices.html">Best Practices</a></li>
+                            </ul></li>
+                            <li class="nav-parent"><a>IO Adapters</a>
+                            <ul class="nav nav-children">
+                              <li><a href="../usage/io/file-io.html">File IO</a></li>
+                              <li><a href="../usage/io/tcp.html">Network IO (TCP)</a></li>
+                            </ul></li>
                             <li><a href="../usage/swave-core-api.html">API Docs (ScalaDoc)</a></li>
                             <li><a href="../usage/swave-akka-compat/index.html">swave-akka-compat</a></li>
                             <li><a href="../usage/swave-scodec-compat/index.html">swave-scodec-compat</a></li>
@@ -170,7 +183,7 @@ def b = Spout(1, 2, 3 to 100: _*)
 
 def c = Spout(100 to 1 by -1).map(101 - _)
 
-def d = Spout.from(1, step = 1).take(100)
+def d = Spout.ints(from = 1, step = 1).take(100)
 
 def e = Spout.iterate(1)(_ + 1).takeWhile(_ &lt;= 100)
 
@@ -211,7 +224,7 @@ def drain2[T]: Drain[T, Future[Unit]] = Drain.foreach(println)</code></pre>
 <p>The result of attaching a <code>Drain</code> to a <code>Spout</code> is a <a href="http://swave.io/api/core/latest/#swave.core.Piping">Piping</a>, a type you&rsquo;ll probably use less frequently in your own code. A <code>Piping</code> represents a complete stream pipeline or graph setup, which is ready to be run. Its single type parameter is the result type of the <code>Drain</code> that was used to &ldquo;close&rdquo; the stream pipeline.</p>
 <p>Note that up until this point, including the attachment of a <code>Drain</code>, nothing has really happened apart from <em>describing</em> what your stream setup looks like. No data has started to flow and no resources (apart from the memory for the pipeline) have been claimed.</p>
 <h2><a href="#running-a-stream" name="running-a-stream" class="anchor"><span class="anchor-link"></span></a>Running a Stream</h2>
-<p>It is only when you call <code>.run()</code> on a <code>Piping</code> that the whole stream machinery kicks into motion and data elements start to flow. Thereby one very important thing to have in mind is that you can only ever call <code>.run()</code> <strong>once</strong> on any given stream setup. After the first <code>.run()</code> call all elements of the stream setup, i.e. all involved spouts and drains (as well as, potentially, <a href="transformations/pipes.html">Pipes</a> and <a href="transformations/modules.html">Modules</a>) have been &ldquo;spent&rdquo;. They cannot be used again and will cause all subsequent streams that they are incorporated into to fail with an <a href="http://swave.io/api/core/latest/#swave.core.IllegalReuseException">IllegalReuseException</a>.</p>
+<p>It is only when you call <code>.run()</code> on a <code>Piping</code> that the whole stream machinery kicks into motion and data elements start to flow. Thereby one very important thing to have in mind is that you can only ever call <code>.run()</code> <strong>once</strong> on any given stream setup. After the first <code>.run()</code> call all elements of the stream setup, i.e. all involved spouts and drains (as well as, potentially, <a href="further/pipes.html">Pipes</a> and <a href="further/modules.html">Modules</a>) have been &ldquo;spent&rdquo;. They cannot be used again and will cause all subsequent streams that they are incorporated into to fail with an <a href="http://swave.io/api/core/latest/#swave.core.IllegalReuseException">IllegalReuseException</a>.</p>
 <p><em>swave</em> streams can run synchronously (yet without any blocking!) purely on the caller thread. All the examples we&rsquo;ve looked at so far are of this kind. However, there might be components in your stream setup that require asynchronous dispatch and therefore cannot run purely on the caller thread in a non-blocking fashion. For example, a spout or drain might be connected to a network socket and thus must be &ldquo;woken up&rdquo; when new data arrive or the kernel signals that the socket is now ready to accept data. Or the stream might contain a transformation that requires the concept of &ldquo;time&rdquo; in order to do its thing (like <code>throttle</code> or <code>takeWithin</code>). Or you might want to introduce an asynchronous boundary manually (see the <code>async</code> transformation), in order to allow for different parts of your pipeline to be run in parallel. In all of these cases the stream will be started asynchronously when you call <code>.run()</code>, which means it will be started and run on another thread.</p>
 <h2><a href="#streamenv" name="streamenv" class="anchor"><span class="anchor-link"></span></a>StreamEnv</h2>
 <p>When you try to run a stream now, only with what we&rsquo;ve talked about so far, you&rsquo;ll see that there is still one final thing missing. For example if we try to compile this snippet:</p>
@@ -225,14 +238,14 @@ def drain2[T]: Drain[T, Future[Unit]] = Drain.foreach(println)</code></pre>
             ^  
 </code></pre>
 <p>which tells us that we need to supply an implicit <a href="http://swave.io/api/core/latest/#swave.core.StreamEnv">StreamEnv</a> instance.</p>
-<p>The <a href="http://swave.io/api/core/latest/#swave.core.StreamEnv">StreamEnv</a> is similar to the <a href="http://swave.io/api/#akka.core.ActorSystem">ActorSystem</a> type in Akka. It provides all the global configuration information that&rsquo;s required by <em>swave&rsquo;s</em> internal streaming engine. For example, the <code>StreamEnv</code> contains the thread-pool configuration(s) and general <a href="http://swave.io/api/core/latest/#swave.core.StreamEnv.Settings">Settings</a> you have <a href="configuration.html">configured</a> as well as a global <code>Logger</code> and <a href="http://swave.io/api/core/latest/#swave.core.Scheduler">Scheduler</a> instance.</p>
+<p>The <a href="http://swave.io/api/core/latest/#swave.core.StreamEnv">StreamEnv</a> is similar to the <a href="http://swave.io/api/#akka.core.ActorSystem">ActorSystem</a> type in Akka. It provides all the global configuration information that&rsquo;s required by <em>swave&rsquo;s</em> internal streaming engine. For example, the <code>StreamEnv</code> contains the thread-pool configuration(s) and general <a href="http://swave.io/api/core/latest/#swave.core.StreamEnv.Settings">Settings</a> you have <a href="further/configuration.html">configured</a> as well as a global <code>Logger</code> and <a href="http://swave.io/api/core/latest/#swave.core.Scheduler">Scheduler</a> instance.</p>
 <p>The simplest and yet perfectly fine way to supply a <code>StreamEnv</code> instance is this:</p>
 <pre><code class="scala">implicit val env = StreamEnv()</code></pre>
-<p>This will simply load the complete <a href="configuration.html">Configuration</a> from the <code>reference.conf</code> and, potentially, <code>application.conf</code> files on your classpath.</p>
+<p>This will simply load the complete <a href="further/configuration.html">Configuration</a> from the <code>reference.conf</code> and, potentially, <code>application.conf</code> files on your classpath.</p>
 <p>Note: If any of the streams that is started with a particular <code>StreamEnv</code> instance is asynchronous, i.e. requires dispatch onto another thread, the <code>StreamEnv</code> instance needs to be explicitly shut down when the application wants to exit. Otherwise the internal thread-pools will not be terminated and thus keep the JVM from exiting (unless all thread-pools are configured with <code>daemonic = on</code>, which is not the default).</p>
 <p>This is how you trigger an orderly shutdown of a <code>StreamEnv</code> instance:</p>
 <pre><code class="scala">env.shutdown()</code></pre>
-<h2><a href="#shortcuts" name="shortcuts" class="anchor"><span class="anchor-link"></span></a>Shortcuts</h2>
+<h2><a href="#drainto-shortcuts" name="drainto-shortcuts" class="anchor"><span class="anchor-link"></span></a>drainTo Shortcuts</h2>
 <p>Since attaching a <code>Drain</code> and immediately calling <code>.run()</code> on the result is such a common pattern, <em>swave</em> offers several shortcuts that allow you to do both in one single step. For example:</p>
 <pre><code class="scala">def spout = Spout(1 to 100)
 

@@ -575,6 +575,48 @@ function.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="Dra
 function. The given function is only executed when the outer stream is started.</p><p>If the outer stream is synchronous the <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a> returned by <code>onStart</code> must be able to run synchronously
 as well. If it doesn't the stream will fail with an <a href="IllegalAsyncBoundaryException.html" class="extype" name="swave.core.IllegalAsyncBoundaryException">IllegalAsyncBoundaryException</a>.
 </p></div></div>
+    </li><li name="swave.core.Drain#mkString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="mkString[T](limit:Int,start:String,sep:String,end:String):swave.core.Drain[T,scala.concurrent.Future[String]]"></a>
+      <a id="mkString[T](Int,String,String,String):Drain[T,Future[String]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">mkString</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="limit">limit: <span class="extype" name="scala.Int">Int</span></span>, <span name="start">start: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="sep">sep: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="end">end: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a>[<span class="extype" name="swave.core.Drain.mkString.T">T</span>, <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="scala.Predef.String">String</span>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.Drain$@mkString[T](limit:Int,start:String,sep:String,end:String):swave.core.Drain[T,scala.concurrent.Future[String]]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a> which produces a single string representation of the stream by concatenating
+the <code>toString</code> result of all elements with the given <code>start</code>, <code>sep</code> and <code>end</code> strings.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a> which produces a single string representation of the stream by concatenating
+the <code>toString</code> result of all elements with the given <code>start</code>, <code>sep</code> and <code>end</code> strings.</p><p>The given <code>limit</code> protects against an overflow beyond the expected maximum number
+of elements by failing the stream with a <a href="StreamLimitExceeded.html" class="extype" name="swave.core.StreamLimitExceeded">StreamLimitExceeded</a> if more elements are received.
+</p></div></div>
+    </li><li name="swave.core.Drain#mkString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="mkString[T](limit:Int,sep:String):swave.core.Drain[T,scala.concurrent.Future[String]]"></a>
+      <a id="mkString[T](Int,String):Drain[T,Future[String]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">mkString</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="limit">limit: <span class="extype" name="scala.Int">Int</span></span>, <span name="sep">sep: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>)</span><span class="result">: <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a>[<span class="extype" name="swave.core.Drain.mkString.T">T</span>, <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="scala.Predef.String">String</span>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.Drain$@mkString[T](limit:Int,sep:String):swave.core.Drain[T,scala.concurrent.Future[String]]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a> which produces a single string representation of the stream by concatenating
+the <code>toString</code> result of all elements, optionally separated by <code>sep</code>.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a> which produces a single string representation of the stream by concatenating
+the <code>toString</code> result of all elements, optionally separated by <code>sep</code>.</p><p>The given <code>limit</code> protects against an overflow beyond the expected maximum number
+of elements by failing the stream with a <a href="StreamLimitExceeded.html" class="extype" name="swave.core.StreamLimitExceeded">StreamLimitExceeded</a> if more elements are received.
+</p></div></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>

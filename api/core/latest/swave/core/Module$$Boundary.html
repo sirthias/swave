@@ -28,10 +28,12 @@
         </head>
         <body class="type">
       <div id="definition">
-        <img alt="Class" src="../../lib/class_big.png" />
+        <a href="Module$$Boundary$.html" title="See companion object"><img alt="Class/Object" src="../../lib/class_to_object_big.png" /></a>
         <p id="owner"><a href="../package.html" class="extype" name="swave">swave</a>.<a href="package.html" class="extype" name="swave.core">core</a>.<a href="Module$.html" class="extype" name="swave.core.Module">Module</a></p>
-        <h1>Boundary</h1><h3><span class="morelinks"><div>Related Doc:
-            <a href="Module$.html" class="extype" name="swave.core.Module">package Module</a>
+        <h1><a href="Module$$Boundary$.html" title="See companion object">Boundary</a></h1><h3><span class="morelinks"><div>
+            Related Docs:
+            <a href="Module$$Boundary$.html" title="See companion object">object Boundary</a>
+            | <a href="Module$.html" class="extype" name="swave.core.Module">package Module</a>
           </div></span></h3><span class="permalink">
       <a href="../../index.html#swave.core.Module$$Boundary" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
@@ -41,18 +43,21 @@
 
       <h4 id="signature" class="signature">
       <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">case class</span>
+        <span class="modifier">sealed abstract </span>
+        <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">Boundary</span><span class="params">(<span name="elem">elem: <a href="PipeElem.html" class="extype" name="swave.core.PipeElem">PipeElem</a></span>, <span name="isEntry">isEntry: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="isInner">isInner: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <span class="name">Boundary</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       
           <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span class="extype" name="scala.Serializable">Serializable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="scala.Product">Product</span>, <span class="extype" name="scala.Equals">Equals</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
-        </div></div>
+          <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+        </div><div class="toggleContainer block">
+            <span class="toggle">Known Subclasses</span>
+            <div class="subClasses hiddenContent"><a href="Module$$Boundary$$InnerEntry.html" class="extype" name="swave.core.Module.Boundary.InnerEntry">InnerEntry</a>, <a href="Module$$Boundary$$InnerExit.html" class="extype" name="swave.core.Module.Boundary.InnerExit">InnerExit</a>, <a href="Module$$Boundary$$OuterEntry.html" class="extype" name="swave.core.Module.Boundary.OuterEntry">OuterEntry</a>, <a href="Module$$Boundary$$OuterExit.html" class="extype" name="swave.core.Module.Boundary.OuterExit">OuterExit</a></div>
+          </div></div>
         
 
       <div id="mbrsel">
@@ -69,7 +74,7 @@
                 <span class="filtertype">Inherited<br />
                 </span>
                 <ol id="linearization">
-                  <li class="in" name="swave.core.Module.Boundary"><span>Boundary</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  <li class="in" name="swave.core.Module.Boundary"><span>Boundary</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                 </ol>
               </div><div id="ancestors">
             <span class="filtertype"></span>
@@ -86,21 +91,25 @@
 
       <div id="template">
         <div id="allMembers">
-        <div id="constructors" class="members">
-              <h3>Instance Constructors</h3>
-              <ol><li name="swave.core.Module.Boundary#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(elem:swave.core.PipeElem,isEntry:Boolean,isInner:Boolean):swave.core.Module.Boundary"></a>
-      <a id="&lt;init&gt;:Boundary"></a>
+        
+
+        
+
+        <div id="values" class="values members">
+              <h3>Abstract Value Members</h3>
+              <ol><li name="swave.core.Module.Boundary#stage" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="stage:swave.core.Stage"></a>
+      <a id="stage:Stage"></a>
       <h4 class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">new</span>
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">Boundary</span><span class="params">(<span name="elem">elem: <a href="PipeElem.html" class="extype" name="swave.core.PipeElem">PipeElem</a></span>, <span name="isEntry">isEntry: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="isInner">isInner: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span>
+        <span class="name">stage</span><span class="result">: <a href="Stage.html" class="extype" name="swave.core.Stage">Stage</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#swave.core.Module$$Boundary@&lt;init&gt;(elem:swave.core.PipeElem,isEntry:Boolean,isInner:Boolean):swave.core.Module.Boundary" title="Permalink" target="_top">
+      <a href="../../index.html#swave.core.Module$$Boundary@stage:swave.core.Stage" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -108,12 +117,8 @@
     </li></ol>
             </div>
 
-        
-
-        
-
         <div id="values" class="values members">
-              <h3>Value Members</h3>
+              <h3>Concrete Value Members</h3>
               <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a>
       <a id="!=(Any):Boolean"></a>
@@ -205,23 +210,6 @@
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="swave.core.Module.Boundary#elem" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="elem:swave.core.PipeElem"></a>
-      <a id="elem:PipeElem"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">elem</span><span class="result">: <a href="PipeElem.html" class="extype" name="swave.core.PipeElem">PipeElem</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.Module$$Boundary@elem:swave.core.PipeElem" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
     </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a>
       <a id="eq(AnyRef):Boolean"></a>
@@ -239,6 +227,23 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#equals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="equals(x$1:Any):Boolean"></a>
+      <a id="equals(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.Module$$Boundary@equals(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <a id="finalize():Unit"></a>
@@ -279,6 +284,23 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hashCode():Int"></a>
+      <a id="hashCode():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.Module$$Boundary@hashCode():Int" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="swave.core.Module.Boundary#isEntry" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="isEntry:Boolean"></a>
       <a id="isEntry:Boolean"></a>
@@ -292,6 +314,23 @@
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#swave.core.Module$$Boundary@isEntry:Boolean" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="swave.core.Module.Boundary#isExit" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="isExit:Boolean"></a>
+      <a id="isExit:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isExit</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.Module$$Boundary@isExit:Boolean" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -330,6 +369,23 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="swave.core.Module.Boundary#isOuter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="isOuter:Boolean"></a>
+      <a id="isOuter:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isOuter</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.Module$$Boundary@isOuter:Boolean" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>
@@ -398,7 +454,7 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="swave.core.Module.Boundary#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="scala.AnyRef#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
       <a id="toString():String"></a>
       <h4 class="signature">
@@ -407,14 +463,14 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#swave.core.Module$$Boundary@toString():String" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="swave.core.Module.Boundary">Boundary</a> → AnyRef → Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <a id="wait():Unit"></a>
@@ -493,15 +549,7 @@
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="scala.Serializable">
-              <h3>Inherited from <span class="extype" name="scala.Serializable">Serializable</span></h3>
-            </div><div class="parent" name="java.io.Serializable">
-              <h3>Inherited from <span class="extype" name="java.io.Serializable">Serializable</span></h3>
-            </div><div class="parent" name="scala.Product">
-              <h3>Inherited from <span class="extype" name="scala.Product">Product</span></h3>
-            </div><div class="parent" name="scala.Equals">
-              <h3>Inherited from <span class="extype" name="scala.Equals">Equals</span></h3>
-            </div><div class="parent" name="scala.AnyRef">
+        <div class="parent" name="scala.AnyRef">
               <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
             </div><div class="parent" name="scala.Any">
               <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>

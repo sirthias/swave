@@ -279,6 +279,24 @@ found or constructed for it.</p>
 of data elements.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> which will evaluate the given call-by-name argument to produce an infinite stream
 of data elements.</p><p>CAUTION: The call-by-name argument might be executed from another thread if the stream is asynchronous!
 </p></div></div>
+    </li><li name="swave.core.Spout#doubles" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="doubles(from:Double,step:Double):swave.core.Spout[Double]"></a>
+      <a id="doubles(Double,Double):Spout[Double]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">doubles</span><span class="params">(<span name="from">from: <span class="extype" name="scala.Double">Double</span></span>, <span name="step">step: <span class="extype" name="scala.Double">Double</span></span>)</span><span class="result">: <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a>[<span class="extype" name="scala.Double">Double</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.Spout$@doubles(from:Double,step:Double):swave.core.Spout[Double]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> which produces an infinite stream of <code>Double</code> elements starting
+with the given <code>start</code> and increments of <code>step</code>.</p>
     </li><li name="swave.core.Spout#empty" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="empty[T]:swave.core.Spout[T]"></a>
       <a id="empty[T]:Spout[T]"></a>
@@ -390,24 +408,6 @@ otherwise the error is delayed until the first request signal is received from d
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="swave.core.Spout#from" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="from(start:Int,step:Int):swave.core.Spout[Int]"></a>
-      <a id="from(Int,Int):Spout[Int]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">from</span><span class="params">(<span name="start">start: <span class="extype" name="scala.Int">Int</span></span>, <span name="step">step: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1</span></span>)</span><span class="result">: <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a>[<span class="extype" name="scala.Int">Int</span>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.Spout$@from(start:Int,step:Int):swave.core.Spout[Int]" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">A <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> which produces an infinite stream of <code>Int</code> elements starting
-with the given <code>start</code> and increments of <code>step</code>.</p>
     </li><li name="swave.core.Spout#fromFuture" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="fromFuture[T](future:scala.concurrent.Future[T]):swave.core.Spout[T]"></a>
       <a id="fromFuture[T](Future[T]):Spout[T]"></a>
@@ -550,6 +550,24 @@ is failed with the exception in the future.</p><p>The returned <a href="Spout.ht
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="swave.core.Spout#ints" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ints(from:Int,step:Int):swave.core.Spout[Int]"></a>
+      <a id="ints(Int,Int):Spout[Int]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ints</span><span class="params">(<span name="from">from: <span class="extype" name="scala.Int">Int</span></span>, <span name="step">step: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1</span></span>)</span><span class="result">: <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a>[<span class="extype" name="scala.Int">Int</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.Spout$@ints(from:Int,step:Int):swave.core.Spout[Int]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> which produces an infinite stream of <code>Int</code> elements starting
+with the given <code>start</code> and increments of <code>step</code>.</p>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -608,6 +626,24 @@ function.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="Spo
 function. The given function is only executed when the outer stream is started.</p><p>If the outer stream is synchronous the <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> returned by <code>onStart</code> must be able to run synchronously
 as well. If it doesn't the stream will fail with an <a href="IllegalAsyncBoundaryException.html" class="extype" name="swave.core.IllegalAsyncBoundaryException">IllegalAsyncBoundaryException</a>.
 </p></div></div>
+    </li><li name="swave.core.Spout#longs" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="longs(from:Long,step:Long):swave.core.Spout[Long]"></a>
+      <a id="longs(Long,Long):Spout[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">longs</span><span class="params">(<span name="from">from: <span class="extype" name="scala.Long">Long</span></span>, <span name="step">step: <span class="extype" name="scala.Long">Long</span> = <span class="symbol">1</span></span>)</span><span class="result">: <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a>[<span class="extype" name="scala.Long">Long</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.Spout$@longs(from:Long,step:Long):swave.core.Spout[Long]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a> which produces an infinite stream of <code>Long</code> elements starting
+with the given <code>start</code> and increments of <code>step</code>.</p>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>

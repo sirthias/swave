@@ -83,6 +83,11 @@
                           </ul></li>
                           <li class="nav-parent nav-expanded nav-active"><a><i class="fa fa-book" aria-hidden="true"></i><span>User Documentation</span></a>
                           <ul class="nav nav-children">
+                            <li class="nav-parent"><a>Show-Off</a>
+                            <ul class="nav nav-children">
+                              <li><a href="../usage/show-off/overview.html">Show-Off Overview</a></li>
+                              <li><a href="../usage/show-off/fibonacci.html">Fibonacci Example</a></li>
+                            </ul></li>
                             <li><a href="../usage/setup.html">Setup</a></li>
                             <li><a href="../usage/quick-start.html">Quick Start</a></li>
                             <li class="nav-expanded nav-active"><a href="../usage/basics.html">Basics</a></li>
@@ -92,19 +97,27 @@
                             <ul class="nav nav-children">
                               <li><a href="../usage/transformations/overview.html">Transformations Overview</a></li>
                               <li><a href="../usage/transformations/simple.html">Simple Transformations</a></li>
-                              <li><a href="../usage/transformations/fan-outs.html">Fan-Outs</a></li>
                               <li><a href="../usage/transformations/fan-ins.html">Fan-Ins</a></li>
-                              <li><a href="../usage/transformations/injecting.html">Injecting</a></li>
-                              <li><a href="../usage/transformations/flattening.html">Flattening</a></li>
-                              <li><a href="../usage/transformations/pipes.html">Pipes</a></li>
-                              <li><a href="../usage/transformations/modules.html">Modules</a></li>
+                              <li><a href="../usage/transformations/fan-outs.html">Fan-Outs</a></li>
+                              <li><a href="../usage/transformations/streams-of-streams.html">Streams-of-Streams</a></li>
                               <li><a href="../usage/transformations/couplings.html">Couplings</a></li>
                               <li><a href="../usage/transformations/reference/index.html">Transformation Reference</a></li>
                             </ul></li>
-                            <li><a href="../usage/sync-vs-async.html">Sync vs. Async</a></li>
-                            <li><a href="../usage/debugging.html">Debugging</a></li>
-                            <li><a href="../usage/rendering.html">Rendering</a></li>
-                            <li><a href="../usage/configuration.html">Configuration</a></li>
+                            <li class="nav-parent"><a>Further Topics</a>
+                            <ul class="nav nav-children">
+                              <li><a href="../usage/further/sync-vs-async.html">Sync vs. Async</a></li>
+                              <li><a href="../usage/further/pipes.html">Pipes</a></li>
+                              <li><a href="../usage/further/modules.html">Modules</a></li>
+                              <li><a href="../usage/further/debugging.html">Debugging</a></li>
+                              <li><a href="../usage/further/rendering.html">Rendering</a></li>
+                              <li><a href="../usage/further/configuration.html">Configuration</a></li>
+                              <li><a href="../usage/further/best-practices.html">Best Practices</a></li>
+                            </ul></li>
+                            <li class="nav-parent"><a>IO Adapters</a>
+                            <ul class="nav nav-children">
+                              <li><a href="../usage/io/file-io.html">File IO</a></li>
+                              <li><a href="../usage/io/tcp.html">Network IO (TCP)</a></li>
+                            </ul></li>
                             <li><a href="../usage/swave-core-api.html">API Docs (ScalaDoc)</a></li>
                             <li><a href="../usage/swave-akka-compat/index.html">swave-akka-compat</a></li>
                             <li><a href="../usage/swave-scodec-compat/index.html">swave-scodec-compat</a></li>
@@ -163,20 +176,20 @@
 <dl>
   <dt>Request(n: <code>Long</code>)
   </dt>
-  <dd>Signals that the downstream stage is ready to receive the next <code>n</code> data elements.<br/> The total number of requested elements is called <strong>demand</strong> and the lack thereof <strong>backpressure</strong>.</dd>
+  <dd>Signal flowing upstream which indicates that the downstream stage is ready to receive the next <code>n</code> data elements. The total number of requested elements is called <strong>demand</strong> and the lack thereof is called <strong>backpressure</strong>.</dd>
   <dt>Cancel</dt>
-  <dd>Signals that the downstream stage is no longer interested in receiving data elements and will (potentially) shut down.</dd>
+  <dd>Signal flowing upstream which indicates that the downstream stage is no longer interested in receiving data elements and will (potentially) shut down.</dd>
   <dt>OnNext(element)
   </dt>
-  <dd>Delivers the next data element to the downstream stage.</dd>
+  <dd>Signal flowing downstream which delivers the next data element to the downstream stage.</dd>
   <dt>OnComplete</dt>
-  <dd>Signals that the upstream stage will deliver no more data elements and will (potentially) shut down.</dd>
+  <dd>Signal flowing downstream which indicates that the upstream stage will not deliver any more data elements and will (potentially) shut down.</dd>
   <dt>OnError(error: <code>Throwable</code>)
   </dt>
-  <dd>Signals that the upstream stage has encountered an error and will shut down.</dd>
+  <dd>Signal flowing downstream which indicates that the upstream stage has encountered an error and will shut down.</dd>
 </dl>
 <p>After a stream is started the machinery is kicked into motion by the first <code>Request</code> signal dispatched (in most cases) by the final <a href="drains.html">Drain</a> at the very end of the pipeline. This <code>Request</code> signal triggers respective state machine actions in the upstream stages which cause the dispatch of more signals that traverse the whole graph in a kind of ripple effect. As a result of this process data elements begin to flow from the spouts towards the drains where they can.</p>
-<p>The key thing to realize here is that <strong>nothing will happen unless sufficient demand is signalled from downstream</strong> via one or more <code>Request</code> signals. In most cases you won&rsquo;t have to worry about all the details of this process, but especially when things don&rsquo;t work as expected you might have to understand these lower-level principles in order to <a href="debugging.html">debug the problem</a>. </p>
+<p>The key thing to realize here is that <strong>nothing will happen unless sufficient demand is signalled from downstream</strong> via one or more <code>Request</code> signals. In most cases you won&rsquo;t have to worry about all the details of this process, but especially when things don&rsquo;t work as expected you might have to understand these lower-level principles in order to <a href="further/debugging.html">debug the problem</a>. </p>
 <h2><a href="#stream-life-cycle" name="stream-life-cycle" class="anchor"><span class="anchor-link"></span></a>Stream Life-Cycle</h2>
 <p>All stages in <em>swave</em> are single-use, which means that they go through their life-cycle at most <strong>once</strong>.<br/> This section outlines what this life-cycle looks like.</p>
 <h3><a href="#connecting-and-closing" name="connecting-and-closing" class="anchor"><span class="anchor-link"></span></a>Connecting and Closing</h3>
@@ -185,14 +198,14 @@
 <pre><code class="scala">val foo: Spout[Char] = Spout(&#39;f&#39;, &#39;o&#39;, &#39;o&#39;)</code></pre><p class="centered"><img src="../assets/img/foo-spout.svg" alt="Spout foo" /></p>
 <p>The spout instance <code>foo</code> has no downstream attached yet, i.e. it has one open port. We can attach a <a href="transformations/index.html">transformation</a> to connect the open port to a downstream stage:</p>
 <pre><code class="scala">val upperFoo: Spout[Char] = foo.map(_.toUpper)</code></pre><p class="centered"><img src="../assets/img/upper-foo.svg" alt="Spout upperFoo" /></p>
-<p>After we&rsquo;ve done this the <code>foo</code> instance is fully connected. Any attempt to reuse it (e.g. by trying to attach another transformation) will fail with an <a href="http://swave.io/api/core/latest/#swave.core.IllegalReuseException">IllegalReuseException</a>. However, attaching the <code>map</code> transformation to the <code>foo</code> instance produces another spout (called <code>upperFoo</code> in this case), which itself has an unconnected (open) port.</p>
+<p>After we&rsquo;ve done this the <code>foo</code> instance is fully connected. Any attempt to reuse it (e.g. by trying to attach another transformation) will fail with an <a href="http://swave.io/api/core/latest/#swave.core.IllegalReuseException">IllegalReuseException</a>. However, attaching the <code>map</code> transformation to the <code>foo</code> instance produces another spout (called <code>upperFoo</code> in this case), which itself has now an unconnected (open) port.</p>
 <p>As you can see attaching <a href="transformations/index.html">transformations</a> to <a href="spouts.html">spouts</a> will always connect up some ports but at the same time produce new unconnected ones. Only by attaching <a href="drains.html">drains</a> can a graph become fully <strong>closed</strong>, without any ports left unconnected:</p>
 <pre><code class="scala">val piping: Piping[Future[Char]] = upperFoo.to(Drain.head)</code></pre><p class="centered"><img src="../assets/img/simple-piping.svg" alt="Simple Piping" /></p>
 <h3><a href="#sealing" name="sealing" class="anchor"><span class="anchor-link"></span></a>Sealing</h3>
 <p>As you might have already seen in the <a href="quick-start.html">Quick-Start</a> chapter a graph has to be closed first, by connecting up all open ports, before it can be started. Most of the time this is hard to get wrong because the DSL will only give you a <a href="http://swave.io/api/core/latest/#swave.core.Piping">Piping</a> if the final port is connected to a <a href="drains.html">drain</a>, and a stream can only be started via a <a href="http://swave.io/api/core/latest/#swave.core.Piping">Piping</a>.<br/> Sometimes however, for example when using <a href="transformations/couplings.html">Couplings</a>, there is a chance that some ports are not connected yet when the stream is started. Therefore, just before starting, <em>swave</em> sends a special <code>xSeal</code> signal across all stages of the graph, which causes them to verify their being fully connected. If any port is still unconnected the stream will immediately fail with an <a href="http://swave.io/api/core/latest/#swave.core.UnclosedStreamGraphException">UnclosedStreamGraphException</a>.</p>
 <p>A stream graph can only be sealed once. Trying to seal it a second time will result in an <a href="http://swave.io/api/core/latest/#swave.core.IllegalReuseException">IllegalReuseException</a>.</p>
 <h3><a href="#starting" name="starting" class="anchor"><span class="anchor-link"></span></a>Starting</h3>
-<p>Once the stream setup has been sealed successfully it can be started. It is only at this point, when the stream is started, that any resources are claimed, which are potentially required by a stage in the graph (e.g. a network socket, a file handle or a thread-pool). Before the start, up until and including the sealing, no component in the stream will become active, which means that you are free to inspect it, maybe <a href="rendering.html">render</a> it, and potentially drop it without having to worry about any clean-up.</p>
+<p>Once the stream setup has been sealed successfully it can be started. It is only at this point, when the stream is started, that any resources are claimed, which are potentially required by a stage in the graph (e.g. a network socket, a file handle or a thread-pool). Before the start, up until and including the sealing, no component in the stream will become active, which means that you are free to inspect it, maybe <a href="further/rendering.html">render</a> it, and potentially drop it without having to worry about any clean-up.</p>
 <p>After having been started most stages will either begin to immediately send out signals to their peers or wait for signals from their peers, depending on their own logic and configuration. In the process data elements will start to flow from the <a href="spouts.html">spouts</a> to the <a href="drains.html">drains</a>.</p>
 <p>A <a href="http://swave.io/api/core/latest/#swave.core.Piping">Piping</a> can only be started once. Trying to start it a second time will result in an <a href="http://swave.io/api/core/latest/#swave.core.IllegalReuseException">IllegalReuseException</a>.</p>
 <h3><a href="#running" name="running" class="anchor"><span class="anchor-link"></span></a>Running</h3>
@@ -216,21 +229,6 @@
 <h3><a href="#terminating" name="terminating" class="anchor"><span class="anchor-link"></span></a>Terminating</h3>
 <p>A stream graph is fully terminated when all its stages have shut down. When exactly a stage shuts down depends on the stage&rsquo;s logic. The basic <a href="spouts.html">spout</a> stages and most simple transformation stages shut down when they have received a <code>cancel</code> from downstream or a termination signal from upstream. However, this is not necessarily the case for <a href="transformations/fan-ins.html">fan-in</a> and <a href="transformations/fan-outs.html">fan-out</a> stages.</p>
 <p>Many times you are only interested in completion of the result <code>Future</code> that a final <a href="drains.html">drain</a> produces. However, depending on the stream&rsquo;s execution mode, this might well be before all stages have terminated. It could even be that the stream continues to run indefinitely afterwards if it&rsquo;s set up in a way that allows this.</p>
-<h2><a href="#prefer-def-over-val" name="prefer-def-over-val" class="anchor"><span class="anchor-link"></span></a>Prefer <code>def</code> over <code>val</code></h2>
-<p>One simple way to deal with the non-reusability of <em>swave&rsquo;s</em> stream components is to model them as a <code>def</code> rather than a <code>val</code> wherever reuse is desired, e.g. like this:</p>
-<pre><code class="scala">// the stream of all natural numbers as Strings
-def numberStrings = Spout.from(1).map(_.toString)
-
-// print the first 10
-numberStrings.take(10).foreach(println)
-
-// print the 42nd
-println(numberStrings.drop(41).drainToHead())
-
-// concatenate the first hundred
-val s: Future[String] =
-  numberStrings.take(100).drainToMkString(&quot;, &quot;)</code></pre>
-<p>Apart from ensuring that you&rsquo;ll never see an <a href="http://swave.io/api/core/latest/#swave.core.IllegalReuseException">IllegalReuseException</a> it also has the benefit that parameterizing your higher-level stream constructs becomes trivial (as all that&rsquo;s required is giving the <code>def</code> a parameter list). </p>
 <h2><a href="#execution-model" name="execution-model" class="anchor"><span class="anchor-link"></span></a>Execution Model</h2>
 <p><em>swave</em> streams can run in one of two basic modes:</p>
 <ol>
@@ -239,7 +237,7 @@ val s: Future[String] =
 </ol>
 <p>Hereby the caller thread is the thread calling the <code>run</code> method. </p>
 <p>Whether a stream runs synchronously or asynchronously depends on the kinds of stages that are present in the graph. By default <em>swave</em> will run the stream synchronously if possible, but certain kinds of stages must react to external signals (like timers or interrupts) and thus cannot operate in a synchronous mode. If at least one of these is present in the graph then the stream will run asynchronously.</p>
-<p>Of course you can also force a stream to run asynchronously in various ways. Check out the chapter on <a href="sync-vs-async.html">Sync vs. Async Execution</a> for more details on this.</p>
+<p>Of course you can also force a stream to run asynchronously in various ways. Check out the chapter on <a href="further/sync-vs-async.html">Sync vs. Async Execution</a> for more details on this.</p>
 <h2><a href="#thread-safety" name="thread-safety" class="anchor"><span class="anchor-link"></span></a>Thread Safety</h2>
 <p>While the running of streams is specifically designed for asynchronous execution the DSL for constructing stream graphs is not. This means that, if you (for example) try to reuse a stage from two different threads without proper synchronization, the behavior you see might be unexpected.</p>
 <p>The DSL is designed for use from only one thread at a time. If you share DSL elements across threads you must make sure to properly synchronize all accesses yourself.</p>

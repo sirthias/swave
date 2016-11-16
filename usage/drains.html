@@ -83,6 +83,11 @@
                           </ul></li>
                           <li class="nav-parent nav-expanded nav-active"><a><i class="fa fa-book" aria-hidden="true"></i><span>User Documentation</span></a>
                           <ul class="nav nav-children">
+                            <li class="nav-parent"><a>Show-Off</a>
+                            <ul class="nav nav-children">
+                              <li><a href="../usage/show-off/overview.html">Show-Off Overview</a></li>
+                              <li><a href="../usage/show-off/fibonacci.html">Fibonacci Example</a></li>
+                            </ul></li>
                             <li><a href="../usage/setup.html">Setup</a></li>
                             <li><a href="../usage/quick-start.html">Quick Start</a></li>
                             <li><a href="../usage/basics.html">Basics</a></li>
@@ -92,19 +97,27 @@
                             <ul class="nav nav-children">
                               <li><a href="../usage/transformations/overview.html">Transformations Overview</a></li>
                               <li><a href="../usage/transformations/simple.html">Simple Transformations</a></li>
-                              <li><a href="../usage/transformations/fan-outs.html">Fan-Outs</a></li>
                               <li><a href="../usage/transformations/fan-ins.html">Fan-Ins</a></li>
-                              <li><a href="../usage/transformations/injecting.html">Injecting</a></li>
-                              <li><a href="../usage/transformations/flattening.html">Flattening</a></li>
-                              <li><a href="../usage/transformations/pipes.html">Pipes</a></li>
-                              <li><a href="../usage/transformations/modules.html">Modules</a></li>
+                              <li><a href="../usage/transformations/fan-outs.html">Fan-Outs</a></li>
+                              <li><a href="../usage/transformations/streams-of-streams.html">Streams-of-Streams</a></li>
                               <li><a href="../usage/transformations/couplings.html">Couplings</a></li>
                               <li><a href="../usage/transformations/reference/index.html">Transformation Reference</a></li>
                             </ul></li>
-                            <li><a href="../usage/sync-vs-async.html">Sync vs. Async</a></li>
-                            <li><a href="../usage/debugging.html">Debugging</a></li>
-                            <li><a href="../usage/rendering.html">Rendering</a></li>
-                            <li><a href="../usage/configuration.html">Configuration</a></li>
+                            <li class="nav-parent"><a>Further Topics</a>
+                            <ul class="nav nav-children">
+                              <li><a href="../usage/further/sync-vs-async.html">Sync vs. Async</a></li>
+                              <li><a href="../usage/further/pipes.html">Pipes</a></li>
+                              <li><a href="../usage/further/modules.html">Modules</a></li>
+                              <li><a href="../usage/further/debugging.html">Debugging</a></li>
+                              <li><a href="../usage/further/rendering.html">Rendering</a></li>
+                              <li><a href="../usage/further/configuration.html">Configuration</a></li>
+                              <li><a href="../usage/further/best-practices.html">Best Practices</a></li>
+                            </ul></li>
+                            <li class="nav-parent"><a>IO Adapters</a>
+                            <ul class="nav nav-children">
+                              <li><a href="../usage/io/file-io.html">File IO</a></li>
+                              <li><a href="../usage/io/tcp.html">Network IO (TCP)</a></li>
+                            </ul></li>
                             <li><a href="../usage/swave-core-api.html">API Docs (ScalaDoc)</a></li>
                             <li><a href="../usage/swave-akka-compat/index.html">swave-akka-compat</a></li>
                             <li><a href="../usage/swave-scodec-compat/index.html">swave-scodec-compat</a></li>
@@ -179,7 +192,7 @@ Spout(1 to 100)
   .value.get.get shouldEqual 5050</code></pre>
 <h2><a href="#result-types-are-async" name="result-types-are-async" class="anchor"><span class="anchor-link"></span></a>Result Types are Async</h2>
 <p>One consequence of the fact that every stage must be able to run asynchronously, off the caller thread, is that the drain result (which is returned by the <code>run()</code> call on a <a href="http://swave.io/api/core/latest/#swave.core.Piping">Piping</a>) cannot directly contain stream elements. As blocking is not an option the <code>run()</code> call must return right away if the stream is running asynchronously, often before the first data elements have even begun their traversal of the stream graph.<br/></p>
-<p>In consequence most kinds of drains have a result type of <code>Future[Something]</code> rather than just <code>Something</code>.</p>
+<p>In consequence most kinds of drains have a result type of <code>Future[T]</code> rather than just <code>T</code>.</p>
 <p>However, if you know that a stream runs synchronously (because it doesn&rsquo;t contain asynchronous stages) the <code>Future</code> instance you&rsquo;ll get back from the <code>run()</code> call will be already fulfilled. This is because, in those cases, the complete stream execution will happen &ldquo;inside&rdquo; the <code>run()</code> call. Then, and only then, it&rsquo;s fine to directly access the future&rsquo;s value via <code>future.value.get</code> directly after the <code>run()</code> call.</p>
                 <div class="nav-next">
                     <p><strong>Next:</strong> <a href="../usage/transformations/index.html">Transformations</a></p>

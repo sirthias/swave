@@ -119,18 +119,18 @@
         <div id="values" class="values members">
               <h3>Abstract Value Members</h3>
               <ol><li name="swave.core.StreamOps#append" visbl="prt" data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="append[T](stage:swave.core.impl.stages.Stage):StreamOps.this.Repr[T]"></a>
-      <a id="append[T](Stage):Repr[T]"></a>
+      <a id="append[T](stage:swave.core.impl.stages.StageImpl):StreamOps.this.Repr[T]"></a>
+      <a id="append[T](StageImpl):Repr[T]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">abstract </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">append</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="stage">stage: <span class="extype" name="swave.core.impl.stages.Stage">Stage</span></span>)</span><span class="result">: <a href="#Repr[T]&lt;:swave.core.StreamOps[T]{typeRepr[X]&lt;:StreamOps.this.Repr[X]}" class="extmbr" name="swave.core.StreamOps.Repr">Repr</a>[<span class="extype" name="swave.core.StreamOps.append.T">T</span>]</span>
+        <span class="name">append</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="stage">stage: <span class="extype" name="swave.core.impl.stages.StageImpl">StageImpl</span></span>)</span><span class="result">: <a href="#Repr[T]&lt;:swave.core.StreamOps[T]{typeRepr[X]&lt;:StreamOps.this.Repr[X]}" class="extmbr" name="swave.core.StreamOps.Repr">Repr</a>[<span class="extype" name="swave.core.StreamOps.append.T">T</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#swave.core.StreamOps@append[T](stage:swave.core.impl.stages.Stage):StreamOps.this.Repr[T]" title="Permalink" target="_top">
+      <a href="../../index.html#swave.core.StreamOps@append[T](stage:swave.core.impl.stages.StageImpl):StreamOps.this.Repr[T]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -871,19 +871,19 @@
       </a>
     </span>
       
-    </li><li name="swave.core.StreamOps#flatmap" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="flatmap[B,C](f:A=&gt;B,parallelism:Int)(implicitev:swave.core.Streamable.Aux[B,C]):StreamOps.this.Repr[C]"></a>
-      <a id="flatmap[B,C]((A)⇒B,Int)(Aux[B,C]):Repr[C]"></a>
+    </li><li name="swave.core.StreamOps#flatMap" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="flatMap[B,C](f:A=&gt;B,parallelism:Int)(implicitev:swave.core.Streamable.Aux[B,C]):StreamOps.this.Repr[C]"></a>
+      <a id="flatMap[B,C]((A)⇒B,Int)(Aux[B,C]):Repr[C]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">flatmap</span><span class="tparams">[<span name="B">B</span>, <span name="C">C</span>]</span><span class="params">(<span name="f">f: (<span class="extype" name="swave.core.StreamOps.A">A</span>) ⇒ <span class="extype" name="swave.core.StreamOps.flatmap.B">B</span></span>, <span name="parallelism">parallelism: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="ev">ev: <a href="Streamable$.html#Aux[T,Out0]=swave.core.Streamable[T]{typeOut=Out0}" class="extmbr" name="swave.core.Streamable.Aux">Aux</a>[<span class="extype" name="swave.core.StreamOps.flatmap.B">B</span>, <span class="extype" name="swave.core.StreamOps.flatmap.C">C</span>]</span>)</span><span class="result">: <a href="#Repr[T]&lt;:swave.core.StreamOps[T]{typeRepr[X]&lt;:StreamOps.this.Repr[X]}" class="extmbr" name="swave.core.StreamOps.Repr">Repr</a>[<span class="extype" name="swave.core.StreamOps.flatmap.C">C</span>]</span>
+        <span class="name">flatMap</span><span class="tparams">[<span name="B">B</span>, <span name="C">C</span>]</span><span class="params">(<span name="f">f: (<span class="extype" name="swave.core.StreamOps.A">A</span>) ⇒ <span class="extype" name="swave.core.StreamOps.flatMap.B">B</span></span>, <span name="parallelism">parallelism: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="ev">ev: <a href="Streamable$.html#Aux[T,Out0]=swave.core.Streamable[T]{typeOut=Out0}" class="extmbr" name="swave.core.Streamable.Aux">Aux</a>[<span class="extype" name="swave.core.StreamOps.flatMap.B">B</span>, <span class="extype" name="swave.core.StreamOps.flatMap.C">C</span>]</span>)</span><span class="result">: <a href="#Repr[T]&lt;:swave.core.StreamOps[T]{typeRepr[X]&lt;:StreamOps.this.Repr[X]}" class="extmbr" name="swave.core.StreamOps.Repr">Repr</a>[<span class="extype" name="swave.core.StreamOps.flatMap.C">C</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#swave.core.StreamOps@flatmap[B,C](f:A=&gt;B,parallelism:Int)(implicitev:swave.core.Streamable.Aux[B,C]):StreamOps.this.Repr[C]" title="Permalink" target="_top">
+      <a href="../../index.html#swave.core.StreamOps@flatMap[B,C](f:A=&gt;B,parallelism:Int)(implicitev:swave.core.Streamable.Aux[B,C]):StreamOps.this.Repr[C]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -1155,57 +1155,6 @@ but the next incoming element will be emitted immediately after reception as par
       </a>
     </span>
       
-    </li><li name="swave.core.StreamOps#limit" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="limit(maxElements:Long):StreamOps.this.Repr[A]"></a>
-      <a id="limit(Long):Repr[A]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">limit</span><span class="params">(<span name="maxElements">maxElements: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <a href="#Repr[T]&lt;:swave.core.StreamOps[T]{typeRepr[X]&lt;:StreamOps.this.Repr[X]}" class="extmbr" name="swave.core.StreamOps.Repr">Repr</a>[<span class="extype" name="swave.core.StreamOps.A">A</span>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.StreamOps@limit(maxElements:Long):StreamOps.this.Repr[A]" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
-    </li><li name="swave.core.StreamOps#limitIdleTime" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="limitIdleTime(timeout:scala.concurrent.duration.FiniteDuration):StreamOps.this.Repr[A]"></a>
-      <a id="limitIdleTime(FiniteDuration):Repr[A]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">limitIdleTime</span><span class="params">(<span name="timeout">timeout: <span class="extype" name="scala.concurrent.duration.FiniteDuration">FiniteDuration</span></span>)</span><span class="result">: <a href="#Repr[T]&lt;:swave.core.StreamOps[T]{typeRepr[X]&lt;:StreamOps.this.Repr[X]}" class="extmbr" name="swave.core.StreamOps.Repr">Repr</a>[<span class="extype" name="swave.core.StreamOps.A">A</span>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.StreamOps@limitIdleTime(timeout:scala.concurrent.duration.FiniteDuration):StreamOps.this.Repr[A]" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
-    </li><li name="swave.core.StreamOps#limitWeighted" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="limitWeighted(max:Long,cost:A=&gt;Long):StreamOps.this.Repr[A]"></a>
-      <a id="limitWeighted(Long,(A)⇒Long):Repr[A]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">limitWeighted</span><span class="params">(<span name="max">max: <span class="extype" name="scala.Long">Long</span></span>, <span name="cost">cost: (<span class="extype" name="swave.core.StreamOps.A">A</span>) ⇒ <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <a href="#Repr[T]&lt;:swave.core.StreamOps[T]{typeRepr[X]&lt;:StreamOps.this.Repr[X]}" class="extmbr" name="swave.core.StreamOps.Repr">Repr</a>[<span class="extype" name="swave.core.StreamOps.A">A</span>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.StreamOps@limitWeighted(max:Long,cost:A=&gt;Long):StreamOps.this.Repr[A]" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
     </li><li name="swave.core.StreamOps#logEvent" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="logEvent(marker:String,log:(String,swave.core.StreamEvent[A])=&gt;Unit):StreamOps.this.Repr[A]"></a>
       <a id="logEvent(String,(String,StreamEvent[A])⇒Unit):Repr[A]"></a>
@@ -1309,7 +1258,7 @@ but the next incoming element will be emitted immediately after reception as par
     </span>
       
     </li><li name="swave.core.StreamOps#mergeToEither" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="mergeToEither[B](other:swave.core.Spout[B]):StreamOps.this.Repr[Either[A,B]]"></a>
+      <a id="mergeToEither[B](right:swave.core.Spout[B]):StreamOps.this.Repr[Either[A,B]]"></a>
       <a id="mergeToEither[B](Spout[B]):Repr[Either[A,B]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1317,10 +1266,10 @@ but the next incoming element will be emitted immediately after reception as par
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">mergeToEither</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="other">other: <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a>[<span class="extype" name="swave.core.StreamOps.mergeToEither.B">B</span>]</span>)</span><span class="result">: <a href="#Repr[T]&lt;:swave.core.StreamOps[T]{typeRepr[X]&lt;:StreamOps.this.Repr[X]}" class="extmbr" name="swave.core.StreamOps.Repr">Repr</a>[<span class="extype" name="scala.Either">Either</span>[<span class="extype" name="swave.core.StreamOps.A">A</span>, <span class="extype" name="swave.core.StreamOps.mergeToEither.B">B</span>]]</span>
+        <span class="name">mergeToEither</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="right">right: <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a>[<span class="extype" name="swave.core.StreamOps.mergeToEither.B">B</span>]</span>)</span><span class="result">: <a href="#Repr[T]&lt;:swave.core.StreamOps[T]{typeRepr[X]&lt;:StreamOps.this.Repr[X]}" class="extmbr" name="swave.core.StreamOps.Repr">Repr</a>[<span class="extype" name="scala.Either">Either</span>[<span class="extype" name="swave.core.StreamOps.A">A</span>, <span class="extype" name="swave.core.StreamOps.mergeToEither.B">B</span>]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#swave.core.StreamOps@mergeToEither[B](other:swave.core.Spout[B]):StreamOps.this.Repr[Either[A,B]]" title="Permalink" target="_top">
+      <a href="../../index.html#swave.core.StreamOps@mergeToEither[B](right:swave.core.Spout[B]):StreamOps.this.Repr[Either[A,B]]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -1699,6 +1648,23 @@ but the next incoming element will be emitted immediately after reception as par
       </a>
     </span>
       
+    </li><li name="swave.core.StreamOps#sliceEvery" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="sliceEvery(dropLen:Long,takeLen:Long):StreamOps.this.Repr[A]"></a>
+      <a id="sliceEvery(Long,Long):Repr[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">sliceEvery</span><span class="params">(<span name="dropLen">dropLen: <span class="extype" name="scala.Long">Long</span></span>, <span name="takeLen">takeLen: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <a href="#Repr[T]&lt;:swave.core.StreamOps[T]{typeRepr[X]&lt;:StreamOps.this.Repr[X]}" class="extmbr" name="swave.core.StreamOps.Repr">Repr</a>[<span class="extype" name="swave.core.StreamOps.A">A</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps@sliceEvery(dropLen:Long,takeLen:Long):StreamOps.this.Repr[A]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="swave.core.StreamOps#sliding" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="sliding(windowSize:Int):StreamOps.this.Repr[scala.collection.immutable.Seq[A]]"></a>
       <a id="sliding(Int):Repr[Seq[A]]"></a>
@@ -1869,6 +1835,23 @@ but the next incoming element will be emitted immediately after reception as par
       </a>
     </span>
       
+    </li><li name="swave.core.StreamOps#takeEveryNth" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="takeEveryNth(n:Long):StreamOps.this.Repr[A]"></a>
+      <a id="takeEveryNth(Long):Repr[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">takeEveryNth</span><span class="params">(<span name="n">n: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <a href="#Repr[T]&lt;:swave.core.StreamOps[T]{typeRepr[X]&lt;:StreamOps.this.Repr[X]}" class="extmbr" name="swave.core.StreamOps.Repr">Repr</a>[<span class="extype" name="swave.core.StreamOps.A">A</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps@takeEveryNth(n:Long):StreamOps.this.Repr[A]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="swave.core.StreamOps#takeLast" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="takeLast(n:Int):StreamOps.this.Repr[A]"></a>
       <a id="takeLast(Int):Repr[A]"></a>
@@ -2035,6 +2018,40 @@ but the next incoming element will be emitted immediately after reception as par
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#swave.core.StreamOps@withInitialTimeout(timeout:scala.concurrent.duration.FiniteDuration):StreamOps.this.Repr[A]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="swave.core.StreamOps#withLimit" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="withLimit(maxElements:Long):StreamOps.this.Repr[A]"></a>
+      <a id="withLimit(Long):Repr[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withLimit</span><span class="params">(<span name="maxElements">maxElements: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <a href="#Repr[T]&lt;:swave.core.StreamOps[T]{typeRepr[X]&lt;:StreamOps.this.Repr[X]}" class="extmbr" name="swave.core.StreamOps.Repr">Repr</a>[<span class="extype" name="swave.core.StreamOps.A">A</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps@withLimit(maxElements:Long):StreamOps.this.Repr[A]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="swave.core.StreamOps#withLimitWeighted" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="withLimitWeighted(max:Long,cost:A=&gt;Long):StreamOps.this.Repr[A]"></a>
+      <a id="withLimitWeighted(Long,(A)⇒Long):Repr[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withLimitWeighted</span><span class="params">(<span name="max">max: <span class="extype" name="scala.Long">Long</span></span>, <span name="cost">cost: (<span class="extype" name="swave.core.StreamOps.A">A</span>) ⇒ <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <a href="#Repr[T]&lt;:swave.core.StreamOps[T]{typeRepr[X]&lt;:StreamOps.this.Repr[X]}" class="extmbr" name="swave.core.StreamOps.Repr">Repr</a>[<span class="extype" name="swave.core.StreamOps.A">A</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps@withLimitWeighted(max:Long,cost:A=&gt;Long):StreamOps.this.Repr[A]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>

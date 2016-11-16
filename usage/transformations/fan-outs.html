@@ -83,6 +83,11 @@
                           </ul></li>
                           <li class="nav-parent nav-expanded nav-active"><a><i class="fa fa-book" aria-hidden="true"></i><span>User Documentation</span></a>
                           <ul class="nav nav-children">
+                            <li class="nav-parent"><a>Show-Off</a>
+                            <ul class="nav nav-children">
+                              <li><a href="../../usage/show-off/overview.html">Show-Off Overview</a></li>
+                              <li><a href="../../usage/show-off/fibonacci.html">Fibonacci Example</a></li>
+                            </ul></li>
                             <li><a href="../../usage/setup.html">Setup</a></li>
                             <li><a href="../../usage/quick-start.html">Quick Start</a></li>
                             <li><a href="../../usage/basics.html">Basics</a></li>
@@ -92,19 +97,27 @@
                             <ul class="nav nav-children">
                               <li><a href="../../usage/transformations/overview.html">Transformations Overview</a></li>
                               <li><a href="../../usage/transformations/simple.html">Simple Transformations</a></li>
-                              <li class="nav-expanded nav-active"><a href="../../usage/transformations/fan-outs.html">Fan-Outs</a></li>
                               <li><a href="../../usage/transformations/fan-ins.html">Fan-Ins</a></li>
-                              <li><a href="../../usage/transformations/injecting.html">Injecting</a></li>
-                              <li><a href="../../usage/transformations/flattening.html">Flattening</a></li>
-                              <li><a href="../../usage/transformations/pipes.html">Pipes</a></li>
-                              <li><a href="../../usage/transformations/modules.html">Modules</a></li>
+                              <li class="nav-expanded nav-active"><a href="../../usage/transformations/fan-outs.html">Fan-Outs</a></li>
+                              <li><a href="../../usage/transformations/streams-of-streams.html">Streams-of-Streams</a></li>
                               <li><a href="../../usage/transformations/couplings.html">Couplings</a></li>
                               <li><a href="../../usage/transformations/reference/index.html">Transformation Reference</a></li>
                             </ul></li>
-                            <li><a href="../../usage/sync-vs-async.html">Sync vs. Async</a></li>
-                            <li><a href="../../usage/debugging.html">Debugging</a></li>
-                            <li><a href="../../usage/rendering.html">Rendering</a></li>
-                            <li><a href="../../usage/configuration.html">Configuration</a></li>
+                            <li class="nav-parent"><a>Further Topics</a>
+                            <ul class="nav nav-children">
+                              <li><a href="../../usage/further/sync-vs-async.html">Sync vs. Async</a></li>
+                              <li><a href="../../usage/further/pipes.html">Pipes</a></li>
+                              <li><a href="../../usage/further/modules.html">Modules</a></li>
+                              <li><a href="../../usage/further/debugging.html">Debugging</a></li>
+                              <li><a href="../../usage/further/rendering.html">Rendering</a></li>
+                              <li><a href="../../usage/further/configuration.html">Configuration</a></li>
+                              <li><a href="../../usage/further/best-practices.html">Best Practices</a></li>
+                            </ul></li>
+                            <li class="nav-parent"><a>IO Adapters</a>
+                            <ul class="nav nav-children">
+                              <li><a href="../../usage/io/file-io.html">File IO</a></li>
+                              <li><a href="../../usage/io/tcp.html">Network IO (TCP)</a></li>
+                            </ul></li>
                             <li><a href="../../usage/swave-core-api.html">API Docs (ScalaDoc)</a></li>
                             <li><a href="../../usage/swave-akka-compat/index.html">swave-akka-compat</a></li>
                             <li><a href="../../usage/swave-scodec-compat/index.html">swave-scodec-compat</a></li>
@@ -152,9 +165,104 @@
             <div id="main-content">
                 <!-- start: page -->
 <h1><a href="#fan-outs" name="fan-outs" class="anchor"><span class="anchor-link"></span></a>Fan-Outs</h1>
-<p>&hellip; TODO &hellip;</p>
+<p>Fan-Outs are <a href="../basics.html#streams-as-graphs">stream graph components</a> with one input port and several output ports.</p><p class="centered"><img src="../../assets/img/fan-out.svg" alt="Fan-Out" /></p>
+<p>Currently these fan-out variants are available:</p>
+<ul>
+  <li><a href="reference/fanOutBroadcast.html">fanOutBroadcast</a></li>
+  <li><a href="reference/fanOutBroadcastBuffered.html">fanOutBroadcastBuffered</a></li>
+  <li><a href="reference/fanOutFirstAvailable.html">fanOutFirstAvailable</a></li>
+  <li><a href="reference/fanOutRoundRobin.html">fanOutRoundRobin</a></li>
+  <li><a href="reference/switch.html">switch</a></li>
+</ul>
+<p>Additionally these fan-out shortcut transformations are defined:</p>
+<ul>
+  <li><a href="reference/tee.html">tee</a></li>
+  <li><a href="reference/switchIf.html">switchIf</a></li>
+</ul>
+<h2><a href="#basic-example" name="basic-example" class="anchor"><span class="anchor-link"></span></a>Basic Example</h2>
+<p><em>swave&rsquo;s</em> streaming DSL allows you to define fan-outs in a flexible yet concise way.<br/> Here is a basic example:</p>
+<pre><code class="scala">import swave.core._
+implicit val env = StreamEnv()
+
+val promise1 = Promise[Seq[String]]()
+val drain1 =
+  Drain.seq(limit = 10).captureResult(promise1)
+
+val promise2 = Promise[Seq[Int]]()
+val drain2 =
+  Drain.seq(limit = 10).captureResult(promise2)
+
+Spout.ints(from = 0)
+  .fanOutBroadcast(eagerCancel = true)
+    .sub.filter(_ &gt; 45).map(_.toString).to(drain1)
+    .sub.map(_.toString).end
+    .sub.slice(42, 7).to(drain2) // terminates the stream by cancelling after the 48th element
+  .continue
+  .drop(10)
+  .drainToMkString(limit = 100)
+  .value.get.get shouldEqual (10 to 48).mkString
+
+promise1.future.value.get.get shouldEqual (46 to 48).map(_.toString)
+promise2.future.value.get.get shouldEqual (42 to 48)</code></pre>
+<p>This example encodes this stream graph:</p><p class="centered"><img src="../../assets/img/basic-fan-out.svg" alt="Fan-Out Example" /></p>
+<p>This graph has three <a href="../drains.html">Drains</a>, two producing a <code>Seq</code> to a <code>Promise</code> and one (the main one) producing a <code>String</code>. <br/> As you can already (partially) see from this example a fan-out definition consists of</p>
+<ol>
+  <li>a call to a specific fan-out variant, in this case <a href="reference/fanOutBroadcast.html">fanOutBroadcast</a></li>
+  <li>the addition of one or more fan-out branches via <code>sub</code></li>
+  <li>the definition of sub-branch <a href="overview.html">transformations</a> (as on any regular <a href="../spouts.html">Spout</a>) after the <code>sub</code> call</li>
+  <li>closing the subs</li>
+  <li>closing the fan-out</li>
+</ol>
+<p>The last two points deserve some deeper explanation.</p>
+<p>After you&rsquo;ve finished the definition of a sub branch &ldquo;pipeline&rdquo; (following a <code>sub</code> call) there are two alternatives for what to do with this open sub branch. You can either drain it into a <a href="../drains.html">Drain</a> with <code>.to(drain)</code> (as the first and last sub branches do in the example above) or you can leave it open by simply calling <code>.end</code>.</p>
+<p>After you&rsquo;ve finished defining all sub branches there are two ways to &ldquo;close&rdquo; the fan-out. If only a single sub is left open (with <code>.end</code>) you can use <code>.continue</code> to &ldquo;pick-up&rdquo; this open sub branch and simply continue appending more <a href="overview.html">transformations</a> to it. This sub then becomes the new &ldquo;main line&rdquo; of your stream graph.</p>
+<p>If several subs are left open you cannot use <code>.continue</code>, because it wouldn&rsquo;t be clear which one to pick up and what to do with the other open subs. In this case you can use one of the available <a href="fan-ins.html">fan-in</a> variants to &ldquo;join&rdquo; the open subs and continue your stream graph definition in a fluent fashion. A common use case for this is a &ldquo;diamond&rdquo; graph.</p>
+<h2><a href="#diamond-example" name="diamond-example" class="anchor"><span class="anchor-link"></span></a>Diamond Example</h2>
+<p>A common stream graph pattern is a &ldquo;diamond&rdquo; setup, where a fan-out first defines several sub branches, which each apply some specific transformations to &ldquo;their&rdquo; elements, before the ends of the sub branches are re-joined with some kind of <a href="fan-ins.html">fan-in</a> logic. For example this graph:</p><p class="centered"><img src="../../assets/img/diamond.svg" alt="Diamond Graph" /></p>
+<p>can be encoded like this:</p>
+<pre><code class="scala">import swave.core._
+implicit val env = StreamEnv()
+
+Spout(1, 2, 3)
+  .fanOutBroadcast()
+    .sub.map(&quot;A&quot; + _).end
+    .sub.map(&quot;B&quot; + _).end
+  .fanInToTuple // Spout[(String, String)]
+  .drainToMkString(limit = 10, sep = &quot;;&quot;)
+  .value.get.get shouldEqual &quot;(A1,B1);(A2,B2);(A3,B3)&quot;</code></pre>
+<p>Adding one or even more sub branches that aren&rsquo;t left open (i.e. drain into some <a href="../drains.html">Drain</a>) wouldn&rsquo;t affect the fan-in in any way. And if you add another fan-out sub that is left open (i.e. ends with <code>.end</code>) the fan-in would work just as well but produce a <code>Tuple3</code> instead of a <code>Tuple2</code>.</p>
+<h2><a href="#mixing-fan-outs-and-fan-ins" name="mixing-fan-outs-and-fan-ins" class="anchor"><span class="anchor-link"></span></a>Mixing Fan-Outs and Fan-Ins</h2>
+<p>Mixing fan-outs and <a href="fan-ins.html">fan-ins</a> is possible even beyond what was shown in the examples above.<br/> Take this code for example:</p>
+<pre><code class="scala">import swave.core._
+implicit val env = StreamEnv()
+
+Spout(1, 2, 3)
+  .fanOutBroadcast()
+    .sub.map(_.toString).end
+    .attach(Spout.longs(from = 10))
+    .sub.to(Drain.ignore.dropResult) // just for fun
+    .sub.end
+    .attachLeft(Spout.doubles(from = 0, step = 0.5))
+  .fanInToTuple // Spout[(Double, String, Long, Int)]
+  .drainToList(limit = 10)
+  .value.get.get shouldEqual Seq(
+  (0.0, &quot;1&quot;, 10, 1),
+  (0.5, &quot;2&quot;, 11, 2),
+  (1.0, &quot;3&quot;, 12, 3))</code></pre>
+<p>It encodes this graph:</p><p class="centered"><img src="../../assets/img/mixed.svg" alt="Mixed Fan-Out/Fan-In Graph" /></p>
+<p>This graph could be drawn in a simpler way but we show it like this in order to make it easier to correlate the DSL code with the visual representation.</p>
+<p>As you can see from this example you can <code>attach</code> <a href="../spouts.html">Spouts</a> &ldquo;from the outside&rdquo; at any point in a fan-out definition, even on the left (with <code>attachLeft</code>), which allows for very flexible and yet concise definition of the large majority of common stream graphs. Some graphs, especially the ones containing cycles, cannot be constructed in a fully fluent fashion. But with only one small additional element, namely <a href="couplings.html">Couplings</a>, even these graphs, and in fact <em>all</em> graphs, can be defined. </p>
+<h2><a href="#captureresult-and-dropresult" name="captureresult-and-dropresult" class="anchor"><span class="anchor-link"></span></a>captureResult and dropResult</h2>
+<p>In the examples above you might have noticed the <code>.captureResult</code> and <code>.dropResult</code> calls, of which one is required for most types of <a href="../drains.html">Drains</a> if they are to be used as the target of a fan-out sub branch.</p>
+<p>The reason for this is that the DSL offers no way to access the result of a <a href="../drains.html">Drain</a> when it is used within a fan-out sub branch. Therefore, in order to be usable in sub branch, a drain is <em>required</em> to not produce a result, which means that its result type must be <code>Unit</code>. Since most types of drains <em>do</em> produce results they must be explicitly transformed into <a href="../drains.html">Drains</a> without result.</p>
+<p>There are two options for this:</p>
+<ol>
+  <li>capture the result in a <code>Promise</code></li>
+  <li>drop the result completely</li>
+</ol>
+<p><a href="../drains.html">Drains</a> define transformation methods for both of these alternatives, which are named accordingly. </p>
                 <div class="nav-next">
-                    <p><strong>Next:</strong> <a href="../../usage/transformations/fan-ins.html">Fan-Ins</a></p>
+                    <p><strong>Next:</strong> <a href="../../usage/transformations/streams-of-streams.html">Streams-of-Streams</a></p>
                 </div>
                 <!-- end: page -->
             </div>

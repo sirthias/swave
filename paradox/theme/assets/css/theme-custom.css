@@ -54,8 +54,10 @@ ul.nav-main li .nav-children li.nav-active > a { color: #0088cc; }
 }
 .nav-next p { display: inline; color: #0c323b; font-style: italic; }
 
+code { font-weight: bold; background-color:#f8f8f8; padding: 0 2px; color: #458; }
+
 pre { margin: 1.5em 0; }
-pre code { font-size: 14px; line-height: 1.4em; color: #458 }
+pre code { font-weight: normal;  font-size: 14px; line-height: 1.4em; color: #458 }
 
 .toc {
     margin-top: 1em;
@@ -81,8 +83,6 @@ h2 { margin-top: 40px }
 h3 { margin-top: 30px }
 
 ul, ol { margin-bottom: 10px }
-
-p > code { font-weight: bold; background-color:#f8f8f8; padding: 0 2px; color: #458; }
 
 /* header anchors */
 

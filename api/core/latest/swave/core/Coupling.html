@@ -43,7 +43,7 @@
 
       <h4 id="signature" class="signature">
       <span class="modifier_kind">
-        <span class="modifier">sealed abstract </span>
+        <span class="modifier">final </span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
@@ -51,7 +51,9 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A simple streaming component with one input, one output port and no internal transformation logic.</p><p>It is typically used to manually connect two ports of a stream graph that cannot
+be otherwise connected via the streaming DSL, e.g. for creating cycles.
+</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
@@ -92,47 +94,10 @@
 
         
 
-        <div id="values" class="values members">
-              <h3>Abstract Value Members</h3>
-              <ol><li name="swave.core.Coupling#in" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="in:swave.core.Drain[T,Unit]"></a>
-      <a id="in:Drain[T,Unit]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">in</span><span class="result">: <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a>[<span class="extype" name="swave.core.Coupling.T">T</span>, <span class="extype" name="scala.Unit">Unit</span>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.Coupling@in:swave.core.Drain[T,Unit]" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
-    </li><li name="swave.core.Coupling#out" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="out:swave.core.Spout[T]"></a>
-      <a id="out:Spout[T]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">out</span><span class="result">: <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a>[<span class="extype" name="swave.core.Coupling.T">T</span>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.Coupling@out:swave.core.Spout[T]" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
-    </li></ol>
-            </div>
+        
 
         <div id="values" class="values members">
-              <h3>Concrete Value Members</h3>
+              <h3>Value Members</h3>
               <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a>
       <a id="!=(Any):Boolean"></a>
@@ -315,6 +280,23 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="swave.core.Coupling#in" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="in:swave.core.Drain[T,Unit]"></a>
+      <a id="in:Drain[T,Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">in</span><span class="result">: <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a>[<span class="extype" name="swave.core.Coupling.T">T</span>, <span class="extype" name="scala.Unit">Unit</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.Coupling@in:swave.core.Drain[T,Unit]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -383,6 +365,23 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="swave.core.Coupling#out" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="out:swave.core.Spout[T]"></a>
+      <a id="out:Spout[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">out</span><span class="result">: <a href="Spout.html" class="extype" name="swave.core.Spout">Spout</a>[<span class="extype" name="swave.core.Coupling.T">T</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.Coupling@out:swave.core.Spout[T]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>

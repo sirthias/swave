@@ -191,18 +191,18 @@ As such it serves as a &quot;point of entry&quot; into a stream graph for data e
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="swave.core.Spout#append" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="append[B](stage:swave.core.impl.stages.Stage):swave.core.Spout[B]"></a>
-      <a id="append[B](Stage):Spout[B]"></a>
+      <a id="append[B](stage:swave.core.impl.stages.StageImpl):swave.core.Spout[B]"></a>
+      <a id="append[B](StageImpl):Spout[B]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">append</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="stage">stage: <span class="extype" name="swave.core.impl.stages.Stage">Stage</span></span>)</span><span class="result">: <a href="" class="extype" name="swave.core.Spout">Spout</a>[<span class="extype" name="swave.core.Spout.append.B">B</span>]</span>
+        <span class="name">append</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="stage">stage: <span class="extype" name="swave.core.impl.stages.StageImpl">StageImpl</span></span>)</span><span class="result">: <a href="" class="extype" name="swave.core.Spout">Spout</a>[<span class="extype" name="swave.core.Spout.append.B">B</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#swave.core.Spout@append[B](stage:swave.core.impl.stages.Stage):swave.core.Spout[B]" title="Permalink" target="_top">
+      <a href="../../index.html#swave.core.Spout@append[B](stage:swave.core.impl.stages.StageImpl):swave.core.Spout[B]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -587,41 +587,45 @@ If the stream produces more than <code>limit</code> elements it will be error-te
 a <a href="StreamLimitExceeded.html" class="extype" name="swave.core.StreamLimitExceeded">StreamLimitExceeded</a> exception.
 </p></div></div>
     </li><li name="swave.core.Spout#drainToMkString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="drainToMkString(start:String,sep:String,end:String)(implicitenv:swave.core.StreamEnv):scala.concurrent.Future[String]"></a>
-      <a id="drainToMkString(String,String,String)(StreamEnv):Future[String]"></a>
+      <a id="drainToMkString(limit:Int,start:String,sep:String,end:String)(implicitenv:swave.core.StreamEnv):scala.concurrent.Future[String]"></a>
+      <a id="drainToMkString(Int,String,String,String)(StreamEnv):Future[String]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">drainToMkString</span><span class="params">(<span name="start">start: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="sep">sep: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="end">end: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="env">env: <a href="StreamEnv.html" class="extype" name="swave.core.StreamEnv">StreamEnv</a></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+        <span class="name">drainToMkString</span><span class="params">(<span name="limit">limit: <span class="extype" name="scala.Int">Int</span></span>, <span name="start">start: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="sep">sep: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="end">end: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="env">env: <a href="StreamEnv.html" class="extype" name="swave.core.StreamEnv">StreamEnv</a></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#swave.core.Spout@drainToMkString(start:String,sep:String,end:String)(implicitenv:swave.core.StreamEnv):scala.concurrent.Future[String]" title="Permalink" target="_top">
+      <a href="../../index.html#swave.core.Spout@drainToMkString(limit:Int,start:String,sep:String,end:String)(implicitenv:swave.core.StreamEnv):scala.concurrent.Future[String]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Attaches a <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a> which produces a single string representation of all stream elements.</p><div class="fullcomment"><div class="comment cmt"><p>Attaches a <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a> which produces a single string representation of all stream elements.
+If the stream produces more than <code>limit</code> elements it will be error-terminated with
+a <a href="StreamLimitExceeded.html" class="extype" name="swave.core.StreamLimitExceeded">StreamLimitExceeded</a> exception.
 The stream is immediately started.
 </p></div></div>
     </li><li name="swave.core.Spout#drainToMkString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="drainToMkString(sep:String)(implicitenv:swave.core.StreamEnv):scala.concurrent.Future[String]"></a>
-      <a id="drainToMkString(String)(StreamEnv):Future[String]"></a>
+      <a id="drainToMkString(limit:Int,sep:String)(implicitenv:swave.core.StreamEnv):scala.concurrent.Future[String]"></a>
+      <a id="drainToMkString(Int,String)(StreamEnv):Future[String]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">drainToMkString</span><span class="params">(<span name="sep">sep: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="env">env: <a href="StreamEnv.html" class="extype" name="swave.core.StreamEnv">StreamEnv</a></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+        <span class="name">drainToMkString</span><span class="params">(<span name="limit">limit: <span class="extype" name="scala.Int">Int</span></span>, <span name="sep">sep: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="env">env: <a href="StreamEnv.html" class="extype" name="swave.core.StreamEnv">StreamEnv</a></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#swave.core.Spout@drainToMkString(sep:String)(implicitenv:swave.core.StreamEnv):scala.concurrent.Future[String]" title="Permalink" target="_top">
+      <a href="../../index.html#swave.core.Spout@drainToMkString(limit:Int,sep:String)(implicitenv:swave.core.StreamEnv):scala.concurrent.Future[String]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Attaches a <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a> which produces a single string representation of all stream elements.</p><div class="fullcomment"><div class="comment cmt"><p>Attaches a <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a> which produces a single string representation of all stream elements.
+If the stream produces more than <code>limit</code> elements it will be error-terminated with
+a <a href="StreamLimitExceeded.html" class="extype" name="swave.core.StreamLimitExceeded">StreamLimitExceeded</a> exception.
 The stream is immediately started.
 </p></div></div>
     </li><li name="swave.core.Spout#drainToSeq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -970,19 +974,19 @@ a <a href="StreamLimitExceeded.html" class="extype" name="swave.core.StreamLimit
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="StreamOps.html" class="extype" name="swave.core.StreamOps">StreamOps</a></dd></dl></div>
-    </li><li name="swave.core.StreamOps#flatmap" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="flatmap[B,C](f:A=&gt;B,parallelism:Int)(implicitev:swave.core.Streamable.Aux[B,C]):StreamOps.this.Repr[C]"></a>
-      <a id="flatmap[B,C]((A@scala.annotation.unchecked.uncheckedVariance)⇒B,Int)(Aux[B,C]):Repr[C]"></a>
+    </li><li name="swave.core.StreamOps#flatMap" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="flatMap[B,C](f:A=&gt;B,parallelism:Int)(implicitev:swave.core.Streamable.Aux[B,C]):StreamOps.this.Repr[C]"></a>
+      <a id="flatMap[B,C]((A@scala.annotation.unchecked.uncheckedVariance)⇒B,Int)(Aux[B,C]):Repr[C]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">flatmap</span><span class="tparams">[<span name="B">B</span>, <span name="C">C</span>]</span><span class="params">(<span name="f">f: (A @scala.annotation.unchecked.uncheckedVariance) ⇒ <span class="extype" name="swave.core.StreamOps.flatmap.B">B</span></span>, <span name="parallelism">parallelism: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="ev">ev: <a href="Streamable$.html#Aux[T,Out0]=swave.core.Streamable[T]{typeOut=Out0}" class="extmbr" name="swave.core.Streamable.Aux">Aux</a>[<span class="extype" name="swave.core.StreamOps.flatmap.B">B</span>, <span class="extype" name="swave.core.StreamOps.flatmap.C">C</span>]</span>)</span><span class="result">: <a href="#Repr[T]=swave.core.Spout[T]" class="extmbr" name="swave.core.Spout.Repr">Repr</a>[<span class="extype" name="swave.core.StreamOps.flatmap.C">C</span>]</span>
+        <span class="name">flatMap</span><span class="tparams">[<span name="B">B</span>, <span name="C">C</span>]</span><span class="params">(<span name="f">f: (A @scala.annotation.unchecked.uncheckedVariance) ⇒ <span class="extype" name="swave.core.StreamOps.flatMap.B">B</span></span>, <span name="parallelism">parallelism: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="ev">ev: <a href="Streamable$.html#Aux[T,Out0]=swave.core.Streamable[T]{typeOut=Out0}" class="extmbr" name="swave.core.Streamable.Aux">Aux</a>[<span class="extype" name="swave.core.StreamOps.flatMap.B">B</span>, <span class="extype" name="swave.core.StreamOps.flatMap.C">C</span>]</span>)</span><span class="result">: <a href="#Repr[T]=swave.core.Spout[T]" class="extmbr" name="swave.core.Spout.Repr">Repr</a>[<span class="extype" name="swave.core.StreamOps.flatMap.C">C</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#swave.core.Spout@flatmap[B,C](f:A=&gt;B,parallelism:Int)(implicitev:swave.core.Streamable.Aux[B,C]):StreamOps.this.Repr[C]" title="Permalink" target="_top">
+      <a href="../../index.html#swave.core.Spout@flatMap[B,C](f:A=&gt;B,parallelism:Int)(implicitev:swave.core.Streamable.Aux[B,C]):StreamOps.this.Repr[C]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -1290,57 +1294,6 @@ but the next incoming element will be emitted immediately after reception as par
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="StreamOps.html" class="extype" name="swave.core.StreamOps">StreamOps</a></dd></dl></div>
-    </li><li name="swave.core.StreamOps#limit" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="limit(maxElements:Long):StreamOps.this.Repr[A]"></a>
-      <a id="limit(Long):Repr[A@scala.annotation.unchecked.uncheckedVariance]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">limit</span><span class="params">(<span name="maxElements">maxElements: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <a href="#Repr[T]=swave.core.Spout[T]" class="extmbr" name="swave.core.Spout.Repr">Repr</a>[A @scala.annotation.unchecked.uncheckedVariance]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.Spout@limit(maxElements:Long):StreamOps.this.Repr[A]" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="StreamOps.html" class="extype" name="swave.core.StreamOps">StreamOps</a></dd></dl></div>
-    </li><li name="swave.core.StreamOps#limitIdleTime" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="limitIdleTime(timeout:scala.concurrent.duration.FiniteDuration):StreamOps.this.Repr[A]"></a>
-      <a id="limitIdleTime(FiniteDuration):Repr[A@scala.annotation.unchecked.uncheckedVariance]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">limitIdleTime</span><span class="params">(<span name="timeout">timeout: <span class="extype" name="scala.concurrent.duration.FiniteDuration">FiniteDuration</span></span>)</span><span class="result">: <a href="#Repr[T]=swave.core.Spout[T]" class="extmbr" name="swave.core.Spout.Repr">Repr</a>[A @scala.annotation.unchecked.uncheckedVariance]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.Spout@limitIdleTime(timeout:scala.concurrent.duration.FiniteDuration):StreamOps.this.Repr[A]" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="StreamOps.html" class="extype" name="swave.core.StreamOps">StreamOps</a></dd></dl></div>
-    </li><li name="swave.core.StreamOps#limitWeighted" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="limitWeighted(max:Long,cost:A=&gt;Long):StreamOps.this.Repr[A]"></a>
-      <a id="limitWeighted(Long,(A@scala.annotation.unchecked.uncheckedVariance)⇒Long):Repr[A@scala.annotation.unchecked.uncheckedVariance]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">limitWeighted</span><span class="params">(<span name="max">max: <span class="extype" name="scala.Long">Long</span></span>, <span name="cost">cost: (A @scala.annotation.unchecked.uncheckedVariance) ⇒ <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <a href="#Repr[T]=swave.core.Spout[T]" class="extmbr" name="swave.core.Spout.Repr">Repr</a>[A @scala.annotation.unchecked.uncheckedVariance]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.Spout@limitWeighted(max:Long,cost:A=&gt;Long):StreamOps.this.Repr[A]" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="StreamOps.html" class="extype" name="swave.core.StreamOps">StreamOps</a></dd></dl></div>
     </li><li name="swave.core.StreamOps#logEvent" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="logEvent(marker:String,log:(String,swave.core.StreamEvent[A])=&gt;Unit):StreamOps.this.Repr[A]"></a>
       <a id="logEvent(String,(String,StreamEvent[A@scala.annotation.unchecked.uncheckedVariance])⇒Unit):Repr[A@scala.annotation.unchecked.uncheckedVariance]"></a>
@@ -1444,7 +1397,7 @@ but the next incoming element will be emitted immediately after reception as par
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="StreamOps.html" class="extype" name="swave.core.StreamOps">StreamOps</a></dd></dl></div>
     </li><li name="swave.core.StreamOps#mergeToEither" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="mergeToEither[B](other:swave.core.Spout[B]):StreamOps.this.Repr[Either[A,B]]"></a>
+      <a id="mergeToEither[B](right:swave.core.Spout[B]):StreamOps.this.Repr[Either[A,B]]"></a>
       <a id="mergeToEither[B](Spout[B]):Repr[Either[A@scala.annotation.unchecked.uncheckedVariance,B]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1452,10 +1405,10 @@ but the next incoming element will be emitted immediately after reception as par
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">mergeToEither</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="other">other: <a href="" class="extype" name="swave.core.Spout">Spout</a>[<span class="extype" name="swave.core.StreamOps.mergeToEither.B">B</span>]</span>)</span><span class="result">: <a href="#Repr[T]=swave.core.Spout[T]" class="extmbr" name="swave.core.Spout.Repr">Repr</a>[<span class="extype" name="scala.Either">Either</span>[A @scala.annotation.unchecked.uncheckedVariance, <span class="extype" name="swave.core.StreamOps.mergeToEither.B">B</span>]]</span>
+        <span class="name">mergeToEither</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="right">right: <a href="" class="extype" name="swave.core.Spout">Spout</a>[<span class="extype" name="swave.core.StreamOps.mergeToEither.B">B</span>]</span>)</span><span class="result">: <a href="#Repr[T]=swave.core.Spout[T]" class="extmbr" name="swave.core.Spout.Repr">Repr</a>[<span class="extype" name="scala.Either">Either</span>[A @scala.annotation.unchecked.uncheckedVariance, <span class="extype" name="swave.core.StreamOps.mergeToEither.B">B</span>]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#swave.core.Spout@mergeToEither[B](other:swave.core.Spout[B]):StreamOps.this.Repr[Either[A,B]]" title="Permalink" target="_top">
+      <a href="../../index.html#swave.core.Spout@mergeToEither[B](right:swave.core.Spout[B]):StreamOps.this.Repr[Either[A,B]]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -1681,23 +1634,6 @@ but the next incoming element will be emitted immediately after reception as par
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="StreamOps.html" class="extype" name="swave.core.StreamOps">StreamOps</a></dd></dl></div>
-    </li><li name="swave.core.Spout#pipeElem" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="pipeElem:swave.core.PipeElem"></a>
-      <a id="pipeElem:PipeElem"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">pipeElem</span><span class="result">: <a href="PipeElem.html" class="extype" name="swave.core.PipeElem">PipeElem</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.Spout@pipeElem:swave.core.PipeElem" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">The <a href="PipeElem.html" class="extype" name="swave.core.PipeElem">PipeElem</a> representation of this spout.</p>
     </li><li name="swave.core.StreamOps#prefixAndTail" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="prefixAndTail(n:Int):StreamOps.this.Repr[(scala.collection.immutable.Seq[A],swave.core.Spout[A])]"></a>
       <a id="prefixAndTail(Int):Repr[(Seq[A@scala.annotation.unchecked.uncheckedVariance],Spout[A@scala.annotation.unchecked.uncheckedVariance])]"></a>
@@ -1868,6 +1804,23 @@ but the next incoming element will be emitted immediately after reception as par
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="StreamOps.html" class="extype" name="swave.core.StreamOps">StreamOps</a></dd></dl></div>
+    </li><li name="swave.core.StreamOps#sliceEvery" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="sliceEvery(dropLen:Long,takeLen:Long):StreamOps.this.Repr[A]"></a>
+      <a id="sliceEvery(Long,Long):Repr[A@scala.annotation.unchecked.uncheckedVariance]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">sliceEvery</span><span class="params">(<span name="dropLen">dropLen: <span class="extype" name="scala.Long">Long</span></span>, <span name="takeLen">takeLen: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <a href="#Repr[T]=swave.core.Spout[T]" class="extmbr" name="swave.core.Spout.Repr">Repr</a>[A @scala.annotation.unchecked.uncheckedVariance]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.Spout@sliceEvery(dropLen:Long,takeLen:Long):StreamOps.this.Repr[A]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="StreamOps.html" class="extype" name="swave.core.StreamOps">StreamOps</a></dd></dl></div>
     </li><li name="swave.core.StreamOps#sliding" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="sliding(windowSize:Int):StreamOps.this.Repr[scala.collection.immutable.Seq[A]]"></a>
       <a id="sliding(Int):Repr[Seq[A@scala.annotation.unchecked.uncheckedVariance]]"></a>
@@ -1953,6 +1906,23 @@ but the next incoming element will be emitted immediately after reception as par
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="StreamOps.html" class="extype" name="swave.core.StreamOps">StreamOps</a></dd></dl></div>
+    </li><li name="swave.core.Spout#stage" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="stage:swave.core.Stage"></a>
+      <a id="stage:Stage"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">stage</span><span class="result">: <a href="Stage.html" class="extype" name="swave.core.Stage">Stage</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.Spout@stage:swave.core.Stage" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">The <a href="Stage.html" class="extype" name="swave.core.Stage">Stage</a> of this spout.</p>
     </li><li name="swave.core.StreamOps#switch" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="switch[N&lt;:shapeless.Nat](f:A=&gt;Int,eagerCancel:Boolean)(implicitti:shapeless.ops.nat.ToInt[N],implicitfl:shapeless.ops.hlist.Fill[N,A]):swave.core.StreamOps.BranchOut[fl.Out,shapeless.HNil,shapeless.CNil,Nothing,StreamOps.this.Repr]"></a>
       <a id="switch[N&lt;:Nat]((A@scala.annotation.unchecked.uncheckedVariance)⇒Int,Boolean)(ToInt[N],Fill[N,A@scala.annotation.unchecked.uncheckedVariance]):BranchOut[Out,HNil,CNil,Nothing,Repr]"></a>
@@ -2034,6 +2004,23 @@ but the next incoming element will be emitted immediately after reception as par
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#swave.core.Spout@take(count:Long):StreamOps.this.Repr[A]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="StreamOps.html" class="extype" name="swave.core.StreamOps">StreamOps</a></dd></dl></div>
+    </li><li name="swave.core.StreamOps#takeEveryNth" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="takeEveryNth(n:Long):StreamOps.this.Repr[A]"></a>
+      <a id="takeEveryNth(Long):Repr[A@scala.annotation.unchecked.uncheckedVariance]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">takeEveryNth</span><span class="params">(<span name="n">n: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <a href="#Repr[T]=swave.core.Spout[T]" class="extmbr" name="swave.core.Spout.Repr">Repr</a>[A @scala.annotation.unchecked.uncheckedVariance]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.Spout@takeEveryNth(n:Long):StreamOps.this.Repr[A]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -2256,6 +2243,40 @@ but the next incoming element will be emitted immediately after reception as par
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#swave.core.Spout@withInitialTimeout(timeout:scala.concurrent.duration.FiniteDuration):StreamOps.this.Repr[A]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="StreamOps.html" class="extype" name="swave.core.StreamOps">StreamOps</a></dd></dl></div>
+    </li><li name="swave.core.StreamOps#withLimit" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withLimit(maxElements:Long):StreamOps.this.Repr[A]"></a>
+      <a id="withLimit(Long):Repr[A@scala.annotation.unchecked.uncheckedVariance]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withLimit</span><span class="params">(<span name="maxElements">maxElements: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <a href="#Repr[T]=swave.core.Spout[T]" class="extmbr" name="swave.core.Spout.Repr">Repr</a>[A @scala.annotation.unchecked.uncheckedVariance]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.Spout@withLimit(maxElements:Long):StreamOps.this.Repr[A]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="StreamOps.html" class="extype" name="swave.core.StreamOps">StreamOps</a></dd></dl></div>
+    </li><li name="swave.core.StreamOps#withLimitWeighted" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withLimitWeighted(max:Long,cost:A=&gt;Long):StreamOps.this.Repr[A]"></a>
+      <a id="withLimitWeighted(Long,(A@scala.annotation.unchecked.uncheckedVariance)⇒Long):Repr[A@scala.annotation.unchecked.uncheckedVariance]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withLimitWeighted</span><span class="params">(<span name="max">max: <span class="extype" name="scala.Long">Long</span></span>, <span name="cost">cost: (A @scala.annotation.unchecked.uncheckedVariance) ⇒ <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <a href="#Repr[T]=swave.core.Spout[T]" class="extmbr" name="swave.core.Spout.Repr">Repr</a>[A @scala.annotation.unchecked.uncheckedVariance]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.Spout@withLimitWeighted(max:Long,cost:A=&gt;Long):StreamOps.this.Repr[A]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>

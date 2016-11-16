@@ -108,7 +108,7 @@
     </span>
       
     </li><li name="swave.core.Graph.Vertex" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="Vertex=Either[swave.core.Module.ID,swave.core.PipeElem]"></a>
+      <a id="Vertex=Either[swave.core.Module.ID,swave.core.Stage]"></a>
       <a id="Vertex:Vertex"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -116,10 +116,10 @@
         <span class="kind">type</span>
       </span>
       <span class="symbol">
-        <span class="name">Vertex</span><span class="result"> = <span class="extype" name="scala.util.Either">Either</span>[<a href="Module$$ID.html" class="extype" name="swave.core.Module.ID">ID</a>, <a href="PipeElem.html" class="extype" name="swave.core.PipeElem">PipeElem</a>]</span>
+        <span class="name">Vertex</span><span class="result"> = <span class="extype" name="scala.util.Either">Either</span>[<a href="Module$$ID.html" class="extype" name="swave.core.Module.ID">ID</a>, <a href="Stage.html" class="extype" name="swave.core.Stage">Stage</a>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#swave.core.Graph$@Vertex=Either[swave.core.Module.ID,swave.core.PipeElem]" title="Permalink" target="_top">
+      <a href="../../index.html#swave.core.Graph$@Vertex=Either[swave.core.Module.ID,swave.core.Stage]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -240,18 +240,18 @@
               
         </dd></dl></div>
     </li><li name="swave.core.Graph#create" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="create(entryElem:swave.core.PipeElem,expandModules:swave.core.Graph.ExpandModules):swave.core.graph.Digraph[swave.core.Graph.Vertex]"></a>
-      <a id="create(PipeElem,ExpandModules):Digraph[Vertex]"></a>
+      <a id="create(entryStage:swave.core.Stage,expandModules:swave.core.Graph.ExpandModules):swave.core.graph.Digraph[swave.core.Graph.Vertex]"></a>
+      <a id="create(Stage,ExpandModules):Digraph[Vertex]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">create</span><span class="params">(<span name="entryElem">entryElem: <a href="PipeElem.html" class="extype" name="swave.core.PipeElem">PipeElem</a></span>, <span name="expandModules">expandModules: <a href="Graph$$ExpandModules.html" class="extype" name="swave.core.Graph.ExpandModules">ExpandModules</a> = <span class="symbol"><span class="name"><a href="Graph$$ExpandModules$.html">ExpandModules.None</a></span></span></span>)</span><span class="result">: <a href="graph/Digraph.html" class="extype" name="swave.core.graph.Digraph">Digraph</a>[<a href="#Vertex=Either[swave.core.Module.ID,swave.core.PipeElem]" class="extmbr" name="swave.core.Graph.Vertex">Vertex</a>]</span>
+        <span class="name">create</span><span class="params">(<span name="entryStage">entryStage: <a href="Stage.html" class="extype" name="swave.core.Stage">Stage</a></span>, <span name="expandModules">expandModules: <a href="Graph$$ExpandModules.html" class="extype" name="swave.core.Graph.ExpandModules">ExpandModules</a> = <span class="symbol"><span class="name"><a href="Graph$$ExpandModules$.html">ExpandModules.None</a></span></span></span>)</span><span class="result">: <a href="graph/Digraph.html" class="extype" name="swave.core.graph.Digraph">Digraph</a>[<a href="#Vertex=Either[swave.core.Module.ID,swave.core.Stage]" class="extmbr" name="swave.core.Graph.Vertex">Vertex</a>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#swave.core.Graph$@create(entryElem:swave.core.PipeElem,expandModules:swave.core.Graph.ExpandModules):swave.core.graph.Digraph[swave.core.Graph.Vertex]" title="Permalink" target="_top">
+      <a href="../../index.html#swave.core.Graph$@create(entryStage:swave.core.Stage,expandModules:swave.core.Graph.ExpandModules):swave.core.graph.Digraph[swave.core.Graph.Vertex]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -291,18 +291,18 @@
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="swave.core.Graph#explore" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="explore(entryElem:swave.core.PipeElem):Set[swave.core.PipeElem]"></a>
-      <a id="explore(PipeElem):Set[PipeElem]"></a>
+      <a id="explore(entryStage:swave.core.Stage):Set[swave.core.Stage]"></a>
+      <a id="explore(Stage):Set[Stage]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">explore</span><span class="params">(<span name="entryElem">entryElem: <a href="PipeElem.html" class="extype" name="swave.core.PipeElem">PipeElem</a></span>)</span><span class="result">: <span class="extype" name="scala.Predef.Set">Set</span>[<a href="PipeElem.html" class="extype" name="swave.core.PipeElem">PipeElem</a>]</span>
+        <span class="name">explore</span><span class="params">(<span name="entryStage">entryStage: <a href="Stage.html" class="extype" name="swave.core.Stage">Stage</a></span>)</span><span class="result">: <span class="extype" name="scala.Predef.Set">Set</span>[<a href="Stage.html" class="extype" name="swave.core.Stage">Stage</a>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#swave.core.Graph$@explore(entryElem:swave.core.PipeElem):Set[swave.core.PipeElem]" title="Permalink" target="_top">
+      <a href="../../index.html#swave.core.Graph$@explore(entryStage:swave.core.Stage):Set[swave.core.Stage]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -433,18 +433,18 @@
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="swave.core.Graph#render" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="render(pipeElem:swave.core.PipeElem,expandModules:swave.core.Graph.ExpandModules,glyphSet:swave.core.graph.GlyphSet,showParams:Boolean,showRunners:Boolean,showNops:Boolean):String"></a>
-      <a id="render(PipeElem,ExpandModules,GlyphSet,Boolean,Boolean,Boolean):String"></a>
+      <a id="render(stage:swave.core.Stage,expandModules:swave.core.Graph.ExpandModules,glyphSet:swave.core.graph.GlyphSet,showParams:Boolean,showRunners:Boolean,showNops:Boolean):String"></a>
+      <a id="render(Stage,ExpandModules,GlyphSet,Boolean,Boolean,Boolean):String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">render</span><span class="params">(<span name="pipeElem">pipeElem: <a href="PipeElem.html" class="extype" name="swave.core.PipeElem">PipeElem</a></span>, <span name="expandModules">expandModules: <a href="Graph$$ExpandModules.html" class="extype" name="swave.core.Graph.ExpandModules">ExpandModules</a> = <span class="symbol"><span class="name"><a href="Graph$$ExpandModules$.html">ExpandModules.None</a></span></span></span>, <span name="glyphSet">glyphSet: <a href="graph/GlyphSet.html" class="extype" name="swave.core.graph.GlyphSet">GlyphSet</a> = <span class="symbol"><span class="name"><a href="../package.html">GlyphSet.`3x3 ASCII`</a></span></span></span>, <span name="showParams">showParams: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="showRunners">showRunners: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="showNops">showNops: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+        <span class="name">render</span><span class="params">(<span name="stage">stage: <a href="Stage.html" class="extype" name="swave.core.Stage">Stage</a></span>, <span name="expandModules">expandModules: <a href="Graph$$ExpandModules.html" class="extype" name="swave.core.Graph.ExpandModules">ExpandModules</a> = <span class="symbol"><span class="name"><a href="Graph$$ExpandModules$.html">ExpandModules.None</a></span></span></span>, <span name="glyphSet">glyphSet: <a href="graph/GlyphSet.html" class="extype" name="swave.core.graph.GlyphSet">GlyphSet</a> = <span class="symbol"><span class="name"><a href="../package.html">GlyphSet.`3x3 ASCII`</a></span></span></span>, <span name="showParams">showParams: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="showRunners">showRunners: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="showNops">showNops: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#swave.core.Graph$@render(pipeElem:swave.core.PipeElem,expandModules:swave.core.Graph.ExpandModules,glyphSet:swave.core.graph.GlyphSet,showParams:Boolean,showRunners:Boolean,showNops:Boolean):String" title="Permalink" target="_top">
+      <a href="../../index.html#swave.core.Graph$@render(stage:swave.core.Stage,expandModules:swave.core.Graph.ExpandModules,glyphSet:swave.core.graph.GlyphSet,showParams:Boolean,showRunners:Boolean,showNops:Boolean):String" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>

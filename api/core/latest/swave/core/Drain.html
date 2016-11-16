@@ -189,19 +189,19 @@ this method's effect is: Marks all primary drains in the graph behind this drain
 &quot;to be run on the dispatcher with the given id&quot; or the default-dispatcher.</p><p>NOTE: The (internal) graph behind this drain's stage must not contain any explicit async boundaries.
 Otherwise an <span class="extype" name="IllegalStateException">IllegalStateException</span> will be thrown.
 </p></div></div>
-    </li><li name="swave.core.Drain#capture" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="capture[P](promise:scala.concurrent.Promise[P])(implicitcapture:swave.core.Drain.Capture[R,P]):swave.core.Drain[T,Unit]"></a>
-      <a id="capture[P](Promise[P])(Capture[R,P]):Drain[T,Unit]"></a>
+    </li><li name="swave.core.Drain#captureResult" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="captureResult[P](promise:scala.concurrent.Promise[P])(implicitcapture:swave.core.Drain.Capture[R,P]):swave.core.Drain[T,Unit]"></a>
+      <a id="captureResult[P](Promise[P])(Capture[R,P]):Drain[T,Unit]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">capture</span><span class="tparams">[<span name="P">P</span>]</span><span class="params">(<span name="promise">promise: <span class="extype" name="scala.concurrent.Promise">Promise</span>[<span class="extype" name="swave.core.Drain.capture.P">P</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="capture">capture: <a href="Drain$$Capture.html" class="extype" name="swave.core.Drain.Capture">Capture</a>[<span class="extype" name="swave.core.Drain.R">R</span>, <span class="extype" name="swave.core.Drain.capture.P">P</span>]</span>)</span><span class="result">: <a href="" class="extype" name="swave.core.Drain">Drain</a>[<span class="extype" name="swave.core.Drain.T">T</span>, <span class="extype" name="scala.Unit">Unit</span>]</span>
+        <span class="name">captureResult</span><span class="tparams">[<span name="P">P</span>]</span><span class="params">(<span name="promise">promise: <span class="extype" name="scala.concurrent.Promise">Promise</span>[<span class="extype" name="swave.core.Drain.captureResult.P">P</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="capture">capture: <a href="Drain$$Capture.html" class="extype" name="swave.core.Drain.Capture">Capture</a>[<span class="extype" name="swave.core.Drain.R">R</span>, <span class="extype" name="swave.core.Drain.captureResult.P">P</span>]</span>)</span><span class="result">: <a href="" class="extype" name="swave.core.Drain">Drain</a>[<span class="extype" name="swave.core.Drain.T">T</span>, <span class="extype" name="scala.Unit">Unit</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#swave.core.Drain@capture[P](promise:scala.concurrent.Promise[P])(implicitcapture:swave.core.Drain.Capture[R,P]):swave.core.Drain[T,Unit]" title="Permalink" target="_top">
+      <a href="../../index.html#swave.core.Drain@captureResult[P](promise:scala.concurrent.Promise[P])(implicitcapture:swave.core.Drain.Capture[R,P]):swave.core.Drain[T,Unit]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -447,23 +447,6 @@ This means that only one of them can be used (once) in any stream setup.
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="swave.core.Drain#pipeElem" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="pipeElem:swave.core.PipeElem"></a>
-      <a id="pipeElem:PipeElem"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">pipeElem</span><span class="result">: <a href="PipeElem.html" class="extype" name="swave.core.PipeElem">PipeElem</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.Drain@pipeElem:swave.core.PipeElem" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">The <a href="PipeElem.html" class="extype" name="swave.core.PipeElem">PipeElem</a> representation of this <a href="" class="extype" name="swave.core.Drain">Drain</a>.</p>
     </li><li name="swave.core.Drain#result" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="result:R"></a>
       <a id="result:R"></a>
@@ -481,6 +464,23 @@ This means that only one of them can be used (once) in any stream setup.
       </a>
     </span>
       
+    </li><li name="swave.core.Drain#stage" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="stage:swave.core.Stage"></a>
+      <a id="stage:Stage"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">stage</span><span class="result">: <a href="Stage.html" class="extype" name="swave.core.Stage">Stage</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.Drain@stage:swave.core.Stage" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">The <a href="Stage.html" class="extype" name="swave.core.Stage">Stage</a> representation of this <a href="" class="extype" name="swave.core.Drain">Drain</a>.</p>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>

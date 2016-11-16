@@ -157,12 +157,12 @@ when the buffer is full and a new element arrives.</p>
       </a>
     </span>
       
-    </li><li name="swave.core.Coupling" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+    </li><li name="swave.core.Coupling" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="Coupling[T]extendsAnyRef"></a>
       <a id="Coupling[T]:Coupling[T]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
-        <span class="modifier">sealed abstract </span>
+        <span class="modifier">final </span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
@@ -173,7 +173,9 @@ when the buffer is full and a new element arrives.</p>
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">A simple streaming component with one input, one output port and no internal transformation logic.</p><div class="fullcomment"><div class="comment cmt"><p>A simple streaming component with one input, one output port and no internal transformation logic.</p><p>It is typically used to manually connect two ports of a stream graph that cannot
+be otherwise connected via the streaming DSL, e.g. for creating cycles.
+</p></div></div>
     </li><li name="swave.core.Dispatcher" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="DispatcherextendsExecutionContextExecutor"></a>
       <a id="Dispatcher:Dispatcher"></a>
@@ -335,23 +337,6 @@ as a &quot;point of exit&quot; from a stream graph to other destinations (e.g. t
       </a>
     </span>
       
-    </li><li name="swave.core.PipeElem" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="PipeElemextendsAnyRef"></a>
-      <a id="PipeElem:PipeElem"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">sealed </span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a href="PipeElem.html"><span class="name">PipeElem</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.package@PipeElemextendsAnyRef" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
     </li><li name="swave.core.Piping" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="Piping[A]extendsAnyRef"></a>
       <a id="Piping[A]:Piping[A]"></a>
@@ -465,6 +450,23 @@ potentially by several threads concurrently.</p><p>It manages an internal queue 
 As such it serves as a &quot;point of entry&quot; into a stream graph for data elements from other sources
 (e.g. from memory, disk or the network).
 </p></div><dl class="paramcmts block"><dt class="tparam">A</dt><dd class="cmt"><p>the type of the data elements produced</p></dd></dl></div>
+    </li><li name="swave.core.Stage" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="StageextendsAnyRef"></a>
+      <a id="Stage:Stage"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="Stage.html"><span class="name">Stage</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.package@StageextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="swave.core.StreamEnv" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="StreamEnvextendsAnyRef"></a>
       <a id="StreamEnv:StreamEnv"></a>
@@ -818,23 +820,6 @@ As such it serves as a &quot;point of entry&quot; into a stream graph for data e
       </a>
     </span>
       
-    </li><li name="swave.core.PipeElem" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="PipeElem"></a>
-      <a id="PipeElem:PipeElem"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="PipeElem$.html"><span class="name">PipeElem</span></a>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.package@PipeElem" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
     </li><li name="swave.core.PushSpout" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="PushSpout"></a>
       <a id="PushSpout:PushSpout"></a>
@@ -916,6 +901,23 @@ As such it serves as a &quot;point of entry&quot; into a stream graph for data e
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#swave.core.package@Spout" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="swave.core.Stage" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Stage"></a>
+      <a id="Stage:Stage"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Stage$.html"><span class="name">Stage</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.package@Stage" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>

@@ -83,6 +83,11 @@
                           </ul></li>
                           <li class="nav-parent nav-expanded nav-active"><a><i class="fa fa-book" aria-hidden="true"></i><span>User Documentation</span></a>
                           <ul class="nav nav-children">
+                            <li class="nav-parent"><a>Show-Off</a>
+                            <ul class="nav nav-children">
+                              <li><a href="../usage/show-off/overview.html">Show-Off Overview</a></li>
+                              <li><a href="../usage/show-off/fibonacci.html">Fibonacci Example</a></li>
+                            </ul></li>
                             <li><a href="../usage/setup.html">Setup</a></li>
                             <li><a href="../usage/quick-start.html">Quick Start</a></li>
                             <li><a href="../usage/basics.html">Basics</a></li>
@@ -92,19 +97,27 @@
                             <ul class="nav nav-children">
                               <li><a href="../usage/transformations/overview.html">Transformations Overview</a></li>
                               <li><a href="../usage/transformations/simple.html">Simple Transformations</a></li>
-                              <li><a href="../usage/transformations/fan-outs.html">Fan-Outs</a></li>
                               <li><a href="../usage/transformations/fan-ins.html">Fan-Ins</a></li>
-                              <li><a href="../usage/transformations/injecting.html">Injecting</a></li>
-                              <li><a href="../usage/transformations/flattening.html">Flattening</a></li>
-                              <li><a href="../usage/transformations/pipes.html">Pipes</a></li>
-                              <li><a href="../usage/transformations/modules.html">Modules</a></li>
+                              <li><a href="../usage/transformations/fan-outs.html">Fan-Outs</a></li>
+                              <li><a href="../usage/transformations/streams-of-streams.html">Streams-of-Streams</a></li>
                               <li><a href="../usage/transformations/couplings.html">Couplings</a></li>
                               <li><a href="../usage/transformations/reference/index.html">Transformation Reference</a></li>
                             </ul></li>
-                            <li><a href="../usage/sync-vs-async.html">Sync vs. Async</a></li>
-                            <li><a href="../usage/debugging.html">Debugging</a></li>
-                            <li><a href="../usage/rendering.html">Rendering</a></li>
-                            <li><a href="../usage/configuration.html">Configuration</a></li>
+                            <li class="nav-parent"><a>Further Topics</a>
+                            <ul class="nav nav-children">
+                              <li><a href="../usage/further/sync-vs-async.html">Sync vs. Async</a></li>
+                              <li><a href="../usage/further/pipes.html">Pipes</a></li>
+                              <li><a href="../usage/further/modules.html">Modules</a></li>
+                              <li><a href="../usage/further/debugging.html">Debugging</a></li>
+                              <li><a href="../usage/further/rendering.html">Rendering</a></li>
+                              <li><a href="../usage/further/configuration.html">Configuration</a></li>
+                              <li><a href="../usage/further/best-practices.html">Best Practices</a></li>
+                            </ul></li>
+                            <li class="nav-parent"><a>IO Adapters</a>
+                            <ul class="nav nav-children">
+                              <li><a href="../usage/io/file-io.html">File IO</a></li>
+                              <li><a href="../usage/io/tcp.html">Network IO (TCP)</a></li>
+                            </ul></li>
                             <li><a href="../usage/swave-core-api.html">API Docs (ScalaDoc)</a></li>
                             <li><a href="../usage/swave-akka-compat/index.html">swave-akka-compat</a></li>
                             <li><a href="../usage/swave-scodec-compat/index.html">swave-scodec-compat</a></li>
@@ -152,6 +165,14 @@
 <h1><a href="#user-documentation" name="user-documentation" class="anchor"><span class="anchor-link"></span></a>User Documentation</h1>
 <div class="toc ">
 <ul>
+  <li><a href="../usage/show-off/index.html">Show-Off</a>
+  <ul>
+    <li><a href="../usage/show-off/overview.html">Show-Off Overview</a>
+    <ul>
+      <li><a href="../usage/show-off/overview.html#contributions-welcome">Contributions Welcome</a></li>
+    </ul></li>
+    <li><a href="../usage/show-off/fibonacci.html">Fibonacci Example</a></li>
+  </ul></li>
   <li><a href="../usage/setup.html">Setup</a>
   <ul>
     <li><a href="../usage/setup.html#modules">Modules</a></li>
@@ -165,7 +186,7 @@
     <li><a href="../usage/quick-start.html#attaching-drains">Attaching Drains</a></li>
     <li><a href="../usage/quick-start.html#running-a-stream">Running a Stream</a></li>
     <li><a href="../usage/quick-start.html#streamenv">StreamEnv</a></li>
-    <li><a href="../usage/quick-start.html#shortcuts">Shortcuts</a></li>
+    <li><a href="../usage/quick-start.html#drainto-shortcuts">drainTo Shortcuts</a></li>
   </ul></li>
   <li><a href="../usage/basics.html">Basics</a>
   <ul>
@@ -179,7 +200,6 @@
       <li><a href="../usage/basics.html#running">Running</a></li>
       <li><a href="../usage/basics.html#terminating">Terminating</a></li>
     </ul></li>
-    <li><a href="../usage/basics.html#prefer-def-over-val">Prefer <code>def</code> over <code>val</code></a></li>
     <li><a href="../usage/basics.html#execution-model">Execution Model</a></li>
     <li><a href="../usage/basics.html#thread-safety">Thread Safety</a></li>
   </ul></li>
@@ -203,21 +223,32 @@
       <li><a href="../usage/transformations/overview.html#transformation-categories">Transformation Categories</a></li>
       <li><a href="../usage/transformations/overview.html#documentation-entry-points">Documentation Entry-Points</a></li>
     </ul></li>
-    <li><a href="../usage/transformations/simple.html">Simple Transformations</a></li>
-    <li><a href="../usage/transformations/fan-outs.html">Fan-Outs</a></li>
-    <li><a href="../usage/transformations/fan-ins.html">Fan-Ins</a></li>
-    <li><a href="../usage/transformations/injecting.html">Injecting</a></li>
-    <li><a href="../usage/transformations/flattening.html">Flattening</a></li>
-    <li><a href="../usage/transformations/pipes.html">Pipes</a></li>
-    <li><a href="../usage/transformations/modules.html">Modules</a></li>
+    <li><a href="../usage/transformations/simple.html">Simple Transformations</a>
+    <ul>
+      <li><a href="../usage/transformations/simple.html#synchronous-simple-transformations">Synchronous Simple Transformations</a></li>
+      <li><a href="../usage/transformations/simple.html#asynchronous-simple-transformations">Asynchronous Simple Transformations</a></li>
+    </ul></li>
+    <li><a href="../usage/transformations/fan-ins.html">Fan-Ins</a>
+    <ul>
+      <li><a href="../usage/transformations/fan-ins.html#symmetric-vs-asymmetric-fan-ins">Symmetric vs. Asymmetric Fan-Ins</a></li>
+      <li><a href="../usage/transformations/fan-ins.html#homogeneous-vs-heterogeneous-fan-ins">Homogeneous vs. Heterogeneous Fan-Ins</a></li>
+    </ul></li>
+    <li><a href="../usage/transformations/fan-outs.html">Fan-Outs</a>
+    <ul>
+      <li><a href="../usage/transformations/fan-outs.html#basic-example">Basic Example</a></li>
+      <li><a href="../usage/transformations/fan-outs.html#diamond-example">Diamond Example</a></li>
+      <li><a href="../usage/transformations/fan-outs.html#mixing-fan-outs-and-fan-ins">Mixing Fan-Outs and Fan-Ins</a></li>
+      <li><a href="../usage/transformations/fan-outs.html#captureresult-and-dropresult">captureResult and dropResult</a></li>
+    </ul></li>
+    <li><a href="../usage/transformations/streams-of-streams.html">Streams-of-Streams</a>
+    <ul>
+      <li><a href="../usage/transformations/streams-of-streams.html#creating-streams-of-streams">Creating Streams-of-Streams</a></li>
+      <li><a href="../usage/transformations/streams-of-streams.html#flattening-streams-of-streams">Flattening Streams-of-Streams</a></li>
+    </ul></li>
     <li><a href="../usage/transformations/couplings.html">Couplings</a></li>
     <li><a href="../usage/transformations/reference/index.html">Transformation Reference</a>
     <ul>
       <li><a href="../usage/transformations/reference/async.html">async</a></li>
-      <li><a href="../usage/transformations/reference/attach.html">attach</a></li>
-      <li><a href="../usage/transformations/reference/attachAll.html">attachAll</a></li>
-      <li><a href="../usage/transformations/reference/attachLeft.html">attachLeft</a></li>
-      <li><a href="../usage/transformations/reference/attachN.html">attachN</a></li>
       <li><a href="../usage/transformations/reference/buffer.html">buffer</a></li>
       <li><a href="../usage/transformations/reference/bufferDropping.html">bufferDropping</a></li>
       <li><a href="../usage/transformations/reference/collect.html">collect</a></li>
@@ -234,6 +265,16 @@
       <li><a href="../usage/transformations/reference/duplicate.html">duplicate</a></li>
       <li><a href="../usage/transformations/reference/elementAt.html">elementAt</a></li>
       <li><a href="../usage/transformations/reference/expand.html">expand</a></li>
+      <li><a href="../usage/transformations/reference/fanInConcat.html">fanInConcat</a></li>
+      <li><a href="../usage/transformations/reference/fanInFirstNonEmpty.html">fanInFirstNonEmpty</a></li>
+      <li><a href="../usage/transformations/reference/fanInInterleave.html">fanInInterleave</a></li>
+      <li><a href="../usage/transformations/reference/fanInMerge.html">fanInMerge</a></li>
+      <li><a href="../usage/transformations/reference/fanInMergeSorted.html">fanInMergeSorted</a></li>
+      <li><a href="../usage/transformations/reference/fanInToTuple.html">fanInToTuple</a></li>
+      <li><a href="../usage/transformations/reference/fanInToHList.html">fanInToHList</a></li>
+      <li><a href="../usage/transformations/reference/fanInToCoproduct.html">fanInToCoproduct</a></li>
+      <li><a href="../usage/transformations/reference/fanInToProduct.html">fanInToProduct</a></li>
+      <li><a href="../usage/transformations/reference/fanInToSum.html">fanInToSum</a></li>
       <li><a href="../usage/transformations/reference/fanOutBroadcast.html">fanOutBroadcast</a></li>
       <li><a href="../usage/transformations/reference/fanOutBroadcastBuffered.html">fanOutBroadcastBuffered</a></li>
       <li><a href="../usage/transformations/reference/fanOutFirstAvailable.html">fanOutFirstAvailable</a></li>
@@ -241,7 +282,7 @@
       <li><a href="../usage/transformations/reference/filter.html">filter</a></li>
       <li><a href="../usage/transformations/reference/filterNot.html">filterNot</a></li>
       <li><a href="../usage/transformations/reference/first.html">first</a></li>
-      <li><a href="../usage/transformations/reference/flatmap.html">flatmap</a></li>
+      <li><a href="../usage/transformations/reference/flatMap.html">flatMap</a></li>
       <li><a href="../usage/transformations/reference/flattenConcat.html">flattenConcat</a></li>
       <li><a href="../usage/transformations/reference/flattenMerge.html">flattenMerge</a></li>
       <li><a href="../usage/transformations/reference/fold.html">fold</a></li>
@@ -254,9 +295,6 @@
       <li><a href="../usage/transformations/reference/interleave.html">interleave</a></li>
       <li><a href="../usage/transformations/reference/intersperse.html">intersperse</a></li>
       <li><a href="../usage/transformations/reference/last.html">last</a></li>
-      <li><a href="../usage/transformations/reference/limit.html">limit</a></li>
-      <li><a href="../usage/transformations/reference/limitIdleTime.html">limitIdleTime</a></li>
-      <li><a href="../usage/transformations/reference/limitWeighted.html">limitWeighted</a></li>
       <li><a href="../usage/transformations/reference/logEvent.html">logEvent</a></li>
       <li><a href="../usage/transformations/reference/map.html">map</a></li>
       <li><a href="../usage/transformations/reference/mapAsync.html">mapAsync</a></li>
@@ -286,6 +324,7 @@
       <li><a href="../usage/transformations/reference/sample.html">sample</a></li>
       <li><a href="../usage/transformations/reference/scan.html">scan</a></li>
       <li><a href="../usage/transformations/reference/slice.html">slice</a></li>
+      <li><a href="../usage/transformations/reference/sliceEvery.html">sliceEvery</a></li>
       <li><a href="../usage/transformations/reference/sliding.html">sliding</a></li>
       <li><a href="../usage/transformations/reference/slidingTo.html">slidingTo</a></li>
       <li><a href="../usage/transformations/reference/split.html">split</a></li>
@@ -294,6 +333,7 @@
       <li><a href="../usage/transformations/reference/switch.html">switch</a></li>
       <li><a href="../usage/transformations/reference/switchIf.html">switchIf</a></li>
       <li><a href="../usage/transformations/reference/take.html">take</a></li>
+      <li><a href="../usage/transformations/reference/takeEveryNth.html">takeEveryNth</a></li>
       <li><a href="../usage/transformations/reference/takeLast.html">takeLast</a></li>
       <li><a href="../usage/transformations/reference/takeWhile.html">takeWhile</a></li>
       <li><a href="../usage/transformations/reference/takeWithin.html">takeWithin</a></li>
@@ -302,13 +342,29 @@
       <li><a href="../usage/transformations/reference/withCompletionTimeout.html">withCompletionTimeout</a></li>
       <li><a href="../usage/transformations/reference/withIdleTimeout.html">withIdleTimeout</a></li>
       <li><a href="../usage/transformations/reference/withInitialTimeout.html">withInitialTimeout</a></li>
+      <li><a href="../usage/transformations/reference/withLimit.html">limit</a></li>
+      <li><a href="../usage/transformations/reference/withLimitWeighted.html">limitWeighted</a></li>
       <li><a href="../usage/transformations/reference/zip.html">zip</a></li>
     </ul></li>
   </ul></li>
-  <li><a href="../usage/sync-vs-async.html">Sync vs. Async</a></li>
-  <li><a href="../usage/debugging.html">Debugging</a></li>
-  <li><a href="../usage/rendering.html">Rendering</a></li>
-  <li><a href="../usage/configuration.html">Configuration</a></li>
+  <li><a href="../usage/further/index.html">Further Topics</a>
+  <ul>
+    <li><a href="../usage/further/sync-vs-async.html">Sync vs. Async</a></li>
+    <li><a href="../usage/further/pipes.html">Pipes</a></li>
+    <li><a href="../usage/further/modules.html">Modules</a></li>
+    <li><a href="../usage/further/debugging.html">Debugging</a></li>
+    <li><a href="../usage/further/rendering.html">Rendering</a></li>
+    <li><a href="../usage/further/configuration.html">Configuration</a></li>
+    <li><a href="../usage/further/best-practices.html">Best Practices</a>
+    <ul>
+      <li><a href="../usage/further/best-practices.html#prefer-def-over-val">Prefer <code>def</code> over <code>val</code></a></li>
+    </ul></li>
+  </ul></li>
+  <li><a href="../usage/io/index.html">IO Adapters</a>
+  <ul>
+    <li><a href="../usage/io/file-io.html">File IO</a></li>
+    <li><a href="../usage/io/tcp.html">Network IO (TCP)</a></li>
+  </ul></li>
   <li><a href="../usage/swave-core-api.html">API Docs (ScalaDoc)</a></li>
   <li><a href="../usage/swave-akka-compat/index.html">swave-akka-compat</a>
   <ul>
@@ -325,7 +381,7 @@
 </ul>
 </div>
                 <div class="nav-next">
-                    <p><strong>Next:</strong> <a href="../usage/setup.html">Setup</a></p>
+                    <p><strong>Next:</strong> <a href="../usage/show-off/index.html">Show-Off</a></p>
                 </div>
                 <!-- end: page -->
             </div>
