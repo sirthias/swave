@@ -17,14 +17,14 @@ class CouplingSpec extends FreeSpec with Matchers {
       import swave.core._
       implicit val env = StreamEnv()
 
-      val c = Coupling[Int]
-
-      def fibonacciNumbers =
+      def fibonacciNumbers = {
+        val c = Coupling[Int]
         Spout(0, 1)
           .concat(c.out)
           .fanOutBroadcast(eagerCancel = true)
             .sub.buffer(2, Buffer.RequestStrategy.Always).sliding(2).map(_.sum).to(c.in)
             .subContinue
+      }
 
       fibonacciNumbers
         .take(8)

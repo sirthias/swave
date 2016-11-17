@@ -10,7 +10,7 @@ swave-core
 : The core infrastructure you'll want to add as a dependency on in almost all cases.
 
 @ref[swave-akka-compat](swave-akka-compat/index.md)
-: Helpers for seamless integration with [Akka-Stream]
+: Helpers for seamless integration with @extref[Akka-Stream]
 
 @ref[swave-scodec-compat](swave-scodec-compat/index.md)
 : Helpers for seamless integration with [Scodec]
@@ -50,6 +50,6 @@ Dependencies
 - `com.typesafe.scala-logging %% scala-logging`
 
 
-  [Akka-Stream]: http://doc.akka.io/docs/akka/2.4/scala/stream/index.html
+  [Akka-Stream]: akka:stream/index
   [Scodec]: http://scodec.org/
   [SBT]: http://www.scala-sbt.org/

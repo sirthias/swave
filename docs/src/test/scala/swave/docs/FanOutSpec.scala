@@ -78,5 +78,29 @@ class FanOutSpec extends FreeSpec with Matchers {
       //#mixed
     }
 
+    "teee" in {
+      //#teee
+      import swave.core._
+      implicit val env = StreamEnv()
+
+      // simple extension for `Spout[T]`, could also be a value class
+      implicit class RichSpout[T](underlying: Spout[T]) {
+        def teee(drain: Drain[T, Unit]): Spout[T] =
+          underlying
+            .fanOutBroadcast()
+              .sub.to(drain)
+              .subContinue // short for: .sub.end.continue
+      }
+
+      val promise = Promise[Seq[Int]]()
+
+      Spout(1, 2, 3)
+        .teee(Drain.seq(limit = 10).captureResult(promise))
+        .drainToList(limit = 10)
+        .value.get.get shouldEqual Seq(1, 2, 3)
+
+      promise.future.value.get.get shouldEqual Seq(1, 2, 3)
+      //#teee
+    }
   }
 }

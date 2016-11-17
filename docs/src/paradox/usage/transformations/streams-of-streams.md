@@ -43,6 +43,20 @@ Flattening Streams-of-Streams
 - @ref[flattenMerge]
 
 
+Example
+-------
+
+As an example of a stream-of-streams application let's look at a (slightly simplified) implementation of the
+@ref[takeEveryNth] transformation, which we call `takeEvery` here in order to avoid name clashes:
+
+@@snip [-]($test/StreamOfStreamsSpec.scala) { #takeEvery }
+
+This is a typical application of the @ref[inject] transformation, which creates a sub stream, pushes as many elements
+into it as the sub stream accepts, then opens the next sub stream and so on.
+Every sub stream accepts `n` elements, of which only the last one is produced.
+When all sub streams are concatenated we get exactly the kind of "take every n-th element" effect that we intended. 
+
+
   [transformations]: overview.md
   [Simple Transformations]: simple.md
   [inject]: reference/inject.md
@@ -56,3 +70,4 @@ Flattening Streams-of-Streams
   [flatMap]: reference/flatMap.md
   [flattenConcat]: reference/flattenConcat.md
   [flattenMerge]: reference/flattenMerge.md
+  [takeEveryNth]: reference/takeEveryNth.md

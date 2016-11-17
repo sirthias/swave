@@ -100,7 +100,22 @@ As you can see from this example you can `attach` @ref[Spouts] "from the outside
 even on the left (with `attachLeft`), which allows for very flexible and yet concise definition of the large majority
 of common stream graphs. Some graphs, especially the ones containing cycles, cannot be constructed in a fully fluent
 fashion. But with only one small additional element, namely @ref[Couplings], even these graphs, and in fact *all*
-graphs, can be defined. 
+graphs, can be defined.
+ 
+
+subContinue
+-----------
+
+In some of the "@ref[Show Off Examples]" as well as in the *swave* sources you are going to come across a shortcut that
+is frequently used in fan-outs: `subContinue`.
+
+`subContinue` is simply short-hand for `.sub.end.continue`, i.e. the addition of another fan-out sub branch that is
+immediately used to "close" the fan-out and continue the definition of the "main" stream pipeline.
+
+As an example, this is a simple re-implementation of the `tee` transformation, which we call `teee` here in order to
+avoid a name clash with the existing @ref[tee]:  
+
+@@snip [-]($test/FanOutSpec.scala) { #teee }
 
 
 captureResult and dropResult 
@@ -131,6 +146,7 @@ There are two options for this:
   [fan-in]: fan-ins.md
   [fan-ins]: fan-ins.md
   [Couplings]: couplings.md
+  [Show Off Examples]: ../show-off/overview.md
   [fanOutBroadcast]: reference/fanOutBroadcast.md
   [fanOutBroadcastBuffered]: reference/fanOutBroadcastBuffered.md
   [fanOutFirstAvailable]: reference/fanOutFirstAvailable.md

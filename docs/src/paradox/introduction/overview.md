@@ -5,7 +5,7 @@ What is *swave*?
 ----------------
 
 *swave* is a library providing a general, @ref[Reactive-Streams](reactive-streams.md)-compliant streaming infrastructure for applications
-written in [Scala]. As such it plays in the same space as [Akka-Stream], but differs from it in some important
+written in [Scala]. As such it plays in the same space as @extref[Akka-Stream], but differs from it in some important
 aspects. (For more info on this check out @ref[swave vs Akka-Stream](swave-vs-akka-stream.md))
 
            
@@ -25,7 +25,7 @@ Although [Scala] provides the @scaladoc[scala.immutable.Stream](scala.immutable.
 library this abstraction is quite limited in its functionality and barely scratches the surface of the benefits that
 [Stream Processing] as a programming abstraction is able to provide.
 Therefore a number of stream processing libraries have recently emerged in the [Scala] eco-system, the most prominent
-of which are probably [Akka-Stream] and [FS2] (formally [Scalaz Stream]), which approach the field from two
+of which are probably @extref[Akka-Stream] and [FS2] (formally [Scalaz Stream]), which approach the field from two
 different angles.
 
 Since modern stream processing, especially with support for non-blocking backpressure, is both incredibly sexy
@@ -62,7 +62,7 @@ Type-Safe and Concise
   as much of your program logic as possible while reducing necessary boilerplate to the absolute minimum. 
 
   [Scala]: http://www.scala-lang.org/
-  [Akka-Stream]: http://doc.akka.io/docs/akka/2.4/scala/stream/index.html
+  [Akka-Stream]: akka:stream/index
   [Reactive Manifesto]: http://www.reactivemanifesto.org/
   [Stream Processing]: https://en.wikipedia.org/wiki/Stream_processing 
   [FS2]: https://github.com/functional-streams-for-scala/fs2

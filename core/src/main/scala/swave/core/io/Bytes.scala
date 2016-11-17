@@ -15,10 +15,10 @@ import swave.core.util._
 /**
   * Typeclass qualifying `T` as a type holding one or more bytes.
   *
-  * Used as an abstraction across popular "byte holder types" like
+  * Used as an abstraction across popular immutable "byte sequence types" like
   * `akka.util.ByteString` or `scodec.bits.ByteVector`.
   *
-  * API surface is modelled after `scodec.bits.ByteVector`.
+  * The API surface is modelled mostly after `scodec.bits.ByteVector`.
   */
 trait Bytes[T] {
 
@@ -28,7 +28,7 @@ trait Bytes[T] {
   def fill[A: Integral](size: Long)(b: A): T
   def apply(array: Array[Byte]): T
   def apply(bytes: Array[Byte], offset: Int, length: Int): T
-  def apply[A: Integral](bytes: A*): T // uses only the least significant byte each integral value
+  def apply[A: Integral](bytes: A*): T // uses only the least significant byte of each integral value
   def apply(bytes: Vector[Byte]): T
   def apply(buffer: ByteBuffer): T
   def apply(bs: GenTraversableOnce[Byte]): T

@@ -26,7 +26,7 @@ The interface types defined in this library, most importantly
 libraries and thus allow for seamless integration between different RS-implementations on the JVM.
 
 Normally you shouldn't have to define the `reactive-streams` JAR as an explicit dependency of your project.
-It'll automatically land on your classpath as a transitive dependency of *swave* (or [Akka-Stream], for example).
+It'll automatically land on your classpath as a transitive dependency of *swave* (or @extref[Akka-Stream], for example).
 
 
 RS Support in *swave*
@@ -47,5 +47,5 @@ Check the respective documentation on @ref[Spouts](../usage/spouts.md) and
   [Reactive Streams]: http://www.reactive-streams.org/
   [Scala]: http://www.scala-lang.org/
   [Creative Commons Zero]: http://creativecommons.org/publicdomain/zero/1.0
-  [Akka-Stream]: http://doc.akka.io/docs/akka/2.4/scala/stream/index.html
+  [Akka-Stream]: akka:stream/index
   *[RS]: Reactive Streams
