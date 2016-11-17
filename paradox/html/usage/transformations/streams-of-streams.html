@@ -86,6 +86,7 @@
                             <li class="nav-parent"><a>Show-Off</a>
                             <ul class="nav nav-children">
                               <li><a href="../../usage/show-off/overview.html">Show-Off Overview</a></li>
+                              <li><a href="../../usage/show-off/md5.html">MD5 Example</a></li>
                               <li><a href="../../usage/show-off/fibonacci.html">Fibonacci Example</a></li>
                             </ul></li>
                             <li><a href="../../usage/setup.html">Setup</a></li>
@@ -187,6 +188,26 @@
   <li><a href="reference/flattenConcat.html">flattenConcat</a></li>
   <li><a href="reference/flattenMerge.html">flattenMerge</a></li>
 </ul>
+<h2><a href="#example" name="example" class="anchor"><span class="anchor-link"></span></a>Example</h2>
+<p>As an example of a stream-of-streams application let&rsquo;s look at a (slightly simplified) implementation of the <a href="reference/takeEveryNth.html">takeEveryNth</a> transformation, which we call <code>takeEvery</code> here in order to avoid name clashes:</p>
+<pre><code class="scala">import swave.core._
+implicit val env = StreamEnv()
+
+// simple extension for `Spout[T]`, could also be a value class
+implicit class RichSpout[T](underlying: Spout[T]) {
+  def takeEvery(n: Long): Spout[T] =
+    underlying                  // Spout[T]
+      .inject                   // Spout[Spout[T]]
+      .map(_.drop(n-1).take(1)) // Spout[Spout[T]]
+      .flattenConcat()          // Spout[T]
+}
+
+Spout.ints(from = 1)
+  .takeEvery(10)
+  .take(5)
+  .drainToList(limit = 100)
+  .value.get.get shouldEqual Seq(10, 20, 30, 40, 50)</code></pre>
+<p>This is a typical application of the <a href="reference/inject.html">inject</a> transformation, which creates a sub stream, pushes as many elements into it as the sub stream accepts, then opens the next sub stream and so on. Every sub stream accepts <code>n</code> elements, of which only the last one is produced. When all sub streams are concatenated we get exactly the kind of &ldquo;take every n-th element&rdquo; effect that we intended. </p>
                 <div class="nav-next">
                     <p><strong>Next:</strong> <a href="../../usage/transformations/couplings.html">Couplings</a></p>
                 </div>

@@ -86,6 +86,7 @@
                             <li class="nav-parent nav-expanded nav-active"><a>Show-Off</a>
                             <ul class="nav nav-children">
                               <li><a href="../../usage/show-off/overview.html">Show-Off Overview</a></li>
+                              <li><a href="../../usage/show-off/md5.html">MD5 Example</a></li>
                               <li class="nav-expanded nav-active"><a href="../../usage/show-off/fibonacci.html">Fibonacci Example</a></li>
                             </ul></li>
                             <li><a href="../../usage/setup.html">Setup</a></li>
@@ -180,26 +181,57 @@ fibonacciNumbers
   .take(8)
   .drainToList(limit = 100)
   .value.get.get shouldEqual List(0, 1, 1, 2, 3, 5, 8, 13)</code></pre>
-<p>The recursion required for the stream generation is hereby provided by the &ldquo;unfolding&rdquo; feature.<br/> As such it is &ldquo;built-in&rdquo; and not that interesting.</p>
+<p>While this is a concise and efficient implementation the recursion required for the stream generation is hereby provided by the &ldquo;unfolding&rdquo; feature. As such it is &ldquo;built-in&rdquo; and not that interesting from a &ldquo;show-off&rdquo; perspective.</p>
 <p>A maybe more illustrative way to construct the same stream is the following one, which makes the recursion explicit in the stream graph structure:</p>
 <pre><code class="scala">import swave.core._
 implicit val env = StreamEnv()
 
-val c = Coupling[Int]
-
-def fibonacciNumbers =
+def fibonacciNumbers = {
+  val c = Coupling[Int]
   Spout(0, 1)
     .concat(c.out)
     .fanOutBroadcast(eagerCancel = true)
       .sub.buffer(2, Buffer.RequestStrategy.Always).sliding(2).map(_.sum).to(c.in)
       .subContinue
+}
 
 fibonacciNumbers
   .take(8)
   .drainToList(limit = 100)
   .value.get.get shouldEqual List(0, 1, 1, 2, 3, 5, 8, 13)</code></pre>
-<p>The stream graph defined by this code can be visualized like this:</p>
-<p>&hellip; TODO &hellip;</p>
+<p>The stream graph defined by this code can be visualized like this:</p><p class="centered"><img src="../../assets/img/fibobacci-graph.svg" alt="Fibonacci Example Stream Graph" /></p>
+<p>As you can see this graph contains a cycle, which is the source for the infinite nature of the stream.<br/> Let&rsquo;s understand how this setup works by tracing the initial phase of the stream execution step by step:</p>
+<ol>
+  <li>
+  <p>When the stream is started three <a href="../basics.html">stages</a> begin to actively send signals: the main <a href="../drains.html">Drain</a> at the very end,  the <a href="../transformations/reference/buffer.html">buffer</a> stage in the first fan-out sub branch and the <a href="../transformations/reference/take.html">sliding</a> stage right behind it.  All 3 stages signal demand to the upstreams. The main drain signals demand for <code>Int.MaxValue</code> elements and the  <a href="../transformations/reference/buffer.html">buffer</a> and <a href="../transformations/reference/take.html">sliding</a> stages each signal demand for 2 elements.</p></li>
+  <li>
+  <p>The <a href="../transformations/reference/take.html">take</a> stage receives the demand signal from its downstream and forwards it as <code>Request(8)</code> to its own  upstream, which, via the <code>subContinue</code>, is the <a href="../transformations/reference/fanOutBroadcast.html">fanOutBroadcast</a> stage.</p></li>
+  <li>
+  <p>The <a href="../transformations/reference/fanOutBroadcast.html">fanOutBroadcast</a> stage receives the demand signal for 2 elements (from the <a href="../transformations/reference/buffer.html">buffer</a> stage) on its first  sub stream and a demand of 8 on its second sub stream. It therefore signals a demand of 2 to its own upstream,  the <a href="../transformations/reference/concat.html">concat</a>.</p></li>
+  <li>
+  <p>The <a href="../transformations/reference/concat.html">concat</a> stage forwards this demand to its first upstream, the <code>Spout(0, 1)</code>, which immediately delivers  two elements and signals completion.</p></li>
+  <li>
+  <p>The <a href="../transformations/reference/concat.html">concat</a> stage forwards the two received elements (<code>0</code> and <code>1</code>) to its downstream and registers the  completion of its first upstream, which will cause all still unfulfilled as well as future demand to go to its  second upstream (the <code>out</code> side of the <a href="../transformations/couplings.html">Coupling</a>).</p></li>
+  <li>
+  <p>The <a href="../transformations/reference/fanOutBroadcast.html">fanOutBroadcast</a> stage receives the two elements (<code>0</code> and <code>1</code>) and forwards them to both of its downstreams.</p></li>
+  <li>
+  <p>The <a href="../transformations/reference/take.html">take</a> stage forwards the elements to the main <a href="../drains.html">Drain</a> and registers that it has seen the first two of  the total 8 elements it is expecting.</p></li>
+  <li>
+  <p>The <a href="../transformations/reference/buffer.html">buffer</a> stage receives the two elements and immediately forwards them to the <a href="../transformations/reference/take.html">sliding</a> stage, which has  already demanded them at the very start of the stream. Then the <a href="../transformations/reference/buffer.html">buffer</a> stage immediately re-requests two more  elements from the <a href="../transformations/reference/fanOutBroadcast.html">fanOutBroadcast</a> stage.</p></li>
+  <li>
+  <p>The <a href="../transformations/reference/fanOutBroadcast.html">fanOutBroadcast</a> stage now has unfulfilled demand of 2 on its first sub and 6 on its seconds. It therefore  signals demand of 2 to the <a href="../transformations/reference/concat.html">concat</a> stage, which, via the <a href="../transformations/couplings.html">Coupling</a> and the <a href="../transformations/reference/take.html">map</a>, arrives at the  <a href="../transformations/reference/take.html">sliding</a> stage.</p></li>
+  <li>
+  <p>The <a href="../transformations/reference/take.html">sliding</a> stage produces its first window, a <code>Seq(0, 1)</code> to the <a href="../transformations/reference/take.html">map</a>, which in result produces a <code>1</code>  element to the <a href="../transformations/reference/concat.html">concat</a> stage (again, via the <a href="../transformations/couplings.html">Coupling</a>). Then it signals demand for the next element to  the <a href="../transformations/reference/buffer.html">buffer</a> stage.</p></li>
+  <li>
+  <p>The <a href="../transformations/reference/concat.html">concat</a>, which currently has unfulfilled demand of 2, receives the <code>1</code> element and produces it to the  <a href="../transformations/reference/fanOutBroadcast.html">fanOutBroadcast</a>, which pushes it to both of its sub streams, where it arrives at the main <a href="../drains.html">Drain</a> as well  as the <a href="../transformations/reference/buffer.html">buffer</a>.</p></li>
+  <li>
+  <p>As the <a href="../transformations/reference/buffer.html">buffer</a> has already seen demand of <code>1</code> from its downstream it immediately forwards this element to the  <a href="../transformations/reference/take.html">sliding</a> stage, which produces the next window, a <code>Seq(1, 1)</code> to the <a href="../transformations/reference/take.html">map</a>, which in result produces a <code>2</code>  to the <a href="../transformations/reference/concat.html">concat</a>, which forwards it to the <a href="../transformations/reference/fanOutBroadcast.html">fanOutBroadcast</a>, which produces it to both its downstreams.</p></li>
+</ol>
+<p>At this point a continuous cycle of demand and element production has been established and will run as long as nothing stops the process. In this case the process will be stopped by the <a href="../transformations/reference/take.html">take</a> stage. After it has received 8 elements it sends a <code>Cancel</code> signal to its upstream, the <a href="../transformations/reference/fanOutBroadcast.html">fanOutBroadcast</a>. Since that is configured with <code>eagerCancel = true</code> it will not continue to run &ldquo;on one leg&rdquo; (i.e. with only on sub stream left), but rather forward the <code>Cancel</code> signal to its own upstream, which causes all stages in the cycle to be stopped by the propagating cancellation.</p>
+<h2><a href="#learnings" name="learnings" class="anchor"><span class="anchor-link"></span></a>Learnings</h2>
+<p>When you play around with the code of this example you&rsquo;ll notice that things won&rsquo;t work when you remove the <a href="../transformations/reference/buffer.html">buffer</a> stage, reduce its size or change it&rsquo;s <code>RequestStrategy</code>. The reason is that a certain amount of demand is required <em>in the cycle</em> in order to kick things into motion and establish a perpetual flow of elements. When you follow the initial sequence of events closely, as outlined above, you&rsquo;ll see why this is the case.</p>
+<p>The learning here is that, while cycles are a perfectly valid and useful streaming pattern, they can require additional <a href="../transformations/reference/buffer.html">buffer</a> stages to work correctly. Figuring out what exactly the minimum required buffer size is can be hard to figure out by simply looking at the stage setup. Starting out with a bigger buffer and reducing it until things break can be a good and pragmatic approach.</p>
+<p>A second learning is that, if you have perpetual cycles, you need to think about a way to stop the stream if it&rsquo;s not supposed to run forever. A <a href="../transformations/reference/fanOutBroadcast.html">fanOutBroadcast</a> configured with <code>eagerCancel = true</code>, as shown in this example, is one possible way.</p>
                 <div class="nav-next">
                     <p><strong>Next:</strong> <a href="../../usage/setup.html">Setup</a></p>
                 </div>

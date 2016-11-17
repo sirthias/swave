@@ -86,6 +86,7 @@
                             <li class="nav-parent"><a>Show-Off</a>
                             <ul class="nav nav-children">
                               <li><a href="../../usage/show-off/overview.html">Show-Off Overview</a></li>
+                              <li><a href="../../usage/show-off/md5.html">MD5 Example</a></li>
                               <li><a href="../../usage/show-off/fibonacci.html">Fibonacci Example</a></li>
                             </ul></li>
                             <li><a href="../../usage/setup.html">Setup</a></li>
@@ -251,7 +252,31 @@ Spout(1, 2, 3)
   (1.0, &quot;3&quot;, 12, 3))</code></pre>
 <p>It encodes this graph:</p><p class="centered"><img src="../../assets/img/mixed.svg" alt="Mixed Fan-Out/Fan-In Graph" /></p>
 <p>This graph could be drawn in a simpler way but we show it like this in order to make it easier to correlate the DSL code with the visual representation.</p>
-<p>As you can see from this example you can <code>attach</code> <a href="../spouts.html">Spouts</a> &ldquo;from the outside&rdquo; at any point in a fan-out definition, even on the left (with <code>attachLeft</code>), which allows for very flexible and yet concise definition of the large majority of common stream graphs. Some graphs, especially the ones containing cycles, cannot be constructed in a fully fluent fashion. But with only one small additional element, namely <a href="couplings.html">Couplings</a>, even these graphs, and in fact <em>all</em> graphs, can be defined. </p>
+<p>As you can see from this example you can <code>attach</code> <a href="../spouts.html">Spouts</a> &ldquo;from the outside&rdquo; at any point in a fan-out definition, even on the left (with <code>attachLeft</code>), which allows for very flexible and yet concise definition of the large majority of common stream graphs. Some graphs, especially the ones containing cycles, cannot be constructed in a fully fluent fashion. But with only one small additional element, namely <a href="couplings.html">Couplings</a>, even these graphs, and in fact <em>all</em> graphs, can be defined.</p>
+<h2><a href="#subcontinue" name="subcontinue" class="anchor"><span class="anchor-link"></span></a>subContinue</h2>
+<p>In some of the &ldquo;<a href="../show-off/overview.html">Show Off Examples</a>&rdquo; as well as in the <em>swave</em> sources you are going to come across a shortcut that is frequently used in fan-outs: <code>subContinue</code>.</p>
+<p><code>subContinue</code> is simply short-hand for <code>.sub.end.continue</code>, i.e. the addition of another fan-out sub branch that is immediately used to &ldquo;close&rdquo; the fan-out and continue the definition of the &ldquo;main&rdquo; stream pipeline.</p>
+<p>As an example, this is a simple re-implementation of the <code>tee</code> transformation, which we call <code>teee</code> here in order to avoid a name clash with the existing <a href="reference/tee.html">tee</a>: </p>
+<pre><code class="scala">import swave.core._
+implicit val env = StreamEnv()
+
+// simple extension for `Spout[T]`, could also be a value class
+implicit class RichSpout[T](underlying: Spout[T]) {
+  def teee(drain: Drain[T, Unit]): Spout[T] =
+    underlying
+      .fanOutBroadcast()
+        .sub.to(drain)
+        .subContinue // short for: .sub.end.continue
+}
+
+val promise = Promise[Seq[Int]]()
+
+Spout(1, 2, 3)
+  .teee(Drain.seq(limit = 10).captureResult(promise))
+  .drainToList(limit = 10)
+  .value.get.get shouldEqual Seq(1, 2, 3)
+
+promise.future.value.get.get shouldEqual Seq(1, 2, 3)</code></pre>
 <h2><a href="#captureresult-and-dropresult" name="captureresult-and-dropresult" class="anchor"><span class="anchor-link"></span></a>captureResult and dropResult</h2>
 <p>In the examples above you might have noticed the <code>.captureResult</code> and <code>.dropResult</code> calls, of which one is required for most types of <a href="../drains.html">Drains</a> if they are to be used as the target of a fan-out sub branch.</p>
 <p>The reason for this is that the DSL offers no way to access the result of a <a href="../drains.html">Drain</a> when it is used within a fan-out sub branch. Therefore, in order to be usable in sub branch, a drain is <em>required</em> to not produce a result, which means that its result type must be <code>Unit</code>. Since most types of drains <em>do</em> produce results they must be explicitly transformed into <a href="../drains.html">Drains</a> without result.</p>

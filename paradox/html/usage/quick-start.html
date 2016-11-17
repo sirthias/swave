@@ -86,6 +86,7 @@
                             <li class="nav-parent"><a>Show-Off</a>
                             <ul class="nav nav-children">
                               <li><a href="../usage/show-off/overview.html">Show-Off Overview</a></li>
+                              <li><a href="../usage/show-off/md5.html">MD5 Example</a></li>
                               <li><a href="../usage/show-off/fibonacci.html">Fibonacci Example</a></li>
                             </ul></li>
                             <li><a href="../usage/setup.html">Setup</a></li>
@@ -238,7 +239,7 @@ def drain2[T]: Drain[T, Future[Unit]] = Drain.foreach(println)</code></pre>
             ^  
 </code></pre>
 <p>which tells us that we need to supply an implicit <a href="http://swave.io/api/core/latest/#swave.core.StreamEnv">StreamEnv</a> instance.</p>
-<p>The <a href="http://swave.io/api/core/latest/#swave.core.StreamEnv">StreamEnv</a> is similar to the <a href="http://swave.io/api/#akka.core.ActorSystem">ActorSystem</a> type in Akka. It provides all the global configuration information that&rsquo;s required by <em>swave&rsquo;s</em> internal streaming engine. For example, the <code>StreamEnv</code> contains the thread-pool configuration(s) and general <a href="http://swave.io/api/core/latest/#swave.core.StreamEnv.Settings">Settings</a> you have <a href="further/configuration.html">configured</a> as well as a global <code>Logger</code> and <a href="http://swave.io/api/core/latest/#swave.core.Scheduler">Scheduler</a> instance.</p>
+<p>The <a href="http://swave.io/api/core/latest/#swave.core.StreamEnv">StreamEnv</a> is similar to the <a href="http://doc.akka.io/api/akka/2.4/#akka.core.ActorSystem">ActorSystem</a> type in Akka. It provides all the global configuration information that&rsquo;s required by <em>swave&rsquo;s</em> internal streaming engine. For example, the <code>StreamEnv</code> contains the thread-pool configuration(s) and general <a href="http://swave.io/api/core/latest/#swave.core.StreamEnv.Settings">Settings</a> you have <a href="further/configuration.html">configured</a> as well as a global <code>Logger</code> and <a href="http://swave.io/api/core/latest/#swave.core.Scheduler">Scheduler</a> instance.</p>
 <p>The simplest and yet perfectly fine way to supply a <code>StreamEnv</code> instance is this:</p>
 <pre><code class="scala">implicit val env = StreamEnv()</code></pre>
 <p>This will simply load the complete <a href="further/configuration.html">Configuration</a> from the <code>reference.conf</code> and, potentially, <code>application.conf</code> files on your classpath.</p>

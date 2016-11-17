@@ -86,6 +86,7 @@
                             <li class="nav-parent"><a>Show-Off</a>
                             <ul class="nav nav-children">
                               <li><a href="../usage/show-off/overview.html">Show-Off Overview</a></li>
+                              <li><a href="../usage/show-off/md5.html">MD5 Example</a></li>
                               <li><a href="../usage/show-off/fibonacci.html">Fibonacci Example</a></li>
                             </ul></li>
                             <li><a href="../usage/setup.html">Setup</a></li>
@@ -168,19 +169,19 @@
 <dl>
   <dt>Scala-only vs. Scala + Java
   </dt>
-  <dd><em>swave</em> is Scala-only, whereas <a href="http://doc.akka.io/docs/akka/2.4/scala/stream/index.html">Akka-Stream</a> comes with a Scala API <em>and</em> a Java API. While the latter addresses  a strictly larger user base it also adds a significant amount of development and maintenance effort.</dd>
+  <dd><em>swave</em> is Scala-only, whereas <a href="http://doc.akka.io/docs/akka/2.4/scala/stream/index.html">Akka-Stream</a> comes with a Scala API <em>and</em> a Java API. While the latter  addresses a strictly larger user base it also adds a significant amount of development and maintenance effort.</dd>
   <dt>Non-Lifted vs. Lifted Design
   </dt>
-  <dd>All of <em>swave</em>&rsquo;s key types are non-lifted, single use abstractions. This differs from <a href="http://doc.akka.io/docs/akka/2.4/scala/stream/index.html">Akka-Stream</a> which tries to  keep its abstraction as reusable as possible (which is not always possible).</dd>
+  <dd>All of <em>swave</em>&rsquo;s key types are non-lifted, single use abstractions. This differs from <a href="http://doc.akka.io/docs/akka/2.4/scala/stream/index.html">Akka-Stream</a> which tries  to keep its abstraction as reusable as possible (which is not always possible).</dd>
   <dt>Sync + Async vs. Async only
   </dt>
   <dd>In addition to scheduling tasks onto configurable thread-pools <em>swave</em> allows for synchronous  (but still non-blocking!) execution on the caller thread, if the stream setup permits it.  <a href="http://doc.akka.io/docs/akka/2.4/scala/stream/index.html">Akka-Stream</a> always runs its streams on independent Akka Actors (and thus thread-pools).</dd>
   <dt>Shapeless-based DSL vs. Point-to-point Graph DSL
   </dt>
-  <dd>While <em>swave</em> tries to keep individual transformations named similarly to <a href="http://doc.akka.io/docs/akka/2.4/scala/stream/index.html">Akka-Stream</a> the DSL for creating more  complex stream setups, with fan-outs, fan-ins, loops, etc. is substantially different between the two.</dd>
+  <dd>While <em>swave</em> tries to keep individual transformations named similarly to <a href="http://doc.akka.io/docs/akka/2.4/scala/stream/index.html">Akka-Stream</a> the DSL for creating  more complex stream setups, with fan-outs, fan-ins, loops, etc. is substantially different between the two.</dd>
   <dt>Quick Evolution vs. Long-term stability
   </dt>
-  <dd>Being part of <a href="http://akka.io/">Akka</a> Akka-Stream has much tighter requirements on long-term stability and binary compatibility than  <em>swave</em>. This means that you can probably rely on <a href="http://doc.akka.io/docs/akka/2.4/scala/stream/index.html">Akka-Stream</a> as a more stable and mature foundation going forward.  However, the less stringent stability requirements allow us to evolve <em>swave</em> faster and incorporate new learnings  more freely.</dd>
+  <dd>Being part of <a href="http://akka.io/">Akka</a> Akka-Stream has much tighter requirements on long-term stability and binary compatibility than  <em>swave</em>. This means that you can probably rely on <a href="http://doc.akka.io/docs/akka/2.4/scala/stream/index.html">Akka-Stream</a> as a more stable and mature foundation going  forward. However, the less stringent stability requirements allow us to evolve <em>swave</em> faster and incorporate new  learnings more freely.</dd>
 </dl>
 <p>Non-blocking, backpressured stream processing in Scala is an exciting and promising arena, with most of its potential still untapped. Therefore we don&rsquo;t see <em>swave</em> as a head-on competitor to <a href="http://doc.akka.io/docs/akka/2.4/scala/stream/index.html">Akka-Stream</a>, trying to steal away from its user base. Rather we regards ourselves as two teams that are exploring this still new field together, learning from one another and comparing approaches on numerous levels. The more users whose needs we can jointly address the more the Scala eco-system will benefit as a whole.</p>
                 <div class="nav-next">
