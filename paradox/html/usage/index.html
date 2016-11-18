@@ -101,6 +101,7 @@
                               <li><a href="../usage/transformations/fan-ins.html">Fan-Ins</a></li>
                               <li><a href="../usage/transformations/fan-outs.html">Fan-Outs</a></li>
                               <li><a href="../usage/transformations/streams-of-streams.html">Streams-of-Streams</a></li>
+                              <li><a href="../usage/transformations/relationships.html">Fan-In/Out Relationships</a></li>
                               <li><a href="../usage/transformations/couplings.html">Couplings</a></li>
                               <li><a href="../usage/transformations/reference/index.html">Transformation Reference</a></li>
                             </ul></li>
@@ -248,9 +249,15 @@
     </ul></li>
     <li><a href="../usage/transformations/streams-of-streams.html">Streams-of-Streams</a>
     <ul>
-      <li><a href="../usage/transformations/streams-of-streams.html#creating-streams-of-streams">Creating Streams-of-Streams</a></li>
-      <li><a href="../usage/transformations/streams-of-streams.html#flattening-streams-of-streams">Flattening Streams-of-Streams</a></li>
+      <li><a href="../usage/transformations/streams-of-streams.html#injecting-transformations">Injecting Transformations</a></li>
+      <li><a href="../usage/transformations/streams-of-streams.html#flattening-transformations">Flattening Transformations</a></li>
       <li><a href="../usage/transformations/streams-of-streams.html#example">Example</a></li>
+      <li><a href="../usage/transformations/streams-of-streams.html#relationship-to-fan-ins-and-fan-outs">Relationship to Fan-Ins and Fan-Outs</a></li>
+    </ul></li>
+    <li><a href="../usage/transformations/relationships.html">Fan-In/Out Relationships</a>
+    <ul>
+      <li><a href="../usage/transformations/relationships.html#symmetry-between-fan-outs-and-fan-ins">Symmetry between Fan-Outs and Fan-Ins</a></li>
+      <li><a href="../usage/transformations/relationships.html#correspondance-between-fan-out-in-and-injecting-flattening">Correspondance between Fan-Out/In and Injecting/Flattening</a></li>
     </ul></li>
     <li><a href="../usage/transformations/couplings.html">Couplings</a></li>
     <li><a href="../usage/transformations/reference/index.html">Transformation Reference</a>
@@ -273,10 +280,9 @@
       <li><a href="../usage/transformations/reference/elementAt.html">elementAt</a></li>
       <li><a href="../usage/transformations/reference/expand.html">expand</a></li>
       <li><a href="../usage/transformations/reference/fanInConcat.html">fanInConcat</a></li>
-      <li><a href="../usage/transformations/reference/fanInFirstNonEmpty.html">fanInFirstNonEmpty</a></li>
-      <li><a href="../usage/transformations/reference/fanInInterleave.html">fanInInterleave</a></li>
+      <li><a href="../usage/transformations/reference/fanInRoundRobin.html">fanInRoundRobin</a></li>
       <li><a href="../usage/transformations/reference/fanInMerge.html">fanInMerge</a></li>
-      <li><a href="../usage/transformations/reference/fanInMergeSorted.html">fanInMergeSorted</a></li>
+      <li><a href="../usage/transformations/reference/fanInSorted.html">fanInSorted</a></li>
       <li><a href="../usage/transformations/reference/fanInToTuple.html">fanInToTuple</a></li>
       <li><a href="../usage/transformations/reference/fanInToHList.html">fanInToHList</a></li>
       <li><a href="../usage/transformations/reference/fanInToCoproduct.html">fanInToCoproduct</a></li>
@@ -284,21 +290,28 @@
       <li><a href="../usage/transformations/reference/fanInToSum.html">fanInToSum</a></li>
       <li><a href="../usage/transformations/reference/fanOutBroadcast.html">fanOutBroadcast</a></li>
       <li><a href="../usage/transformations/reference/fanOutBroadcastBuffered.html">fanOutBroadcastBuffered</a></li>
-      <li><a href="../usage/transformations/reference/fanOutFirstAvailable.html">fanOutFirstAvailable</a></li>
       <li><a href="../usage/transformations/reference/fanOutRoundRobin.html">fanOutRoundRobin</a></li>
+      <li><a href="../usage/transformations/reference/fanOutSequential.html">fanOutSequential</a></li>
+      <li><a href="../usage/transformations/reference/fanOutToAny.html">fanOutToAny</a></li>
       <li><a href="../usage/transformations/reference/filter.html">filter</a></li>
       <li><a href="../usage/transformations/reference/filterNot.html">filterNot</a></li>
       <li><a href="../usage/transformations/reference/first.html">first</a></li>
       <li><a href="../usage/transformations/reference/flatMap.html">flatMap</a></li>
       <li><a href="../usage/transformations/reference/flattenConcat.html">flattenConcat</a></li>
       <li><a href="../usage/transformations/reference/flattenMerge.html">flattenMerge</a></li>
+      <li><a href="../usage/transformations/reference/flattenRoundRobin.html">flattenRoundRobin</a></li>
+      <li><a href="../usage/transformations/reference/flattenSorted.html">flattenSorted</a></li>
+      <li><a href="../usage/transformations/reference/flattenToSeq.html">flattenToSeq</a></li>
       <li><a href="../usage/transformations/reference/fold.html">fold</a></li>
       <li><a href="../usage/transformations/reference/groupBy.html">groupBy</a></li>
       <li><a href="../usage/transformations/reference/grouped.html">grouped</a></li>
       <li><a href="../usage/transformations/reference/groupedTo.html">groupedTo</a></li>
       <li><a href="../usage/transformations/reference/groupedWithin.html">groupedWithin</a></li>
       <li><a href="../usage/transformations/reference/headAndTail.html">headAndTail</a></li>
-      <li><a href="../usage/transformations/reference/inject.html">inject</a></li>
+      <li><a href="../usage/transformations/reference/injectBroadcast.html">injectBroadcast</a></li>
+      <li><a href="../usage/transformations/reference/injectRoundRobin.html">injectRoundRobin</a></li>
+      <li><a href="../usage/transformations/reference/injectSequential.html">injectSequential</a></li>
+      <li><a href="../usage/transformations/reference/injectToAny.html">injectToAny</a></li>
       <li><a href="../usage/transformations/reference/interleave.html">interleave</a></li>
       <li><a href="../usage/transformations/reference/intersperse.html">intersperse</a></li>
       <li><a href="../usage/transformations/reference/last.html">last</a></li>

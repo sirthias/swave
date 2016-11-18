@@ -101,6 +101,7 @@
                               <li><a href="../../usage/transformations/fan-ins.html">Fan-Ins</a></li>
                               <li><a href="../../usage/transformations/fan-outs.html">Fan-Outs</a></li>
                               <li><a href="../../usage/transformations/streams-of-streams.html">Streams-of-Streams</a></li>
+                              <li><a href="../../usage/transformations/relationships.html">Fan-In/Out Relationships</a></li>
                               <li><a href="../../usage/transformations/couplings.html">Couplings</a></li>
                               <li><a href="../../usage/transformations/reference/index.html">Transformation Reference</a></li>
                             </ul></li>
@@ -166,7 +167,7 @@
             <div id="main-content">
                 <!-- start: page -->
 <h1><a href="#simple-transformations" name="simple-transformations" class="anchor"><span class="anchor-link"></span></a>Simple Transformations</h1>
-<p>Simple <a href="overview.html">transformations</a> are <a href="../basics.html#streams-as-graphs">stream graph components</a> with one input port and one output port. They &ldquo;simply&rdquo; transform a <a href="../spouts.html">Spout</a> of one type into a <a href="../spouts.html">Spout</a> of another type. </p><p class="centered"><img src="../../assets/img/simple-transformation.svg" alt="A Simple Transformation" /></p>
+<p>Simple <a href="overview.html">transformations</a> are <a href="../basics.html#streams-as-graphs">stream graph components</a> with one input port and one output port. They &ldquo;simply&rdquo; transform a <a href="../spouts.html">Spout</a> of one type into a <a href="../spouts.html">Spout</a> of another or even the same type. </p><p class="centered"><img src="../../assets/img/simple-transformation.svg" alt="A Simple Transformation" /></p>
 <p>Simple transformations are attached to a <a href="../spouts.html">Spout</a> through a call to the respective DSL method that is defined in the <code>StreamOps</code> trait (see also the <a href="http://swave.io/api/core/latest/#swave.core.StreamOps">StreamOps Scaladoc</a> or <a href="https://github.com/sirthias/swave/tree/master/core/src/main/scala/swave/core/StreamOps.scala">StreamOps Source Code</a>).</p>
 <p>For example:</p>
 <pre><code class="scala">import swave.core._
@@ -180,8 +181,8 @@ Spout(1, 2, 3, 4, 5) // Spout[Int]
   .map(_.toString)   // Spout[String]
   .drainToHead()     // Future[String]
   .value.get.get shouldEqual &quot;24&quot;</code></pre>
-<p>To reiterate the explanations from the <a href="../quick-start.html">Quick Start</a> and <a href="../basics.html">Basics</a> chapters: Calling a method like <code>.map(...)</code> on a <a href="../spouts.html">Spout</a> doesn&rsquo;t trigger any immediate action except the attachment of a <code>Map</code> stage to the open port of the underlying <a href="../spouts.html">Spout</a>.<br/> No data start to flow and no elements are actually being mapped.</p>
-<p>Only when the stream is started and run will the <code>Map</code> stage spring to life and apply its logic to the incoming data elements.</p>
+<p>To reiterate the explanations from the <a href="../quick-start.html">Quick Start</a> and <a href="../basics.html">Basics</a> chapters: Calling a method like <code>.map(...)</code> on a <a href="../spouts.html">Spout</a> doesn&rsquo;t trigger any immediate action except for the attachment of a <code>Map</code> stage to the open port of the underlying <a href="../spouts.html">Spout</a>.<br/> No data start to flow and no elements are actually being mapped.</p>
+<p>Only when the stream is <a href="../quick-start.html#running-a-stream">started and run</a> will the <code>Map</code> stage spring to life and apply its logic to the incoming data elements.</p>
 <h2><a href="#synchronous-simple-transformations" name="synchronous-simple-transformations" class="anchor"><span class="anchor-link"></span></a>Synchronous Simple Transformations</h2>
 <ul>
   <li><a href="reference/buffer.html">buffer</a></li>

@@ -101,6 +101,7 @@
                               <li><a href="../../usage/transformations/fan-ins.html">Fan-Ins</a></li>
                               <li><a href="../../usage/transformations/fan-outs.html">Fan-Outs</a></li>
                               <li class="nav-expanded nav-active"><a href="../../usage/transformations/streams-of-streams.html">Streams-of-Streams</a></li>
+                              <li><a href="../../usage/transformations/relationships.html">Fan-In/Out Relationships</a></li>
                               <li><a href="../../usage/transformations/couplings.html">Couplings</a></li>
                               <li><a href="../../usage/transformations/reference/index.html">Transformation Reference</a></li>
                             </ul></li>
@@ -166,27 +167,37 @@
             <div id="main-content">
                 <!-- start: page -->
 <h1><a href="#streams-of-streams" name="streams-of-streams" class="anchor"><span class="anchor-link"></span></a>Streams-of-Streams</h1>
-<p>Streams, like most other abstractions, can be nested.<br/> This means that you can have a <code>Spout[Spout[T]]</code> like you can have a <code>List[List[T]]</code>.</p>
-<p><em>swave</em> offer a number of <a href="overview.html">transformations</a> that either create a stream-of-streams from in incoming stream of &ldquo;regular&rdquo; elements or flatten a stream-of-streams back to an outgoing stream of &ldquo;regular&rdquo; elements.</p><p class="centered"><img src="../../assets/img/sos-transforms.svg" alt="Stream-of-Stream Transforms" /></p>
+<p>Streams, like most other abstractions, can be nested. This means that you can have a <code>Spout[Spout[T]]</code> like you can have a <code>List[List[T]]</code>. <em>swave</em> offers a number of <a href="overview.html">transformations</a> that either</p>
+<ol>
+  <li>
+    <p>create a stream-of-streams from in incoming stream of &ldquo;regular&rdquo; elements (which we call &ldquo;injecting&rdquo;)</p><p class="centered"><img src="../../assets/img/injecting.svg" alt="An Injecting Transformation" /></p>
+  </li>
+  <li>
+    <p>or flatten a stream-of-streams back to an outgoing stream of &ldquo;regular&rdquo; elements (which we call &ldquo;flattening&rdquo;)</p><p class="centered"><img src="../../assets/img/flattening.svg" alt="A Flattening Transformation" /></p>
+  </li>
+</ol>
 <p>While the shape of these stream-of-streams transformations is the same as for <a href="simple.html">Simple Transformations</a> the internal and external complexity is significantly higher. This is because the state-space of the state-machines implementing the transformation logic increases significantly with the number of open streams that a stage has to concurrently deal with. We therefore categorize stream-of-streams transformations as a separate group.</p>
-<h2><a href="#creating-streams-of-streams" name="creating-streams-of-streams" class="anchor"><span class="anchor-link"></span></a>Creating Streams-of-Streams</h2>
-<p><em>swave</em> currently defines these &ldquo;creating streams-of-streams&rdquo; transformations:</p>
+<h2><a href="#injecting-transformations" name="injecting-transformations" class="anchor"><span class="anchor-link"></span></a>Injecting Transformations</h2>
+<p><em>swave</em> currently defines these injecting transformations:</p>
 <ul>
   <li><a href="reference/groupBy.html">groupBy</a></li>
   <li><a href="reference/headAndTail.html">headAndTail</a></li>
-  <li><a href="reference/inject.html">inject</a></li>
+  <li><a href="reference/injectSequential.html">injectSequential</a></li>
   <li><a href="reference/prefixAndTail.html">prefixAndTail</a></li>
   <li><a href="reference/prefixAndTailTo.html">prefixAndTailTo</a></li>
   <li><a href="reference/split.html">split</a></li>
   <li><a href="reference/splitAfter.html">splitAfter</a></li>
   <li><a href="reference/splitWhen.html">splitWhen</a></li>
 </ul>
-<h2><a href="#flattening-streams-of-streams" name="flattening-streams-of-streams" class="anchor"><span class="anchor-link"></span></a>Flattening Streams-of-Streams</h2>
-<p><em>swave</em> currently defines these &ldquo;flattening streams-of-streams&rdquo; transformations:</p>
+<h2><a href="#flattening-transformations" name="flattening-transformations" class="anchor"><span class="anchor-link"></span></a>Flattening Transformations</h2>
+<p><em>swave</em> currently defines these flattening transformations:</p>
 <ul>
   <li><a href="reference/flatMap.html">flatMap</a></li>
   <li><a href="reference/flattenConcat.html">flattenConcat</a></li>
   <li><a href="reference/flattenMerge.html">flattenMerge</a></li>
+  <li><a href="reference/flattenRoundRobin.html">flattenRoundRobin</a></li>
+  <li><a href="reference/flattenSorted.html">flattenSorted</a></li>
+  <li><a href="reference/flattenToSeq.html">flattenToSeq</a></li>
 </ul>
 <h2><a href="#example" name="example" class="anchor"><span class="anchor-link"></span></a>Example</h2>
 <p>As an example of a stream-of-streams application let&rsquo;s look at a (slightly simplified) implementation of the <a href="reference/takeEveryNth.html">takeEveryNth</a> transformation, which we call <code>takeEvery</code> here in order to avoid name clashes:</p>
@@ -197,7 +208,7 @@ implicit val env = StreamEnv()
 implicit class RichSpout[T](underlying: Spout[T]) {
   def takeEvery(n: Long): Spout[T] =
     underlying                  // Spout[T]
-      .inject                   // Spout[Spout[T]]
+      .injectSequential         // Spout[Spout[T]]
       .map(_.drop(n-1).take(1)) // Spout[Spout[T]]
       .flattenConcat()          // Spout[T]
 }
@@ -207,9 +218,11 @@ Spout.ints(from = 1)
   .take(5)
   .drainToList(limit = 100)
   .value.get.get shouldEqual Seq(10, 20, 30, 40, 50)</code></pre>
-<p>This is a typical application of the <a href="reference/inject.html">inject</a> transformation, which creates a sub stream, pushes as many elements into it as the sub stream accepts, then opens the next sub stream and so on. Every sub stream accepts <code>n</code> elements, of which only the last one is produced. When all sub streams are concatenated we get exactly the kind of &ldquo;take every n-th element&rdquo; effect that we intended. </p>
+<p>This is a typical application of the <a href="reference/injectSequential.html">injectSequential</a> transformation, which creates a sub stream, pushes as many elements into it as the sub stream accepts, then opens the next sub stream and so on. Every sub stream accepts <code>n</code> elements, of which only the last one is produced. When all sub streams are concatenated we get exactly the kind of &ldquo;take every n-th element&rdquo; effect that we intended. </p>
+<h2><a href="#relationship-to-fan-ins-and-fan-outs" name="relationship-to-fan-ins-and-fan-outs" class="anchor"><span class="anchor-link"></span></a>Relationship to Fan-Ins and Fan-Outs</h2>
+<p>The injecting and flattening transformations have a very close relationship to <a href="fan-outs.html">fan-outs</a> and <a href="fan-ins.html">fan-ins</a>, respectively.<br/> Check out the the <a href="relationships.html">next chapter</a> for more details.</p>
                 <div class="nav-next">
-                    <p><strong>Next:</strong> <a href="../../usage/transformations/couplings.html">Couplings</a></p>
+                    <p><strong>Next:</strong> <a href="../../usage/transformations/relationships.html">Fan-In/Out Relationships</a></p>
                 </div>
                 <!-- end: page -->
             </div>

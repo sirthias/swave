@@ -329,52 +329,18 @@
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="swave.core.StreamOps.FanIn#fanInConcat" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="fanInConcat(implicitev:swave.core.StreamOps.FanInReq[L]):Repr[Sup]"></a>
-      <a id="fanInConcat(FanInReq[L]):Repr[Sup]"></a>
+      <a id="fanInConcat(stopAfterFirstNonEmpty:Boolean)(implicitev:swave.core.StreamOps.FanInReq[L]):Repr[Sup]"></a>
+      <a id="fanInConcat(Boolean)(FanInReq[L]):Repr[Sup]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">fanInConcat</span><span class="params">(<span class="implicit">implicit </span><span name="ev">ev: <span class="extype" name="swave.core.StreamOps.FanInReq">FanInReq</span>[<span class="extype" name="swave.core.StreamOps.FanIn.L">L</span>]</span>)</span><span class="result">: <span class="extype" name="swave.core.StreamOps.FanIn.Repr">Repr</span>[<span class="extype" name="swave.core.StreamOps.FanIn.Sup">Sup</span>]</span>
+        <span class="name">fanInConcat</span><span class="params">(<span name="stopAfterFirstNonEmpty">stopAfterFirstNonEmpty: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="ev">ev: <span class="extype" name="swave.core.StreamOps.FanInReq">FanInReq</span>[<span class="extype" name="swave.core.StreamOps.FanIn.L">L</span>]</span>)</span><span class="result">: <span class="extype" name="swave.core.StreamOps.FanIn.Repr">Repr</span>[<span class="extype" name="swave.core.StreamOps.FanIn.Sup">Sup</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#swave.core.StreamOps$$FanIn@fanInConcat(implicitev:swave.core.StreamOps.FanInReq[L]):Repr[Sup]" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
-    </li><li name="swave.core.StreamOps.FanIn#fanInFirstNonEmpty" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="fanInFirstNonEmpty(implicitev:swave.core.StreamOps.FanInReq[L]):Repr[Sup]"></a>
-      <a id="fanInFirstNonEmpty(FanInReq[L]):Repr[Sup]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">fanInFirstNonEmpty</span><span class="params">(<span class="implicit">implicit </span><span name="ev">ev: <span class="extype" name="swave.core.StreamOps.FanInReq">FanInReq</span>[<span class="extype" name="swave.core.StreamOps.FanIn.L">L</span>]</span>)</span><span class="result">: <span class="extype" name="swave.core.StreamOps.FanIn.Repr">Repr</span>[<span class="extype" name="swave.core.StreamOps.FanIn.Sup">Sup</span>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.StreamOps$$FanIn@fanInFirstNonEmpty(implicitev:swave.core.StreamOps.FanInReq[L]):Repr[Sup]" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
-    </li><li name="swave.core.StreamOps.FanIn#fanInInterleave" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="fanInInterleave(segmentSize:Int,eagerComplete:Boolean)(implicitev:swave.core.StreamOps.FanInReq[L]):Repr[Sup]"></a>
-      <a id="fanInInterleave(Int,Boolean)(FanInReq[L]):Repr[Sup]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">fanInInterleave</span><span class="params">(<span name="segmentSize">segmentSize: <span class="extype" name="scala.Int">Int</span></span>, <span name="eagerComplete">eagerComplete: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="ev">ev: <span class="extype" name="swave.core.StreamOps.FanInReq">FanInReq</span>[<span class="extype" name="swave.core.StreamOps.FanIn.L">L</span>]</span>)</span><span class="result">: <span class="extype" name="swave.core.StreamOps.FanIn.Repr">Repr</span>[<span class="extype" name="swave.core.StreamOps.FanIn.Sup">Sup</span>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.StreamOps$$FanIn@fanInInterleave(segmentSize:Int,eagerComplete:Boolean)(implicitev:swave.core.StreamOps.FanInReq[L]):Repr[Sup]" title="Permalink" target="_top">
+      <a href="../../index.html#swave.core.StreamOps$$FanIn@fanInConcat(stopAfterFirstNonEmpty:Boolean)(implicitev:swave.core.StreamOps.FanInReq[L]):Repr[Sup]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -396,19 +362,36 @@
       </a>
     </span>
       
-    </li><li name="swave.core.StreamOps.FanIn#fanInMergeSorted" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="fanInMergeSorted(eagerComplete:Boolean)(implicitev:swave.core.StreamOps.FanInReq[L],implicitord:Ordering[Sup]):Repr[Sup]"></a>
-      <a id="fanInMergeSorted(Boolean)(FanInReq[L],Ordering[Sup]):Repr[Sup]"></a>
+    </li><li name="swave.core.StreamOps.FanIn#fanInRoundRobin" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="fanInRoundRobin(segmentSize:Int,eagerComplete:Boolean)(implicitev:swave.core.StreamOps.FanInReq[L]):Repr[Sup]"></a>
+      <a id="fanInRoundRobin(Int,Boolean)(FanInReq[L]):Repr[Sup]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">fanInMergeSorted</span><span class="params">(<span name="eagerComplete">eagerComplete: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="ev">ev: <span class="extype" name="swave.core.StreamOps.FanInReq">FanInReq</span>[<span class="extype" name="swave.core.StreamOps.FanIn.L">L</span>]</span>, <span name="ord">ord: <span class="extype" name="scala.Ordering">Ordering</span>[<span class="extype" name="swave.core.StreamOps.FanIn.Sup">Sup</span>]</span>)</span><span class="result">: <span class="extype" name="swave.core.StreamOps.FanIn.Repr">Repr</span>[<span class="extype" name="swave.core.StreamOps.FanIn.Sup">Sup</span>]</span>
+        <span class="name">fanInRoundRobin</span><span class="params">(<span name="segmentSize">segmentSize: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1</span></span>, <span name="eagerComplete">eagerComplete: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="ev">ev: <span class="extype" name="swave.core.StreamOps.FanInReq">FanInReq</span>[<span class="extype" name="swave.core.StreamOps.FanIn.L">L</span>]</span>)</span><span class="result">: <span class="extype" name="swave.core.StreamOps.FanIn.Repr">Repr</span>[<span class="extype" name="swave.core.StreamOps.FanIn.Sup">Sup</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#swave.core.StreamOps$$FanIn@fanInMergeSorted(eagerComplete:Boolean)(implicitev:swave.core.StreamOps.FanInReq[L],implicitord:Ordering[Sup]):Repr[Sup]" title="Permalink" target="_top">
+      <a href="../../index.html#swave.core.StreamOps$$FanIn@fanInRoundRobin(segmentSize:Int,eagerComplete:Boolean)(implicitev:swave.core.StreamOps.FanInReq[L]):Repr[Sup]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="swave.core.StreamOps.FanIn#fanInSorted" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="fanInSorted(eagerComplete:Boolean)(implicitev:swave.core.StreamOps.FanInReq[L],implicitord:Ordering[Sup]):Repr[Sup]"></a>
+      <a id="fanInSorted(Boolean)(FanInReq[L],Ordering[Sup]):Repr[Sup]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">fanInSorted</span><span class="params">(<span name="eagerComplete">eagerComplete: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="ev">ev: <span class="extype" name="swave.core.StreamOps.FanInReq">FanInReq</span>[<span class="extype" name="swave.core.StreamOps.FanIn.L">L</span>]</span>, <span name="ord">ord: <span class="extype" name="scala.Ordering">Ordering</span>[<span class="extype" name="swave.core.StreamOps.FanIn.Sup">Sup</span>]</span>)</span><span class="result">: <span class="extype" name="swave.core.StreamOps.FanIn.Repr">Repr</span>[<span class="extype" name="swave.core.StreamOps.FanIn.Sup">Sup</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamOps$$FanIn@fanInSorted(eagerComplete:Boolean)(implicitev:swave.core.StreamOps.FanInReq[L],implicitord:Ordering[Sup]):Repr[Sup]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>

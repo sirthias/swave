@@ -101,6 +101,7 @@
                               <li class="nav-expanded nav-active"><a href="../../usage/transformations/fan-ins.html">Fan-Ins</a></li>
                               <li><a href="../../usage/transformations/fan-outs.html">Fan-Outs</a></li>
                               <li><a href="../../usage/transformations/streams-of-streams.html">Streams-of-Streams</a></li>
+                              <li><a href="../../usage/transformations/relationships.html">Fan-In/Out Relationships</a></li>
                               <li><a href="../../usage/transformations/couplings.html">Couplings</a></li>
                               <li><a href="../../usage/transformations/reference/index.html">Transformation Reference</a></li>
                             </ul></li>
@@ -179,17 +180,16 @@ foo
   .attach(bar)
   .attach(baz)
 //.attach(...)
-  .fanInConcat
+  .fanInConcat()
   .drainToList(limit = 10)
   .value.get.get shouldEqual Seq(1, 2, 3, 10, 20, 30, 100, 200, 300)</code></pre>
 <p>When you call <code>attach(...)</code> on a <a href="../spouts.html">Spout</a> you get back a DSL type which represents <em>several</em> open stream ports, not just a single one as in the case of a simple <a href="../spouts.html">Spout</a>. You can add more spouts to the mix by simply calling <code>.attach(...)</code> again, as often as you like.</p>
 <p>Once you have assembled all the spouts for the fan-in in this way simply call one of the defined <code>fanIn...</code> variants to &ldquo;close&rdquo; the fan-in with the respective logic. Currently these fan-in variants are available:</p>
 <ul>
   <li><a href="reference/fanInConcat.html">fanInConcat</a></li>
-  <li><a href="reference/fanInFirstNonEmpty.html">fanInFirstNonEmpty</a></li>
-  <li><a href="reference/fanInInterleave.html">fanInInterleave</a></li>
   <li><a href="reference/fanInMerge.html">fanInMerge</a></li>
-  <li><a href="reference/fanInMergeSorted.html">fanInMergeSorted</a></li>
+  <li><a href="reference/fanInRoundRobin.html">fanInRoundRobin</a></li>
+  <li><a href="reference/fanInSorted.html">fanInSorted</a></li>
   <li><a href="reference/fanInToTuple.html">fanInToTuple</a></li>
   <li><a href="reference/fanInToHList.html">fanInToHList</a></li>
   <li><a href="reference/fanInToCoproduct.html">fanInToCoproduct</a></li>
@@ -229,7 +229,7 @@ greens              // open = greens
   (20, 140, 260)
 )</code></pre>
 <h2><a href="#homogeneous-vs-heterogeneous-fan-ins" name="homogeneous-vs-heterogeneous-fan-ins" class="anchor"><span class="anchor-link"></span></a>Homogeneous vs. Heterogeneous Fan-Ins</h2>
-<p>The examples above show &ldquo;homogeneous&rdquo; fan-ins, in which all inputs are of the same type. With variants like <a href="reference/fanInConcat.html">fanInConcat</a>, <a href="reference/fanInFirstNonEmpty.html">fanInFirstNonEmpty</a> or <a href="reference/fanInMerge.html">fanInMerge</a> this is the most common case.</p>
+<p>The examples above show &ldquo;homogeneous&rdquo; fan-ins, in which all inputs are of the same type. With variants like <a href="reference/fanInConcat.html">fanInConcat</a> or <a href="reference/fanInMerge.html">fanInMerge</a> this is the most common case.</p>
 <p>However, <a href="reference/fanInToTuple.html">fanInToTuple</a>, <a href="reference/fanInToProduct.html">fanInToProduct</a> or <a href="reference/fanInToSum.html">fanInToSum</a> are usually used on inputs of differing types, i.e. as &ldquo;heterogeneous&rdquo; fan-ins. Here is an example:</p>
 <pre><code class="scala">import swave.core._
 implicit val env = StreamEnv()

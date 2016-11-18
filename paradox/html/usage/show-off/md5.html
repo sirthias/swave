@@ -101,6 +101,7 @@
                               <li><a href="../../usage/transformations/fan-ins.html">Fan-Ins</a></li>
                               <li><a href="../../usage/transformations/fan-outs.html">Fan-Outs</a></li>
                               <li><a href="../../usage/transformations/streams-of-streams.html">Streams-of-Streams</a></li>
+                              <li><a href="../../usage/transformations/relationships.html">Fan-In/Out Relationships</a></li>
                               <li><a href="../../usage/transformations/couplings.html">Couplings</a></li>
                               <li><a href="../../usage/transformations/reference/index.html">Transformation Reference</a></li>
                             </ul></li>
@@ -200,7 +201,7 @@ def md5sum(file: File): Future[String] = {
   <p>Because the <code>fromFile</code> <a href="../spouts.html">Spout</a> is asynchronous the stream pipeline in this example actually consists of two parts that are running in parallel.</p></li>
 </ol>
 <p>The last point deserves some further explanations.<br/> Here is a visualization of the example&rsquo;s stream pipeline:</p><p class="centered"><img src="../../assets/img/md5-graph.svg" alt="MD5 Example Stream Graph" /></p>
-<p>As you can see there is an asynchronous boundary between the first two stages of the graph, which causes both parts to run independently and concurrently from each other. Adding additional asynchronous boundaries, for increasing the degree of concurrency, is as easy as adding an <a href="../transformations/reference/async.html">.async()</a> transformation at arbitrary points in the pipeline.</p>
+<p>As you can see there is an asynchronous boundary between the first two stages of the graph, which causes both parts to run independently from each other and thus concurrently. Adding additional asynchronous boundaries, for increasing the degree of concurrency, is as easy as adding an <a href="../transformations/reference/async.html">.async()</a> transformation at arbitrary points in the pipeline.</p>
 <p>This makes trying out different distribution patterns of your business logic over several threads and cores extremely easy. Adding a boundary means adding a single line of code. Moving a boundary means moving a single line of code. If you contrast that with the amount of work required for introducing, moving or removing asynchronous boundaries in traditional thread-based applications or even actor-based ones some of the benefits of stream-based programming should become apparent.</p>
                 <div class="nav-next">
                     <p><strong>Next:</strong> <a href="../../usage/show-off/fibonacci.html">Fibonacci Example</a></p>
