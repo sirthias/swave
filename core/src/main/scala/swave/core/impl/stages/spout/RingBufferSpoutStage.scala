@@ -9,6 +9,7 @@ package swave.core.impl.stages.spout
 import scala.annotation.tailrec
 import swave.core.Stage
 import swave.core.impl.Outport
+import swave.core.impl.stages.SpoutStage
 import swave.core.impl.util.RingBuffer
 import swave.core.macros.StageImplementation
 

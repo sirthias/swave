@@ -6,6 +6,8 @@
 
 package swave.core.impl.stages.inout
 
+import swave.core.impl.stages.InOutStage
+
 import scala.annotation.tailrec
 import swave.core.{Buffer, BufferOverflowFailure, Stage}
 import swave.core.impl.{Inport, Outport}

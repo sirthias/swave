@@ -4,12 +4,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package swave.core.impl.stages.spout
+package swave.core.impl.stages
 
 import scala.annotation.compileTimeOnly
 import swave.core.Stage
 import swave.core.impl.{Outport, RunContext}
-import swave.core.impl.stages.StageImpl
 
 // format: OFF
 private[swave] abstract class SpoutStage extends StageImpl {

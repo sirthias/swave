@@ -4,13 +4,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package swave.core.impl.stages.fanout
+package swave.core.impl.stages
 
 import scala.annotation.compileTimeOnly
 import swave.core.Stage
-import swave.core.impl.{Inport, Outport, RunContext}
-import swave.core.impl.stages.StageImpl
 import swave.core.impl.util.AbstractOutportList
+import swave.core.impl.{Inport, Outport, RunContext}
 
 // format: OFF
 private[core] abstract class FanOutStage extends StageImpl {
@@ -32,13 +31,13 @@ private[core] abstract class FanOutStage extends StageImpl {
   protected def createOutportCtx(out: Outport, tail: OutportCtx): OutportCtx
 }
 
-private[fanout] object FanOutStage {
+private[stages] object FanOutStage {
 
-  private[fanout] abstract class OutportContext[L >: Null <: OutportContext[L]](out: Outport, tail: L)
+  private[stages] abstract class OutportContext[L >: Null <: OutportContext[L]](out: Outport, tail: L)
     extends AbstractOutportList[L](out, tail) {
     var remaining: Long = _ // requested by this `out` but not yet delivered, i.e. unfulfilled demand
   }
 
-  private[fanout] final class SimpleOutportContext(out: Outport, tail: SimpleOutportContext)
+  private[stages] final class SimpleOutportContext(out: Outport, tail: SimpleOutportContext)
     extends OutportContext[SimpleOutportContext](out, tail)
 }

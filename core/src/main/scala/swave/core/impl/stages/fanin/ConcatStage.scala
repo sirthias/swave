@@ -8,6 +8,7 @@ package swave.core.impl.stages.fanin
 
 import swave.core.Stage
 import swave.core.impl.Outport
+import swave.core.impl.stages.FanInStage
 import swave.core.impl.util.InportList
 import swave.core.macros._
 import swave.core.util._

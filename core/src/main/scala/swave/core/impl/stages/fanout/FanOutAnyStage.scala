@@ -8,8 +8,9 @@ package swave.core.impl.stages.fanout
 
 import swave.core.Stage
 import swave.core.impl.Outport
+import swave.core.impl.stages.FanOutStage
 
-private[core] final class FirstAvailableStage(eagerCancel: Boolean) extends FanOutStage {
+private[core] final class FanOutAnyStage(eagerCancel: Boolean) extends FanOutStage {
 
   def kind = Stage.Kind.FanOut.FirstAvailable(eagerCancel)
 

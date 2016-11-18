@@ -4,20 +4,18 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package swave.core.impl.stages.drain
+package swave.core.impl.stages
 
 import scala.annotation.compileTimeOnly
-import swave.core.IllegalAsyncBoundaryException
-import swave.core.Stage
+import swave.core.{IllegalAsyncBoundaryException, Stage}
 import swave.core.impl.{Inport, RunContext}
-import swave.core.impl.stages.StageImpl
 
 // format: OFF
 private[swave] abstract class DrainStage extends StageImpl {
 
   def kind: Stage.Kind.Drain
 
-  private[this] var _dispatcherId: String = null
+  private[this] var _dispatcherId: String = _
   protected var _inputStages: List[Stage] = Nil
 
   override def inputStages: List[Stage] = _inputStages

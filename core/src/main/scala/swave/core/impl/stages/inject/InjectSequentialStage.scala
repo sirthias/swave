@@ -4,21 +4,22 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package swave.core.impl.stages.inout
+package swave.core.impl.stages.inject
 
 import scala.annotation.tailrec
-import swave.core.{Spout, Stage}
+import swave.core.impl.stages.InOutStage
 import swave.core.impl.stages.spout.SubSpoutStage
 import swave.core.impl.util.RingBuffer
 import swave.core.impl.{Inport, Outport, RunContext}
 import swave.core.macros._
 import swave.core.util._
+import swave.core.{Spout, Stage}
 
 // TODO: reduce buffer to one single element, like in the SplitStage
 
 // format: OFF
 @StageImplementation(fullInterceptions = true)
-private[core] final class InjectStage extends InOutStage { stage =>
+private[core] final class InjectSequentialStage extends InOutStage { stage =>
 
   def kind = Stage.Kind.InOut.Inject
 

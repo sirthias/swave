@@ -25,7 +25,7 @@ class FanInSpec extends FreeSpec with Matchers {
         .attach(bar)
         .attach(baz)
       //.attach(...)
-        .fanInConcat
+        .fanInConcat()
         .drainToList(limit = 10)
         .value.get.get shouldEqual Seq(1, 2, 3, 10, 20, 30, 100, 200, 300)
       //#example1

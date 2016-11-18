@@ -13,6 +13,7 @@ import scala.concurrent.{ExecutionContext, Future, Promise}
 import org.reactivestreams.{Publisher, Subscriber}
 import swave.core.impl.TypeLogic.ToFuture
 import swave.core.impl.Outport
+import swave.core.impl.stages.DrainStage
 import swave.core.impl.stages.drain._
 import swave.core.impl.stages.inout.AsyncBoundaryStage
 import swave.core.macros._

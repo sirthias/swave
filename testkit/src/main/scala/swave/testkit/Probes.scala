@@ -13,10 +13,8 @@ import scala.util.DynamicVariable
 import scala.collection.immutable
 import scala.concurrent.{Await, Future, Promise, TimeoutException}
 import scala.concurrent.duration._
-import swave.core.impl.stages.StageImpl
-import swave.core.impl.stages.drain.DrainStage
+import swave.core.impl.stages.{DrainStage, SpoutStage, StageImpl}
 import swave.core.impl.{Inport, Outport}
-import swave.core.impl.stages.spout.SpoutStage
 import swave.core.macros._
 import swave.core.util._
 import swave.core._

@@ -8,6 +8,7 @@ package swave.core.impl.stages.fanout
 
 import swave.core.Stage
 import swave.core.impl.Outport
+import swave.core.impl.stages.FanOutStage
 
 private[core] final class SwitchStage(branchCount: Int, f: AnyRef ⇒ Int, eagerCancel: Boolean) extends FanOutStage {
 

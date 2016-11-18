@@ -7,7 +7,7 @@
 package swave.core.impl.stages.drain
 
 import scala.util.control.NonFatal
-import swave.core.impl.stages.StageImpl
+import swave.core.impl.stages.{DrainStage, StageImpl}
 import swave.core.impl.{Inport, RunContext}
 import swave.core.macros.StageImplementation
 import swave.core.{Cancellable, Stage, SubscriptionTimeoutException}

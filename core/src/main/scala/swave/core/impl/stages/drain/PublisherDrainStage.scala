@@ -7,12 +7,14 @@
 package swave.core.impl.stages.drain
 
 import java.util.concurrent.atomic.AtomicReference
+
 import org.reactivestreams.{Publisher, Subscriber, Subscription}
+
 import scala.annotation.tailrec
 import swave.core.{Stage, UnsupportedSecondSubscriptionException}
 import swave.core.impl.{Inport, StreamRunner}
 import swave.core.impl.rs.{ForwardToRunnerSubscription, RSCompliance}
-import swave.core.impl.stages.StreamTermination
+import swave.core.impl.stages.{DrainStage, StreamTermination}
 import swave.core.macros.StageImplementation
 import swave.core.util._
 

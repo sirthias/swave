@@ -39,13 +39,13 @@ class RenderingSpec extends FreeSpec with Matchers {
       .duplicate
       .attach(Spout("x", "y", "z"))
       .fromFanInVia(foo)
-      .fanInConcat
+      .fanInConcat()
       .map(_.toString)
       .to(Drain.first(2))
   }
 
   "Example 5" tests {
-    Spout(1, 2, 3).fanOutBroadcast().sub.end.sub.end.fanInConcat.to(Drain.head)
+    Spout(1, 2, 3).fanOutBroadcast().sub.end.sub.end.fanInConcat().to(Drain.head)
   }
 
   "Example 6" tests {

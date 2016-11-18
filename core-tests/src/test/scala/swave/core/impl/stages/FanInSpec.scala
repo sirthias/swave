@@ -32,7 +32,7 @@ final class FanInSpec extends SyncPipeSpec with Inspectors {
 
       spouts.head
         .attachAll(spouts.tail)
-        .fanInConcat
+        .fanInConcat()
         .drainTo(out.drain) shouldTerminate likeThis {
         case Cancelled ⇒ // inputs can be in any state
         case Completed ⇒ forAll(ins) { _.terminalState shouldBe Completed }
@@ -57,7 +57,7 @@ final class FanInSpec extends SyncPipeSpec with Inspectors {
 
       spouts.head
         .attachAll(spouts.tail)
-        .fanInFirstNonEmpty
+        .fanInConcat(stopAfterFirstNonEmpty = true)
         .drainTo(out.drain) shouldTerminate likeThis {
         case Cancelled ⇒ // inputs can be in any state
         case Completed ⇒

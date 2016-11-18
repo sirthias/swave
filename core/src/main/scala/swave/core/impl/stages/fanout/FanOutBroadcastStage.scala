@@ -9,12 +9,13 @@ package swave.core.impl.stages.fanout
 import scala.annotation.tailrec
 import swave.core.macros.StageImplementation
 import swave.core.Stage
+import swave.core.impl.stages.FanOutStage
 import swave.core.impl.{Inport, Outport}
 import swave.core.util._
 
 // format: OFF
 @StageImplementation(fullInterceptions = true)
-private[core] final class BroadcastStage(eagerCancel: Boolean) extends FanOutStage {
+private[core] final class FanOutBroadcastStage(eagerCancel: Boolean) extends FanOutStage {
 
   def kind = Stage.Kind.FanOut.Broadcast(eagerCancel)
 

@@ -10,11 +10,11 @@ import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.channels.FileChannel
 import java.nio.file.Path
-import com.typesafe.scalalogging.Logger
 import scala.annotation.tailrec
+import com.typesafe.scalalogging.Logger
 import swave.core.Stage
 import swave.core.impl.Outport
-import swave.core.impl.stages.spout.SpoutStage
+import swave.core.impl.stages.SpoutStage
 import swave.core.io.Bytes
 import swave.core.io.files.quietClose
 import swave.core.macros._

@@ -18,10 +18,12 @@ import shapeless.ops.nat.ToInt
 import shapeless.ops.hlist.{Fill, ToCoproduct, Tupler}
 import swave.core.impl.stages.StageImpl
 import swave.core.impl.util.{InportList, RingBuffer}
-import swave.core.impl.stages.fanin.{ConcatStage, FirstNonEmptyStage, MergeStage, ToProductStage}
+import swave.core.impl.stages.fanin._
 import swave.core.impl.stages.fanout._
-import swave.core.impl.{Inport, ModuleImpl, TypeLogic}
+import swave.core.impl.stages.flatten._
+import swave.core.impl.stages.inject._
 import swave.core.impl.stages.inout._
+import swave.core.impl.{Inport, ModuleImpl, TypeLogic}
 import swave.core.util._
 import swave.core.macros._
 import TypeLogic._
@@ -81,7 +83,7 @@ trait StreamOps[A] extends Any { self ⇒
     append(new CollectStage(pf.asInstanceOf[PartialFunction[AnyRef, AnyRef]]))
 
   final def concat[B >: A](other: Spout[B]): Repr[B] =
-    attach(other).fanInConcat
+    attach(other).fanInConcat()
 
   final def conflateWithSeed[B](lift: A ⇒ B)(aggregate: (B, A) ⇒ B): Repr[B] =
     append(new ConflateStage(lift.asInstanceOf[AnyRef ⇒ AnyRef], aggregate.asInstanceOf[(AnyRef, AnyRef) ⇒ AnyRef]))
@@ -130,23 +132,26 @@ trait StreamOps[A] extends Any { self ⇒
     append(new ExpandStage(zero.asInstanceOf[Iterator[AnyRef]], extrapolate.asInstanceOf[AnyRef ⇒ Iterator[AnyRef]]))
 
   final def fanOutBroadcast(eagerCancel: Boolean = false): FanOut[A, HNil, CNil, Nothing, Repr] =
-    new FanOut(append(new BroadcastStage(eagerCancel)).base, InportList.empty, wrap)
+    new FanOut(append(new FanOutBroadcastStage(eagerCancel)).base, InportList.empty, wrap)
 
   final def fanOutBroadcastBuffered(bufferSize: Int,
                                     requestStrategy: Buffer.RequestStrategy = Buffer.RequestStrategy.WhenHalfEmpty,
                                     eagerCancel: Boolean = false): FanOut[A, HNil, CNil, Nothing, Repr] = {
     requireArg(bufferSize >= 0, "`bufferSize` must be >= 0")
     if (bufferSize > 0) {
-      val stage = new BroadcastBufferedStage(bufferSize, requestStrategy(bufferSize), eagerCancel)
+      val stage = new FanOutBroadcastBufferedStage(bufferSize, requestStrategy(bufferSize), eagerCancel)
       new FanOut(append(stage).base, InportList.empty, wrap)
     } else fanOutBroadcast(eagerCancel)
   }
 
-  final def fanOutFirstAvailable(eagerCancel: Boolean = false): FanOut[A, HNil, CNil, Nothing, Repr] =
-    new FanOut(append(new FirstAvailableStage(eagerCancel)).base, InportList.empty, wrap)
-
   final def fanOutRoundRobin(eagerCancel: Boolean = false): FanOut[A, HNil, CNil, Nothing, Repr] =
-    new FanOut(append(new RoundRobinStage(eagerCancel)).base, InportList.empty, wrap)
+    ???
+
+  final def fanOutSequential(eagerCancel: Boolean = false): FanOut[A, HNil, CNil, Nothing, Repr] =
+    ???
+
+  final def fanOutToAny(eagerCancel: Boolean = false): FanOut[A, HNil, CNil, Nothing, Repr] =
+    ???
 
   final def filter(predicate: A ⇒ Boolean): Repr[A] =
     append(new FilterStage(predicate.asInstanceOf[Any ⇒ Boolean], negated = false))
@@ -168,6 +173,15 @@ trait StreamOps[A] extends Any { self ⇒
 
   final def flattenMerge[B](parallelism: Int)(implicit ev: Streamable.Aux[A, B]): Repr[B] =
     append(new FlattenMergeStage(ev.asInstanceOf[Streamable.Aux[AnyRef, AnyRef]], parallelism))
+
+  final def flattenRoundRobin[B](parallelism: Int)(implicit ev: Streamable.Aux[A, B]): Repr[B] =
+    ???
+
+  final def flattenSorted[B: Ordering](parallelism: Int)(implicit ev: Streamable.Aux[A, B]): Repr[B] =
+    ???
+
+  final def flattenToSeq[B](parallelism: Int)(implicit ev: Streamable.Aux[A, B]): Repr[B] =
+    ???
 
   final def fold[B](zero: B)(f: (B, A) ⇒ B): Repr[B] =
     append(new FoldStage(zero.asInstanceOf[AnyRef], f.asInstanceOf[(AnyRef, AnyRef) ⇒ AnyRef]))
@@ -223,11 +237,20 @@ trait StreamOps[A] extends Any { self ⇒
     */
   def identity: Repr[A]
 
-  final def inject: Repr[Spout[A]] =
-    append(new InjectStage)
+  final def injectToAny(parallelism: Int): Repr[Spout[A]] =
+    ???
 
-  final def interleave[B >: A](other: Spout[B], segmentSize: Int, eagerComplete: Boolean): Repr[B] =
-    attach(other).fanInInterleave(segmentSize, eagerComplete)
+  final def injectBroadcast(parallelism: Int): Repr[Spout[A]] =
+    ???
+
+  final def injectRoundRobin(parallelism: Int): Repr[Spout[A]] =
+    ???
+
+  final def injectSequential: Repr[Spout[A]] =
+    append(new InjectSequentialStage)
+
+  final def interleave[B >: A](other: Spout[B], segmentSize: Int = 1, eagerComplete: Boolean = false): Repr[B] =
+    attach(other).fanInRoundRobin(segmentSize, eagerComplete)
 
   final def intersperse[B >: A](inject: B): Repr[B] =
     intersperse(null.asInstanceOf[B], inject, null.asInstanceOf[B])
@@ -254,7 +277,7 @@ trait StreamOps[A] extends Any { self ⇒
     attach(other).fanInMerge(eagerComplete)
 
   final def mergeSorted[B >: A: Ordering](other: Spout[B], eagerComplete: Boolean = false): Repr[B] =
-    attach(other).fanInMergeSorted(eagerComplete)
+    attach(other).fanInSorted(eagerComplete)
 
   final def mergeToEither[B](right: Spout[B]): Repr[Either[A, B]] =
     map(Left[A, B]).attach(right.map(Right[A, B])).fanInToSum[Either[A, B]]()
@@ -263,7 +286,7 @@ trait StreamOps[A] extends Any { self ⇒
     via(Pipe[A].flatMap(x ⇒ Iterator.fill(factor)(x)) named "multiply")
 
   final def nonEmptyOr[B >: A](other: Spout[B]): Repr[B] =
-    attach(other).fanInFirstNonEmpty
+    attach(other).fanInConcat(stopAfterFirstNonEmpty = true)
 
   final def nop: Repr[A] =
     append(new NopStage)
@@ -327,7 +350,7 @@ trait StreamOps[A] extends Any { self ⇒
     via(Pipe[A] drop startIndex take length named "slice")
 
   final def sliceEvery(dropLen: Long, takeLen: Long): Repr[A] =
-    via(Pipe[A].inject.flatMap(_.slice(dropLen, takeLen)) named "sliceEvery")
+    via(Pipe[A].injectSequential.flatMap(_.slice(dropLen, takeLen)) named "sliceEvery")
 
   final def sliding(windowSize: Int): Repr[immutable.Seq[A]] =
     slidingTo[immutable.Seq](windowSize)
@@ -390,7 +413,7 @@ trait StreamOps[A] extends Any { self ⇒
 
   final def takeEveryNth(n: Long): Repr[A] = {
     requireArg(n > 0, "`count` must be > 0")
-    via(Pipe[A].inject.flatMap(_.elementAt(n - 1)) named "takeEvery")
+    via(Pipe[A].injectSequential.flatMap(_.elementAt(n - 1)) named "takeEvery")
   }
 
   final def takeLast(n: Int): Repr[A] = {
@@ -475,15 +498,16 @@ object StreamOps {
       new FanIn0(this.subs :++ subs, rawWrap)
     }
 
-    def fanInConcat: Repr[Sup] =
-      wrap(new ConcatStage(subs))
-    def fanInFirstNonEmpty: Repr[Sup] =
-      wrap(new FirstNonEmptyStage(subs))
-    def fanInInterleave(segmentSize: Int, eagerComplete: Boolean): Repr[Sup] =
-      ???
+    def fanInConcat(stopAfterFirstNonEmpty: Boolean = false): Repr[Sup] =
+      wrap(if (stopAfterFirstNonEmpty) new FirstNonEmptyStage(subs) else new ConcatStage(subs))
+
     def fanInMerge(eagerComplete: Boolean = false): Repr[Sup] =
       wrap(new MergeStage(subs, eagerComplete))
-    def fanInMergeSorted(eagerComplete: Boolean = false)(implicit ord: Ordering[Sup]): Repr[Sup] =
+
+    def fanInRoundRobin(segmentSize: Int = 1, eagerComplete: Boolean = false): Repr[Sup] =
+      ???
+
+    def fanInSorted(eagerComplete: Boolean = false)(implicit ord: Ordering[Sup]): Repr[Sup] =
       ???
 
     private def wrap[T](in: Inport): Repr[T] = rawWrap(in).asInstanceOf[Repr[T]]
@@ -521,28 +545,33 @@ object StreamOps {
       new FanIn0(this.subs :++ subs, rawWrap)
     }
 
-    final def fanInConcat(implicit ev: FanInReq[L]): Repr[Sup] =
-      wrap(new ConcatStage(subs))
-    final def fanInFirstNonEmpty(implicit ev: FanInReq[L]): Repr[Sup] =
-      wrap(new FirstNonEmptyStage(subs))
-    final def fanInInterleave(segmentSize: Int, eagerComplete: Boolean)(implicit ev: FanInReq[L]): Repr[Sup] =
-      ???
+    final def fanInConcat(stopAfterFirstNonEmpty: Boolean = false)(implicit ev: FanInReq[L]): Repr[Sup] =
+      wrap(if (stopAfterFirstNonEmpty) new FirstNonEmptyStage(subs) else new ConcatStage(subs))
+
     final def fanInMerge(eagerComplete: Boolean = false)(implicit ev: FanInReq[L]): Repr[Sup] =
       wrap(new MergeStage(subs, eagerComplete))
-    final def fanInMergeSorted(eagerComplete: Boolean = false)(implicit ev: FanInReq[L],
-                                                               ord: Ordering[Sup]): Repr[Sup] =
+
+    final def fanInRoundRobin(segmentSize: Int = 1, eagerComplete: Boolean = false)(
+        implicit ev: FanInReq[L]): Repr[Sup] =
       ???
+
+    final def fanInSorted(eagerComplete: Boolean = false)(implicit ev: FanInReq[L], ord: Ordering[Sup]): Repr[Sup] =
+      ???
+
+    final def fanInToCoproduct(eagerComplete: Boolean = true)(implicit ev: FanInReq[L]): Repr[C] =
+      ???
+
+    final def fanInToHList(implicit ev: FanInReq[L]): Repr[L] =
+      wrap(new ToProductStage(Stage.Kind.FanIn.ToHList, subs, _.toHList()))
+
+    final def fanInToProduct[T](implicit ev: FanInReq[L], gen: Productable[T, L]): Repr[T] =
+      fanInToHList.asInstanceOf[StreamOps[L]].map(l ⇒ gen from l).asInstanceOf[Repr[T]]
+
+    final def fanInToSum[T](eagerComplete: Boolean = true)(implicit ev: FanInReq[L], gen: Summable[T, C]): Repr[T] =
+      fanInToCoproduct(eagerComplete).asInstanceOf[StreamOps[C]].map(c ⇒ gen from c).asInstanceOf[Repr[T]]
 
     final def fanInToTuple(implicit ev: FanInReq[L], t: Tuplable[L]): Repr[t.Out] =
       wrap(new ToProductStage(Stage.Kind.FanIn.ToTuple, subs, _.toTuple))
-    final def fanInToHList(implicit ev: FanInReq[L]): Repr[L] =
-      wrap(new ToProductStage(Stage.Kind.FanIn.ToHList, subs, _.toHList()))
-    final def fanInToCoproduct(eagerComplete: Boolean = true)(implicit ev: FanInReq[L]): Repr[C] =
-      ???
-    final def fanInToProduct[T](implicit ev: FanInReq[L], gen: Productable[T, L]): Repr[T] =
-      fanInToHList.asInstanceOf[StreamOps[L]].map(l ⇒ gen from l).asInstanceOf[Repr[T]]
-    final def fanInToSum[T](eagerComplete: Boolean = true)(implicit ev: FanInReq[L], gen: Summable[T, C]): Repr[T] =
-      fanInToCoproduct(eagerComplete).asInstanceOf[StreamOps[C]].map(c ⇒ gen from c).asInstanceOf[Repr[T]]
 
     def fromFanInVia[P <: HList, R, Out](joined: Module.TypeLogic.Joined[L, P, R])(
         implicit vr: ViaResult[P, Piping[R], Repr, Out]): Out = {

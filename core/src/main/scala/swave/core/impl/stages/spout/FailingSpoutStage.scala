@@ -8,6 +8,7 @@ package swave.core.impl.stages.spout
 
 import swave.core.Stage
 import swave.core.impl.Outport
+import swave.core.impl.stages.SpoutStage
 import swave.core.macros.StageImplementation
 
 // format: OFF

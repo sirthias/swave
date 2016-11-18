@@ -9,6 +9,7 @@ package swave.core.impl.stages.drain
 import scala.concurrent.Promise
 import swave.core.Stage
 import swave.core.impl.Inport
+import swave.core.impl.stages.DrainStage
 import swave.core.macros.StageImplementation
 
 // format: OFF

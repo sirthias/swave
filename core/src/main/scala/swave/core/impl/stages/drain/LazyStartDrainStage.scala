@@ -11,6 +11,7 @@ import swave.core.impl.stages.spout.SubSpoutStage
 import swave.core.impl.{Inport, Outport, RunContext}
 import swave.core.macros.StageImplementation
 import swave.core._
+import swave.core.impl.stages.DrainStage
 
 // format: OFF
 @StageImplementation

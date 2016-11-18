@@ -4,9 +4,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package swave.core.impl.stages.inout
+package swave.core.impl.stages.inject
 
 import scala.util.control.NonFatal
+import swave.core.impl.stages.InOutStage
 import swave.core.impl.stages.spout.SubSpoutStage
 import swave.core.impl.{Inport, Outport, RunContext}
 import swave.core.macros._
@@ -15,8 +16,7 @@ import swave.core.{Split, Spout, Stage}
 
 // format: OFF
 @StageImplementation(fullInterceptions = true)
-private[core] final class SplitStage(commandFor: AnyRef ⇒ Split.Command, eagerCancel: Boolean)
-  extends InOutStage { stage =>
+private[core] final class SplitStage(commandFor: AnyRef ⇒ Split.Command, eagerCancel: Boolean) extends InOutStage {
 
   def kind = Stage.Kind.InOut.Split(commandFor, eagerCancel)
 

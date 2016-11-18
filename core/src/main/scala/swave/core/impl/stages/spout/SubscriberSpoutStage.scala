@@ -7,11 +7,13 @@
 package swave.core.impl.stages.spout
 
 import java.util.concurrent.atomic.AtomicReference
+
 import scala.annotation.tailrec
 import org.reactivestreams.{Subscriber, Subscription}
 import swave.core.Stage
 import swave.core.impl.{Outport, StreamRunner}
 import swave.core.impl.rs.RSCompliance
+import swave.core.impl.stages.SpoutStage
 import swave.core.macros.StageImplementation
 import swave.core.util._
 

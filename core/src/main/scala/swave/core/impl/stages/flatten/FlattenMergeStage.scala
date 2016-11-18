@@ -4,15 +4,17 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package swave.core.impl.stages.inout
+package swave.core.impl.stages.flatten
 
-import scala.annotation.tailrec
-import swave.core.impl.util.{InportAnyRefList, InportList, RingBuffer}
+import swave.core.impl._
+import swave.core.impl.stages.InOutStage
 import swave.core.impl.stages.drain.SubDrainStage
-import swave.core.{Stage, Streamable}
+import swave.core.impl.util.{InportAnyRefList, InportList, RingBuffer}
 import swave.core.macros._
 import swave.core.util._
-import swave.core.impl._
+import swave.core.{Stage, Streamable}
+
+import scala.annotation.tailrec
 
 // format: OFF
 @StageImplementation(fullInterceptions = true)

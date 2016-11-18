@@ -62,7 +62,7 @@ class IllegalConstructsSpec extends FreeSpec {
       illTyped(
         """Spout(1, 2, 3)
            .fanOutBroadcast()
-           .fanInConcat""",
+           .fanInConcat()""",
         "Cannot fan-in here. You need to have at least two open fan-in sub-streams.")
     }
   }

@@ -10,7 +10,7 @@ import scala.annotation.tailrec
 import swave.core.macros.StageImplementation
 import swave.core.Stage
 import swave.core.impl.Outport
-import swave.core.impl.stages.spout.SpoutStage
+import swave.core.impl.stages.SpoutStage
 
 @StageImplementation(fullInterceptions = true)
 private[testkit] final class TestSpoutStage(val id: Int,

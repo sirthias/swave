@@ -12,6 +12,7 @@ import swave.core.impl.{Inport, Outport, RunContext}
 import swave.core.macros.StageImplementation
 import swave.core.util._
 import swave.core._
+import swave.core.impl.stages.SpoutStage
 
 // format: OFF
 @StageImplementation

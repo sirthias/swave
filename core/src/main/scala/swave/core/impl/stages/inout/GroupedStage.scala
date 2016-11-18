@@ -9,6 +9,7 @@ package swave.core.impl.stages.inout
 import scala.collection.mutable
 import swave.core.impl.{Inport, Outport}
 import swave.core.Stage
+import swave.core.impl.stages.InOutStage
 import swave.core.macros._
 import swave.core.util._
 

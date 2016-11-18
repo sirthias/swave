@@ -6,6 +6,8 @@
 
 package swave.core.impl.stages.inout
 
+import swave.core.impl.stages.InOutStage
+
 import scala.concurrent.duration._
 import scala.collection.immutable.VectorBuilder
 import swave.core.impl.{Inport, Outport, StreamRunner}

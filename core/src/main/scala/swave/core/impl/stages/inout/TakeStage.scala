@@ -7,6 +7,7 @@
 package swave.core.impl.stages.inout
 
 import swave.core.Stage
+import swave.core.impl.stages.InOutStage
 import swave.core.impl.{Inport, Outport}
 import swave.core.macros._
 

@@ -10,6 +10,7 @@ import scala.annotation.tailrec
 import swave.core.Stage
 import swave.core.impl.util.{InportAnyRefList, InportList, RingBuffer}
 import swave.core.impl.Outport
+import swave.core.impl.stages.FanInStage
 import swave.core.macros._
 import swave.core.util._
 

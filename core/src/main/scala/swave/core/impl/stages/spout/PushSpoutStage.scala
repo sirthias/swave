@@ -7,10 +7,11 @@
 package swave.core.impl.stages.spout
 
 import org.jctools.queues.MpscChunkedArrayQueue
+
 import scala.annotation.tailrec
 import swave.core.Stage
 import swave.core.impl.Outport
-import swave.core.impl.stages.StreamTermination
+import swave.core.impl.stages.{SpoutStage, StreamTermination}
 import swave.core.macros.StageImplementation
 import swave.core.util._
 

@@ -8,6 +8,7 @@ package swave.core.impl.stages.fanout
 
 import scala.annotation.tailrec
 import swave.core.Stage
+import swave.core.impl.stages.FanOutStage
 import swave.core.impl.util.MultiReaderRingBuffer
 import swave.core.impl.{Inport, Outport}
 import swave.core.macros._
@@ -15,19 +16,19 @@ import swave.core.util._
 
 // format: OFF
 @StageImplementation(fullInterceptions = true)
-private[core] final class BroadcastBufferedStage(bufferSize: Int, requestThreshold: Int, eagerCancel: Boolean)
+private[core] final class FanOutBroadcastBufferedStage(bufferSize: Int, requestThreshold: Int, eagerCancel: Boolean)
   extends FanOutStage {
 
   requireArg(bufferSize > 0, "`bufferSize` must be > 0")
 
   def kind = Stage.Kind.FanOut.BroadcastBuffered(bufferSize, requestThreshold, eagerCancel)
 
-  type OutportCtx = BroadcastBufferedStage.OutportContextWithCursor
+  type OutportCtx = FanOutBroadcastBufferedStage.OutportContextWithCursor
 
   private[this] val buffer = new MultiReaderRingBuffer[AnyRef](roundUpToPowerOf2(bufferSize))
 
   protected def createOutportCtx(out: Outport, tail: OutportCtx): OutportCtx =
-    new BroadcastBufferedStage.OutportContextWithCursor(out, tail)
+    new FanOutBroadcastBufferedStage.OutportContextWithCursor(out, tail)
 
   connectFanOutAndSealWith { (ctx, in, outs) ⇒
     ctx.registerForXStart(this)
@@ -191,7 +192,7 @@ private[core] final class BroadcastBufferedStage(bufferSize: Int, requestThresho
     } else stop()
 }
 
-private[fanout] object BroadcastBufferedStage {
+private[fanout] object FanOutBroadcastBufferedStage {
 
   private[fanout] final class OutportContextWithCursor(out: Outport, tail: OutportContextWithCursor)
     extends FanOutStage.OutportContext[OutportContextWithCursor](out, tail) with MultiReaderRingBuffer.Cursor {

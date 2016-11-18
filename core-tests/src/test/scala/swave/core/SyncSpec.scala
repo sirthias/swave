@@ -96,7 +96,7 @@ class SyncSpec extends SwaveSpec {
         "(3,z,z)")
     }
 
-    "inject" in {
+    "injectSequential" in {
       Spout(1 to 50).takeEveryNth(10) should produce(10, 20, 30, 40, 50)
     }
   }

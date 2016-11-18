@@ -41,7 +41,7 @@ final class InjectSpec extends SyncPipeSpec with Inspectors {
           } else sub.drainTo(Drain.ignore)
         }
 
-        in.spout.inject.drainTo(out.drain) shouldTerminate likeThis {
+        in.spout.injectSequential.drainTo(out.drain) shouldTerminate likeThis {
           case Cancelled ⇒ // input can be in any state
 
           case Completed if subOuts.nonEmpty ⇒

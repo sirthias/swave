@@ -6,6 +6,7 @@
 
 package swave.core.impl.stages.inout
 
+import swave.core.impl.stages.InOutStage
 import swave.core.impl.{Inport, Outport, StreamRunner}
 import swave.core.macros._
 import swave.core.{Cancellable, Stage, StreamTimeoutException}

@@ -11,6 +11,7 @@ import scala.util.{Failure, Success}
 import scala.util.control.NonFatal
 import swave.core.Stage
 import swave.core.Spout.Unfolding
+import swave.core.impl.stages.SpoutStage
 import swave.core.impl.{CallingThreadExecutionContext, Outport}
 import swave.core.macros._
 import swave.core.util._

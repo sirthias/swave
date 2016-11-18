@@ -8,7 +8,7 @@ package swave.core.internal.testkit
 
 import scala.util.control.NonFatal
 import swave.core.Stage
-import swave.core.impl.stages.drain.DrainStage
+import swave.core.impl.stages.DrainStage
 import swave.core.impl.{Inport, RunContext}
 import swave.core.macros._
 

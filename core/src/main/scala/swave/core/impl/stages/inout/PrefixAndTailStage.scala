@@ -10,6 +10,7 @@ import swave.core.impl.stages.spout.SubSpoutStage
 import swave.core.impl.{Inport, Outport, RunContext}
 import swave.core.macros._
 import swave.core._
+import swave.core.impl.stages.InOutStage
 
 // format: OFF
 @StageImplementation

@@ -7,8 +7,9 @@
 package swave.core.impl.stages.inout
 
 import java.util.function.BiConsumer
+
 import scala.util.control.NonFatal
-import swave.core.impl.stages.StageImpl
+import swave.core.impl.stages.{InOutStage, StageImpl}
 import swave.core.impl.stages.spout.SubSpoutStage
 import swave.core.impl.{Inport, Outport, RunContext}
 import swave.core.{Spout, Stage}

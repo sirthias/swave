@@ -6,6 +6,8 @@
 
 package swave.core.impl.stages.inout
 
+import swave.core.impl.stages.InOutStage
+
 import scala.util.control.NonFatal
 import scala.concurrent.duration._
 import swave.core.{Cancellable, Stage}

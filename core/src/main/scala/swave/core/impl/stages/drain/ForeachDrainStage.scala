@@ -11,6 +11,7 @@ import scala.concurrent.Promise
 import swave.core.macros.StageImplementation
 import swave.core.Stage
 import swave.core.impl.Inport
+import swave.core.impl.stages.DrainStage
 
 // format: OFF
 @StageImplementation

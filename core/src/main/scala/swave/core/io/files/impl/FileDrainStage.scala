@@ -14,7 +14,7 @@ import scala.concurrent.Promise
 import com.typesafe.scalalogging.Logger
 import swave.core.Stage
 import swave.core.impl.Inport
-import swave.core.impl.stages.drain.DrainStage
+import swave.core.impl.stages.DrainStage
 import swave.core.io.Bytes
 import swave.core.macros.StageImplementation
 
