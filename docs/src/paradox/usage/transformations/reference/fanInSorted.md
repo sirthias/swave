@@ -1,4 +1,4 @@
-fanInMergeSorted
+fanInSorted
 ================
 
 ... TODO ...

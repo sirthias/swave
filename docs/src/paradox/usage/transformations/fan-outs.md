@@ -11,8 +11,9 @@ Currently these fan-out variants are available:
  
 * @ref[fanOutBroadcast]
 * @ref[fanOutBroadcastBuffered]
-* @ref[fanOutFirstAvailable]
 * @ref[fanOutRoundRobin]
+* @ref[fanOutSequential]
+* @ref[fanOutToAny]
 * @ref[switch]
 
 Additionally these fan-out shortcut transformations are defined:
@@ -149,8 +150,9 @@ There are two options for this:
   [Show Off Examples]: ../show-off/overview.md
   [fanOutBroadcast]: reference/fanOutBroadcast.md
   [fanOutBroadcastBuffered]: reference/fanOutBroadcastBuffered.md
-  [fanOutFirstAvailable]: reference/fanOutFirstAvailable.md
   [fanOutRoundRobin]: reference/fanOutRoundRobin.md
+  [fanOutSequential]: reference/fanOutSequential.md
+  [fanOutToAny]: reference/fanOutToAny.md
   [switch]: reference/switch.md
   [switchIf]: reference/switchIf.md
   [tee]: reference/tee.md

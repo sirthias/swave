@@ -1,4 +1,0 @@
-fanInFirstNonEmpty
-==================
-
-... TODO ...

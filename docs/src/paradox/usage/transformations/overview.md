@@ -49,10 +49,10 @@ Documentation Entry-Points
 Here are the entry points to the documentation of all transformations, organized by shape and splitting out
 streams-of-streams:
  
-* [Simple Transformations](simple.md)
-* [Fan-Outs](fan-outs.md)
-* [Fan-Ins](fan-ins.md)
-* [Streams-of-Streams](streams-of-streams.md)
+* @ref[Simple Transformations](simple.md)
+* @ref[Fan-Outs](fan-outs.md)
+* @ref[Fan-Ins](fan-ins.md)
+* @ref[Streams-of-Streams](streams-of-streams.md)
 
 If you'd like to get closer to the source, most transformations are defined in the `swave.core.StreamOps` trait:
 

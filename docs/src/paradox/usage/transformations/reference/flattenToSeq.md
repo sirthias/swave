@@ -1,0 +1,4 @@
+flattenToSeq
+============
+
+... TODO ...

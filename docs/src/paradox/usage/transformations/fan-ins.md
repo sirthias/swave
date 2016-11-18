@@ -20,10 +20,9 @@ Once you have assembled all the spouts for the fan-in in this way simply call on
 to "close" the fan-in with the respective logic. Currently these fan-in variants are available:
 
 * @ref[fanInConcat]
-* @ref[fanInFirstNonEmpty]
-* @ref[fanInInterleave]
 * @ref[fanInMerge]
-* @ref[fanInMergeSorted]
+* @ref[fanInRoundRobin]
+* @ref[fanInSorted]
 * @ref[fanInToTuple]
 * @ref[fanInToHList]
 * @ref[fanInToCoproduct]
@@ -61,7 +60,7 @@ Homogeneous vs. Heterogeneous Fan-Ins
 -------------------------------------
 
 The examples above show "homogeneous" fan-ins, in which all inputs are of the same type. With variants like
-@ref[fanInConcat], @ref[fanInFirstNonEmpty] or @ref[fanInMerge] this is the most common case.
+@ref[fanInConcat] or @ref[fanInMerge] this is the most common case.
 
 However, @ref[fanInToTuple], @ref[fanInToProduct] or @ref[fanInToSum] are usually used on inputs of differing types,
 i.e. as "heterogeneous" fan-ins. Here is an example:
@@ -77,10 +76,9 @@ Here the creation of case class instances from sub-streams for each member is im
   [Spout]: ../spouts.md
   [shapeless]: https://github.com/milessabin/shapeless
   [fanInConcat]: reference/fanInConcat.md
-  [fanInFirstNonEmpty]: reference/fanInFirstNonEmpty.md
-  [fanInInterleave]: reference/fanInInterleave.md
+  [fanInRoundRobin]: reference/fanInRoundRobin.md
   [fanInMerge]: reference/fanInMerge.md
-  [fanInMergeSorted]: reference/fanInMergeSorted.md
+  [fanInSorted]: reference/fanInSorted.md
   [fanInToTuple]: reference/fanInToTuple.md
   [fanInToHList]: reference/fanInToHList.md
   [fanInToCoproduct]: reference/fanInToCoproduct.md

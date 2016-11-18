@@ -78,9 +78,9 @@ pre code { font-weight: normal;  font-size: 14px; line-height: 1.4em; color: #45
 dl, dt { margin-top: 1em; line-height: inherit }
 dd { margin-left: 1em; line-height: inherit }
 
-h1 { font-size: 4.2rem; margin-top: 0 }
-h2 { margin-top: 40px }
-h3 { margin-top: 30px }
+h1 { font-size: 4.2rem; margin: 0 0 0.7em }
+h2 { margin: 1.5em 0 0.7em }
+h3 { margin: 1.5em 0 0.7em }
 
 ul, ol { margin-bottom: 10px }
 
@@ -106,8 +106,8 @@ h1 > a.anchor, h2 > a.anchor, h3 > a.anchor, h4 > a.anchor, h5 > a.anchor, h6 > 
     position: absolute;
     display: block;
     width: 30px;
-    margin-left: -30px;
-    padding-right: 3px;
+    margin: -130px 0 0 -30px;
+    padding: 130px 3px 0 0;
     text-align: right;
     text-decoration: none;
 }

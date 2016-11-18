@@ -1,4 +1,4 @@
-fanInInterleave
+injectBroadcast
 ===============
 
 ... TODO ...

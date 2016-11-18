@@ -2,7 +2,7 @@ Simple Transformations
 ======================
 
 Simple @ref[transformations] are @ref[stream graph components] with one input port and one output port.
-They "simply" transform a @ref[Spout] of one type into a @ref[Spout] of another type. 
+They "simply" transform a @ref[Spout] of one type into a @ref[Spout] of another or even the same type. 
 
 @@@ p { .centered }
 ![A Simple Transformation](.../simple-transformation.svg)
@@ -16,11 +16,11 @@ For example:
 @@snip [-]($test/SimpleTransformSpec.scala) { #example }
 
 To reiterate the explanations from the @ref[Quick Start] and @ref[Basics] chapters: Calling a method like `.map(...)` on
-a @ref[Spout] doesn't trigger any immediate action except the attachment of a `Map` stage to the open port of the
+a @ref[Spout] doesn't trigger any immediate action except for the attachment of a `Map` stage to the open port of the
 underlying @ref[Spout].<br/>
 No data start to flow and no elements are actually being mapped.
  
-Only when the stream is started and run will the `Map` stage spring to life and apply its logic to the incoming
+Only when the stream is @ref[started and run] will the `Map` stage spring to life and apply its logic to the incoming
 data elements.
 
 
@@ -97,3 +97,4 @@ data elements.
   [StreamOps Source Code]: /core/src/main/scala/swave/core/StreamOps.scala
   [Quick Start]: ../quick-start.md
   [Basics]: ../basics.md
+  [started and run]: ../quick-start.md#running-a-stream

@@ -38,8 +38,8 @@ Here is a visualization of the example's stream pipeline:
 @@@
 
 As you can see there is an asynchronous boundary between the first two stages of the graph, which causes both parts
-to run independently and concurrently from each other. Adding additional asynchronous boundaries, for increasing the
-degree of concurrency, is as easy as adding an @ref[.async()] transformation at arbitrary points in the pipeline.
+to run independently from each other and thus concurrently. Adding additional asynchronous boundaries, for increasing
+the degree of concurrency, is as easy as adding an @ref[.async()] transformation at arbitrary points in the pipeline.
 
 This makes trying out different distribution patterns of your business logic over several threads and cores extremely
 easy. Adding a boundary means adding a single line of code. Moving a boundary means moving a single line of code.
