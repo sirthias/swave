@@ -1,13 +1,13 @@
 import com.lightbend.paradox.markdown.Writer
 import com.lightbend.paradox.markdown.Writer.Context
-import org.pegdown.{DefaultVerbatimSerializer, VerbatimSerializer}
-import org.pegdown.ast.{Node => AstNode}
+import org.pegdown.{DefaultVerbatimSerializer, ToHtmlSerializer, VerbatimSerializer}
+import org.pegdown.ast.{InlineHtmlNode, TableBodyNode, TableCellNode, TableRowNode, TextNode, Node => AstNode}
 
 import scala.xml._
 import scala.xml.transform._
+import scala.collection.JavaConverters._
 
-class CustomWriter extends Writer(verbatimSerializers =
-  Map(VerbatimSerializer.DEFAULT -> new DefaultVerbatimSerializer)) {
+class CustomWriter extends Writer(CustomWriter) {
   import CustomWriter._
 
   /**
@@ -68,7 +68,8 @@ class CustomWriter extends Writer(verbatimSerializers =
   }
 }
 
-object CustomWriter {
+object CustomWriter extends (Writer.Context => ToHtmlSerializer) {
+
   private def rewriteRule(f: Node => Seq[Node]) =
     new RewriteRule {
       override def transform(n: Node): Seq[Node] = f(n)
@@ -80,4 +81,46 @@ object CustomWriter {
     def addClass(s: String) = setClassAttr(classAttr.map(_ + ' ' + s) getOrElse s)
     def hasClassAttr(value: String) = classAttr == Some(value)
   }
+
+  override def apply(ctx: Context): ToHtmlSerializer =
+    new ToHtmlSerializer(Writer.defaultLinks(ctx),
+      Map[String, VerbatimSerializer](VerbatimSerializer.DEFAULT -> new DefaultVerbatimSerializer).asJava,
+      Writer.defaultPlugins(ctx).asJava) {
+
+      override def visit(node: TableBodyNode): Unit = super.visit(transformMultiRowCells(node))
+
+      def transformMultiRowCells(node: TableBodyNode): TableBodyNode = {
+
+        def startsWithTilde(cellNode: AstNode): Boolean =
+          cellNode match {
+            case tcn: TableCellNode =>
+              tcn.getChildren.asScala.headOption.exists {
+                case x: TextNode => x.getText.startsWith("~")
+                case x => false
+              }
+            case _ => false
+          }
+
+        val rows = node.getChildren.asScala.map { case trn: TableRowNode => trn.getChildren.asScala.toList }.toList
+        if (rows.exists(row => row.size == 1 && startsWithTilde(row.head))) {
+          val colCount = rows.map(_.size).max
+          val tbn = new TableBodyNode
+          rows.foldLeft(Option.empty[List[TableCellNode]]) {
+            case (None, cells) =>
+              val trn = new TableRowNode
+              tbn.getChildren.add(trn)
+              trn.getChildren.addAll(cells.asJava)
+              while(trn.getChildren.size() < colCount) trn.getChildren.add(new TableCellNode)
+              Some(trn.getChildren.asScala.toList.asInstanceOf[List[TableCellNode]])
+            case (_, cells) if startsWithTilde(cells.head) => None
+            case (x@Some(rowCells), cells) =>
+              rowCells.zip(cells).foreach { case (a, b: TableCellNode) =>
+                a.getChildren.add(new InlineHtmlNode("<br/>"))
+                a.getChildren.addAll(b.getChildren) }
+              x
+          }
+          tbn
+        } else node
+      }
+    }
 }

@@ -132,3 +132,5 @@ p.centered { text-align: center }
 #main-index .header .logo { opacity: 0.32; }
 #main-index h1:first-of-type { display: none; }
 #main-index .content-body #main-content > p:first-of-type img { margin-bottom: 2em }
+
+#relationships td { vertical-align: top }

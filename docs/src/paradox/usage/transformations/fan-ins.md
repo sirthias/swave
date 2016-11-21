@@ -33,7 +33,7 @@ Additionally these fan-in shortcut transformations are defined:
 
 * @ref[concat]
 * @ref[interleave]
-* @ref[nonEmptyOr]
+* @ref[orElse]
 * @ref[merge]
 * @ref[mergeSorted]
 * @ref[mergeToEither]
@@ -86,7 +86,7 @@ Here the creation of case class instances from sub-streams for each member is im
   [fanInToSum]: reference/fanInToSum.md
   [concat]: reference/concat.md
   [interleave]: reference/interleave.md
-  [nonEmptyOr]: reference/nonEmptyOr.md
+  [orElse]: reference/orElse.md
   [merge]: reference/merge.md
   [mergeSorted]: reference/mergeSorted.md
   [mergeToEither]: reference/mergeToEither.md

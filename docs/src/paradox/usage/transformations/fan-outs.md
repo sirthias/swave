@@ -13,13 +13,13 @@ Currently these fan-out variants are available:
 * @ref[fanOutBroadcastBuffered]
 * @ref[fanOutRoundRobin]
 * @ref[fanOutSequential]
+* @ref[fanOutSwitch]
 * @ref[fanOutToAny]
-* @ref[switch]
+* @ref[fanOutUnZip]
 
 Additionally these fan-out shortcut transformations are defined:
 
 * @ref[tee]
-* @ref[switchIf]
 
 
 Basic Example
@@ -152,7 +152,7 @@ There are two options for this:
   [fanOutBroadcastBuffered]: reference/fanOutBroadcastBuffered.md
   [fanOutRoundRobin]: reference/fanOutRoundRobin.md
   [fanOutSequential]: reference/fanOutSequential.md
+  [fanOutSwitch]: reference/fanOutSwitch.md
   [fanOutToAny]: reference/fanOutToAny.md
-  [switch]: reference/switch.md
-  [switchIf]: reference/switchIf.md
+  [fanOutUnZip]: reference/fanOutUnZip.md
   [tee]: reference/tee.md

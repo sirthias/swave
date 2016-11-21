@@ -6,7 +6,7 @@ What is *swave*?
 
 *swave* is a library providing a general, @ref[Reactive-Streams](reactive-streams.md)-compliant streaming infrastructure for applications
 written in [Scala]. As such it plays in the same space as @extref[Akka-Stream], but differs from it in some important
-aspects. (For more info on this check out @ref[swave vs Akka-Stream](swave-vs-akka-stream.md))
+aspects. (For more info on this check out @ref[swave vs Akka-Stream](swave-vs-akka-stream.md).)
 
            
 Motivation
@@ -19,10 +19,10 @@ and distributed hardware basis.
 All this presents significant challenges, which fuel the continuing search for programming models that are attractive
 and advantageous in today computing environments.
 
-One such programming model, albeit hardly a recent invention at its core, is [Stream Processing].
+One such programming model, although hardly a recent invention at its core, is [Stream Processing].
 
-Although [Scala] provides the @scaladoc[scala.immutable.Stream](scala.immutable.Stream) datatype with its standard
-library this abstraction is quite limited in its functionality and barely scratches the surface of the benefits that
+[Scala] provides the @scaladoc[scala.immutable.Stream](scala.immutable.Stream) datatype with its standard library
+but this abstraction is quite limited in its functionality and barely scratches the surface of the benefits that
 [Stream Processing] as a programming abstraction is able to provide.
 Therefore a number of stream processing libraries have recently emerged in the [Scala] eco-system, the most prominent
 of which are probably @extref[Akka-Stream] and [FS2] (formally [Scalaz Stream]), which approach the field from two

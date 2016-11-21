@@ -10,7 +10,8 @@ import swave.core.Stage
 import swave.core.impl.Outport
 import swave.core.impl.stages.FanOutStage
 
-private[core] final class SwitchStage(branchCount: Int, f: AnyRef ⇒ Int, eagerCancel: Boolean) extends FanOutStage {
+private[core] final class FanOutSwitchStage(branchCount: Int, f: AnyRef ⇒ Int, eagerCancel: Boolean)
+    extends FanOutStage {
 
   def kind = Stage.Kind.FanOut.Switch(branchCount, f, eagerCancel)
 

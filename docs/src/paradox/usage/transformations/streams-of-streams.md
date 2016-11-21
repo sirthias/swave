@@ -4,13 +4,13 @@ Streams-of-Streams
 Streams, like most other abstractions, can be nested. This means that you can have a `Spout[Spout[T]]` like you can
 have a `List[List[T]]`. *swave* offers a number of @ref[transformations] that either
 
-1. create a stream-of-streams from in incoming stream of "regular" elements (which we call "injecting")
+1. create a stream-of-streams from in incoming stream of "regular" elements (which we call **injecting**)
 
     @@@ p { .centered }
     ![An Injecting Transformation](.../injecting.svg)
     @@@ 
 
-2. or flatten a stream-of-streams back to an outgoing stream of "regular" elements (which we call "flattening")
+2. or flatten a stream-of-streams back to an outgoing stream of "regular" elements (which we call **flattening**)
 
     @@@ p { .centered }
     ![A Flattening Transformation](.../flattening.svg)
@@ -28,10 +28,10 @@ Injecting Transformations
 *swave* currently defines these injecting transformations:
 
 - @ref[groupBy]
-- @ref[headAndTail]
+- @ref[injectBroadcast]
+- @ref[injectRoundRobin]
 - @ref[injectSequential]
-- @ref[prefixAndTail]
-- @ref[prefixAndTailTo]
+- @ref[injectToAny]
 - @ref[split]
 - @ref[splitAfter]
 - @ref[splitWhen]
@@ -74,11 +74,11 @@ Check out the the @ref[next chapter] for more details.
 
   [transformations]: overview.md
   [Simple Transformations]: simple.md
-  [injectSequential]: reference/injectSequential.md
   [groupBy]: reference/groupBy.md
-  [headAndTail]: reference/headAndTail.md
-  [prefixAndTail]: reference/prefixAndTail.md
-  [prefixAndTailTo]: reference/prefixAndTailTo.md
+  [injectBroadcast]: reference/injectBroadcast.md
+  [injectRoundRobin]: reference/injectRoundRobin.md
+  [injectSequential]: reference/injectSequential.md
+  [injectToAny]: reference/injectToAny.md
   [split]: reference/split.md
   [splitAfter]: reference/splitAfter.md
   [splitWhen]: reference/splitWhen.md

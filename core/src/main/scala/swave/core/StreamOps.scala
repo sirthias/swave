@@ -150,7 +150,27 @@ trait StreamOps[A] extends Any { self ⇒
   final def fanOutSequential(eagerCancel: Boolean = false): FanOut[A, HNil, CNil, Nothing, Repr] =
     ???
 
+  final def fanOutSwitch(n: Nat, eagerCancel: Boolean = false)(
+      f: A ⇒ Int)(implicit ti: ToInt[n.N], fl: Fill[n.N, A]): BranchOut[fl.Out, HNil, CNil, Nothing, Repr] =
+    fanOutSwitch[n.N](f, eagerCancel)
+
+  final def fanOutSwitch[N <: Nat](f: A ⇒ Int)(implicit ti: ToInt[N],
+                                               fl: Fill[N, A]): BranchOut[fl.Out, HNil, CNil, Nothing, Repr] =
+    fanOutSwitch[N](f, eagerCancel = false)
+
+  final def fanOutSwitch[N <: Nat](f: A ⇒ Int, eagerCancel: Boolean)(
+      implicit ti: ToInt[N],
+      fl: Fill[N, A]): BranchOut[fl.Out, HNil, CNil, Nothing, Repr] = {
+    val branchCount = ti()
+    val base        = append(new FanOutSwitchStage(branchCount, f.asInstanceOf[AnyRef ⇒ Int], eagerCancel)).base
+    new BranchOut(InportList.fill(branchCount, attachNop(base)), InportList.empty, wrap)
+  }
+
   final def fanOutToAny(eagerCancel: Boolean = false): FanOut[A, HNil, CNil, Nothing, Repr] =
+    ???
+
+  final def fanOutUnZip[L <: HList](eagerCancel: Boolean = false)(
+      implicit ev: FromProduct[A, L]): BranchOut[L, HNil, CNil, Nothing, Repr] =
     ???
 
   final def filter(predicate: A ⇒ Boolean): Repr[A] =
@@ -185,6 +205,9 @@ trait StreamOps[A] extends Any { self ⇒
 
   final def fold[B](zero: B)(f: (B, A) ⇒ B): Repr[B] =
     append(new FoldStage(zero.asInstanceOf[AnyRef], f.asInstanceOf[(AnyRef, AnyRef) ⇒ AnyRef]))
+
+  final def foldAsync[B](zero: B)(f: (B, A) ⇒ Future[B]): Repr[B] =
+    ???
 
   /**
     * @param maxSubstreams the maximum number of sub-streams allowed. Exceeding this limit causes to stream to be
@@ -285,7 +308,7 @@ trait StreamOps[A] extends Any { self ⇒
   final def multiply(factor: Int): Repr[A] =
     via(Pipe[A].flatMap(x ⇒ Iterator.fill(factor)(x)) named "multiply")
 
-  final def nonEmptyOr[B >: A](other: Spout[B]): Repr[B] =
+  final def orElse[B >: A](other: Spout[B]): Repr[B] =
     attach(other).fanInConcat(stopAfterFirstNonEmpty = true)
 
   final def nop: Repr[A] =
@@ -346,6 +369,9 @@ trait StreamOps[A] extends Any { self ⇒
   final def scan[B](zero: B)(f: (B, A) ⇒ B): Repr[B] =
     append(new ScanStage(zero.asInstanceOf[AnyRef], f.asInstanceOf[(AnyRef, AnyRef) ⇒ AnyRef]))
 
+  final def scanAsync[B](zero: B)(f: (B, A) ⇒ Future[B]): Repr[B] =
+    ???
+
   final def slice(startIndex: Long, length: Long): Repr[A] =
     via(Pipe[A] drop startIndex take length named "slice")
 
@@ -387,26 +413,6 @@ trait StreamOps[A] extends Any { self ⇒
 
   final def splitWhen(f: A ⇒ Boolean, eagerCancel: Boolean = true): Repr[Spout[A]] =
     via(Pipe[A].split(x => if (f(x)) Split.CompleteEmit else Split.Emit, eagerCancel) named "splitWhen")
-
-  final def switch(n: Nat, eagerCancel: Boolean = false)(
-      f: A ⇒ Int)(implicit ti: ToInt[n.N], fl: Fill[n.N, A]): BranchOut[fl.Out, HNil, CNil, Nothing, Repr] =
-    switch[n.N](f, eagerCancel)
-
-  final def switch[N <: Nat](f: A ⇒ Int)(implicit ti: ToInt[N],
-                                         fl: Fill[N, A]): BranchOut[fl.Out, HNil, CNil, Nothing, Repr] =
-    switch[N](f, eagerCancel = false)
-
-  final def switch[N <: Nat](f: A ⇒ Int, eagerCancel: Boolean)(
-      implicit ti: ToInt[N],
-      fl: Fill[N, A]): BranchOut[fl.Out, HNil, CNil, Nothing, Repr] = {
-    val branchCount = ti()
-    val base        = append(new SwitchStage(branchCount, f.asInstanceOf[AnyRef ⇒ Int], eagerCancel)).base
-    new BranchOut(InportList.fill(branchCount, attachNop(base)), InportList.empty, wrap)
-  }
-
-  final def switchIf(p: A ⇒ Boolean,
-                     eagerCancel: Boolean = false): BranchOut[A :: A :: HNil, HNil, CNil, Nothing, Repr] =
-    switch(2, eagerCancel)(x ⇒ if (p(x)) 1 else 0)
 
   final def take(count: Long): Repr[A] =
     append(new TakeStage(count))
@@ -564,7 +570,7 @@ object StreamOps {
     final def fanInToHList(implicit ev: FanInReq[L]): Repr[L] =
       wrap(new ToProductStage(Stage.Kind.FanIn.ToHList, subs, _.toHList()))
 
-    final def fanInToProduct[T](implicit ev: FanInReq[L], gen: Productable[T, L]): Repr[T] =
+    final def fanInToProduct[T](implicit ev: FanInReq[L], gen: ToProduct[T, L]): Repr[T] =
       fanInToHList.asInstanceOf[StreamOps[L]].map(l ⇒ gen from l).asInstanceOf[Repr[T]]
 
     final def fanInToSum[T](eagerComplete: Boolean = true)(implicit ev: FanInReq[L], gen: Summable[T, C]): Repr[T] =
@@ -708,7 +714,10 @@ object StreamOps {
   private type FanInReq[L <: HList] = IsHCons2[L]
 
   @implicitNotFound(msg = "Cannot assemble product type `${T}` from `${L}`.")
-  private type Productable[T, L <: HList] = Generic.Aux[T, L]
+  private type ToProduct[T, L <: HList] = Generic.Aux[T, L]
+
+  @implicitNotFound(msg = "Cannot auto-deconstruct `${T}`. You might want to `map` to a case class first.")
+  private type FromProduct[T, L <: HList] = Generic.Aux[T, L]
 
   @implicitNotFound(msg = "Cannot assemble sum type `${T}` from `${C}`.")
   private type Summable[T, C <: Coproduct] = Generic.Aux[T, C]

@@ -189,7 +189,7 @@ object Drain {
     * A [[Drain]] which only requests and produces the very first stream element as an [[Option]].
     */
   def headOption[T]: Drain[T, Future[Option[T]]] =
-    Pipe[T].first.map(Some(_)).nonEmptyOr(Spout.one(None)).to(head) named "Drain.headOption"
+    Pipe[T].first.map(Some(_)).orElse(Spout.one(None)).to(head) named "Drain.headOption"
 
   /**
     * A [[Drain]] which signals infinite demand and simply drops all received elements.

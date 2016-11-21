@@ -35,7 +35,8 @@ class FibonacciSpec extends FreeSpec with Matchers {
       import swave.core._
       implicit val env = StreamEnv()
 
-      def fibonacciNumbers = {
+      // the "infinite" stream of all Fibonacci numbers
+      def fibonacciNumbers: Spout[Int] = {
         val c = Coupling[Int]
         Spout(0, 1)
           .concat(c.out)

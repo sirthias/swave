@@ -22,8 +22,33 @@ The stream graph defined by this code can be visualized like this:
 ![Fibonacci Example Stream Graph](.../fibobacci-graph.svg)
 @@@
 
-As you can see this graph contains a cycle, which is the source for the infinite nature of the stream.<br/>
-Let's understand how this setup works by tracing the initial phase of the stream execution step by step:
+
+High-Level Mechanics
+--------------------
+
+From a high-level perspective this stream setup is built around a graph cycle that only contains two semantically
+significant logic stages:
+
+1. A @ref[sliding] stage, which produces, for every incoming element, a `Seq` containing the last two elements.
+2. A @ref[map] stage, which takes the `Seq` produced by the @ref[sliding] stage, computes the sum of both its elements
+   and pushes this sum into the loop as the next element.
+   
+This simple setup is the core of the stream graph and suffices for generating the "infinite" sequence of Fibonacci
+numbers. Everything else is required infrastructure for
+ 
+- seeding the loop with the two initial numbers (the `Spout(0, 1)`)
+- closing the loop, which cannot be constructued by the fluent DSL alone (the @ref[Coupling])
+- creating sufficient demand in the loop to "kick" the process into the motion
+  (the @ref[buffer] stage, see section below)
+- syphoning off the generated values and stopping the loop when nobody is interested in its results any more
+  (the @ref[fanOutBroadcast] stage with the `eagerCancel = true` configuration) 
+
+
+Low-Level Mechanics
+-------------------
+
+If you are interested, let's understand how this setup works in detail by tracing the initial phase of the stream
+execution step by step:
 
 1. When the stream is started three @ref[stages] begin to actively send signals: the main @ref[Drain] at the very end,
    the @ref[buffer] stage in the first fan-out sub branch and the @ref[sliding] stage right behind it.
