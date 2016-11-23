@@ -15,7 +15,7 @@ import swave.core.impl.util.FastFuture
 final class RichFuture[T](val underlying: Future[T]) extends AnyVal {
   private[swave] def fast: FastFuture[T] = new FastFuture[T](underlying)
 
-  def await(timeout: FiniteDuration = 10.seconds): T =
+  def await(timeout: FiniteDuration = 1.second): T =
     underlying.value match {
       case Some(t)                          ⇒ t.get
       case None if timeout == Duration.Zero ⇒ throw new TimeoutException(s"Future was not completed")

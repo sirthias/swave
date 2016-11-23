@@ -7,9 +7,7 @@
 package swave.core.impl.stages
 
 import java.util.concurrent.ThreadLocalRandom
-
 import scala.util.Try
-import scala.concurrent.duration._
 import swave.core._
 import swave.core.internal.testkit.TestError
 import swave.core.util._
@@ -90,7 +88,7 @@ final class ExpandSpec extends SwaveSpec {
         .map { i ⇒ if (ThreadLocalRandom.current().nextBoolean()) Thread.sleep(10); i }
         .expand(Iterator.continually(_))
         .drainFolding(Set.empty[Int])(_ + _)
-        .await(1.second)
+        .await()
         .toSeq
         .sorted shouldEqual (50 to 100)
     }
