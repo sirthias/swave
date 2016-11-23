@@ -154,7 +154,7 @@ private[swave] object RunContext {
     var syncCleanup        = List.empty[Runnable]
     var allowSyncUnstopped = false
 
-    def isSyncRun = runners.get().isEmpty
+    def isSyncRun = runners.get() eq Nil
 
     @tailrec def registerRunners(list: List[StreamRunner]): Unit = {
       val current = runners.get()

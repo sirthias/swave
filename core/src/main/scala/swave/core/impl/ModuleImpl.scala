@@ -26,7 +26,7 @@ private[core] final class ModuleImpl[I <: Module.Input, O <: Module.Output] priv
     * @return the streams of OT ::: OB as an InportList or the result instance (in case Module.Output.Result[_])
     */
   def apply(inports: InportList): Any = {
-    requireState(id.boundaries.isEmpty, "Illegal module reuse")
+    requireState(id.boundaries eq Nil, "Illegal module reuse")
     inports.foreach { ins ⇒
       id.addBoundary(Boundary.OuterEntry(ins.in.stage))
       ()

@@ -261,7 +261,7 @@ object Spout {
     * A [[Spout]] which produces either one or zero elements depending on the given [[Option]] instance.
     */
   def fromOption[T](option: Option[T]): Spout[T] =
-    (if (option.isEmpty) empty else one(option.get)) named "Spout.fromOption"
+    (if (option eq None) empty else one(option.get)) named "Spout.fromOption"
 
   /**
     * A [[Spout]] which produces the same elements as the given [[Publisher]].

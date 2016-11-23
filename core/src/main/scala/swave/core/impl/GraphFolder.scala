@@ -21,22 +21,22 @@ private[impl] object GraphFolder {
     if ((stage ne from) && ctx(stage)) {
       val ins  = stage.inputStages
       val outs = stage.outputStages
-      if (ins.isEmpty) {
-        if (outs.isEmpty) {
+      if (ins eq Nil) {
+        if (outs eq Nil) {
           /* 0:0 */
           throw new IllegalStateException // no inputs and no outputs?
-        } else if (outs.tail.isEmpty) {
+        } else if (outs.tail eq Nil) {
           /* 0:1 */
           fold(outs.head, stage)
         } else {
           /* 0:x */
           foldAll(outs, stage)
         }
-      } else if (ins.tail.isEmpty) {
-        if (outs.isEmpty) {
+      } else if (ins.tail eq Nil) {
+        if (outs eq Nil) {
           /* 1:0 */
           fold(ins.head, stage)
-        } else if (outs.tail.isEmpty) {
+        } else if (outs.tail eq Nil) {
           /* 1:1 */
           if (from eq outs.head) fold(ins.head, stage)
           else if (from eq ins.head) fold(outs.head, stage)
@@ -50,10 +50,10 @@ private[impl] object GraphFolder {
           foldAll(outs, stage)
         }
       } else {
-        if (outs.isEmpty) {
+        if (outs eq Nil) {
           /* x:0 */
           foldAll(ins, stage)
-        } else if (outs.tail.isEmpty) {
+        } else if (outs.tail eq Nil) {
           /* x:1 */
           foldAll(ins, stage)
           fold(outs.head, stage)
