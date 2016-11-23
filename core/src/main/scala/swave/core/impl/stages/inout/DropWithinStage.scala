@@ -6,10 +6,9 @@
 
 package swave.core.impl.stages.inout
 
-import swave.core.impl.stages.InOutStage
-
 import scala.concurrent.duration._
 import swave.core.{Cancellable, Stage}
+import swave.core.impl.stages.InOutStage
 import swave.core.impl.{Inport, Outport, StreamRunner}
 import swave.core.macros._
 
@@ -22,7 +21,7 @@ private[core] final class DropWithinStage(duration: FiniteDuration) extends InOu
   def kind = Stage.Kind.InOut.DropWithin(duration)
 
   connectInOutAndSealWith { (ctx, in, out) ⇒
-    ctx.registerForRunnerAssignment(this)
+    ctx.registerRunnerAssignment(StreamRunner.Assignment.Default(this))
     ctx.registerForXStart(this)
     running(in, out)
   }

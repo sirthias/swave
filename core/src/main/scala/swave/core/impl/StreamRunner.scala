@@ -6,24 +6,37 @@
 
 package swave.core.impl
 
-import scala.annotation.tailrec
+import scala.annotation.{switch, tailrec}
 import scala.concurrent.duration._
 import com.typesafe.scalalogging.Logger
 import swave.core.impl.stages.drain.SubDrainStage
 import swave.core.impl.stages.inout.AsyncBoundaryStage
 import swave.core.impl.stages.spout.SubSpoutStage
 import swave.core.impl.stages.StageImpl
-import swave.core.impl.util.ImsiList
-import swave.core.util._
 import swave.core._
 
-private[core] final class StreamRunner(_throughput: Int, _log: Logger, _dispatcher: Dispatcher, scheduler: Scheduler)
-    extends StreamActor(_throughput, _log, _dispatcher) {
+/**
+  * A `StreamRunner` instance represents the execution environment for exactly one async region.
+  * All signals destined for stages within the runners region go through the `enqueueXXX` methods of the runner.
+  */
+private[core] final class StreamRunner private (_throughput: Int,
+                                                _log: Logger,
+                                                _disp: Dispatcher,
+                                                scheduler: Scheduler)
+    extends StreamActor(_throughput, _log, _disp) {
   import StreamRunner._
 
   protected type MessageType = Message
 
+  private[this] var _activeStagesCount = 0
+
   startMessageProcessing()
+
+  private[impl] def registerStageStart(stage: StageImpl): Unit =
+    _activeStagesCount += 1 // so far we only count the number of active stages
+
+  private[impl] def registerStageStop(stage: StageImpl): Unit =
+    _activeStagesCount -= 1 // so far we only count the number of active stages
 
   def enqueueRequest(target: StageImpl, n: Long)(implicit from: Outport): Unit =
     enqueue(new StreamRunner.Message.Request(target, n, from))
@@ -44,7 +57,7 @@ private[core] final class StreamRunner(_throughput: Int, _log: Logger, _dispatch
 
   protected def receive(msg: Message): Unit = {
     val target = msg.target
-    msg.id match {
+    (msg.id: @switch) match {
       case 0 ⇒
         val m = msg.asInstanceOf[Message.Subscribe]
         target.subscribe()(m.from)
@@ -98,6 +111,9 @@ private[core] final class StreamRunner(_throughput: Int, _log: Logger, _dispatch
 
 private[core] object StreamRunner {
 
+  private def apply(dispatcher: Dispatcher)(implicit env: StreamEnv) =
+    new StreamRunner(env.settings.throughput, env.log, dispatcher, env.scheduler)
+
   final case class Timeout(timer: Cancellable)
 
   protected sealed abstract class Message(val id: Int, val target: StageImpl)
@@ -117,99 +133,112 @@ private[core] object StreamRunner {
     }
   }
 
-  private final class AssignToRegion(val runner: StreamRunner, isDefault: Boolean, ovrride: Boolean = false)
-      extends (Stage ⇒ Boolean) {
-    def _apply(stage: Stage): Boolean = apply(stage)
-    @tailrec def apply(stage: Stage): Boolean =
-      stage match {
-        case x: AsyncBoundaryStage ⇒
-          // async boundary stages belong to their upstream runner
-          x.runner = x.inputStages.head.stageImpl.runner
-          true
-        case s: StageImpl if (s.runner eq null) || (ovrride && (s.runner ne runner)) ⇒
-          s.runner = runner
-          3 * s.inputStages.size012 + s.outputStages.size012 match {
-            case 0 /* 0:0 */ ⇒ throw new IllegalStateException // no input and no output?
-            case 1 /* 0:1 */ ⇒
-              s match {
-                case x: SubSpoutStage ⇒ subStreamBoundary(x.in, x, s.outputStages.head)
-                case _                ⇒ apply(s.outputStages.head)
+  /**
+    * Applies all the given runner assignments to their respective async regions.
+    * In case any invalid (i.e. conflicting) assignments are detected an [[IllegalAsyncBoundaryException]]
+    * is thrown.
+    *
+    * Returns the list of new [[StreamRunner]] instances applied to the graph.
+    */
+  def assignRunners(assignments: List[Assignment])(implicit env: StreamEnv): List[StreamRunner] = {
+
+    def applyRunner(stage: StageImpl, runner: StreamRunner): Unit =
+      GraphFolder.fold(stage) {
+        new GraphFolder.FoldContext {
+          override def apply(stage: Stage): Boolean =
+            (stage.stageImpl.runner eq null) && {
+              stage match {
+                case x: AsyncBoundaryStage => // async boundary stages belong to their upstream runner
+                  x.runner = stage.inputStages.head.stageImpl.runner
+                  false
+                case x: SubSpoutStage ⇒ verifySubStreamBoundary(x, x.in)
+                case x: SubDrainStage ⇒ verifySubStreamBoundary(x, x.out)
+                case _ =>
+                  stage.stageImpl.runner = runner
+                  true
               }
-            case 2 /* 0:x */ ⇒ s.outputStages.forall(this)
-            case 3 /* 1:0 */ ⇒
-              s match {
-                case x: SubDrainStage ⇒ subStreamBoundary(x.out, x, s.inputStages.head)
-                case _                ⇒ apply(s.inputStages.head)
-              }
-            case 4 /* 1:1 */ ⇒ _apply(s.inputStages.head) && apply(s.outputStages.head)
-            case 5 /* 1:x */ ⇒ _apply(s.inputStages.head) && s.outputStages.forall(this)
-            case 6 /* x:0 */ ⇒ s.inputStages.forall(this)
-            case 7 /* x:1 */ ⇒ s.inputStages.forall(this) && apply(s.outputStages.head)
-            case 8 /* x:x */ ⇒ s.inputStages.forall(this) && s.outputStages.forall(this)
-          }
-        case _ ⇒ true
+            }
+
+          def verifySubStreamBoundary(s: StageImpl, parent: StageImpl): Boolean =
+            if (parent.runner ne null) {
+              s.runner = runner
+              true
+            } else
+              throw new IllegalAsyncBoundaryException(
+                "A synchronous parent stream must not contain " +
+                  "an async sub-stream. You can fix this by explicitly marking the parent stream as `async`.")
+        }
       }
 
-    def subStreamBoundary(parent: StageImpl, subStream: StageImpl, next: Stage): Boolean =
-      if (parent.runner ne null) {
-        if (parent.runner ne runner) {
-          if (isDefault) {
-            // if we have a default runner assignment for the sub-stream move it onto the same runner as the parent
-            new AssignToRegion(parent.runner, isDefault = false, ovrride = true).apply(subStream)
-            false // break out of the outer assignment loop
-          } else
-            throw new IllegalAsyncBoundaryException(
-              "An asynchronous sub-stream with a non-default dispatcher assignment (in this case `" +
-                runner.dispatcher.name + "`) must be fenced off from its parent stream with explicit async boundaries!")
-        } else apply(next) // parent and sub-stream port are on the same runner (as required!)
-      } else
-        throw new IllegalAsyncBoundaryException(
-          "A synchronous parent stream must not contain " +
-            "an async sub-stream. You can fix this by explicitly marking the parent stream as `async`.")
-  }
+    def assignRunner(stage: StageImpl, runner: StreamRunner): Unit =
+      stage.runner match {
+        case null     => applyRunner(stage, runner)
+        case `runner` => // ok
+        case x =>
+          throw new IllegalAsyncBoundaryException(
+            "An asynchronous sub-stream with a non-default dispatcher assignment (in this case `" +
+              x.dispatcher.name + "`) must be fenced off from its parent stream with explicit async boundaries!")
+      }
 
-  def assignRunners(needRunner: StageDispatcherIdListMap)(implicit env: StreamEnv): Unit = {
-
-    def createAssign(dispatcher: Dispatcher, isDefault: Boolean) =
-      new AssignToRegion(new StreamRunner(env.settings.throughput, env.log, dispatcher, env.scheduler), isDefault)
+    def assignDispatcher(stage: StageImpl, dispatcher: Dispatcher): StreamRunner =
+      stage.runner match {
+        case null =>
+          val runner = StreamRunner(dispatcher)
+          applyRunner(stage, runner)
+          runner
+        case x if x.dispatcher eq dispatcher => null
+        case x =>
+          throw new IllegalAsyncBoundaryException(
+            "Conflicting dispatcher assignment to async region containing stage " +
+              s"'${stage.getClass.getSimpleName}': [${dispatcher.name}] vs. [${x.dispatcher.name}]")
+      }
 
     @tailrec
-    def assignNonDefaults(remaining: StageDispatcherIdListMap, defaultAssignments: List[StageImpl]): List[StageImpl] =
-      if (remaining.nonEmpty) {
-        import remaining._
-        if (dispatcherId.nonEmpty) {
-          val assign = createAssign(env.dispatchers(dispatcherId), isDefault = false)
-          if (stage.runner ne null) {
-            throw new IllegalAsyncBoundaryException(
-              "Conflicting dispatcher assignment to async region containing stage " +
-                s"'${stage.getClass.getSimpleName}': [${assign.runner.dispatcher.name}] vs. [${stage.runner.dispatcher.name}]")
-          } else assign(stage)
-          assignNonDefaults(tail, defaultAssignments)
-        } else assignNonDefaults(tail, stage :: defaultAssignments)
-      } else defaultAssignments
-
-    val defaultAssignments = assignNonDefaults(needRunner, Nil)
-    defaultAssignments.foreach { stage ⇒
-      if (stage.runner eq null) {
-        val assign = createAssign(env.defaultDispatcher, isDefault = true)
-        assign(stage)
+    def assignDefaults(remaining: List[StageImpl], runners: List[StreamRunner]): List[StreamRunner] =
+      remaining match {
+        case Nil => runners
+        case stage :: tail =>
+          val newRunners =
+            if (stage.runner eq null) {
+              val runner = StreamRunner(env.defaultDispatcher)
+              applyRunner(stage, runner)
+              runner :: runners
+            } else runners
+          assignDefaults(tail, newRunners)
       }
+
+    @tailrec
+    def assignNonDefaults(remaining: List[Assignment],
+                          defaultAssignments: List[StageImpl],
+                          runners: List[StreamRunner]): List[StreamRunner] =
+      remaining match {
+        case Nil => assignDefaults(defaultAssignments, runners)
+        case Assignment.Default(stage) :: tail =>
+          assignNonDefaults(tail, stage :: defaultAssignments, runners)
+        case Assignment.DispatcherId(stage, dispatcherId) :: tail =>
+          val runner = assignDispatcher(stage, env.dispatchers(dispatcherId))
+          assignNonDefaults(tail, defaultAssignments, if (runner ne null) runner :: runners else runners)
+        case Assignment.Runner(stage, runner) :: tail =>
+          assignRunner(stage, runner)
+          assignNonDefaults(tail, defaultAssignments, runners)
+      }
+
+    assignNonDefaults(assignments, Nil, Nil)
+  }
+
+  sealed abstract class Assignment {
+    def dispatcherId: String
+  }
+  object Assignment {
+    def apply(stage: StageImpl, dispatcherId: String): Assignment =
+      if (dispatcherId.isEmpty) Default(stage) else DispatcherId(stage, dispatcherId)
+
+    final case class Default(stage: StageImpl) extends Assignment {
+      def dispatcherId = "default"
     }
-  }
-
-  final class StageDispatcherIdListMap(val stage: StageImpl, val dispatcherId: String, tail: StageDispatcherIdListMap)
-      extends ImsiList[StageDispatcherIdListMap](tail)
-  object StageDispatcherIdListMap {
-    def empty: StageDispatcherIdListMap = null
-    def apply(stage: StageImpl, dispatcherId: String, tail: StageDispatcherIdListMap) =
-      new StageDispatcherIdListMap(stage, dispatcherId, tail)
-  }
-
-  final class StageStageList(val stage0: StageImpl, val stage1: StageImpl, tail: StageStageList)
-      extends ImsiList[StageStageList](tail)
-  object StageStageList {
-    def empty: StageStageList = null
-    def apply(stage0: StageImpl, stage1: StageImpl, tail: StageStageList) =
-      new StageStageList(stage0, stage1, tail)
+    final case class DispatcherId(stage: StageImpl, dispatcherId: String) extends Assignment
+    final case class Runner(stage: StageImpl, runner: StreamRunner) extends Assignment {
+      def dispatcherId = runner.dispatcher.name
+    }
   }
 }

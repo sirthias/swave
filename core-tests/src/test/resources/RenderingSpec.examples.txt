@@ -17,19 +17,19 @@ Example 3:
  o {Spout.apply}
  |
  |
- o--+ FanIn.Concat()
- |  |
- |  ^
- o--^--+ FanOut.Broadcast(false)
- |  ^  |
- |  ^  |
- |  ^  o Drain.Head()
- |  ^
- |  ^
- o  ^ {first}
- |  ^
- |  ^
- o  ^ BufferWithBackpressure(1, 0)
+ o-----+ FanIn.Concat()
+ |     |
+ |     ^
+ o--+  ^ FanOut.Broadcast(false)
+ |  |  ^
+ |  |  ^
+ o  |  ^ Drain.Head()
+    |  ^
+    |  ^
+ o--+  ^ {first}
+ |     ^
+ |     ^
+ o  >>>^ BufferWithBackpressure(1, 0)
  |  ^
  |  ^
  o  ^ Map(<function1>)
@@ -92,10 +92,10 @@ Example 7:
  o--+ {tee}
  |  |
  |  |
- |  o Drain.Head()
- |
- |
- o Drain.Ignore(List())
+ o  | Drain.Head()
+    |
+    |
+    o Drain.Ignore(List())
 
 Example 8:
  o {Spout.ints}

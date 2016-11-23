@@ -23,7 +23,7 @@ private[core] abstract class FanOutStage extends StageImpl {
   protected final var _outputStages: List[Stage] = Nil
 
   final def inputStages: List[Stage] = _inputStages
-  final def outputStages: List[Stage] = _outputStages.reverse
+  final def outputStages: List[Stage] = _outputStages
 
   @compileTimeOnly("Unresolved `connectFanOutAndSealWith` call")
   protected final def connectFanOutAndSealWith(f: (RunContext, Inport, OutportCtx) ⇒ State): Unit = ()

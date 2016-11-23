@@ -76,17 +76,15 @@ private[swave] abstract class StageImpl extends PortImpl {
   private[this] var _intercepting                        = false
   private[this] var _sealed                              = false
   private[this] var _state: State                        = _ // current state; the STOPPED state is always encoded as zero
-  private[this] var _mbs: Int                            = _
+  private[this] var _mbs: Int                            = _ // configured max batch size
   private[this] var _inportState: InportContext          = _
   private[this] var _buffer: ResizableRingBuffer[AnyRef] = _
-  private[this] var _stopPromise: Promise[Unit]          = _
+  private[this] var _stopPromise: Promise[Unit]          = _ // TODO: consider removing, i.e. finding a solution that doesn't add a field here
   private[this] var _lastSubscribed: Outport             = _ // needed by `_request` when `fullInterceptions` is off
 
-  /**
-    * The [[StreamRunner]] that is assigned to the given stage.
-    */
   private[swave] final var runner: StreamRunner = _ // null -> sync run, non-null -> async run
 
+  // TODO: turn into `def`
   protected final var interceptingStates: Int = _ // bit mask holding a 1 bit for every state which requires interception support
 
   protected final def configureFrom(ctx: RunContext): Unit = _mbs = ctx.env.settings.maxBatchSize
@@ -317,16 +315,14 @@ private[swave] abstract class StageImpl extends PortImpl {
 
   /////////////////////////////////////// XSTART ///////////////////////////////////////
 
-  final def xStart(): Unit = {
-    _state = _xStart()
-    handleInterceptions()
-  }
-
-  protected def _xStart(): State =
-    _state match {
-      case 0 ⇒ stay()
-      case _ ⇒ throw illegalState(s"Unexpected xStart()")
+  final def xStart(): Unit =
+    if (!isStopped) {
+      _state = _xStart()
+      if (runner ne null) runner.registerStageStart(this)
+      handleInterceptions()
     }
+
+  protected def _xStart(): State = throw illegalState(s"Unexpected xStart()")
 
   /////////////////////////////////////// XEVENT ///////////////////////////////////////
 
@@ -377,6 +373,7 @@ private[swave] abstract class StageImpl extends PortImpl {
       if (e ne null) _stopPromise.failure(e)
       else _stopPromise.success(())
     }
+    if (runner ne null) runner.registerStageStop(this)
     _buffer = null // don't hang on to elements
     0 // STOPPED state encoding
   }

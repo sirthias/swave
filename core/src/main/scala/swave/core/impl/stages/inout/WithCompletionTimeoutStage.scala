@@ -6,12 +6,11 @@
 
 package swave.core.impl.stages.inout
 
+import scala.concurrent.duration._
 import swave.core.impl.stages.InOutStage
 import swave.core.impl.{Inport, Outport, StreamRunner}
 import swave.core.macros._
 import swave.core.{Cancellable, Stage, StreamTimeoutException}
-
-import scala.concurrent.duration._
 
 // format: OFF
 @StageImplementation
@@ -22,7 +21,7 @@ private[core] final class WithCompletionTimeoutStage(timeout: FiniteDuration) ex
   def kind = Stage.Kind.InOut.WithCompletionTimeout(timeout)
 
   connectInOutAndSealWith { (ctx, in, out) ⇒
-    ctx.registerForRunnerAssignment(this)
+    ctx.registerRunnerAssignment(StreamRunner.Assignment.Default(this))
     running(in, out)
   }
 

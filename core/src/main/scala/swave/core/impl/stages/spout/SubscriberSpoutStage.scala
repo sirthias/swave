@@ -65,7 +65,7 @@ private[core] final class SubscriberSpoutStage extends SpoutStage { stage =>
   def subscriber: Subscriber[AnyRef] = refSub
 
   connectOutAndSealWith { (ctx, out) ⇒
-    ctx.registerForRunnerAssignment(this)
+    ctx.registerRunnerAssignment(StreamRunner.Assignment.Default(this))
     ctx.registerForXStart(this)
     awaitingXStart(out)
   }

@@ -45,13 +45,17 @@ private[core] final class LazyStartSpoutStage(onStart: () => Spout[AnyRef]) exte
     cancel = _ => awaitingOnSubscribe(ctx, in, out, -1),
 
     onSubscribe = _ => {
-      ctx.sealAndStartSubStream(in)
-      if (requested != 0) {
-        if (requested > 0) {
-          in.request(requested)
-          running(in, out)
-        } else stopCancel(in)
-      } else running(in, out)
+      var funError: Throwable = null
+      try ctx.sealAndStartSubStream(in)
+      catch { case NonFatal(e) => funError = e }
+      if (funError eq null) {
+        if (requested != 0) {
+          if (requested > 0) {
+            in.request(requested)
+            running(in, out)
+          } else stopCancel(in)
+        } else running(in, out)
+      } else stopError(funError, out)
     })
 
   def running(in: Inport, out: Outport) = state(

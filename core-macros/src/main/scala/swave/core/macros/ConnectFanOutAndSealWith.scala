@@ -46,6 +46,7 @@ private[macros] trait ConnectFanOutAndSealWith { this: Util =>
           if (in ne null) {
             if (outs.nonEmpty) {
               configureFrom(c)
+              _outputStages = _outputStages.reverse
               in.xSeal(c)
               @tailrec def rec(current: OutportCtx): Unit =
                 if (current ne null) { current.out.xSeal(c); rec(current.tail) }

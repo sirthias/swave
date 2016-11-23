@@ -36,10 +36,12 @@ final class Piping[A] private[core] (port: Port, val result: A) {
     * Prepares this piping for starting and verifies that the ports of all stages are properly connected.
     */
   def seal()(implicit env: StreamEnv): Try[SealedPiping[A]] =
-    Try {
+    try {
       val ctx = new RunContext(port)
       ctx.seal()
-      new SealedPiping(ctx, result)
+      Success(new SealedPiping(ctx, result))
+    } catch {
+      case NonFatal(e) => Failure(e)
     }
 
   /**

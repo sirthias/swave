@@ -12,7 +12,7 @@ import scala.util.control.NonFatal
 import swave.core.Stage
 import swave.core.Spout.Unfolding
 import swave.core.impl.stages.SpoutStage
-import swave.core.impl.{CallingThreadExecutionContext, Outport}
+import swave.core.impl.{CallingThreadExecutionContext, Outport, StreamRunner}
 import swave.core.macros._
 import swave.core.util._
 
@@ -24,7 +24,7 @@ private[core] final class UnfoldAsyncSpoutStage(zero: AnyRef, f: AnyRef => Futur
   def kind = Stage.Kind.Spout.UnfoldAsync(zero, f)
 
   connectOutAndSealWith { (ctx, out) ⇒
-    ctx.registerForRunnerAssignment(this)
+    ctx.registerRunnerAssignment(StreamRunner.Assignment.Default(this))
     awaitingDemand(out, zero)
   }
 

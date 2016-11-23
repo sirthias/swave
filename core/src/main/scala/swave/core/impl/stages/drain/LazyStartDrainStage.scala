@@ -37,8 +37,14 @@ private[core] final class LazyStartDrainStage(onStart: () => Drain[AnyRef, AnyRe
       if (funError eq null) {
         val sub = new SubSpoutStage(ctx, this)
         sub.subscribe()(innerDrain.outport)
-        ctx.sealAndStartSubStream(sub)
-        running(in, sub)
+        try {
+          ctx.sealAndStartSubStream(sub)
+          running(in, sub)
+        } catch {
+          case NonFatal(e) =>
+            in.cancel()
+            stop(e)
+        }
       } else {
         in.cancel()
         stop(funError)

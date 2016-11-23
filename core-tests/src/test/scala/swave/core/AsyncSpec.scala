@@ -140,7 +140,18 @@ class AsyncSpec extends SwaveSpec {
           "Conflicting dispatcher assignment to async region containing stage 'HeadDrainStage': [disp1] vs. [disp0]")
     }
 
-    "sync sub-stream in async parent stream" taggedAs NotOnTravis in {
+    "sync sub-stream in sync parent stream" in {
+      Spout
+        .ints(0)
+        .injectSequential
+        .map(_ elementAt 1)
+        .flattenConcat()
+        .take(5)
+        .drainToList(limit = 5)
+        .await(50.millis) shouldEqual List(1, 3, 5, 7, 9)
+    }
+
+    "-sync sub-stream in async parent stream" taggedAs NotOnTravis in {
       Spout
         .ints(0)
         .injectSequential

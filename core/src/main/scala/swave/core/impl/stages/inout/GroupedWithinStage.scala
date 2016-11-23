@@ -6,10 +6,9 @@
 
 package swave.core.impl.stages.inout
 
-import swave.core.impl.stages.InOutStage
-
 import scala.concurrent.duration._
 import scala.collection.immutable.VectorBuilder
+import swave.core.impl.stages.InOutStage
 import swave.core.impl.{Inport, Outport, StreamRunner}
 import swave.core.{Cancellable, Stage}
 import swave.core.macros._
@@ -28,7 +27,7 @@ private[core] final class GroupedWithinStage(maxSize: Int, duration: FiniteDurat
   private[this] var builderSize = 0 // TODO: remove when https://issues.scala-lang.org/browse/SI-9904 is fixed
 
   connectInOutAndSealWith { (ctx, in, out) ⇒
-    ctx.registerForRunnerAssignment(this)
+    ctx.registerRunnerAssignment(StreamRunner.Assignment.Default(this))
     ctx.registerForXStart(this)
     running(in, out)
   }

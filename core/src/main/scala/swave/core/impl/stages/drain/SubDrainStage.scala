@@ -8,13 +8,13 @@ package swave.core.impl.stages.drain
 
 import scala.util.control.NonFatal
 import swave.core.impl.stages.{DrainStage, StageImpl}
-import swave.core.impl.{Inport, RunContext}
+import swave.core.impl.{Inport, RunContext, StreamRunner}
 import swave.core.macros.StageImplementation
 import swave.core.{Cancellable, Stage, SubscriptionTimeoutException}
 
 // format: OFF
 @StageImplementation(fullInterceptions = true)
-private[core] final class SubDrainStage(ctx: RunContext, val out: StageImpl) extends DrainStage {
+private[core] final class SubDrainStage(parentCtx: RunContext, val out: StageImpl) extends DrainStage {
   import SubDrainStage._
 
   def kind = Stage.Kind.Drain.Sub(out)
@@ -22,7 +22,7 @@ private[core] final class SubDrainStage(ctx: RunContext, val out: StageImpl) ext
   initialState(awaitingOnSubscribe(false, null))
 
   def sealAndStart() =
-    try ctx.sealAndStartSubStream(this)
+    try parentCtx.sealAndStartSubStream(this)
     catch {
       case NonFatal(e) => out.onError(e)
     }
@@ -39,19 +39,20 @@ private[core] final class SubDrainStage(ctx: RunContext, val out: StageImpl) ext
 
     xEvent = {
       case EnableSubscriptionTimeout if timer eq null =>
-        val t = ctx.scheduleSubscriptionTimeout(this, ctx.env.settings.subscriptionTimeout)
+        val t = parentCtx.scheduleSubscriptionTimeout(this, parentCtx.env.settings.subscriptionTimeout)
         awaitingOnSubscribe(cancelled, t)
       case RunContext.SubscriptionTimeout =>
-        val msg = s"Subscription attempt from SubDrainStage timed out after ${ctx.env.settings.subscriptionTimeout}"
+        val msg = s"Subscription attempt from SubDrainStage timed out after ${parentCtx.env.settings.subscriptionTimeout}"
         stopError(new SubscriptionTimeoutException(msg), out)
     })
 
   def ready(in: Inport, cancelled: Boolean): State = state(
     cancel = _ => ready(in, true),
 
-    xSeal = subCtx ⇒ {
-      ctx.attach(subCtx)
+    xSeal = ctx ⇒ {
       configureFrom(ctx)
+      ctx.linkToParentContext(parentCtx)
+      if (out.runner ne null) ctx.registerRunnerAssignment(StreamRunner.Assignment.Runner(this, out.runner))
       in.xSeal(ctx)
       if (cancelled) {
         ctx.registerForXStart(this)

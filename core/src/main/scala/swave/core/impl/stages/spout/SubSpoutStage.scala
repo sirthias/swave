@@ -7,14 +7,14 @@
 package swave.core.impl.stages.spout
 
 import swave.core.{Cancellable, Stage}
-import swave.core.impl.{Outport, RunContext}
+import swave.core.impl.{Outport, RunContext, StreamRunner}
 import swave.core.impl.stages.{SpoutStage, StageImpl, StreamTermination}
 import swave.core.macros.StageImplementation
 import SubSpoutStage._
 
 // format: OFF
 @StageImplementation
-private[core] class SubSpoutStage(ctx: RunContext, val in: StageImpl) extends SpoutStage {
+private[core] class SubSpoutStage(parentCtx: RunContext, val in: StageImpl) extends SpoutStage {
 
   def kind = Stage.Kind.Spout.Sub(in)
 
@@ -33,16 +33,17 @@ private[core] class SubSpoutStage(ctx: RunContext, val in: StageImpl) extends Sp
 
     xEvent = {
       case EnableSubscriptionTimeout if timer eq null =>
-        val t = ctx.scheduleSubscriptionTimeout(this, ctx.env.settings.subscriptionTimeout)
+        val t = parentCtx.scheduleSubscriptionTimeout(this, parentCtx.env.settings.subscriptionTimeout)
         awaitingSubscribe(term, t)
       case RunContext.SubscriptionTimeout =>
         stopCancel(in)
     })
 
   def ready(out: Outport, term: StreamTermination): State = state(
-    xSeal = subCtx ⇒ {
-      ctx.attach(subCtx)
+    xSeal = ctx ⇒ {
       configureFrom(ctx)
+      ctx.linkToParentContext(parentCtx)
+      if (in.runner ne null) ctx.registerRunnerAssignment(StreamRunner.Assignment.Runner(this, in.runner))
       out.xSeal(ctx)
       if (term != StreamTermination.None) {
         ctx.registerForXStart(this)

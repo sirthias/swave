@@ -6,7 +6,6 @@
 
 package swave.core
 
-import scala.annotation.tailrec
 import scala.collection.generic.CanBuildFrom
 import scala.collection.immutable
 import scala.concurrent.{ExecutionContext, Future, Promise}
@@ -15,8 +14,6 @@ import swave.core.impl.TypeLogic.ToFuture
 import swave.core.impl.Outport
 import swave.core.impl.stages.DrainStage
 import swave.core.impl.stages.drain._
-import swave.core.impl.stages.inout.AsyncBoundaryStage
-import swave.core.macros._
 
 /**
   * A `Drain` is a streaming component] with one input port and a no output port. As such it serves
@@ -81,43 +78,14 @@ final class Drain[-T, +R] private[swave] (private[swave] val outport: Outport, v
     * NOTE: The (internal) graph behind this drain's stage must not contain any explicit async boundaries.
     * Otherwise an [[IllegalStateException]] will be thrown.
     */
-  def async(dispatcherId: String = ""): Drain[T, R] =
+  def async(dispatcherId: String = ""): Drain[T, R] = {
     outport match {
-      case stage: DrainStage ⇒
-        stage.assignDispatcherId(dispatcherId)
-        this
-
-      case x: Stage ⇒
-        val assign = new (Stage ⇒ Unit) {
-          var visited                    = Set.empty[Stage]
-          def _apply(stage: Stage): Unit = apply(stage)
-          @tailrec def apply(stage: Stage): Unit =
-            if (!visited.contains(stage)) {
-              visited += stage
-              stage match {
-                case _: AsyncBoundaryStage ⇒ fail()
-                case x: DrainStage         ⇒ x.assignDispatcherId(dispatcherId)
-                case x ⇒
-                  if (x.inputStages.nonEmpty && x.inputStages.tail.isEmpty) {
-                    x.outputStages.foreach(this)
-                    apply(x.inputStages.head)
-                  } else {
-                    requireState(x.outputStages.nonEmpty && x.outputStages.tail.isEmpty, "Unexpected stage shape")
-                    x.inputStages.foreach(this)
-                    apply(x.outputStages.head)
-                  }
-              }
-            }
-          def fail() =
-            throw new IllegalAsyncBoundaryException(
-              s"Cannot assign dispatcher '$dispatcherId' to drain '$this'. " +
-                "The drain's graph contains at least one explicit async boundary.")
-        }
-        assign(x)
-        this
-
-      case _ ⇒ throw new IllegalStateException
+      case x: DrainStage ⇒ x.assignDispatcherId(dispatcherId)
+      case x: Stage      ⇒ DrainStage.assignToAllPrimaryDrains(x, dispatcherId)
+      case _             ⇒ throw new IllegalStateException
     }
+    this
+  }
 
   private[core] def consume(spout: Spout[T]): R = {
     spout.inport.subscribe()(outport)

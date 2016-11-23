@@ -8,7 +8,7 @@ package swave.core.impl.stages.drain
 
 import org.reactivestreams.Subscriber
 import swave.core.Stage
-import swave.core.impl.Inport
+import swave.core.impl.{Inport, StreamRunner}
 import swave.core.impl.rs.ForwardToRunnerSubscription
 import swave.core.impl.stages.DrainStage
 import swave.core.macros.StageImplementation
@@ -20,7 +20,7 @@ private[core] final class SubscriberDrainStage(subscriber: Subscriber[AnyRef]) e
   def kind = Stage.Kind.Drain.FromSubscriber(subscriber)
 
   connectInAndSealWith { (ctx, in) ⇒
-    ctx.registerForRunnerAssignment(this)
+    ctx.registerRunnerAssignment(StreamRunner.Assignment.Default(this))
     ctx.registerForXStart(this)
     awaitingXStart(in)
   }

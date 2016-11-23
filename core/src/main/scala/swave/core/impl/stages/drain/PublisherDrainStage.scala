@@ -7,9 +7,7 @@
 package swave.core.impl.stages.drain
 
 import java.util.concurrent.atomic.AtomicReference
-
 import org.reactivestreams.{Publisher, Subscriber, Subscription}
-
 import scala.annotation.tailrec
 import swave.core.{Stage, UnsupportedSecondSubscriptionException}
 import swave.core.impl.{Inport, StreamRunner}
@@ -44,7 +42,7 @@ private[core] final class PublisherDrainStage extends DrainStage {
   def publisher: Publisher[AnyRef] = refPub
 
   connectInAndSealWith { (ctx, in) ⇒
-    ctx.registerForRunnerAssignment(this)
+    ctx.registerRunnerAssignment(StreamRunner.Assignment.Default(this))
     ctx.registerForXStart(this)
     awaitingXStart(in)
   }

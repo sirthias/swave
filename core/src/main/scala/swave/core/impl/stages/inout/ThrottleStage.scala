@@ -6,11 +6,10 @@
 
 package swave.core.impl.stages.inout
 
-import swave.core.impl.stages.InOutStage
-
 import scala.util.control.NonFatal
 import scala.concurrent.duration._
 import swave.core.{Cancellable, Stage}
+import swave.core.impl.stages.InOutStage
 import swave.core.impl.{Inport, Outport, StreamRunner}
 import swave.core.impl.util.NanoTimeTokenBucket
 import swave.core.macros._
@@ -32,7 +31,7 @@ private[core] final class ThrottleStage(cost: Int, per: FiniteDuration, burst: I
   def kind = Stage.Kind.InOut.Throttle(cost, per, burst, costFn)
 
   connectInOutAndSealWith { (ctx, in, out) ⇒
-    ctx.registerForRunnerAssignment(this)
+    ctx.registerRunnerAssignment(StreamRunner.Assignment.Default(this))
     ctx.registerForXStart(this)
     running(in, out)
   }

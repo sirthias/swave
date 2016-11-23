@@ -8,7 +8,7 @@ package swave.core.impl.stages.spout
 
 import org.reactivestreams.{Publisher, Subscriber, Subscription}
 import swave.core.Stage
-import swave.core.impl.Outport
+import swave.core.impl.{Outport, StreamRunner}
 import swave.core.impl.rs.RSCompliance
 import swave.core.impl.stages.SpoutStage
 import swave.core.macros.StageImplementation
@@ -21,7 +21,7 @@ private[core] final class PublisherSpoutStage(publisher: Publisher[AnyRef]) exte
   def kind = Stage.Kind.Spout.FromPublisher(publisher)
 
   connectOutAndSealWith { (ctx, out) ⇒
-    ctx.registerForRunnerAssignment(this)
+    ctx.registerRunnerAssignment(StreamRunner.Assignment.Default(this))
     ctx.registerForXStart(this)
     awaitingXStart(out)
   }
