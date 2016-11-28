@@ -20,7 +20,7 @@ As you can probably guess a `Spout[T]` is parameterized with the type of the ele
 @scaladoc[Iterable](scala.collection.immutable.Iterable),
 @scaladoc[Iterators](scala.collection.Iterator),
 @scaladoc[Option](scala.Option) and @scaladoc[Try](scala.util.Try), but also
-@scaladoc[Future](scala.concurrent.Future) or @scaladoc[Publisher](org.reactivestreams.Publisher).
+@scaladoc[Future] or @scaladoc[Publisher](org.reactivestreams.Publisher).
 Check out the chapter on @ref[Spouts](spouts.md) for more details.
 
 Attaching Transformations
@@ -60,8 +60,7 @@ Here is a `Drain` that collects all incoming elements into a `Vector`:
 
 In addition to the type parameter for the element type (that we've already seen on `Spout`) a `Drain` has a second one,
 which defines the type of the *result* that the drain produces. For most drains this will be a
-@scaladoc[Future](scala.concurrent.Future), since the `Drain` has to work with synchronous as well as asynchronous
-streams.
+@scaladoc[Future], since the `Drain` has to work with synchronous as well as asynchronous streams.
 
 Here are some other frequently used drains:
 
@@ -173,3 +172,4 @@ There are more `drain...` variants available on `Spout`, you might want to
   [IllegalReuseException]: swave.core.IllegalReuseException
   [configured]: further/configuration.md
   [Configuration]: further/configuration.md
+  [Future]: scala.concurrent.Future

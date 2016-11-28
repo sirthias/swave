@@ -83,6 +83,7 @@ data elements.
  
 ## Asynchronous Simple Transformations 
 
+* [async](reference/async.md)
 * [delay](reference/delay.md)
 * [dropWithin](reference/dropWithin.md)
 * [groupedWithin](reference/groupedWithin.md)
