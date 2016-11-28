@@ -8,6 +8,7 @@ package swave.testkit
 
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.{LinkedBlockingQueue, TimeUnit}
+
 import scala.annotation.tailrec
 import scala.util.DynamicVariable
 import scala.collection.immutable
@@ -45,7 +46,6 @@ trait Probes {
 
       connectOutAndSealWith { (ctx, out) ⇒
         ctx.registerForXStart(this)
-        ctx.allowSyncUnstopped()
         awaitingXStart(out, immutable.Queue.empty)
       }
 
@@ -152,7 +152,6 @@ trait Probes {
 
       connectInAndSealWith { (ctx, in) ⇒
         ctx.registerForXStart(this)
-        ctx.allowSyncUnstopped()
         awaitingXStart(in, immutable.Queue.empty)
       }
 

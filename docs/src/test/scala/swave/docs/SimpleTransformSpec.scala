@@ -14,17 +14,20 @@ class SimpleTransformSpec extends FreeSpec with Matchers {
 
     "example" in {
       //#example
+      import scala.concurrent.Future
       import swave.core._
 
       implicit val env = StreamEnv()
 
+      val result: Future[String] =
       Spout(1, 2, 3, 4, 5) // Spout[Int]
         .map(_ * 2)        // Spout[Int]
         .filter(_ > 5)     // Spout[Int]
         .reduce(_ + _)     // Spout[Int]
         .map(_.toString)   // Spout[String]
         .drainToHead()     // Future[String]
-        .value.get.get shouldEqual "24"
+
+      result.value.get.get shouldEqual "24"
       //#example
     }
   }

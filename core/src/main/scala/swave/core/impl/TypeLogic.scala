@@ -11,7 +11,6 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 import shapeless._
 import shapeless.ops.hlist.{Comapped, ToCoproduct}
-import swave.core.impl.util.FastFuture
 import swave.core.{Spout, StreamOps}
 
 object TypeLogic {
@@ -44,7 +43,7 @@ object TypeLogic {
   @implicitNotFound(msg = "Argument must be an HList of `Spout[_]`")
   type IsHListOfSpout[L <: HList] = Comapped[L, Spout]
 
-  sealed abstract class ToTryOrFuture[T] {
+  sealed abstract class ToTryOrFuture[-T] {
     type Out
     def success(value: T): Out
     def failure(error: Throwable): Out
@@ -54,7 +53,7 @@ object TypeLogic {
       new ToTryOrFuture[Future[T]] {
         type Out = Future[T]
         def success(value: Future[T]) = value
-        def failure(error: Throwable) = FastFuture.failed(error)
+        def failure(error: Throwable) = Future.failed(error)
       }
   }
   sealed abstract class ToTryOrFuture0 {

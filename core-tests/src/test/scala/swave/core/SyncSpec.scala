@@ -112,9 +112,9 @@ class SyncSpec extends SwaveSpec {
     }
 
     "illegal reseal" in {
-      val piping = Spout.one(42).to(Drain.head)
-      piping.seal() shouldBe a[Success[_]]
-      inside(piping.seal()) {
+      val streamGraph = Spout.one(42).to(Drain.head)
+      streamGraph.seal() shouldBe a[Success[_]]
+      inside(streamGraph.seal()) {
         case Failure(e: IllegalReuseException) ⇒
           e.getMessage should include("is already sealed. It cannot be sealed a second time. " +
             "Are you trying to reuse a Spout, Drain, Pipe or Module?")
@@ -138,6 +138,8 @@ class SyncSpec extends SwaveSpec {
     }
 
     "illegal non-terminating" in {
+      pending
+
       val c = Coupling[Int]
       val result = Spout.one(1)
         .concat(c.out)

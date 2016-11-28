@@ -84,7 +84,6 @@ private[swave] abstract class StageImpl extends PortImpl {
 
   private[swave] final var runner: StreamRunner = _ // null -> sync run, non-null -> async run
 
-  // TODO: turn into `def`
   protected final var interceptingStates: Int = _ // bit mask holding a 1 bit for every state which requires interception support
 
   protected final def configureFrom(ctx: RunContext): Unit = _mbs = ctx.env.settings.maxBatchSize
@@ -103,11 +102,11 @@ private[swave] abstract class StageImpl extends PortImpl {
 
   def stateName: String = s"<unknown id ${_state}>"
 
-  final def stage: StageImpl     = this
   final def stageImpl: StageImpl = this
 
   final def isSealed: Boolean  = _sealed
   final def isStopped: Boolean = _state == 0
+  final def hasRunner: Boolean = runner ne null
 
   /////////////////////////////////////// SUBSCRIBE ///////////////////////////////////////
 
@@ -318,7 +317,7 @@ private[swave] abstract class StageImpl extends PortImpl {
   final def xStart(): Unit =
     if (!isStopped) {
       _state = _xStart()
-      if (runner ne null) runner.registerStageStart(this)
+      if (hasRunner) runner.registerStageStart(this)
       handleInterceptions()
     }
 
@@ -348,7 +347,7 @@ private[swave] abstract class StageImpl extends PortImpl {
     }
 
   final def enqueueXEvent(ev: AnyRef): Unit =
-    if (runner ne null) runner.enqueueXEvent(this, ev)
+    if (hasRunner) runner.enqueueXEvent(this, ev)
     else xEvent(ev)
 
   /////////////////////////////////////// STATE DESIGNATOR ///////////////////////////////////////
@@ -373,7 +372,7 @@ private[swave] abstract class StageImpl extends PortImpl {
       if (e ne null) _stopPromise.failure(e)
       else _stopPromise.success(())
     }
-    if (runner ne null) runner.registerStageStop(this)
+    if (hasRunner) runner.registerStageStop(this)
     _buffer = null // don't hang on to elements
     0 // STOPPED state encoding
   }

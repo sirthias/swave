@@ -9,15 +9,15 @@ package swave.core.impl
 import scala.annotation.tailrec
 import swave.core.Stage
 
-private[impl] object GraphFolder {
+private[impl] object GraphTraverser {
 
   // mutable context keeping the folding state
-  abstract class FoldContext {
+  abstract class Context {
     // processes the stage and returns true if folding should continue "behind" the stage
     def apply(stage: Stage): Boolean
   }
 
-  @tailrec def fold(stage: Stage, from: Stage = null)(implicit ctx: FoldContext): Unit =
+  @tailrec def process(stage: Stage, from: Stage = null)(implicit ctx: Context): Unit =
     if ((stage ne from) && ctx(stage)) {
       val ins  = stage.inputStages
       val outs = stage.outputStages
@@ -27,51 +27,51 @@ private[impl] object GraphFolder {
           throw new IllegalStateException // no inputs and no outputs?
         } else if (outs.tail eq Nil) {
           /* 0:1 */
-          fold(outs.head, stage)
+          process(outs.head, stage)
         } else {
           /* 0:x */
-          foldAll(outs, stage)
+          processAll(outs, stage)
         }
       } else if (ins.tail eq Nil) {
         if (outs eq Nil) {
           /* 1:0 */
-          fold(ins.head, stage)
+          process(ins.head, stage)
         } else if (outs.tail eq Nil) {
           /* 1:1 */
-          if (from eq outs.head) fold(ins.head, stage)
-          else if (from eq ins.head) fold(outs.head, stage)
+          if (from eq outs.head) process(ins.head, stage)
+          else if (from eq ins.head) process(outs.head, stage)
           else {
-            _fold(ins.head, stage)
-            fold(outs.head, stage)
+            _process(ins.head, stage)
+            process(outs.head, stage)
           }
         } else {
           /* 1:x */
-          _fold(ins.head, stage)
-          foldAll(outs, stage)
+          _process(ins.head, stage)
+          processAll(outs, stage)
         }
       } else {
         if (outs eq Nil) {
           /* x:0 */
-          foldAll(ins, stage)
+          processAll(ins, stage)
         } else if (outs.tail eq Nil) {
           /* x:1 */
-          foldAll(ins, stage)
-          fold(outs.head, stage)
+          processAll(ins, stage)
+          process(outs.head, stage)
         } else {
           /* x:x */
-          foldAll(ins, stage)
-          foldAll(outs, stage)
+          processAll(ins, stage)
+          processAll(outs, stage)
         }
       }
     }
 
   // simple forwarder to circumvent "not in tail position" compiler error
-  private def _fold(s: Stage, from: Stage)(implicit ctx: FoldContext): Unit = fold(s)
+  private def _process(s: Stage, from: Stage)(implicit ctx: Context): Unit = process(s)
 
-  @tailrec private def foldAll(list: List[Stage], from: Stage)(implicit ctx: FoldContext): Unit =
+  @tailrec private def processAll(list: List[Stage], from: Stage)(implicit ctx: Context): Unit =
     if (list ne Nil) {
-      fold(list.head)
-      foldAll(list.tail, from)
+      process(list.head)
+      processAll(list.tail, from)
     }
 
 }

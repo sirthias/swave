@@ -24,9 +24,9 @@ class BasicSpec extends FreeSpec with Matchers {
     val upperFoo: Spout[Char] = foo.map(_.toUpper)
     //#upperFoo
 
-    //#piping
-    val piping: Piping[Future[Char]] = upperFoo.to(Drain.head)
-    //#piping
+    //#streamGraph
+    val streamGraph: StreamGraph[Future[Char]] = upperFoo.to(Drain.head)
+    //#streamGraph
 
     def `only compiled, not actually run`() = {
       //#reuse

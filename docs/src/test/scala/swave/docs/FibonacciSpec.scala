@@ -14,7 +14,9 @@ class FibonacciSpec extends FreeSpec with Matchers {
 
     "unfold" in {
       //#unfold
+      import scala.concurrent.Future
       import swave.core._
+
       implicit val env = StreamEnv()
 
       // the "infinite" stream of all Fibonacci numbers
@@ -23,16 +25,20 @@ class FibonacciSpec extends FreeSpec with Matchers {
           Spout.Unfolding.Emit(elem = a, next = b -> (a + b))
         }
 
-      fibonacciNumbers
-        .take(8)
-        .drainToList(limit = 100)
-        .value.get.get shouldEqual List(0, 1, 1, 2, 3, 5, 8, 13)
+      val result: Future[List[Int]] =
+        fibonacciNumbers
+          .take(8)
+          .drainToList(limit = 100)
+
+      result.value.get.get shouldEqual List(0, 1, 1, 2, 3, 5, 8, 13)
       //#unfold
     }
 
     "cycle" in {
       //#cycle
+      import scala.concurrent.Future
       import swave.core._
+
       implicit val env = StreamEnv()
 
       // the "infinite" stream of all Fibonacci numbers
@@ -45,10 +51,12 @@ class FibonacciSpec extends FreeSpec with Matchers {
             .subContinue
       }
 
-      fibonacciNumbers
-        .take(8)
-        .drainToList(limit = 100)
-        .value.get.get shouldEqual List(0, 1, 1, 2, 3, 5, 8, 13)
+      val result: Future[List[Int]] =
+        fibonacciNumbers
+          .take(8)
+          .drainToList(limit = 100)
+
+      result.value.get.get shouldEqual List(0, 1, 1, 2, 3, 5, 8, 13)
       //#cycle
     }
   }

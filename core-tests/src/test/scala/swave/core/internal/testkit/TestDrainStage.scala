@@ -43,7 +43,7 @@ private[testkit] final class TestDrainStage(val id: Int,
   def awaitingOnSubscribe() = state(
     onSubscribe = from ⇒ {
       testCtx.trace(s"Received ONSUBSCRIBE from $from in 'initialState'")
-      _inputStages = from.stage :: Nil
+      _inputStages = from.stageImpl :: Nil
       ready(from)
     })
 
@@ -51,12 +51,11 @@ private[testkit] final class TestDrainStage(val id: Int,
     xSeal = c ⇒ {
       testCtx.trace("Received XSEAL in 'ready'")
       configureFrom(c)
-      c.allowSyncUnstopped()
       testCtx.trace("⇠ XSEAL")
       in.xSeal(c)
 
       c.registerForXStart(this)
-      c.registerForPostRunEvent(this)
+      c.syncGlobal.registerForPostRunEvent(this)
       awaitingXStart(c, in)
     })
 
@@ -180,7 +179,7 @@ private[testkit] final class TestDrainStage(val id: Int,
     if (testCtx.hasSchedulings) {
       testCtx.trace(s"Running schedulings...")
       testCtx.processSchedulings()
-      ctx.registerForPostRunEvent(this)
+      ctx.syncGlobal.registerForPostRunEvent(this)
     }
     stay()
   }

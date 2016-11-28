@@ -14,7 +14,9 @@ class StreamOfStreamsSpec extends FreeSpec with Matchers {
 
     "takeEvery" in {
       //#takeEvery
+      import scala.concurrent.Future
       import swave.core._
+
       implicit val env = StreamEnv()
 
       // simple extension for `Spout[T]`, could also be a value class
@@ -26,11 +28,13 @@ class StreamOfStreamsSpec extends FreeSpec with Matchers {
             .flattenConcat()          // Spout[T]
       }
 
-      Spout.ints(from = 1)
-        .takeEvery(10)
-        .take(5)
-        .drainToList(limit = 100)
-        .value.get.get shouldEqual Seq(10, 20, 30, 40, 50)
+      val result: Future[List[Int]] =
+        Spout.ints(from = 1)
+          .takeEvery(10)
+          .take(5)
+          .drainToList(limit = 100)
+
+      result.value.get.get shouldEqual Seq(10, 20, 30, 40, 50)
       //#takeEvery
     }
   }

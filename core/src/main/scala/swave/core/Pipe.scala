@@ -62,7 +62,7 @@ final class Pipe[-A, +B] private (private[core] val firstStage: Outport, private
     result.asInstanceOf[Out]
   }
 
-  def toProcessor: Piping[Processor[A @uV, B @uV]] = {
+  def toProcessor: StreamGraph[Processor[A @uV, B @uV]] = {
     val (spout, subscriber) = Spout.withSubscriber[A]
     spout.via(this).to(Drain.toPublisher()).mapResult(new SubPubProcessor(subscriber, _))
   }
@@ -71,8 +71,8 @@ final class Pipe[-A, +B] private (private[core] val firstStage: Outport, private
 
   def named(moduleID: Module.ID): A =>> B = {
     moduleID
-      .addBoundary(Module.Boundary.InnerEntry(firstStage.stage))
-      .addBoundary(Module.Boundary.InnerExit(lastStage.stage))
+      .addBoundary(Module.Boundary.InnerEntry(firstStage.stageImpl))
+      .addBoundary(Module.Boundary.InnerExit(lastStage.stageImpl))
     this
   }
 }

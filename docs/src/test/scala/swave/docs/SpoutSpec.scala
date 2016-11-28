@@ -56,7 +56,8 @@ class SpoutSpec extends FreeSpec with Matchers {
 
       eitherStream
         .flattenConcat() // = Spout[AnyRef]
-        .drainToList(5).value.get shouldEqual Success(List('0' -> 0, "1", "2"))
+        .drainToList(5)
+        .value.get shouldEqual Success(List('0' -> 0, "1", "2"))
       //#streamable-either
     }
   }

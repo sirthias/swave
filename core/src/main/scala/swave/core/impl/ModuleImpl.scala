@@ -10,7 +10,7 @@ import scala.annotation.tailrec
 import swave.core.impl.stages.inout.NopStage
 import swave.core.impl.util.InportList
 import swave.core.macros._
-import swave.core.{Module, Piping}
+import swave.core.{Module, StreamGraph}
 import Module.TypeLogic._
 import Module._
 
@@ -28,7 +28,7 @@ private[core] final class ModuleImpl[I <: Module.Input, O <: Module.Output] priv
   def apply(inports: InportList): Any = {
     requireState(id.boundaries eq Nil, "Illegal module reuse")
     inports.foreach { ins ⇒
-      id.addBoundary(Boundary.OuterEntry(ins.in.stage))
+      id.addBoundary(Boundary.OuterEntry(ins.in.stageImpl))
       ()
     }
     val outs = construct(inports)
@@ -42,7 +42,7 @@ private[core] final class ModuleImpl[I <: Module.Input, O <: Module.Output] priv
               ins.in.subscribe()(nop)
               nop
             } else ins.in
-          id.addBoundary(Boundary.InnerExit(exit.stage))
+          id.addBoundary(Boundary.InnerExit(exit.stageImpl))
           InportList(exit)
         }
       case result ⇒ result // output is `Module.Output.None` or `Module.Output.Result[_]`, i.e. nothing to do here
@@ -119,7 +119,8 @@ private[core] final class ModuleImpl[I <: Module.Input, O <: Module.Output] priv
   //   .     OB2  IB2     .
   //   .      .    .      .
   //   +......+    +......+
-  def crossJoin[I2 <: Input, O2 <: Output](other: Module[I2, O2])(implicit ev: CrossJoin[I, O, I2, O2]): Piping[Unit] = {
+  def crossJoin[I2 <: Input, O2 <: Output](other: Module[I2, O2])(
+      implicit ev: CrossJoin[I, O, I2, O2]): StreamGraph[Unit] = {
     val otherImpl = ModuleImpl(other)
     requireArg(
       lit + lot + otherImpl.lit + otherImpl.lot > 0,
@@ -135,7 +136,7 @@ private[core] final class ModuleImpl[I <: Module.Input, O <: Module.Output] priv
     connect(`it+ib`, ob2 append ot2)
 
     val entryElem = if (`it+ib`.nonEmpty) `it+ib`.in else `ot+ob`.in
-    new Piping(entryElem, ())
+    new StreamGraph(entryElem.stageImpl, ())
   }
 
   /**

@@ -16,11 +16,11 @@ import swave.core.Dispatcher
 /**
   * Minimalistic actor implementation without `become`.
   */
-private[impl] abstract class StreamActor(protected final val throughput: Int,
-                                         protected final val log: Logger,
-                                         final val dispatcher: Dispatcher) {
+private[impl] abstract class StreamActor(final val dispatcher: Dispatcher, final val throughput: Int) {
 
   protected type MessageType <: AnyRef
+
+  protected def log: Logger
 
   /**
     * The mailbox.

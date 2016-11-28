@@ -51,9 +51,9 @@ abstract class Module[I <: Module.Input, O <: Module.Output] private[core] {
 
   /**
    * Combines this instance with the given one in a way that cross-connects all
-   * inputs and outputs and thus produces a [[Piping]].
+   * inputs and outputs and thus produces a [[StreamGraph]].
    */
-  def crossJoin[I2 <: Input, O2 <: Output](other: Module[I2, O2])(implicit ev: CrossJoin[I, O, I2, O2]): Piping[Unit]
+  def crossJoin[I2 <: Input, O2 <: Output](other: Module[I2, O2])(implicit ev: CrossJoin[I, O, I2, O2]): StreamGraph[Unit]
 
   /**
    * Returns a copy of this [[Module]] with the name changed to the given one.

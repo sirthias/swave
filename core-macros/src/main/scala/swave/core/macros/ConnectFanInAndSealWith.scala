@@ -29,7 +29,7 @@ private[macros] trait ConnectFanInAndSealWith { this: Util =>
 
         subscribe = from ⇒ {
           if (out eq null) {
-            _outputStages = from.stage :: Nil
+            _outputStages = from.stageImpl :: Nil
             from.onSubscribe()
             if (pendingSubs.isEmpty) ready(from)
             else connecting(from, pendingSubs)

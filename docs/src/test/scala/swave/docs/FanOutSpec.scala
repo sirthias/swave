@@ -16,7 +16,9 @@ class FanOutSpec extends FreeSpec with Matchers {
 
     "basic-example" in {
       //#basic-example
+      import scala.concurrent.Future
       import swave.core._
+
       implicit val env = StreamEnv()
 
       val promise1 = Promise[Seq[String]]()
@@ -27,16 +29,17 @@ class FanOutSpec extends FreeSpec with Matchers {
       val drain2 =
         Drain.seq(limit = 10).captureResult(promise2)
 
-      Spout.ints(from = 0)
-        .fanOutBroadcast(eagerCancel = true)
-          .sub.filter(_ > 45).map(_.toString).to(drain1)
-          .sub.map(_.toString).end
-          .sub.slice(42, 7).to(drain2) // terminates the stream by cancelling after the 48th element
-        .continue
-        .drop(10)
-        .drainToMkString(limit = 100)
-        .value.get.get shouldEqual (10 to 48).mkString
+      val result: Future[String] =
+        Spout.ints(from = 0)
+          .fanOutBroadcast(eagerCancel = true)
+            .sub.filter(_ > 45).map(_.toString).to(drain1)
+            .sub.map(_.toString).end
+            .sub.slice(42, 7).to(drain2) // terminates the stream by cancelling after the 48th element
+          .continue
+          .drop(10)
+          .drainToMkString(limit = 100)
 
+      result.value.get.get shouldEqual (10 to 48).mkString
       promise1.future.value.get.get shouldEqual (46 to 48).map(_.toString)
       promise2.future.value.get.get shouldEqual (42 to 48)
       //#basic-example
@@ -44,34 +47,42 @@ class FanOutSpec extends FreeSpec with Matchers {
 
     "diamond" in {
       //#diamond
+      import scala.concurrent.Future
       import swave.core._
+
       implicit val env = StreamEnv()
 
-      Spout(1, 2, 3)
-        .fanOutBroadcast()
-          .sub.map("A" + _).end
-          .sub.map("B" + _).end
-        .fanInToTuple // Spout[(String, String)]
-        .drainToMkString(limit = 10, sep = ";")
-        .value.get.get shouldEqual "(A1,B1);(A2,B2);(A3,B3)"
+      val result: Future[String] =
+        Spout(1, 2, 3)
+          .fanOutBroadcast()
+            .sub.map("A" + _).end
+            .sub.map("B" + _).end
+          .fanInToTuple // Spout[(String, String)]
+          .drainToMkString(limit = 10, sep = ";")
+
+      result.value.get.get shouldEqual "(A1,B1);(A2,B2);(A3,B3)"
       //#diamond
     }
 
     "mixed" in {
       //#mixed
+      import scala.concurrent.Future
       import swave.core._
+
       implicit val env = StreamEnv()
 
-      Spout(1, 2, 3)
-        .fanOutBroadcast()
-          .sub.map(_.toString).end
-          .attach(Spout.longs(from = 10))
-          .sub.to(Drain.ignore.dropResult) // just for fun
-          .sub.end
-          .attachLeft(Spout.doubles(from = 0, step = 0.5))
-        .fanInToTuple // Spout[(Double, String, Long, Int)]
-        .drainToList(limit = 10)
-        .value.get.get shouldEqual Seq(
+      val result: Future[List[(Double, String, Long, Int)]] =
+        Spout(1, 2, 3)
+          .fanOutBroadcast()
+            .sub.map(_.toString).end
+            .attach(Spout.longs(from = 10))
+            .sub.to(Drain.ignore.dropResult) // just for fun
+            .sub.end
+            .attachLeft(Spout.doubles(from = 0, step = 0.5))
+          .fanInToTuple // Spout[(Double, String, Long, Int)]
+          .drainToList(limit = 10)
+
+      result.value.get.get shouldEqual Seq(
         (0.0, "1", 10, 1),
         (0.5, "2", 11, 2),
         (1.0, "3", 12, 3))
@@ -80,7 +91,9 @@ class FanOutSpec extends FreeSpec with Matchers {
 
     "teee" in {
       //#teee
+      import scala.concurrent.Future
       import swave.core._
+
       implicit val env = StreamEnv()
 
       // simple extension for `Spout[T]`, could also be a value class
@@ -94,11 +107,12 @@ class FanOutSpec extends FreeSpec with Matchers {
 
       val promise = Promise[Seq[Int]]()
 
-      Spout(1, 2, 3)
-        .teee(Drain.seq(limit = 10).captureResult(promise))
-        .drainToList(limit = 10)
-        .value.get.get shouldEqual Seq(1, 2, 3)
+      val result: Future[List[Int]] =
+        Spout(1, 2, 3)
+          .teee(Drain.seq(limit = 10).captureResult(promise))
+          .drainToList(limit = 10)
 
+      result.value.get.get shouldEqual Seq(1, 2, 3)
       promise.future.value.get.get shouldEqual Seq(1, 2, 3)
       //#teee
     }

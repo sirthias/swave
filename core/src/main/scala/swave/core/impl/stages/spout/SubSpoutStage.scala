@@ -23,7 +23,7 @@ private[core] class SubSpoutStage(parentCtx: RunContext, val in: StageImpl) exte
   def awaitingSubscribe(term: StreamTermination, timer: Cancellable): State = state(
     subscribe = from ⇒ {
       if (timer ne null) timer.cancel()
-      _outputStages = from.stage :: Nil
+      _outputStages = from.stageImpl :: Nil
       from.onSubscribe()
       ready(from, term)
     },
@@ -33,7 +33,7 @@ private[core] class SubSpoutStage(parentCtx: RunContext, val in: StageImpl) exte
 
     xEvent = {
       case EnableSubscriptionTimeout if timer eq null =>
-        val t = parentCtx.scheduleSubscriptionTimeout(this, parentCtx.env.settings.subscriptionTimeout)
+        val t = parentCtx.scheduleSubscriptionTimeout(this)
         awaitingSubscribe(term, t)
       case RunContext.SubscriptionTimeout =>
         stopCancel(in)
@@ -43,7 +43,7 @@ private[core] class SubSpoutStage(parentCtx: RunContext, val in: StageImpl) exte
     xSeal = ctx ⇒ {
       configureFrom(ctx)
       ctx.linkToParentContext(parentCtx)
-      if (in.runner ne null) ctx.registerRunnerAssignment(StreamRunner.Assignment.Runner(this, in.runner))
+      if (in.hasRunner) ctx.registerRunnerAssignment(StreamRunner.Assignment.Runner(this, in.runner))
       out.xSeal(ctx)
       if (term != StreamTermination.None) {
         ctx.registerForXStart(this)

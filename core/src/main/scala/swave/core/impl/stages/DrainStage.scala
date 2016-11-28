@@ -10,7 +10,7 @@ import scala.annotation.compileTimeOnly
 import swave.core.{IllegalAsyncBoundaryException, Stage}
 import swave.core.impl.{Inport, RunContext, StreamRunner}
 import swave.core.impl.stages.inout.AsyncBoundaryStage
-import swave.core.impl.GraphFolder
+import swave.core.impl.GraphTraverser
 
 // format: OFF
 private[swave] abstract class DrainStage extends StageImpl {
@@ -41,8 +41,8 @@ private[swave] abstract class DrainStage extends StageImpl {
 private[swave] object DrainStage {
 
   def assignToAllPrimaryDrains(stage: Stage, dispatcherId: String): Unit =
-    GraphFolder.fold(stage) {
-      new GraphFolder.FoldContext {
+    GraphTraverser.process(stage) {
+      new GraphTraverser.Context {
         var visited = Set.empty[Stage]
         override def apply(stage: Stage): Boolean =
           !visited.contains(stage) && {

@@ -27,7 +27,7 @@ final class Drain[-T, +R] private[swave] (private[swave] val outport: Outport, v
   /**
     * The [[Stage]] representation of this [[Drain]].
     */
-  def stage: Stage = outport.stage
+  def stage: Stage = outport.stageImpl
 
   /**
     * Turns this [[Drain]] into one that produces no result.
@@ -62,7 +62,7 @@ final class Drain[-T, +R] private[swave] (private[swave] val outport: Outport, v
     * Explicitly attaches the given name to this [[Drain]].
     */
   def named(name: String): this.type = {
-    Module.ID(name).addBoundary(Module.Boundary.InnerEntry(outport.stage))
+    Module.ID(name).addBoundary(Module.Boundary.InnerEntry(outport.stageImpl))
     this
   }
 

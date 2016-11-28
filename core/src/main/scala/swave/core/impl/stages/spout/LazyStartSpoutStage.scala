@@ -46,7 +46,7 @@ private[core] final class LazyStartSpoutStage(onStart: () => Spout[AnyRef]) exte
 
     onSubscribe = _ => {
       var funError: Throwable = null
-      try ctx.sealAndStartSubStream(in)
+      try ctx.sealAndStartSubStream(in.stageImpl)
       catch { case NonFatal(e) => funError = e }
       if (funError eq null) {
         if (requested != 0) {

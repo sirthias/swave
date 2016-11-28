@@ -39,7 +39,7 @@ private[testkit] final class TestSpoutStage(val id: Int,
     subscribe = from ⇒ {
       ctx.trace(s"Received SUBSCRIBE from $from in 'initialState'")
       ctx.trace("⇢ ONSUBSCRIBE")
-      _outputStages = from.stage :: Nil
+      _outputStages = from.stageImpl :: Nil
       from.onSubscribe()
       ready(from)
     })
@@ -48,7 +48,6 @@ private[testkit] final class TestSpoutStage(val id: Int,
     xSeal = c ⇒ {
       ctx.trace("Received XSEAL in 'ready'")
       configureFrom(c)
-      c.allowSyncUnstopped()
       ctx.trace("⇢ XSEAL")
       out.xSeal(c)
       if (elems.hasNext) {

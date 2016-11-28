@@ -37,57 +37,57 @@ class AsyncSpec extends SwaveSpec {
     }
 
     "single default dispatcher" taggedAs NotOnTravis in {
-      val piping =
+      val streamGraph =
         Spout.continually(threadName).map(_ → threadName).to(Drain.head.async()).seal().get
-      val (threadName0, threadName1) = piping.run().await(20.millis)
+      val (threadName0, threadName1) = streamGraph.run().result.await(20.millis)
 
       List(threadName0, threadName1).distinct shouldEqual List("swave-default-1")
     }
 
     "single non-default dispatcher" taggedAs NotOnTravis in {
-      val piping =
+      val streamGraph =
         Spout.continually(threadName).map(_ → threadName).to(Drain.head.async("disp0")).seal().get
-      val (threadName0, threadName1) = piping.run().await(20.millis)
+      val (threadName0, threadName1) = streamGraph.run().result.await(20.millis)
 
       List(threadName0, threadName1).distinct shouldEqual List("swave-disp0-1")
     }
 
     "default async boundary with implicit default tail" taggedAs NotOnTravis in {
-      val piping =
+      val streamGraph =
         Spout.continually(threadName).async().map(_ → threadName).to(Drain.head).seal().get
-      val (threadName0, threadName1) = piping.run().await(20.millis)
+      val (threadName0, threadName1) = streamGraph.run().result.await(20.millis)
 
       List(threadName0, threadName1).distinct shouldEqual List("swave-default-1")
     }
 
     "default async boundary with explicit default tail" taggedAs NotOnTravis in {
-      val piping =
+      val streamGraph =
         Spout.continually(threadName).async().map(_ → threadName).to(Drain.head.async()).seal().get
-      val (threadName0, threadName1) = piping.run().await(20.millis)
+      val (threadName0, threadName1) = streamGraph.run().result.await(20.millis)
 
       List(threadName0, threadName1).distinct shouldEqual List("swave-default-1")
     }
 
     "non-default async boundary with implicit default tail" taggedAs NotOnTravis in {
-      val piping =
+      val streamGraph =
         Spout.continually(threadName).async("disp0").map(_ → threadName).to(Drain.head).seal().get
-      val (threadName0, threadName1) = piping.run().await(20.millis)
+      val (threadName0, threadName1) = streamGraph.run().result.await(20.millis)
 
       threadName0 shouldEqual "swave-disp0-1"
       threadName1 shouldEqual "swave-default-1"
     }
 
     "non-default async boundary with non-default tail" taggedAs NotOnTravis in {
-      val piping =
+      val streamGraph =
         Spout.continually(threadName).async("disp0").map(_ → threadName).to(Drain.head.async("disp1")).seal().get
-      val (threadName0, threadName1) = piping.run().await(20.millis)
+      val (threadName0, threadName1) = streamGraph.run().result.await(20.millis)
 
       threadName0 shouldEqual "swave-disp0-1"
       threadName1 shouldEqual "swave-disp1-1"
     }
 
     "2 async boundaries with non-default tail" taggedAs NotOnTravis in {
-      val piping =
+      val streamGraph =
         Spout
           .continually(threadName)
           .async("disp0")
@@ -97,7 +97,7 @@ class AsyncSpec extends SwaveSpec {
           .to(Drain.head.async("disp2"))
           .seal()
           .get
-      val ((threadName0, threadName1), threadName2) = piping.run().await(20.millis)
+      val ((threadName0, threadName1), threadName2) = streamGraph.run().result.await(20.millis)
 
       threadName0 shouldEqual "swave-disp0-1"
       threadName1 shouldEqual "swave-disp1-1"

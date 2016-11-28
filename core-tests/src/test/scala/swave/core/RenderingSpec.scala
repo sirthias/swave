@@ -82,7 +82,7 @@ class RenderingSpec extends FreeSpec with Matchers {
       }
 
   implicit class Example(name: String) {
-    def tests(pipeNet: ⇒ Piping[_]): Unit =
+    def tests(pipeNet: ⇒ StreamGraph[_]): Unit =
       name in {
         val expectedRendering =
           examples.getOrElse(name + ':', sys.error(s"Section for '$name' not found in examples.txt"))

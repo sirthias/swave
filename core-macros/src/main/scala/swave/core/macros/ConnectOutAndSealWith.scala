@@ -23,7 +23,7 @@ private[macros] trait ConnectOutAndSealWith { this: Util =>
         intercept = false,
 
         subscribe = from ⇒ {
-          _outputStages = from.stage :: Nil
+          _outputStages = from.stageImpl :: Nil
           from.onSubscribe()
           ready(from)
         })

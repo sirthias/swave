@@ -14,7 +14,9 @@ class CouplingSpec extends FreeSpec with Matchers {
 
     "fibonacci" in {
       //#fibonacci
+      import scala.concurrent.Future
       import swave.core._
+
       implicit val env = StreamEnv()
 
       def fibonacciNumbers = {
@@ -26,10 +28,12 @@ class CouplingSpec extends FreeSpec with Matchers {
             .subContinue
       }
 
-      fibonacciNumbers
-        .take(8)
-        .drainToList(limit = 100)
-        .value.get.get shouldEqual List(0, 1, 1, 2, 3, 5, 8, 13)
+      val result: Future[List[Int]] =
+        fibonacciNumbers
+          .take(8)
+          .drainToList(limit = 100)
+
+      result.value.get.get shouldEqual List(0, 1, 1, 2, 3, 5, 8, 13)
       //#fibonacci
     }
   }

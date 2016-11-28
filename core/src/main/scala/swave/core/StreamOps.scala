@@ -473,7 +473,7 @@ trait StreamOps[A] extends Any { self ⇒
 
   final def zip[B](other: Spout[B]): Repr[(A, B)] = {
     val moduleID = Module.ID("zip")
-    moduleID.addBoundary(Module.Boundary.OuterEntry(other.inport.stage))
+    moduleID.addBoundary(Module.Boundary.OuterEntry(other.inport.stageImpl))
     via(Pipe[A].attach(other).fanInToTuple named moduleID)
   }
 }
@@ -580,10 +580,10 @@ object StreamOps {
       wrap(new ToProductStage(Stage.Kind.FanIn.ToTuple, subs, _.toTuple))
 
     def fromFanInVia[P <: HList, R, Out](joined: Module.TypeLogic.Joined[L, P, R])(
-        implicit vr: ViaResult[P, Piping[R], Repr, Out]): Out = {
+        implicit vr: ViaResult[P, StreamGraph[R], Repr, Out]): Out = {
       val out = ModuleImpl(joined.module)(subs)
       val result = vr.id match {
-        case 0 ⇒ new Piping(subs.in, out)
+        case 0 ⇒ new StreamGraph(subs.in.stageImpl, out)
         case 1 ⇒ rawWrap(out.asInstanceOf[InportList].in)
         case 2 ⇒ new FanIn(out.asInstanceOf[InportList], rawWrap)
       }

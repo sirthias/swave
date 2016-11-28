@@ -23,7 +23,7 @@ private[macros] trait ConnectFanOutAndSealWith { this: Util =>
       def connecting(in: Inport, outs: OutportCtx): State = state(
         onSubscribe = from ⇒ {
           if (in eq null) {
-            _inputStages = from.stage :: Nil
+            _inputStages = from.stageImpl :: Nil
             connecting(from, outs)
           } else throw illegalState("Double onSubscribe(" + from + ')')
         },
@@ -35,7 +35,7 @@ private[macros] trait ConnectFanOutAndSealWith { this: Util =>
               else throw illegalState("Double subscribe(" + out + ')')
             } else {
               val newOuts = createOutportCtx(out, outs)
-              _outputStages = out.stage :: _outputStages
+              _outputStages = out.stageImpl :: _outputStages
               out.onSubscribe()
               connecting(in, newOuts)
             }

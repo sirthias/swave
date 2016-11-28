@@ -39,7 +39,7 @@ final class Spout[+A](private[swave] val inport: Inport) extends AnyVal with Str
   /**
     * The [[Stage]] of this spout.
     */
-  def stage: Stage = inport.stage
+  def stage: Stage = inport.stageImpl
 
   /**
     * Returns this [[Spout]] instance.
@@ -49,8 +49,8 @@ final class Spout[+A](private[swave] val inport: Inport) extends AnyVal with Str
   /**
     * Attaches the given [[Drain]] to close this part of the stream graph.
     */
-  def to[R](drain: Drain[A, R]): Piping[R] =
-    new Piping(inport, drain.consume(this))
+  def to[R](drain: Drain[A, R]): StreamGraph[R] =
+    new StreamGraph(inport.stageImpl, drain.consume(this))
 
   /**
     * Attaches the given [[Pipe]] and returns a transformed [[Spout]].
@@ -61,10 +61,10 @@ final class Spout[+A](private[swave] val inport: Inport) extends AnyVal with Str
     * Attaches the given [[Module]] and returns the resulting structure.
     */
   def via[P <: HList, R, Out](joined: Module.TypeLogic.Joined[A :: HNil, P, R])(
-      implicit vr: TypeLogic.ViaResult[P, Piping[R], Spout, Out]): Out = {
+      implicit vr: TypeLogic.ViaResult[P, StreamGraph[R], Spout, Out]): Out = {
     val out = ModuleImpl(joined.module)(InportList(inport))
     val result = vr.id match {
-      case 0 ⇒ new Piping(inport, out)
+      case 0 ⇒ new StreamGraph(inport.stageImpl, out)
       case 1 ⇒ new Spout(out.asInstanceOf[InportList].in)
       case 2 ⇒ new StreamOps.FanIn(out.asInstanceOf[InportList], wrap)
     }
@@ -75,7 +75,7 @@ final class Spout[+A](private[swave] val inport: Inport) extends AnyVal with Str
     * Attaches the given [[Drain]] and immediately starts the stream.
     */
   def drainTo[R](drain: Drain[A, R])(implicit env: StreamEnv, ev: TypeLogic.ToTryOrFuture[R]): ev.Out =
-    to(drain).run()
+    to(drain).run().result
 
   /**
     * Attaches a [[Drain]] which executes the given callback for all stream elements
@@ -149,7 +149,7 @@ final class Spout[+A](private[swave] val inport: Inport) extends AnyVal with Str
     * Explicitly attaches the given name to this [[Spout]].
     */
   def named(name: String): Spout[A] = {
-    Module.ID(name).addBoundary(Module.Boundary.InnerExit(inport.stage))
+    Module.ID(name).addBoundary(Module.Boundary.InnerExit(inport.stageImpl))
     this
   }
 }

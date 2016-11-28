@@ -43,10 +43,7 @@ object Graph {
           if (showParams || showRunners) {
             val sb = new java.lang.StringBuilder(st.kind.name)
             if (showParams) sb.append(st.kind.productIterator.mkString("(", ", ", ")"))
-            if (showRunners) {
-              val runner = st.stageImpl.runner
-              sb.append(" ^").append(if (runner ne null) runner else "none")
-            }
+            if (showRunners) sb.append(" ^").append(if (st.stageImpl.hasRunner) st.stageImpl.runner else "none")
             sb.toString
           } else st.kind.name
         graph.attributes(x) match {

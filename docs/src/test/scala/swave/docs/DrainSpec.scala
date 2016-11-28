@@ -24,8 +24,9 @@ class DrainSpec extends FreeSpec with Matchers {
         Drain.fold(0)(_ + _)
 
       Spout(1 to 100)  // Spout[Int]
-        .to(sumDrain)  // Piping[Int]
-        .run()         // Future[Int]
+        .to(sumDrain)  // StreamGraph[Int]
+        .run()         // StreamRun[Future[Int]]
+        .result        // Future[Int]
         .value         // Option[Try[Int]]
         .get           // Try[Int]
         .get shouldEqual 5050

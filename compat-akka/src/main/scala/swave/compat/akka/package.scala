@@ -89,9 +89,9 @@ package object akka {
 
     def toAkkaSink(implicit env: StreamEnv): Sink[T, R] = {
       val (spout, subscriber) = Spout.withSubscriber[T]
-      val piping              = spout.to(underlying)
+      val streamGraph              = spout.to(underlying)
       Sink.fromSubscriber(subscriber).mapMaterializedValue { _ ⇒
-        piping.run().get // provoke exception on start error
+        streamGraph.run().result.get // provoke exception on start error
       }
     }
   }
@@ -105,9 +105,9 @@ package akka {
 
     def toAkkaSource(implicit env: StreamEnv): Source[T, NotUsed] = {
       val drain  = Drain.toPublisher[T]()
-      val piping = new Spout(underlying).to(drain)
+      val streamGraph = new Spout(underlying).to(drain)
       Source.fromPublisher(drain.result).mapMaterializedValue { notUsed ⇒
-        piping.run().get // provoke exception on start error
+        streamGraph.run().result.get // provoke exception on start error
         notUsed
       }
     }

@@ -10,13 +10,9 @@ import swave.core.impl.stages.StageImpl
 import swave.core.{Module, Stage}
 
 private[swave] sealed trait Port {
-  def stage: Stage
   def stageImpl: StageImpl
 
   def xSeal(ctx: RunContext): Unit
-
-  def isSealed: Boolean
-  def isStopped: Boolean
 }
 
 private[swave] sealed trait Inport extends Port {
@@ -42,7 +38,7 @@ private[swave] sealed trait Outport extends Port {
 private[swave] abstract class PortImpl extends Stage with Inport with Outport {
   private[this] var _boundaryOf = List.empty[Module.ID]
 
-  final def boundaryOf = _boundaryOf
+  final def boundaryOf: List[Module.ID] = _boundaryOf
 
   final def markAsBoundaryOf(moduleID: Module.ID): Unit = _boundaryOf ::= moduleID
 }

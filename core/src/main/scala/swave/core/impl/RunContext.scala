@@ -7,34 +7,71 @@
 package swave.core.impl
 
 import java.util.concurrent.atomic.AtomicReference
-import scala.concurrent.duration.{Duration, FiniteDuration}
 import scala.annotation.tailrec
+import scala.concurrent.Promise
+import scala.concurrent.duration.FiniteDuration
 import swave.core.impl.stages.StageImpl
+import swave.core.macros._
 import swave.core.util._
 import swave.core._
 
 /**
   * A `RunContext` instance keeps all the contextual information required for the start of a *single* connected stream
   * network. This does not include embedded or enclosing sub-streams (streams of streams).
-  *
-  * CAUTION: If the run is async, do not mutate anymore after the sealing phase is over!!!
   */
-private[swave] final class RunContext(val port: Port)(implicit val env: StreamEnv) {
-
+private[swave] final class RunContext(val stage: StageImpl)(implicit val env: StreamEnv) {
   import RunContext._
 
-  // the GlobalContext keeps the state for the global run, i.e. the outermost `run()` of all nested sub-streams
-  private var globalCtx         = new GlobalContext(this)
-  private var runnerAssignments = List.empty[StreamRunner.Assignment]
-  private var needXStart        = List.empty[StageImpl]
+  private[this] var runnerAssignments = List.empty[StreamRunner.Assignment]
+  private[this] var needXStart        = List.empty[StageImpl]
+  private var _global: Global         = _
 
-  private def isMainContext = globalCtx.owner eq this
+  def global: Global = _global
 
-  def allowSyncUnstopped(): Unit = globalCtx.allowSyncUnstopped = true
+  def asyncGlobal: AsyncGlobal =
+    _global match {
+      case null           => { val x = new AsyncGlobal(this); _global = x; x }
+      case x: AsyncGlobal => x
+      case _              => throw new IllegalStateException
+    }
 
-  // must be called before sealing!
-  def linkToParentContext(parentContext: RunContext): Unit =
-    globalCtx = parentContext.globalCtx
+  def syncGlobal: SyncGlobal =
+    _global match {
+      case null          => { val x = new SyncGlobal(this); _global = x; x }
+      case x: SyncGlobal => x
+      case _             => throw new IllegalStateException
+    }
+
+  //////////////////////////////// CALLED DURING SEALING ///////////////////////////////////////////
+  // therefore allowed to mutate, after starting no mutation is allowed anymore if the run is async!
+
+  /**
+    * Seals the stream by sending an `xSeal` signal through the stream graph starting from `port`.
+    */
+  def seal(): Unit = {
+    if (stage.isSealed) {
+      val msg = stage + " is already sealed. It cannot be sealed a second time. " +
+          "Are you trying to reuse a Spout, Drain, Pipe or Module?"
+      throw new IllegalReuseException(msg)
+    }
+    stage.xSeal(this)
+    if (runnerAssignments ne Nil) {
+      if (global.isInstanceOf[SyncGlobal]) {
+        throw new IllegalAsyncBoundaryException(
+          "A synchronous parent stream must not contain " +
+            "an async sub-stream. You can fix this by explicitly marking the parent stream as `async`.")
+      }
+      asyncGlobal.assignRunners(runnerAssignments)
+    }
+  }
+
+  private[impl] def linkToParentContext(parent: RunContext): Unit = {
+    requireState(parent.env eq env, "All sub streams of a stream run must use the same `StreamEnv` instance")
+    if (!parent.stage.hasRunner) {
+      parent.syncGlobal.merge(syncGlobal)
+    }
+    _global = parent.global
+  }
 
   /**
     * Registers a stage for assignment of a [[StreamRunner]] with the given `dispatcherId`.
@@ -47,88 +84,46 @@ private[swave] final class RunContext(val port: Port)(implicit val env: StreamEn
   /**
     * Registers the stage for receiving `xStart` signals.
     */
-  def registerForXStart(stage: StageImpl): Unit =
-    needXStart ::= stage
-
-  /**
-    * Registers the stage for receiving `xEvent(RunContext.PostRun)` signals.
-    * This method is also available from within the `xEvent` event handler,
-    * which can re-register its stage to receive this event once more.
-    *
-    * Note: This event is only available for synchronous runs!
-    */
-  def registerForPostRunEvent(stage: StageImpl): Unit =
-    globalCtx.syncNeedPostRun ::= stage
-
-  /**
-    * Seals the stream by sending an `xSeal` signal through the stream graph starting from `port`.
-    */
-  def seal(): Unit = {
-    if (port.isSealed) {
-      val msg = port + " is already sealed. It cannot be sealed a second time. " +
-          "Are you trying to reuse a Spout, Drain, Pipe or Module?"
-      throw new IllegalReuseException(msg)
-    }
-    port.xSeal(this)
-    if (runnerAssignments.nonEmpty) {
-      globalCtx.registerRunners(StreamRunner.assignRunners(runnerAssignments))
-    }
-  }
-
-  /**
-    * Schedules a [[Cancellable]] timeout of the given `delay`.
-    * If the returned [[Cancellable]] isn't cancelled in time a [[SubscriptionTimeout]] event will be dispatched
-    * to the given `stage`.
-    *
-    * This method differs from the regular one available on [[Scheduler]] in that is also supports
-    * synchronous runs. If the run is synchronous the `delay` is disregarded and the timeout logic
-    * runs when the global run has terminated (unless it's cancelled beforehand).
-    */
-  def scheduleSubscriptionTimeout(stage: StageImpl, delay: Duration): Cancellable =
-    delay match {
-      case d: FiniteDuration if globalCtx.isSyncRun ⇒
-        val timer =
-          new Cancellable with Runnable {
-            def run() = stage.xEvent(SubscriptionTimeout)
-
-            def stillActive = globalCtx.syncCleanup contains this
-
-            def cancel() = {
-              val x = globalCtx.syncCleanup.remove(this)
-              (x ne globalCtx.syncCleanup) && {
-                globalCtx.syncCleanup = x
-                true
-              }
-            }
-          }
-        globalCtx.syncCleanup ::= timer
-        timer
-
-      case d: FiniteDuration ⇒ stage.runner.scheduleEvent(stage, d, SubscriptionTimeout)
-
-      case _ ⇒ Cancellable.Inactive
-    }
+  def registerForXStart(s: StageImpl): Unit =
+    needXStart ::= s
 
   /**
     * Starts (and potentially runs) the stream.
     */
-  def start(): Unit =
-    if (globalCtx.isSyncRun) {
-      needXStart.foreach(dispatchSyncXStart)
-      if (isMainContext) {
-        globalCtx.dispatchSyncPostRunSignal()
-        globalCtx.syncCleanup.foreach(dispatchSyncCleanup)
-        if (!globalCtx.allowSyncUnstopped && !port.isStopped) throw new UnterminatedSynchronousStreamException
+  def start(): Unit = {
+    @tailrec def startSync(remaining: List[StageImpl]): Unit =
+      if (remaining ne Nil) {
+        remaining.head.xStart()
+        startSync(remaining.tail)
       }
-    } else needXStart.foreach(dispatchAsyncXStart)
+    @tailrec def startAsync(remaining: List[StageImpl]): Unit =
+      if (remaining ne Nil) {
+        remaining.head.runner.enqueueXStart(remaining.head)
+        startAsync(remaining.tail)
+      }
+
+    if (!stage.hasRunner) {
+      startSync(needXStart)
+      syncGlobal.postRun(this)
+    } else startAsync(needXStart)
+  }
+
+  //////////////////////////////// CALLED AFTER START ///////////////////////////////////////////
+  // No mutation is allowed anymore if the run is async!!!
+
+  def scheduleSubscriptionTimeout(s: StageImpl): Cancellable =
+    env.settings.subscriptionTimeout match {
+      case d: FiniteDuration ⇒ _global.scheduleSubscriptionTimeout(s, d)
+      case _                 ⇒ Cancellable.Inactive
+    }
 
   /**
     * Seals and starts the given port with the same [[StreamEnv]] as this RunContext.
     *
     * CAUTION: This method will throw if there is any problem with sealing or starting the sub stream.
     */
-  def sealAndStartSubStream(port: Port): Unit = {
-    val subCtx = new RunContext(port)
+  private[impl] def sealAndStartSubStream(stage: StageImpl): Unit = {
+    val subCtx = new RunContext(stage)
     subCtx.seal()
     subCtx.start()
   }
@@ -138,37 +133,100 @@ private[swave] object RunContext {
   case object PostRun
   case object SubscriptionTimeout
 
-  private val dispatchAsyncXStart: StageImpl ⇒ Unit = stage ⇒ stage.runner.enqueueXStart(stage)
-  private val dispatchSyncXStart: StageImpl ⇒ Unit  = _.xStart()
-  private val dispatchSyncPostRun: StageImpl ⇒ Unit = _.xEvent(PostRun)
-  private val dispatchSyncCleanup: Runnable ⇒ Unit  = _.run()
+  // keeps the state for the global run, i.e. across all potentially nested sub streams
+  private[swave] sealed abstract class Global(protected val outermostRunContext: RunContext) {
+    def scheduleSubscriptionTimeout(stage: StageImpl, duration: FiniteDuration): Cancellable
+  }
 
-  private final class GlobalContext(val owner: RunContext) {
-    // only used in async runs
-    // Note: This list might contain the same StreamRunner instance several times,
-    // if an async region contains nested streams!!
-    val runners = new AtomicReference[List[StreamRunner]](Nil)
+  private[swave] final class AsyncGlobal(_outermost: RunContext)(implicit val env: StreamEnv)
+      extends Global(_outermost) {
+    val termination: Promise[Unit] = Promise[Unit]()
+    private[this] val runners      = new AtomicReference(Set.empty[StreamRunner])
 
-    // only used in synchronous runs
-    var syncNeedPostRun    = List.empty[StageImpl]
-    var syncCleanup        = List.empty[Runnable]
-    var allowSyncUnstopped = false
+    def assignRunners(assignments: List[StreamRunner.Assignment]): Unit = {
+      @tailrec def register(list: List[StreamRunner]): Unit = {
+        @tailrec def add(remaining: List[StreamRunner], result: Set[StreamRunner]): Set[StreamRunner] =
+          if (remaining ne Nil) add(remaining.tail, result + remaining.head) else result
 
-    def isSyncRun = runners.get() eq Nil
+        val current = runners.get()
+        val updated = add(list, current)
+        if (!runners.compareAndSet(current, updated)) {
+          register(list) // another thread interfered, so we try again
+        }
+      }
 
-    @tailrec def registerRunners(list: List[StreamRunner]): Unit = {
-      val current = runners.get()
-      val updated = current.reverse_:::(list)
-      if (!runners.compareAndSet(current, updated))
-        registerRunners(list) // try again
+      register(StreamRunner.assignRunners(assignments, this))
     }
 
-    @tailrec def dispatchSyncPostRunSignal(): Unit =
-      if (syncNeedPostRun.nonEmpty) {
-        val needPostRun = syncNeedPostRun
-        syncNeedPostRun = Nil // allow for re-registration in signal handler
-        needPostRun.foreach(dispatchSyncPostRun)
-        dispatchSyncPostRunSignal()
+    @tailrec def unregisterRunner(runner: StreamRunner): Unit = {
+      val current = runners.get()
+      val updated = current - runner
+      if (runners.compareAndSet(current, updated)) {
+        if (updated.isEmpty) { termination.success(()); () }
+      } else unregisterRunner(runner) // another thread interfered, so we try again
+    }
+
+    def scheduleSubscriptionTimeout(stage: StageImpl, duration: FiniteDuration): Cancellable =
+      stage.runner.scheduleEvent(stage, duration, SubscriptionTimeout)
+  }
+
+  private[swave] final class SyncGlobal(_outermost: RunContext)(implicit val env: StreamEnv)
+      extends Global(_outermost) {
+    private var needPostRun = List.empty[StageImpl]
+    private var cleanUp     = List.empty[Runnable]
+
+    /**
+      * Registers the stage for receiving `xEvent(RunContext.PostRun)` signals.
+      * This method is also available from within the `xEvent` event handler,
+      * which can re-register its stage to receive this event once more.
+      */
+    def registerForPostRunEvent(stage: StageImpl): Unit = needPostRun ::= stage
+
+    def scheduleSubscriptionTimeout(stage: StageImpl, duration: FiniteDuration): Cancellable = {
+      val timer =
+        new Cancellable with Runnable {
+          def run(): Unit          = stage.xEvent(SubscriptionTimeout)
+          def stillActive: Boolean = cleanUp contains this
+          def cancel(): Boolean = {
+            val x = cleanUp.remove(this)
+            (x ne cleanUp) && { cleanUp = x; true }
+          }
+        }
+      cleanUp ::= timer
+      timer
+    }
+
+    private[RunContext] def merge(other: SyncGlobal): Unit = {
+      needPostRun :::= other.needPostRun
+      cleanUp :::= other.cleanUp
+    }
+
+    private[RunContext] def postRun(runCtx: RunContext): Unit =
+      if (runCtx eq outermostRunContext) {
+
+        @tailrec def dispatchPostRunSignal(): Unit =
+          if (needPostRun ne Nil) {
+            val stages = needPostRun
+            needPostRun = Nil // allow for re-registration in signal handler
+
+            @tailrec def rec(remaining: List[StageImpl]): Unit =
+              if (remaining ne Nil) {
+                remaining.head.xEvent(PostRun)
+                rec(remaining.tail)
+              }
+            rec(stages)
+            dispatchPostRunSignal()
+          }
+
+        @tailrec def runCleanups(remaining: List[Runnable]): Unit =
+          if (remaining ne Nil) {
+            remaining.head.run()
+            runCleanups(remaining.tail)
+          }
+
+        dispatchPostRunSignal()
+        runCleanups(cleanUp)
+        // if (!runCtx.stage.isStopped) throw new UnterminatedSynchronousStreamException
       }
   }
 }

@@ -32,14 +32,14 @@ private[core] final class SubDrainStage(parentCtx: RunContext, val out: StageImp
 
     onSubscribe = from ⇒ {
       if (timer ne null) timer.cancel()
-      _inputStages = from.stage :: Nil
+      _inputStages = from.stageImpl :: Nil
       xEvent(DoOnSubscribe) // schedule event for after the state transition
       ready(from, cancelled)
     },
 
     xEvent = {
       case EnableSubscriptionTimeout if timer eq null =>
-        val t = parentCtx.scheduleSubscriptionTimeout(this, parentCtx.env.settings.subscriptionTimeout)
+        val t = parentCtx.scheduleSubscriptionTimeout(this)
         awaitingOnSubscribe(cancelled, t)
       case RunContext.SubscriptionTimeout =>
         val msg = s"Subscription attempt from SubDrainStage timed out after ${parentCtx.env.settings.subscriptionTimeout}"
@@ -52,7 +52,7 @@ private[core] final class SubDrainStage(parentCtx: RunContext, val out: StageImp
     xSeal = ctx ⇒ {
       configureFrom(ctx)
       ctx.linkToParentContext(parentCtx)
-      if (out.runner ne null) ctx.registerRunnerAssignment(StreamRunner.Assignment.Runner(this, out.runner))
+      if (out.hasRunner) ctx.registerRunnerAssignment(StreamRunner.Assignment.Runner(this, out.runner))
       in.xSeal(ctx)
       if (cancelled) {
         ctx.registerForXStart(this)

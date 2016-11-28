@@ -79,17 +79,17 @@ class QuickStartSpec extends FreeSpec with Matchers {
     def drain2[T]: Drain[T, Future[Unit]] = Drain.foreach(println)
     //#more-drains
 
-    //#piping
-    def piping: Piping[Future[Unit]] =
+    //#streamGraph
+    def streamGraph: StreamGraph[Future[Unit]] =
       Spout(1 to 100).to(Drain.foreach(println))
-    //#piping
+    //#streamGraph
 
     def `only compiled, not actually run`() = {
       //#run
       val result: Future[Unit] =
         Spout(1 to 100)
           .to(Drain.foreach(println))
-          .run()
+          .run().result
       //#run
 
       //#shortcuts

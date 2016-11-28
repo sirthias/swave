@@ -9,9 +9,7 @@ package swave.core.impl
 import scala.annotation.{switch, tailrec}
 import scala.concurrent.duration._
 import com.typesafe.scalalogging.Logger
-import swave.core.impl.stages.drain.SubDrainStage
 import swave.core.impl.stages.inout.AsyncBoundaryStage
-import swave.core.impl.stages.spout.SubSpoutStage
 import swave.core.impl.stages.StageImpl
 import swave.core._
 
@@ -19,24 +17,25 @@ import swave.core._
   * A `StreamRunner` instance represents the execution environment for exactly one async region.
   * All signals destined for stages within the runners region go through the `enqueueXXX` methods of the runner.
   */
-private[core] final class StreamRunner private (_throughput: Int,
-                                                _log: Logger,
-                                                _disp: Dispatcher,
-                                                scheduler: Scheduler)
-    extends StreamActor(_throughput, _log, _disp) {
+private[core] final class StreamRunner private (_disp: Dispatcher, ctx: RunContext.AsyncGlobal)
+    extends StreamActor(_disp, ctx.env.settings.throughput) {
   import StreamRunner._
 
   protected type MessageType = Message
+
+  protected def log: Logger = ctx.env.log
 
   private[this] var _activeStagesCount = 0
 
   startMessageProcessing()
 
   private[impl] def registerStageStart(stage: StageImpl): Unit =
-    _activeStagesCount += 1 // so far we only count the number of active stages
+    _activeStagesCount += 1
 
-  private[impl] def registerStageStop(stage: StageImpl): Unit =
-    _activeStagesCount -= 1 // so far we only count the number of active stages
+  private[impl] def registerStageStop(stage: StageImpl): Unit = {
+    _activeStagesCount -= 1
+    if (_activeStagesCount == 0) ctx.unregisterRunner(this)
+  }
 
   def enqueueRequest(target: StageImpl, n: Long)(implicit from: Outport): Unit =
     enqueue(new StreamRunner.Message.Request(target, n, from))
@@ -100,19 +99,16 @@ private[core] final class StreamRunner private (_throughput: Int,
     if (delay > Duration.Zero) {
       // we can run the event Runnable directly on the scheduler thread since
       // all it does is enqueueing the event on the runner's dispatcher
-      scheduler.scheduleOnce(delay, msg)(CallingThreadExecutionContext)
+      ctx.env.scheduler.scheduleOnce(delay, msg)(CallingThreadExecutionContext)
     } else {
       msg.run()
       Cancellable.Inactive
     }
 
-  override def toString = dispatcher.name + '@' + Integer.toHexString(System.identityHashCode(this))
+  override def toString: String = dispatcher.name + '@' + Integer.toHexString(System.identityHashCode(this))
 }
 
 private[core] object StreamRunner {
-
-  private def apply(dispatcher: Dispatcher)(implicit env: StreamEnv) =
-    new StreamRunner(env.settings.throughput, env.log, dispatcher, env.scheduler)
 
   final case class Timeout(timer: Cancellable)
 
@@ -129,7 +125,7 @@ private[core] object StreamRunner {
     final class XEvent(target: StageImpl, @volatile private[StreamRunner] var ev: AnyRef, runner: StreamRunner)
         extends Message(8, target)
         with Runnable {
-      def run() = runner.enqueue(this)
+      def run(): Unit = runner.enqueue(this)
     }
   }
 
@@ -140,33 +136,22 @@ private[core] object StreamRunner {
     *
     * Returns the list of new [[StreamRunner]] instances applied to the graph.
     */
-  def assignRunners(assignments: List[Assignment])(implicit env: StreamEnv): List[StreamRunner] = {
+  def assignRunners(assignments: List[Assignment], ctx: RunContext.AsyncGlobal): List[StreamRunner] = {
 
     def applyRunner(stage: StageImpl, runner: StreamRunner): Unit =
-      GraphFolder.fold(stage) {
-        new GraphFolder.FoldContext {
+      GraphTraverser.process(stage) {
+        new GraphTraverser.Context {
           override def apply(stage: Stage): Boolean =
             (stage.stageImpl.runner eq null) && {
               stage match {
                 case x: AsyncBoundaryStage => // async boundary stages belong to their upstream runner
                   x.runner = stage.inputStages.head.stageImpl.runner
                   false
-                case x: SubSpoutStage ⇒ verifySubStreamBoundary(x, x.in)
-                case x: SubDrainStage ⇒ verifySubStreamBoundary(x, x.out)
                 case _ =>
                   stage.stageImpl.runner = runner
                   true
               }
             }
-
-          def verifySubStreamBoundary(s: StageImpl, parent: StageImpl): Boolean =
-            if (parent.runner ne null) {
-              s.runner = runner
-              true
-            } else
-              throw new IllegalAsyncBoundaryException(
-                "A synchronous parent stream must not contain " +
-                  "an async sub-stream. You can fix this by explicitly marking the parent stream as `async`.")
         }
       }
 
@@ -183,7 +168,7 @@ private[core] object StreamRunner {
     def assignDispatcher(stage: StageImpl, dispatcher: Dispatcher): StreamRunner =
       stage.runner match {
         case null =>
-          val runner = StreamRunner(dispatcher)
+          val runner = new StreamRunner(dispatcher, ctx)
           applyRunner(stage, runner)
           runner
         case x if x.dispatcher eq dispatcher => null
@@ -200,7 +185,7 @@ private[core] object StreamRunner {
         case stage :: tail =>
           val newRunners =
             if (stage.runner eq null) {
-              val runner = StreamRunner(env.defaultDispatcher)
+              val runner = new StreamRunner(ctx.env.defaultDispatcher, ctx)
               applyRunner(stage, runner)
               runner :: runners
             } else runners
@@ -216,7 +201,7 @@ private[core] object StreamRunner {
         case Assignment.Default(stage) :: tail =>
           assignNonDefaults(tail, stage :: defaultAssignments, runners)
         case Assignment.DispatcherId(stage, dispatcherId) :: tail =>
-          val runner = assignDispatcher(stage, env.dispatchers(dispatcherId))
+          val runner = assignDispatcher(stage, ctx.env.dispatchers(dispatcherId))
           assignNonDefaults(tail, defaultAssignments, if (runner ne null) runner :: runners else runners)
         case Assignment.Runner(stage, runner) :: tail =>
           assignRunner(stage, runner)
@@ -238,7 +223,7 @@ private[core] object StreamRunner {
     }
     final case class DispatcherId(stage: StageImpl, dispatcherId: String) extends Assignment
     final case class Runner(stage: StageImpl, runner: StreamRunner) extends Assignment {
-      def dispatcherId = runner.dispatcher.name
+      def dispatcherId: String = runner.dispatcher.name
     }
   }
 }

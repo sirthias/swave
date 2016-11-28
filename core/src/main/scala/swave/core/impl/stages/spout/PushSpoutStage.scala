@@ -31,7 +31,7 @@ private[core] final class PushSpoutStage(initialBufferSize: Int, maxBufferSize: 
     intercept = false,
 
     subscribe = from ⇒ {
-      _outputStages = from.stage :: Nil
+      _outputStages = from.stageImpl :: Nil
       from.onSubscribe()
       ready(from, term)
     },

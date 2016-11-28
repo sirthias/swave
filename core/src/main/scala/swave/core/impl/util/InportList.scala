@@ -85,7 +85,7 @@ private[swave] object AbstractInportList {
 
     def toStageList: List[Stage] = {
       val tail = if (underlying.tail ne null) underlying.tail.toStageList else Nil
-      underlying.in.stage :: tail
+      underlying.in.stageImpl :: tail
     }
   }
 }
