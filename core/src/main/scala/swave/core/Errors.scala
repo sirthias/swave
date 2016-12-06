@@ -16,6 +16,8 @@ final class ConfigurationException(msg: String) extends RuntimeException(msg)
 
 final class IllegalAsyncBoundaryException(msg: String) extends RuntimeException(msg)
 
+final class IllegalStreamSetupException(msg: String) extends RuntimeException(msg)
+
 final class IllegalReuseException(msg: String, cause: Throwable = null) extends RuntimeException(msg, cause)
 
 final class UnclosedStreamGraphException(msg: String, cause: Throwable) extends RuntimeException(msg, cause)

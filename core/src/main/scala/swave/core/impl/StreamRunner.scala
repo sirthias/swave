@@ -17,7 +17,7 @@ import swave.core._
   * A `StreamRunner` instance represents the execution environment for exactly one async region.
   * All signals destined for stages within the runners region go through the `enqueueXXX` methods of the runner.
   */
-private[core] final class StreamRunner private (_disp: Dispatcher, ctx: RunContext.AsyncGlobal)
+private[core] final class StreamRunner private (_disp: Dispatcher, ctx: RunSupport.RunContext)
     extends StreamActor(_disp, ctx.env.settings.throughput) {
   import StreamRunner._
 
@@ -136,7 +136,7 @@ private[core] object StreamRunner {
     *
     * Returns the list of new [[StreamRunner]] instances applied to the graph.
     */
-  def assignRunners(assignments: List[Assignment], ctx: RunContext.AsyncGlobal): List[StreamRunner] = {
+  def assignRunners(assignments: List[Assignment], ctx: RunSupport.RunContext): List[StreamRunner] = {
 
     def applyRunner(stage: StageImpl, runner: StreamRunner): Unit =
       GraphTraverser.process(stage) {

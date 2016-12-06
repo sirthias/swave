@@ -14,7 +14,7 @@ import swave.core.macros.StageImplementation
 
 // format: OFF
 @StageImplementation
-private[core] final class FoldStage(zero: AnyRef, f: (AnyRef, AnyRef) ⇒ AnyRef) extends InOutStage {
+private[core] final class FoldStage(zero: AnyRef, f: (Any, Any) ⇒ AnyRef) extends InOutStage {
 
   def kind = Stage.Kind.InOut.Fold(zero, f)
 

@@ -48,6 +48,7 @@ private[testkit] final class TestSpoutStage(val id: Int,
     xSeal = c ⇒ {
       ctx.trace("Received XSEAL in 'ready'")
       configureFrom(c)
+      c.disableErrorOnSyncUnstopped()
       ctx.trace("⇢ XSEAL")
       out.xSeal(c)
       if (elems.hasNext) {

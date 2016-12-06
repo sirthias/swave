@@ -18,8 +18,8 @@ import swave.core.util.AnyRefExtractor.Extraction
 final class Coupling[T] private {
   private[this] val stage = new CouplingStage
 
-  val in: Drain[T, Unit] = Drain[T](stage)
-  val out: Spout[T]      = new Spout[T](stage)
+  val in: Drain[T, Unit] = Drain(stage)
+  val out: Spout[T]      = new Spout(stage)
 }
 
 object Coupling {

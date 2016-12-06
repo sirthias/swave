@@ -402,7 +402,7 @@ private[swave] class StageImplementationMacro(val c: scala.reflect.macros.whiteb
           case Some(sh) ⇒ q"setIntercepting($res == ${sh.id})"
           case None     ⇒ q"()"
         }
-        q"""final protected override def _xSeal($ctx: swave.core.impl.RunContext): State = {
+        q"""final protected override def _xSeal($ctx: swave.core.impl.RunSupport.SealingContext): State = {
               val $res = ${switch("xSeal", cases)}
               $extraLine
               $res

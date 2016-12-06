@@ -17,7 +17,7 @@ import swave.core.util._
 
 // format: OFF
 @StageImplementation
-private[core] final class ThrottleStage(cost: Int, per: FiniteDuration, burst: Int, costFn: AnyRef ⇒ Int)
+private[core] final class ThrottleStage(cost: Int, per: FiniteDuration, burst: Int, costFn: Any ⇒ Int)
   extends InOutStage {
 
   requireArg(cost > 0, "cost must be > 0")

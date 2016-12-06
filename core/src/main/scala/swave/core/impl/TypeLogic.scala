@@ -10,7 +10,7 @@ import scala.annotation.implicitNotFound
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 import shapeless._
-import shapeless.ops.hlist.{Comapped, ToCoproduct}
+import shapeless.ops.hlist.Comapped
 import swave.core.{Spout, StreamOps}
 
 object TypeLogic {
@@ -122,14 +122,13 @@ object TypeLogic {
     implicit def hlist[H, T <: HList, TO, O](implicit a: Aux[T, TO], u: Lub[H, TO, O]): Aux[H :: T, O] = null
   }
 
-  final class ViaResult[L <: HList, Out0, Out1[_], Out](val id: Int) extends AnyVal
+  final class ViaResult[L <: HList, Out0, Repr[_] <: StreamOps[_], Out](val id: Int) extends AnyVal
   object ViaResult extends LowPrioViaResult {
-    implicit def _0[Out0, Out1[_]]: ViaResult[HNil, Out0, Out1, Out0]            = new ViaResult(0)
-    implicit def _1[T, Out0, Out1[_]]: ViaResult[T :: HNil, Out0, Out1, Out1[T]] = new ViaResult(1)
+    implicit def _0[Out0, Repr[_] <: StreamOps[_]]: ViaResult[HNil, Out0, Repr, Out0]            = new ViaResult(0)
+    implicit def _1[T, Out0, Repr[_] <: StreamOps[_]]: ViaResult[T :: HNil, Out0, Repr, Repr[T]] = new ViaResult(1)
   }
   sealed abstract class LowPrioViaResult {
-    implicit def _n[L <: HList, Out0, Out1[_], C <: Coproduct, U](
-        implicit ev0: ToCoproduct.Aux[L, C],
-        ev1: HLub.Aux[L, U]): ViaResult[L, Out0, Out1, StreamOps.FanIn[L, C, U, Out1]] = new ViaResult(2)
+    implicit def _n[L <: HList, Out0, Repr[_] <: StreamOps[_], U](
+        implicit ev: HLub.Aux[L, U]): ViaResult[L, Out0, Repr, Repr[_]#FanIn[L, U]] = new ViaResult(2)
   }
 }

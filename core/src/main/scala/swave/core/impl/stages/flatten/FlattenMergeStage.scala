@@ -6,6 +6,7 @@
 
 package swave.core.impl.stages.flatten
 
+import scala.annotation.tailrec
 import swave.core.impl._
 import swave.core.impl.stages.InOutStage
 import swave.core.impl.stages.drain.SubDrainStage
@@ -14,12 +15,10 @@ import swave.core.macros._
 import swave.core.util._
 import swave.core.{Stage, Streamable}
 
-import scala.annotation.tailrec
-
 // format: OFF
 @StageImplementation(fullInterceptions = true)
-private[core] final class FlattenMergeStage(streamable: Streamable.Aux[AnyRef, AnyRef], parallelism: Int)
-  extends InOutStage {
+private[core] final class FlattenMergeStage(streamable: Streamable.Aux[Any, AnyRef], parallelism: Int)
+  extends InOutStage with RunSupport.RunContextAccess {
 
   requireArg(parallelism > 0, "`parallelism` must be > 0")
 
@@ -30,10 +29,11 @@ private[core] final class FlattenMergeStage(streamable: Streamable.Aux[AnyRef, A
 
   connectInOutAndSealWith { (ctx, in, out) ⇒
     ctx.registerForXStart(this)
-    running(ctx, in, out)
+    ctx.registerForRunContextAccess(this)
+    running(in, out)
   }
 
-  def running(ctx: RunContext, in: Inport, out: Outport) = {
+  def running(in: Inport, out: Outport) = {
 
     def awaitingXStart() = state(
       xStart = () => {
@@ -121,7 +121,7 @@ private[core] final class FlattenMergeStage(streamable: Streamable.Aux[AnyRef, A
     }
 
     def subscribeSubDrain(elem: AnyRef): SubDrainStage = {
-      val sub = new SubDrainStage(ctx, this)
+      val sub = new SubDrainStage(runContext, this)
       streamable(elem).inport.subscribe()(sub)
       sub
     }

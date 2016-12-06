@@ -46,6 +46,7 @@ trait Probes {
 
       connectOutAndSealWith { (ctx, out) ⇒
         ctx.registerForXStart(this)
+        ctx.disableErrorOnSyncUnstopped()
         awaitingXStart(out, immutable.Queue.empty)
       }
 
@@ -152,6 +153,7 @@ trait Probes {
 
       connectInAndSealWith { (ctx, in) ⇒
         ctx.registerForXStart(this)
+        ctx.disableErrorOnSyncUnstopped()
         awaitingXStart(in, immutable.Queue.empty)
       }
 

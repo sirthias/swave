@@ -9,7 +9,7 @@ package swave.core.impl.stages
 import scala.annotation.compileTimeOnly
 import swave.core.Stage
 import swave.core.impl.util.InportList
-import swave.core.impl.{Outport, RunContext}
+import swave.core.impl.{Outport, RunSupport}
 
 // format: OFF
 private[core] abstract class FanInStage(subs: InportList) extends StageImpl {
@@ -22,5 +22,5 @@ private[core] abstract class FanInStage(subs: InportList) extends StageImpl {
   final def outputStages: List[Stage] = _outputStages
 
   @compileTimeOnly("Unresolved `connectFanInAndSealWith` call")
-  protected final def connectFanInAndSealWith(f: (RunContext, Outport) ⇒ State): Unit = ()
+  protected final def connectFanInAndSealWith(f: (RunSupport.SealingContext, Outport) ⇒ State): Unit = ()
 }

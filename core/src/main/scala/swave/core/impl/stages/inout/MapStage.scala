@@ -14,7 +14,7 @@ import swave.core.macros.StageImplementation
 
 // format: OFF
 @StageImplementation
-private[core] final class MapStage(f: AnyRef ⇒ AnyRef) extends InOutStage {
+private[core] final class MapStage(f: Any ⇒ AnyRef) extends InOutStage {
 
   def kind = Stage.Kind.InOut.Map(f)
 

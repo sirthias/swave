@@ -101,18 +101,19 @@ class SyncVsAsyncSpec extends FreeSpec with Matchers {
       import swave.core._
 
       implicit val env = StreamEnv()
+      import env.defaultDispatcher // for the `termination.onComplete(...)` below
 
       val run: StreamRun[Future[Seq[String]]] =
         Spout.ints(0)
           .filter(_ % 5 == 0)
-          .async() // adds an explicit async boundary here
+          .asyncBoundary() // adds an explicit async boundary here
           .map(_.toString)
           .take(10)
           .to(Drain.seq(limit = 100)).run()
 
       run.result.await() shouldEqual (0 to 45 by 5).map(_.toString)
 
-      run.termination.onComplete(_ => env.shutdown())(env.defaultDispatcher)
+      run.termination.onComplete(_ => env.shutdown())
       //#async-boundary
     }
 
@@ -142,12 +143,12 @@ class SyncVsAsyncSpec extends FreeSpec with Matchers {
       val result2 = Promise[String]()
       val result: Future[String] =
         upperChars("Hello")
-          .async("foo")
+          .asyncBoundary("foo")
           .fanOutBroadcast()
-            .sub.drop(2).concat(upperChars("-Friend-").async()).end
-            .sub.take(2).async().multiply(2).end
+            .sub.drop(2).concat(upperChars("-Friend-").asyncBoundary()).end
+            .sub.take(2).asyncBoundary().multiply(2).end
           .fanInConcat()
-          .tee(Pipe[Char].async().deduplicate.to(drain(result2)))
+          .tee(Pipe[Char].asyncBoundary().deduplicate.to(drain(result2)))
           .map(_.toLower)
           .drainToMkString(limit = 100)
 

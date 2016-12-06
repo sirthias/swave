@@ -12,12 +12,12 @@ import scala.collection.generic.CanBuildFrom
 import scala.util.{Failure, Success, Try}
 import scala.concurrent.Future
 import scala.concurrent.duration.FiniteDuration
-import shapeless._
 import swave.core.impl.util.{InportList, RingBuffer}
 import swave.core.impl.{Inport, ModuleImpl, TypeLogic}
 import swave.core.impl.stages.StageImpl
 import swave.core.impl.stages.spout._
 import swave.core.util._
+import shapeless._
 
 /**
   * A `Spout` is a streaming component with no input port and a single output port.
@@ -26,12 +26,13 @@ import swave.core.util._
   *
   * @tparam A the type of the data elements produced
   */
-final class Spout[+A](private[swave] val inport: Inport) extends AnyVal with StreamOps[A @uV] {
+final class Spout[+A](private[swave] val inport: Inport) extends StreamOps[A @uV] {
+
   type Repr[T] = Spout[T]
 
-  protected def base: Inport           = inport
-  protected def wrap: Inport ⇒ Repr[_] = Spout.wrap
-  protected[core] def append[B](stage: StageImpl): Spout[B] = {
+  protected def base: Inport                     = inport
+  protected def wrap[T](inport: Inport): Repr[T] = new Spout(inport)
+  protected[core] def append[T](stage: StageImpl): Repr[T] = {
     inport.subscribe()(stage)
     new Spout(stage)
   }
@@ -42,31 +43,27 @@ final class Spout[+A](private[swave] val inport: Inport) extends AnyVal with Str
   def stage: Stage = inport.stageImpl
 
   /**
-    * Returns this [[Spout]] instance.
-    */
-  def identity: Spout[A] = this.asInstanceOf[Spout[A]]
-
-  /**
     * Attaches the given [[Drain]] to close this part of the stream graph.
     */
   def to[R](drain: Drain[A, R]): StreamGraph[R] =
-    new StreamGraph(inport.stageImpl, drain.consume(this))
+    new StreamGraph(drain.consume(this), inport.stageImpl)
 
   /**
     * Attaches the given [[Pipe]] and returns a transformed [[Spout]].
     */
-  def via[B](pipe: A =>> B): Spout[B] = pipe.transform(this)
+  def via[B](pipe: Pipe[A, B]): Repr[B] =
+    pipe.transform(this)
 
   /**
     * Attaches the given [[Module]] and returns the resulting structure.
     */
   def via[P <: HList, R, Out](joined: Module.TypeLogic.Joined[A :: HNil, P, R])(
-      implicit vr: TypeLogic.ViaResult[P, StreamGraph[R], Spout, Out]): Out = {
+      vr: TypeLogic.ViaResult[P, StreamGraph[R], Spout, Out]): Out = {
     val out = ModuleImpl(joined.module)(InportList(inport))
     val result = vr.id match {
-      case 0 ⇒ new StreamGraph(inport.stageImpl, out)
+      case 0 ⇒ new StreamGraph(out, inport.stageImpl)
       case 1 ⇒ new Spout(out.asInstanceOf[InportList].in)
-      case 2 ⇒ new StreamOps.FanIn(out.asInstanceOf[InportList], wrap)
+      case 2 ⇒ new FanIn(out.asInstanceOf[InportList])
     }
     result.asInstanceOf[Out]
   }
@@ -148,7 +145,7 @@ final class Spout[+A](private[swave] val inport: Inport) extends AnyVal with Str
   /**
     * Explicitly attaches the given name to this [[Spout]].
     */
-  def named(name: String): Spout[A] = {
+  def named(name: String): this.type = {
     Module.ID(name).addBoundary(Module.Boundary.InnerExit(inport.stageImpl))
     this
   }
@@ -180,7 +177,7 @@ object Spout {
     */
   def withSubscriber[T]: (Spout[T], Subscriber[T]) = {
     val stage = new SubscriberSpoutStage
-    new Spout[T](stage) → stage.subscriber.asInstanceOf[Subscriber[T]]
+    new Spout(stage) → stage.subscriber.asInstanceOf[Subscriber[T]]
   }
 
   /**
@@ -378,6 +375,4 @@ object Spout {
   // CAUTION: [[RingBuffer]] is not thread-safe, so don't try to apply concurrent updates if the stream is async!
   private[swave] def fromRingBuffer[T](buffer: RingBuffer[T]): Spout[T] =
     new Spout(new RingBufferSpoutStage(buffer.asInstanceOf[RingBuffer[AnyRef]]))
-
-  private val wrap: Inport ⇒ Spout[_] = new Spout(_)
 }

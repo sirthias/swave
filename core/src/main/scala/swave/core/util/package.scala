@@ -25,12 +25,14 @@ package object util {
 
   val oneIntFunc: Any ⇒ Int = _ ⇒ 1
 
-  val UTF8  = Charset.forName("UTF-8")
-  val ASCII = Charset.forName("US-ASCII")
+  val UTF8: Charset  = Charset.forName("UTF-8")
+  val ASCII: Charset = Charset.forName("US-ASCII")
 
   def isPowerOf2(i: Int): Boolean = Integer.lowestOneBit(i) == i
 
   def roundUpToPowerOf2(i: Int): Int = 1 << (32 - Integer.numberOfLeadingZeros(i - 1))
+
+  def Runnable(body: ⇒ Unit): Runnable = new Runnable { def run(): Unit = body }
 
   implicit def richByteArray(array: Array[Byte]): RichByteArray                    = new RichByteArray(array)
   implicit def richConfig[T](config: Config): RichConfig                           = new RichConfig(config)

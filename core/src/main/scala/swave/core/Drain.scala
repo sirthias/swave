@@ -12,7 +12,6 @@ import scala.concurrent.{ExecutionContext, Future, Promise}
 import org.reactivestreams.{Publisher, Subscriber}
 import swave.core.impl.TypeLogic.ToFuture
 import swave.core.impl.Outport
-import swave.core.impl.stages.DrainStage
 import swave.core.impl.stages.drain._
 
 /**
@@ -78,14 +77,8 @@ final class Drain[-T, +R] private[swave] (private[swave] val outport: Outport, v
     * NOTE: The (internal) graph behind this drain's stage must not contain any explicit async boundaries.
     * Otherwise an [[IllegalStateException]] will be thrown.
     */
-  def async(dispatcherId: String = ""): Drain[T, R] = {
-    outport match {
-      case x: DrainStage ⇒ x.assignDispatcherId(dispatcherId)
-      case x: Stage      ⇒ DrainStage.assignToAllPrimaryDrains(x, dispatcherId)
-      case _             ⇒ throw new IllegalStateException
-    }
-    this
-  }
+  def async(dispatcherId: String = ""): Drain[T, R] =
+    Pipe[T].async(dispatcherId).to(this)
 
   private[core] def consume(spout: Spout[T]): R = {
     spout.inport.subscribe()(outport)
@@ -98,7 +91,7 @@ object Drain {
   /**
     * A [[Drain]] which signals no demand but immediately cancels its upstream and produces no result.
     */
-  def cancelling: Drain[Any, Unit] =
+  def cancelling[T]: Drain[T, Unit] =
     Drain(new CancellingDrainStage)
 
   /**
@@ -191,10 +184,9 @@ object Drain {
     * as well. If it doesn't the stream will fail with an [[IllegalAsyncBoundaryException]].
     */
   def lazyStart[T, R](onStart: () ⇒ Drain[T, R])(implicit tf: ToFuture[R]): Drain[T, Future[tf.Out]] = {
-    val promise    = Promise[tf.Out]()
-    val rawOnStart = onStart.asInstanceOf[() ⇒ Drain[AnyRef, AnyRef]]
-    val stage = new LazyStartDrainStage(rawOnStart, { x ⇒
-      promise.completeWith(tf(x.asInstanceOf[R])); ()
+    val promise = Promise[tf.Out]()
+    val stage = new LazyStartDrainStage[R](onStart, { x ⇒
+      promise.completeWith(tf(x)); ()
     })
     new Drain(stage, promise.future)
   }

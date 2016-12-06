@@ -12,7 +12,7 @@ import swave.core.{Module, Stage}
 private[swave] sealed trait Port {
   def stageImpl: StageImpl
 
-  def xSeal(ctx: RunContext): Unit
+  def xSeal(ctx: RunSupport.SealingContext): Unit
 }
 
 private[swave] sealed trait Inport extends Port {

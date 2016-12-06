@@ -8,13 +8,13 @@ package swave.core.impl.stages.drain
 
 import scala.util.control.NonFatal
 import swave.core.impl.stages.{DrainStage, StageImpl}
-import swave.core.impl.{Inport, RunContext, StreamRunner}
+import swave.core.impl.{Inport, RunSupport, StreamRunner}
 import swave.core.macros.StageImplementation
 import swave.core.{Cancellable, Stage, SubscriptionTimeoutException}
 
 // format: OFF
 @StageImplementation(fullInterceptions = true)
-private[core] final class SubDrainStage(parentCtx: RunContext, val out: StageImpl) extends DrainStage {
+private[core] final class SubDrainStage(runContext: RunSupport.RunContext, val out: StageImpl) extends DrainStage {
   import SubDrainStage._
 
   def kind = Stage.Kind.Drain.Sub(out)
@@ -22,7 +22,7 @@ private[core] final class SubDrainStage(parentCtx: RunContext, val out: StageImp
   initialState(awaitingOnSubscribe(false, null))
 
   def sealAndStart() =
-    try parentCtx.sealAndStartSubStream(this)
+    try RunSupport.sealAndStartSubStream(this, runContext)
     catch {
       case NonFatal(e) => out.onError(e)
     }
@@ -39,10 +39,10 @@ private[core] final class SubDrainStage(parentCtx: RunContext, val out: StageImp
 
     xEvent = {
       case EnableSubscriptionTimeout if timer eq null =>
-        val t = parentCtx.scheduleSubscriptionTimeout(this)
+        val t = runContext.scheduleSubscriptionTimeout(this)
         awaitingOnSubscribe(cancelled, t)
-      case RunContext.SubscriptionTimeout =>
-        val msg = s"Subscription attempt from SubDrainStage timed out after ${parentCtx.env.settings.subscriptionTimeout}"
+      case RunSupport.SubscriptionTimeout =>
+        val msg = s"Subscription attempt from SubDrainStage timed out after ${runContext.env.settings.subscriptionTimeout}"
         stopError(new SubscriptionTimeoutException(msg), out)
     })
 
@@ -51,7 +51,7 @@ private[core] final class SubDrainStage(parentCtx: RunContext, val out: StageImp
 
     xSeal = ctx ⇒ {
       configureFrom(ctx)
-      ctx.linkToParentContext(parentCtx)
+      ctx.assignRunContext(runContext)
       if (out.hasRunner) ctx.registerRunnerAssignment(StreamRunner.Assignment.Runner(this, out.runner))
       in.xSeal(ctx)
       if (cancelled) {
@@ -63,7 +63,7 @@ private[core] final class SubDrainStage(parentCtx: RunContext, val out: StageImp
     xEvent = {
       case DoOnSubscribe => { out.onSubscribe(); stay() }
       case EnableSubscriptionTimeout => stay() // ignore
-      case RunContext.SubscriptionTimeout => stay() // ignore
+      case RunSupport.SubscriptionTimeout => stay() // ignore
     })
 
   def awaitingXStart(in: Inport) = state(
@@ -71,7 +71,7 @@ private[core] final class SubDrainStage(parentCtx: RunContext, val out: StageImp
 
     xEvent = {
       case EnableSubscriptionTimeout => stay() // ignore
-      case RunContext.SubscriptionTimeout => stay() // ignore
+      case RunSupport.SubscriptionTimeout => stay() // ignore
     })
 
   def running(in: Inport) = state(
@@ -85,7 +85,7 @@ private[core] final class SubDrainStage(parentCtx: RunContext, val out: StageImp
 
     xEvent = {
       case EnableSubscriptionTimeout => stay() // ignore
-      case RunContext.SubscriptionTimeout => stay() // ignore
+      case RunSupport.SubscriptionTimeout => stay() // ignore
     })
 }
 

@@ -19,7 +19,6 @@ private[core] final class HeadDrainStage(headPromise: Promise[AnyRef]) extends D
   def kind = Stage.Kind.Drain.Head
 
   connectInAndSealWith { (ctx, in) ⇒
-    registerForRunnerAssignmentIfRequired(ctx)
     ctx.registerForXStart(this)
     awaitingXStart(in)
   }

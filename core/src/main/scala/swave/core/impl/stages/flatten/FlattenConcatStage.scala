@@ -16,8 +16,8 @@ import swave.core.{Stage, Streamable}
 
 // format: OFF
 @StageImplementation(fullInterceptions = true)
-private[core] final class FlattenConcatStage(streamable: Streamable.Aux[AnyRef, AnyRef], parallelism: Int)
-  extends InOutStage {
+private[core] final class FlattenConcatStage(streamable: Streamable.Aux[Any, AnyRef], parallelism: Int)
+  extends InOutStage with RunSupport.RunContextAccess {
 
   requireArg(parallelism > 0, "`parallelism` must be > 0")
 
@@ -25,10 +25,11 @@ private[core] final class FlattenConcatStage(streamable: Streamable.Aux[AnyRef, 
 
   connectInOutAndSealWith { (ctx, in, out) ⇒
     ctx.registerForXStart(this)
-    running(ctx, in, out)
+    ctx.registerForRunContextAccess(this)
+    running(in, out)
   }
 
-  def running(ctx: RunContext, in: Inport, out: Outport) = {
+  def running(in: Inport, out: Outport) = {
 
     def awaitingXStart() = state(
       xStart = () => {
@@ -94,7 +95,7 @@ private[core] final class FlattenConcatStage(streamable: Streamable.Aux[AnyRef, 
     }
 
     def subscribeSubDrain(elem: AnyRef): SubDrainStage = {
-      val sub = new SubDrainStage(ctx, this)
+      val sub = new SubDrainStage(runContext, this)
       streamable(elem).inport.subscribe()(sub)
       sub
     }

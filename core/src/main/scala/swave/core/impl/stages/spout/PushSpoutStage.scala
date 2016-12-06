@@ -47,6 +47,7 @@ private[core] final class PushSpoutStage(initialBufferSize: Int, maxBufferSize: 
 
     xSeal = c ⇒ {
       configureFrom(c)
+      c.disableErrorOnSyncUnstopped() // since we can be syncly driven from a single thread
       out.xSeal(c)
       if (term != StreamTermination.None) {
         c.registerForXStart(this)

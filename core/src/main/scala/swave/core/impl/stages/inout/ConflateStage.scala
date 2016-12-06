@@ -15,8 +15,7 @@ import swave.core.util._
 
 // format: OFF
 @StageImplementation
-private[core] final class ConflateStage(lift: AnyRef => AnyRef, aggregate: (AnyRef, AnyRef) => AnyRef)
-  extends InOutStage {
+private[core] final class ConflateStage(lift: Any => AnyRef, aggregate: (Any, Any) => AnyRef) extends InOutStage {
 
   def kind = Stage.Kind.InOut.Conflate(lift, aggregate)
 

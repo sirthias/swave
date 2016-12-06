@@ -16,7 +16,7 @@ import swave.core.util._
 
 // format: OFF
 @StageImplementation
-private[core] final class ExpandStage(zero: Iterator[AnyRef], extrapolate: AnyRef => Iterator[AnyRef])
+private[core] final class ExpandStage(zero: Iterator[AnyRef], extrapolate: Any => Iterator[AnyRef])
   extends InOutStage {
 
   def kind = Stage.Kind.InOut.Expand(zero, extrapolate)

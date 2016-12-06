@@ -6,11 +6,10 @@
 
 package swave.core.impl.stages.inout
 
-import swave.core.impl.stages.InOutStage
-
 import scala.util.control.NonFatal
 import swave.core.impl.stages.drain.SubDrainStage
-import swave.core.impl.{Inport, Outport, RunContext}
+import swave.core.impl.stages.InOutStage
+import swave.core.impl.{Inport, Outport, RunSupport}
 import swave.core.{Spout, Stage}
 import swave.core.macros._
 import swave.core.util._
@@ -18,7 +17,7 @@ import swave.core.util._
 // format: OFF
 @StageImplementation(fullInterceptions = true)
 private[core] final class RecoverWithStage(maxRecoveries: Long, pf: PartialFunction[Throwable, Spout[AnyRef]])
-  extends InOutStage {
+  extends InOutStage with RunSupport.RunContextAccess {
 
   import RecoverWithStage._
 
@@ -27,13 +26,14 @@ private[core] final class RecoverWithStage(maxRecoveries: Long, pf: PartialFunct
   def kind = Stage.Kind.InOut.RecoverWith(maxRecoveries, pf)
 
   connectInOutAndSealWith { (ctx, in, out) ⇒
-    active(ctx, in, out, 0L, maxRecoveries)
+    ctx.registerForRunContextAccess(this)
+    active(in, out, 0L, maxRecoveries)
   }
 
-  def active(ctx: RunContext, in: Inport, out: Outport, remaining: Long, recoveriesLeft: Long): State = state(
+  def active(in: Inport, out: Outport, remaining: Long, recoveriesLeft: Long): State = state(
     request = (n, _) => {
       in.request(n.toLong)
-      active(ctx, in, out, remaining ⊹ n, recoveriesLeft)
+      active(in, out, remaining ⊹ n, recoveriesLeft)
     },
 
     cancel = stopCancelF(in),
@@ -41,7 +41,7 @@ private[core] final class RecoverWithStage(maxRecoveries: Long, pf: PartialFunct
     onNext = (elem, from) => {
       requireState(from eq in)
       out.onNext(elem)
-      active(ctx, in, out, remaining - 1, recoveriesLeft)
+      active(in, out, remaining - 1, recoveriesLeft)
     },
 
     onComplete = from => {
@@ -58,24 +58,23 @@ private[core] final class RecoverWithStage(maxRecoveries: Long, pf: PartialFunct
           catch { case NonFatal(e) => { funError = e; null } }
         if (funError eq null) {
           if (spout ne null) {
-            val sub = new SubDrainStage(ctx, this)
-            spout.asInstanceOf[Spout[AnyRef]].inport.subscribe()(sub)
-            awaitingSubOnSubscribe(ctx, sub, out, remaining, recoveriesLeft - 1)
+            val sub = new SubDrainStage(runContext, this)
+            spout.asInstanceOf[Spout[_]].inport.subscribe()(sub)
+            awaitingSubOnSubscribe(sub, out, remaining, recoveriesLeft - 1)
           } else stopError(e, out)
         } else stopError(funError, out)
       } else stopError(e, out)
     })
 
-  def awaitingSubOnSubscribe(ctx: RunContext, sub: SubDrainStage, out: Outport, remaining: Long,
-                             recoveriesLeft: Long): State = state(
+  def awaitingSubOnSubscribe(sub: SubDrainStage, out: Outport, remaining: Long, recoveriesLeft: Long): State = state(
     onSubscribe = from ⇒ {
       requireState(from eq sub)
       sub.sealAndStart()
       if (remaining > 0) sub.request(remaining)
-      active(ctx, sub, out, remaining, recoveriesLeft)
+      active(sub, out, remaining, recoveriesLeft)
     },
 
-    request = (n, _) => awaitingSubOnSubscribe(ctx, sub, out, remaining ⊹ n, recoveriesLeft),
+    request = (n, _) => awaitingSubOnSubscribe(sub, out, remaining ⊹ n, recoveriesLeft),
     cancel = stopCancelF(sub))
 }
 

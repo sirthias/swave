@@ -136,7 +136,7 @@ private[core] final class ModuleImpl[I <: Module.Input, O <: Module.Output] priv
     connect(`it+ib`, ob2 append ot2)
 
     val entryElem = if (`it+ib`.nonEmpty) `it+ib`.in else `ot+ob`.in
-    new StreamGraph(entryElem.stageImpl, ())
+    new StreamGraph((), entryElem.stageImpl)
   }
 
   /**

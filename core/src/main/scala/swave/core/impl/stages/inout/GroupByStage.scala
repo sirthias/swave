@@ -11,7 +11,7 @@ import java.util.function.BiConsumer
 import scala.util.control.NonFatal
 import swave.core.impl.stages.{InOutStage, StageImpl}
 import swave.core.impl.stages.spout.SubSpoutStage
-import swave.core.impl.{Inport, Outport, RunContext}
+import swave.core.impl.{Inport, Outport, RunSupport}
 import swave.core.{Spout, Stage}
 import swave.core.macros._
 import swave.core.util._
@@ -20,7 +20,8 @@ import GroupByStage.Sub
 // format: OFF
 @StageImplementation(fullInterceptions = true)
 private[core] final class GroupByStage(maxSubstreams: Int, reopenCancelledSubs: Boolean, eagerComplete: Boolean,
-                                       keyFun: AnyRef ⇒ AnyRef) extends InOutStage { stage =>
+                                       keyFun: Any ⇒ AnyRef)
+  extends InOutStage with RunSupport.RunContextAccess { stage =>
 
   require(maxSubstreams > 0, "`maxSubStreams` must be > 0")
 
@@ -30,10 +31,11 @@ private[core] final class GroupByStage(maxSubstreams: Int, reopenCancelledSubs: 
 
   connectInOutAndSealWith { (ctx, in, out) ⇒
     ctx.registerForXStart(this)
-    running(ctx, in, out)
+    ctx.registerForRunContextAccess(this)
+    running(in, out)
   }
 
-  def running(ctx: RunContext, in: Inport, out: Outport) = {
+  def running(in: Inport, out: Outport) = {
 
     def awaitingXStart() = state(
       xStart = () => {
@@ -373,7 +375,7 @@ private[core] final class GroupByStage(maxSubstreams: Int, reopenCancelledSubs: 
       * @param currentElem the buffered element to be delivered to `awaitingFrom` sub
       */
     def awaitingSubDemandAllOthersGone(awaitingFrom: Sub, currentElem: AnyRef): State = state(
-      request = (n, from) => {
+      request = (_, from) => {
         from match {
           case sub: Sub if sub.isCancelled => stay()
           case sub: Sub if sub eq awaitingFrom =>
@@ -405,7 +407,7 @@ private[core] final class GroupByStage(maxSubstreams: Int, reopenCancelledSubs: 
     }
 
     def createAndRegisterNewSub(key: AnyRef): Sub = {
-      val sub = new Sub(key, ctx, this)
+      val sub = new Sub(key, runContext, this)
       subMap.put(key, sub)
       sub
     }
@@ -467,7 +469,8 @@ private[core] final class GroupByStage(maxSubstreams: Int, reopenCancelledSubs: 
 
 private object GroupByStage {
 
-  private final class Sub(var key: AnyRef, _ctx: RunContext, _in: StageImpl) extends SubSpoutStage(_ctx, _in) {
+  private final class Sub(var key: AnyRef, _ctx: RunSupport.RunContext, _in: StageImpl)
+    extends SubSpoutStage(_ctx, _in) {
 
     var remaining = 0L // the number of elements already requested by this sub but not yet delivered to it
 

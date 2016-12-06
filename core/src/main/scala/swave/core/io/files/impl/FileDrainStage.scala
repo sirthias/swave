@@ -32,7 +32,6 @@ private[core] final class FileDrainStage[T](path: Path, options: Set[StandardOpe
   require(options contains StandardOpenOption.WRITE, "`options` must contain `StandardOpenOption.WRITE`")
 
   connectInAndSealWith { (ctx, in) ⇒
-    registerForRunnerAssignmentIfRequired(ctx)
     ctx.registerForXStart(this)
     val cSize = if (_chunkSize > 0) _chunkSize else ctx.env.settings.fileIOSettings.defaultFileWritingChunkSize
     running(in, cSize)

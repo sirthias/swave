@@ -9,23 +9,25 @@ package swave.core.impl.stages.inject
 import scala.util.control.NonFatal
 import swave.core.impl.stages.InOutStage
 import swave.core.impl.stages.spout.SubSpoutStage
-import swave.core.impl.{Inport, Outport, RunContext}
+import swave.core.impl.{Inport, Outport, RunSupport}
 import swave.core.macros._
 import swave.core.util._
 import swave.core.{Split, Spout, Stage}
 
 // format: OFF
 @StageImplementation(fullInterceptions = true)
-private[core] final class SplitStage(commandFor: AnyRef ⇒ Split.Command, eagerCancel: Boolean) extends InOutStage {
+private[core] final class SplitStage(commandFor: Any ⇒ Split.Command, eagerCancel: Boolean)
+  extends InOutStage with RunSupport.RunContextAccess {
 
   def kind = Stage.Kind.InOut.Split(commandFor, eagerCancel)
 
   connectInOutAndSealWith { (ctx, in, out) ⇒
     ctx.registerForXStart(this)
-    running(ctx, in, out)
+    ctx.registerForRunContextAccess(this)
+    running(in, out)
   }
 
-  def running(ctx: RunContext, in: Inport, out: Outport) = {
+  def running(in: Inport, out: Outport) = {
 
     def awaitingXStart() = state(
       xStart = () => {
@@ -56,7 +58,7 @@ private[core] final class SplitStage(commandFor: AnyRef ⇒ Split.Command, eager
       * @param elem the buffered element
       */
     def noSubAwaitingMainDemandUpstreamGone(elem: AnyRef): State = state(
-      request = (n, from) ⇒ {
+      request = (_, from) ⇒ {
         if (from eq out) {
           val s = emitNewSub()
           s.xEvent(SubSpoutStage.EnableSubscriptionTimeout)
@@ -151,7 +153,7 @@ private[core] final class SplitStage(commandFor: AnyRef ⇒ Split.Command, eager
       * @param elem  the buffered element waiting to be emitted to `sub`
       */
     def awaitingSubDemandUpstreamGone(sub: SubSpoutStage, elem: AnyRef): State = state(
-      request = (n, from) ⇒ {
+      request = (_, from) ⇒ {
         if (from eq sub) {
           sub.onNext(elem)
           sub.onComplete()
@@ -200,7 +202,7 @@ private[core] final class SplitStage(commandFor: AnyRef ⇒ Split.Command, eager
       * @param elem  the buffered element waiting to be emitted to `sub`
       */
     def awaitingSubDemandUpAndDownstreamGone(sub: SubSpoutStage, elem: AnyRef): State = state(
-      request = (n, from) ⇒ {
+      request = (_, from) ⇒ {
         if (from eq sub) {
           sub.onNext(elem)
           stopComplete(sub)
@@ -319,7 +321,7 @@ private[core] final class SplitStage(commandFor: AnyRef ⇒ Split.Command, eager
     ///////////////////////// helpers //////////////////////////
 
     def emitNewSub() = {
-      val s = new SubSpoutStage(ctx, this)
+      val s = new SubSpoutStage(runContext, this)
       out.onNext(new Spout(s).asInstanceOf[AnyRef])
       s
     }

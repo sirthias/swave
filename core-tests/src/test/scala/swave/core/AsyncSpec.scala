@@ -54,7 +54,7 @@ class AsyncSpec extends SwaveSpec {
 
     "default async boundary with implicit default tail" taggedAs NotOnTravis in {
       val streamGraph =
-        Spout.continually(threadName).async().map(_ → threadName).to(Drain.head).seal().get
+        Spout.continually(threadName).asyncBoundary().map(_ → threadName).to(Drain.head).seal().get
       val (threadName0, threadName1) = streamGraph.run().result.await(20.millis)
 
       List(threadName0, threadName1).distinct shouldEqual List("swave-default-1")
@@ -62,7 +62,7 @@ class AsyncSpec extends SwaveSpec {
 
     "default async boundary with explicit default tail" taggedAs NotOnTravis in {
       val streamGraph =
-        Spout.continually(threadName).async().map(_ → threadName).to(Drain.head.async()).seal().get
+        Spout.continually(threadName).asyncBoundary().map(_ → threadName).to(Drain.head.async()).seal().get
       val (threadName0, threadName1) = streamGraph.run().result.await(20.millis)
 
       List(threadName0, threadName1).distinct shouldEqual List("swave-default-1")
@@ -70,7 +70,7 @@ class AsyncSpec extends SwaveSpec {
 
     "non-default async boundary with implicit default tail" taggedAs NotOnTravis in {
       val streamGraph =
-        Spout.continually(threadName).async("disp0").map(_ → threadName).to(Drain.head).seal().get
+        Spout.continually(threadName).asyncBoundary("disp0").map(_ → threadName).to(Drain.head).seal().get
       val (threadName0, threadName1) = streamGraph.run().result.await(20.millis)
 
       threadName0 shouldEqual "swave-disp0-1"
@@ -79,7 +79,7 @@ class AsyncSpec extends SwaveSpec {
 
     "non-default async boundary with non-default tail" taggedAs NotOnTravis in {
       val streamGraph =
-        Spout.continually(threadName).async("disp0").map(_ → threadName).to(Drain.head.async("disp1")).seal().get
+        Spout.continually(threadName).asyncBoundary("disp0").map(_ → threadName).to(Drain.head.async("disp1")).seal().get
       val (threadName0, threadName1) = streamGraph.run().result.await(20.millis)
 
       threadName0 shouldEqual "swave-disp0-1"
@@ -90,9 +90,9 @@ class AsyncSpec extends SwaveSpec {
       val streamGraph =
         Spout
           .continually(threadName)
-          .async("disp0")
+          .asyncBoundary("disp0")
           .map(_ → threadName)
-          .async("disp1")
+          .asyncBoundary("disp1")
           .map(_ → threadName)
           .to(Drain.head.async("disp2"))
           .seal()
@@ -108,12 +108,8 @@ class AsyncSpec extends SwaveSpec {
       Spout
         .continually(threadName)
         .fanOutBroadcast()
-        .sub
-        .async("disp0")
-        .end
-        .sub
-        .async("disp1")
-        .end
+          .sub.asyncBoundary("disp0").end
+          .sub.asyncBoundary("disp1").end
         .fanInMerge()
         .to(Drain.head)
         .seal()
@@ -128,16 +124,14 @@ class AsyncSpec extends SwaveSpec {
       Spout
         .continually(threadName)
         .fanOutBroadcast()
-        .sub
-        .to(Drain.cancelling.async("disp0"))
-        .subContinue
-        .to(Drain.head.async("disp1"))
+          .sub.to(Drain.cancelling.async("disp0"))
+          .subContinue.to(Drain.head.async("disp1"))
         .seal()
         .failed
         .get
         .getMessage
         .shouldEqual(
-          "Conflicting dispatcher assignment to async region containing stage 'HeadDrainStage': [disp1] vs. [disp0]")
+          "Conflicting dispatcher assignment to async region containing stage 'AsyncDispatcherStage': [disp1] vs. [disp0]")
     }
 
     "sync sub-stream in sync parent stream" in {
@@ -151,7 +145,7 @@ class AsyncSpec extends SwaveSpec {
         .await(50.millis) shouldEqual List(1, 3, 5, 7, 9)
     }
 
-    "-sync sub-stream in async parent stream" taggedAs NotOnTravis in {
+    "sync sub-stream in async parent stream" taggedAs NotOnTravis in {
       Spout
         .ints(0)
         .injectSequential
@@ -166,7 +160,7 @@ class AsyncSpec extends SwaveSpec {
       Spout
         .ints(0)
         .injectSequential
-        .map(_.async(bufferSize = 0).elementAt(1))
+        .map(_.asyncBoundary(bufferSize = 0).elementAt(1))
         .flattenConcat()
         .take(5)
         .drainTo(Drain.seq(limit = 5).async())
@@ -192,7 +186,7 @@ class AsyncSpec extends SwaveSpec {
       Spout
         .ints(0)
         .injectSequential
-        .map(_.async("disp0").elementAt(1))
+        .map(_.asyncBoundary("disp0").elementAt(1))
         .flattenConcat()
         .take(5)
         .drainTo(Drain.seq(limit = 5).async())
@@ -207,7 +201,7 @@ class AsyncSpec extends SwaveSpec {
     "complex example" taggedAs NotOnTravis in {
       Spout
         .continually(threadName)
-        .async()
+        .asyncBoundary()
         .injectSequential
         .map(_.take(1).map(_ :: threadName :: Nil))
         .flattenConcat()

@@ -21,7 +21,6 @@ private[core] final class ForeachDrainStage(callback: AnyRef ⇒ Unit, terminati
   def kind = Stage.Kind.Drain.Foreach(callback, terminationPromise)
 
   connectInAndSealWith { (ctx, in) ⇒
-    registerForRunnerAssignmentIfRequired(ctx)
     ctx.registerForXStart(this)
     awaitingXStart(in)
   }

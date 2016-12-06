@@ -10,7 +10,7 @@ import scala.annotation.tailrec
 import swave.core.impl.stages.InOutStage
 import swave.core.impl.stages.spout.SubSpoutStage
 import swave.core.impl.util.RingBuffer
-import swave.core.impl.{Inport, Outport, RunContext}
+import swave.core.impl.{Inport, Outport, RunSupport}
 import swave.core.macros._
 import swave.core.util._
 import swave.core.{Spout, Stage}
@@ -19,7 +19,7 @@ import swave.core.{Spout, Stage}
 
 // format: OFF
 @StageImplementation(fullInterceptions = true)
-private[core] final class InjectSequentialStage extends InOutStage { stage =>
+private[core] final class InjectSequentialStage extends InOutStage with RunSupport.RunContextAccess { stage =>
 
   def kind = Stage.Kind.InOut.Inject
 
@@ -27,14 +27,15 @@ private[core] final class InjectSequentialStage extends InOutStage { stage =>
 
   connectInOutAndSealWith { (ctx, in, out) ⇒
     ctx.registerForXStart(this)
-    running(ctx, in, out)
+    ctx.registerForRunContextAccess(this)
+    running(in, out)
   }
 
-  def running(ctx: RunContext, in: Inport, out: Outport) = {
+  def running(in: Inport, out: Outport) = {
 
     def awaitingXStart() = state(
       xStart = () => {
-        buffer = new RingBuffer[AnyRef](roundUpToPowerOf2(ctx.env.settings.maxBatchSize))
+        buffer = new RingBuffer[AnyRef](roundUpToPowerOf2(runContext.env.settings.maxBatchSize))
         in.request(buffer.capacity.toLong)
         noSubAwaitingElem(buffer.capacity, mainRemaining = 0)
       })
@@ -288,7 +289,7 @@ private[core] final class InjectSequentialStage extends InOutStage { stage =>
     ///////////////////////// helpers //////////////////////////
 
     def emitNewSub() = {
-      val s = new SubSpoutStage(ctx, this)
+      val s = new SubSpoutStage(runContext, this)
       out.onNext(new Spout(s).asInstanceOf[AnyRef])
       s
     }

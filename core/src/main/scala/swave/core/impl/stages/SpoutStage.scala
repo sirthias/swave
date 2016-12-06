@@ -8,7 +8,7 @@ package swave.core.impl.stages
 
 import scala.annotation.compileTimeOnly
 import swave.core.Stage
-import swave.core.impl.{Outport, RunContext}
+import swave.core.impl.{Outport, RunSupport}
 
 // format: OFF
 private[swave] abstract class SpoutStage extends StageImpl {
@@ -21,5 +21,5 @@ private[swave] abstract class SpoutStage extends StageImpl {
   override def outputStages: List[Stage] = _outputStages
 
   @compileTimeOnly("Unresolved `connectOutAndSealWith` call")
-  protected final def connectOutAndSealWith(f: (RunContext, Outport) ⇒ State): Unit = ()
+  protected final def connectOutAndSealWith(f: (RunSupport.SealingContext, Outport) ⇒ State): Unit = ()
 }

@@ -7,14 +7,14 @@
 package swave.core.impl.stages.spout
 
 import swave.core.{Cancellable, Stage}
-import swave.core.impl.{Outport, RunContext, StreamRunner}
+import swave.core.impl.{Outport, RunSupport, StreamRunner}
 import swave.core.impl.stages.{SpoutStage, StageImpl, StreamTermination}
 import swave.core.macros.StageImplementation
 import SubSpoutStage._
 
 // format: OFF
 @StageImplementation
-private[core] class SubSpoutStage(parentCtx: RunContext, val in: StageImpl) extends SpoutStage {
+private[core] class SubSpoutStage(runContext: RunSupport.RunContext, val in: StageImpl) extends SpoutStage {
 
   def kind = Stage.Kind.Spout.Sub(in)
 
@@ -33,16 +33,16 @@ private[core] class SubSpoutStage(parentCtx: RunContext, val in: StageImpl) exte
 
     xEvent = {
       case EnableSubscriptionTimeout if timer eq null =>
-        val t = parentCtx.scheduleSubscriptionTimeout(this)
+        val t = runContext.scheduleSubscriptionTimeout(this)
         awaitingSubscribe(term, t)
-      case RunContext.SubscriptionTimeout =>
+      case RunSupport.SubscriptionTimeout =>
         stopCancel(in)
     })
 
   def ready(out: Outport, term: StreamTermination): State = state(
     xSeal = ctx ⇒ {
       configureFrom(ctx)
-      ctx.linkToParentContext(parentCtx)
+      ctx.assignRunContext(runContext)
       if (in.hasRunner) ctx.registerRunnerAssignment(StreamRunner.Assignment.Runner(this, in.runner))
       out.xSeal(ctx)
       if (term != StreamTermination.None) {
@@ -56,7 +56,7 @@ private[core] class SubSpoutStage(parentCtx: RunContext, val in: StageImpl) exte
 
     xEvent = {
       case EnableSubscriptionTimeout => stay() // ignore
-      case RunContext.SubscriptionTimeout => stay() // ignore
+      case RunSupport.SubscriptionTimeout => stay() // ignore
     })
 
   def awaitingXStart(out: Outport, termination: StreamTermination): State = state(
@@ -72,7 +72,7 @@ private[core] class SubSpoutStage(parentCtx: RunContext, val in: StageImpl) exte
 
     xEvent = {
       case EnableSubscriptionTimeout => stay() // ignore
-      case RunContext.SubscriptionTimeout => stay() // ignore
+      case RunSupport.SubscriptionTimeout => stay() // ignore
     })
 
   def running(out: Outport) = state(
@@ -86,7 +86,7 @@ private[core] class SubSpoutStage(parentCtx: RunContext, val in: StageImpl) exte
 
     xEvent = {
       case EnableSubscriptionTimeout => stay() // ignore
-      case RunContext.SubscriptionTimeout => stay() // ignore
+      case RunSupport.SubscriptionTimeout => stay() // ignore
     })
 }
 

@@ -15,7 +15,7 @@ import swave.core.macros._
 
 // format: OFF
 @StageImplementation
-private[core] final class WithLimitStage(max: Long, cost: AnyRef ⇒ Long) extends InOutStage {
+private[core] final class WithLimitStage(max: Long, cost: Any ⇒ Long) extends InOutStage {
 
   requireArg(max >= 0, "`max` must be >= 0")
 
@@ -41,7 +41,7 @@ private[core] final class WithLimitStage(max: Long, cost: AnyRef ⇒ Long) exten
           running(in, out, rem)
         } else {
           in.cancel()
-          stopError(new StreamLimitExceeded(max, elem), out)
+          stopError(StreamLimitExceeded(max, elem), out)
         }
       } else {
         in.cancel()

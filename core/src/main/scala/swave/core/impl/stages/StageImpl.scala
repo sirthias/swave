@@ -86,7 +86,7 @@ private[swave] abstract class StageImpl extends PortImpl {
 
   protected final var interceptingStates: Int = _ // bit mask holding a 1 bit for every state which requires interception support
 
-  protected final def configureFrom(ctx: RunContext): Unit = _mbs = ctx.env.settings.maxBatchSize
+  protected final def configureFrom(ctx: RunSupport.SealingContext): Unit = _mbs = ctx.env.settings.maxBatchSize
 
   protected final implicit def self: this.type = this
 
@@ -288,7 +288,7 @@ private[swave] abstract class StageImpl extends PortImpl {
 
   /////////////////////////////////////// XSEAL ///////////////////////////////////////
 
-  final def xSeal(ctx: RunContext): Unit =
+  final def xSeal(ctx: RunSupport.SealingContext): Unit =
     if (!_sealed) {
       _sealed = true
       @tailrec def sealBoundaries(remaining: List[Module.Boundary]): Unit =
@@ -305,7 +305,7 @@ private[swave] abstract class StageImpl extends PortImpl {
       _state = _xSeal(ctx)
     }
 
-  protected def _xSeal(ctx: RunContext): State =
+  protected def _xSeal(ctx: RunSupport.SealingContext): State =
     _state match {
       case 0 ⇒ stay()
       case _ ⇒
@@ -361,7 +361,7 @@ private[swave] abstract class StageImpl extends PortImpl {
                             onNext: (AnyRef, Inport) ⇒ State = null,
                             onComplete: Inport ⇒ State = null,
                             onError: (Throwable, Inport) ⇒ State = null,
-                            xSeal: RunContext ⇒ State = null,
+                            xSeal: RunSupport.SealingContext ⇒ State = null,
                             xStart: () ⇒ State = null,
                             xEvent: AnyRef ⇒ State = null): State = 0
 

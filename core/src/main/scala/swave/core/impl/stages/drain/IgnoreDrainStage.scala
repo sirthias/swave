@@ -20,7 +20,6 @@ private[core] final class IgnoreDrainStage(terminationPromise: Promise[Unit])
   def kind = Stage.Kind.Drain.Ignore(terminationPromise)
 
   connectInAndSealWith { (ctx, in) ⇒
-    registerForRunnerAssignmentIfRequired(ctx)
     ctx.registerForXStart(this)
     awaitingXStart(in)
   }

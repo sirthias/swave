@@ -8,24 +8,25 @@ package swave.core.impl.stages.drain
 
 import scala.util.control.NonFatal
 import swave.core.impl.stages.spout.SubSpoutStage
-import swave.core.impl.{Inport, Outport, RunContext}
+import swave.core.impl.{Inport, Outport, RunSupport}
 import swave.core.macros.StageImplementation
-import swave.core._
 import swave.core.impl.stages.DrainStage
+import swave.core._
 
 // format: OFF
 @StageImplementation
-private[core] final class LazyStartDrainStage(onStart: () => Drain[AnyRef, AnyRef],
-                                              connectResult: AnyRef => Unit) extends DrainStage {
+private[core] final class LazyStartDrainStage[R](onStart: () => Drain[_, R], connectResult: R => Unit)
+  extends DrainStage with RunSupport.RunContextAccess {
 
   def kind = Stage.Kind.Drain.LazyStart(onStart)
 
   connectInAndSealWith { (ctx, in) ⇒
     ctx.registerForXStart(this)
-    awaitingXStart(ctx, in)
+    ctx.registerForRunContextAccess(this)
+    awaitingXStart(in)
   }
 
-  def awaitingXStart(ctx: RunContext, in: Inport) = state(
+  def awaitingXStart(in: Inport) = state(
     xStart = () => {
       var funError: Throwable = null
       val innerDrain =
@@ -35,10 +36,10 @@ private[core] final class LazyStartDrainStage(onStart: () => Drain[AnyRef, AnyRe
           d
         } catch { case NonFatal(e) => { funError = e; null } }
       if (funError eq null) {
-        val sub = new SubSpoutStage(ctx, this)
+        val sub = new SubSpoutStage(runContext, this)
         sub.subscribe()(innerDrain.outport)
         try {
-          ctx.sealAndStartSubStream(sub)
+          RunSupport.sealAndStartSubStream(sub, runContext)
           running(in, sub)
         } catch {
           case NonFatal(e) =>

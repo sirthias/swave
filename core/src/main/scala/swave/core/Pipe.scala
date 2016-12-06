@@ -8,15 +8,15 @@ package swave.core
 
 import java.util.concurrent.atomic.AtomicReference
 import org.reactivestreams.Processor
-import swave.core.impl.util.InportList
 import scala.util.control.NonFatal
 import scala.annotation.tailrec
-import scala.annotation.unchecked.{uncheckedVariance ⇒ uV}
-import shapeless._
+import scala.annotation.unchecked.{uncheckedVariance => uV}
 import swave.core.impl.rs.SubPubProcessor
+import swave.core.impl.util.InportList
 import swave.core.impl.stages.StageImpl
 import swave.core.impl.stages.inout.NopStage
 import swave.core.impl._
+import shapeless._
 
 final class Pipe[-A, +B] private (private[core] val firstStage: Outport, private[core] val lastStage: Inport)
     extends StreamOps[B @uV] {
@@ -28,18 +28,15 @@ final class Pipe[-A, +B] private (private[core] val firstStage: Outport, private
 
   private[core] def transform(spout: Spout[A]): Spout[B] = {
     spout.inport.subscribe()(firstStage)
-    new Spout[B](lastStage)
+    new Spout(lastStage)
   }
 
-  protected def base: Inport           = lastStage
-  protected def wrap: Inport ⇒ Repr[_] = in ⇒ new Pipe(firstStage, in)
-
-  protected[core] def append[T](stage: StageImpl): Repr[T] = {
+  protected def base: Inport                     = lastStage
+  protected def wrap[T](inport: Inport): Repr[T] = new Pipe(firstStage, inport)
+  protected def append[T](stage: StageImpl): Repr[T] = {
     lastStage.subscribe()(stage)
     new Pipe(firstStage, stage)
   }
-
-  def identity: A =>> B = this
 
   def to[R](drain: Drain[B, R]): Drain[A, R] = {
     lastStage.subscribe()(drain.outport)
@@ -52,12 +49,12 @@ final class Pipe[-A, +B] private (private[core] val firstStage: Outport, private
   }
 
   def via[P <: HList, R, Out](joined: Module.TypeLogic.Joined[B :: HNil, P, R])(
-      implicit vr: TypeLogic.ViaResult[P, Drain[A @uV, R], Repr @uV, Out]): Out = {
+      vr: TypeLogic.ViaResult[P, Drain[A @uV, R], Repr @uV, Out]): Out = {
     val out = ModuleImpl(joined.module)(InportList(lastStage))
     val result = vr.id match {
       case 0 ⇒ new Drain(firstStage, out)
       case 1 ⇒ new Pipe(firstStage, out.asInstanceOf[InportList].in)
-      case 2 ⇒ new StreamOps.FanIn(out.asInstanceOf[InportList], wrap)
+      case 2 ⇒ new FanIn(out.asInstanceOf[InportList])
     }
     result.asInstanceOf[Out]
   }
@@ -67,9 +64,9 @@ final class Pipe[-A, +B] private (private[core] val firstStage: Outport, private
     spout.via(this).to(Drain.toPublisher()).mapResult(new SubPubProcessor(subscriber, _))
   }
 
-  def named(name: String): A =>> B = named(Module.ID(name))
+  def named(name: String): this.type = named(Module.ID(name))
 
-  def named(moduleID: Module.ID): A =>> B = {
+  def named(moduleID: Module.ID): this.type = {
     moduleID
       .addBoundary(Module.Boundary.InnerEntry(firstStage.stageImpl))
       .addBoundary(Module.Boundary.InnerExit(lastStage.stageImpl))
@@ -84,20 +81,20 @@ object Pipe {
     new Pipe(stage, stage)
   }
 
-  def fromDrainAndSpout[A, B](drain: Drain[A, Unit], spout: Spout[B]): Pipe[A, B] =
+  def fromDrainAndSpout[A, B](drain: Drain[A, Unit], spout: Spout[B]): A =>> B =
     new Pipe(drain.outport, spout.inport) named "Pipe.fromDrainAndSpout"
 
-  def fromProcessor[A, B](processor: Processor[A, B]): Pipe[A, B] =
+  def fromProcessor[A, B](processor: Processor[A, B]): A =>> B =
     fromDrainAndSpout(Drain.fromSubscriber(processor), Spout.fromPublisher(processor))
 
-  def lazyStart[A, B](onStart: () ⇒ Pipe[A, B]): Pipe[A, B] = {
-    val innerPipeRef = new AtomicReference[Pipe[A, B]]
-    val placeholder  = Pipe[A].asInstanceOf[Pipe[A, B]]
-    @tailrec def innerPipe: Pipe[A, B] =
+  def lazyStart[A, B](onStart: () ⇒ A =>> B): A =>> B = {
+    val innerPipeRef = new AtomicReference[A =>> B]
+    val placeholder  = Pipe[A].asInstanceOf[A =>> B]
+    @tailrec def innerPipe: A =>> B =
       innerPipeRef.get match {
         case null ⇒
           if (innerPipeRef.compareAndSet(null, placeholder)) {
-            val pipe =
+            val pipe: A =>> B =
               try onStart()
               catch { case NonFatal(e) ⇒ fromDrainAndSpout(Drain.cancelling, Spout.failing(e)) }
             innerPipeRef.set(pipe)

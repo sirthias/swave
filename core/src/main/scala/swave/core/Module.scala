@@ -291,8 +291,11 @@ object Module {
       final def from(f: In ⇒ Creation[O]): Module[I, O] =
         ModuleImpl(lit, lot)(ins ⇒ f(ins.reverse.toReversedSpoutHList.asInstanceOf[In]).out)
 
-      final def fromBranchOut(f: StreamOps.BranchOut[In, HNil, CNil, InUnified, Spout] ⇒ Creation[O]): Module[I, O] =
-        ModuleImpl(lit, lot)(ins ⇒ f(new StreamOps.BranchOut(ins, InportList.empty, new Spout(_))).out)
+      final def fromBranchOut(f: Spout[_]#BranchOut[In, HNil, InUnified] ⇒ Creation[O]): Module[I, O] =
+        ModuleImpl(lit, lot) { ins ⇒
+          val s = new Spout(null) // dummy
+          f(new s.BranchOut(ins, InportList.empty)).out
+        }
     }
 
     object Creator {
@@ -318,7 +321,7 @@ object Module {
       implicit def fromProduct[P <: Product, L <: HList](product: P)(implicit ev0: ToHList.Aux[P, L], ev1: IsHListOfSpout[L]): Creation[Output.Bottom[ev1.Out]] =
         new Creation(InportList fromHList ev0(product))
 
-      implicit def fromFanIn[L <: HList](fanIn: StreamOps.FanIn[L, _, _, Spout]): Creation[Output.Bottom[L]] =
+      implicit def fromFanIn[L <: HList](fanIn: Spout[_]#FanIn[L, _]): Creation[Output.Bottom[L]] =
         new Creation(fanIn.subs)
     }
 

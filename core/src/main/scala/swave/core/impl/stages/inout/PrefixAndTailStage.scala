@@ -7,7 +7,7 @@
 package swave.core.impl.stages.inout
 
 import swave.core.impl.stages.spout.SubSpoutStage
-import swave.core.impl.{Inport, Outport, RunContext}
+import swave.core.impl.{Inport, Outport, RunSupport}
 import swave.core.macros._
 import swave.core._
 import swave.core.impl.stages.InOutStage
@@ -15,7 +15,7 @@ import swave.core.impl.stages.InOutStage
 // format: OFF
 @StageImplementation
 private[core] final class PrefixAndTailStage(prefixSize: Int, prefixBuilder: scala.collection.mutable.Builder[Any, AnyRef])
-  extends InOutStage {
+  extends InOutStage with RunSupport.RunContextAccess {
 
   requireArg(prefixSize > 0, "`prefixSize` must be > 0")
 
@@ -23,10 +23,11 @@ private[core] final class PrefixAndTailStage(prefixSize: Int, prefixBuilder: sca
 
   connectInOutAndSealWith { (ctx, in, out) ⇒
     ctx.registerForXStart(this)
-    running(ctx, in, out)
+    ctx.registerForRunContextAccess(this)
+    running(in, out)
   }
 
-  def running(ctx: RunContext, in: Inport, out: Outport) = {
+  def running(in: Inport, out: Outport) = {
 
     def awaitingXStart() = state(
       xStart = () => {
@@ -66,7 +67,7 @@ private[core] final class PrefixAndTailStage(prefixSize: Int, prefixBuilder: sca
       onError = stopErrorF(out))
 
     def emit() = {
-      val sub = new SubSpoutStage(ctx, this)
+      val sub = new SubSpoutStage(runContext, this)
       emitPrefixWith(new Spout(sub))
       sub.xEvent(SubSpoutStage.EnableSubscriptionTimeout)
       out.onComplete()
@@ -78,10 +79,10 @@ private[core] final class PrefixAndTailStage(prefixSize: Int, prefixBuilder: sca
       stopComplete(out)
     }
 
-    def emitPrefixWith[T](spout: Spout[T]) = {
+    def emitPrefixWith(spout: Spout[_]) = {
       val prefix = prefixBuilder.result()
       prefixBuilder.clear()
-      out.onNext(prefix -> spout.asInstanceOf[Spout[AnyRef]])
+      out.onNext(prefix -> spout)
     }
 
     awaitingXStart()

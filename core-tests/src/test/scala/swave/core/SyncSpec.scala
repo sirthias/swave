@@ -72,8 +72,8 @@ class SyncSpec extends SwaveSpec {
     "double direct fanout" in {
       Spout(1, 2, 3)
         .fanOutBroadcast()
-        .sub.end
-        .sub.end
+          .sub.end
+          .sub.end
         .fanInMerge() should produce(1, 1, 2, 2, 3, 3)
     }
 
@@ -138,14 +138,13 @@ class SyncSpec extends SwaveSpec {
     }
 
     "illegal non-terminating" in {
-      pending
-
       val c = Coupling[Int]
       val result = Spout.one(1)
         .concat(c.out)
         .fanOutBroadcast()
-        .sub.to(c.in)
-        .subContinue.drainToBlackHole()
+          .sub.to(c.in)
+          .subContinue
+        .drainToBlackHole()
       inside(result.value) {
         case Some(Failure(_: UnterminatedSynchronousStreamException)) ⇒ // ok
       }
