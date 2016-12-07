@@ -209,5 +209,15 @@ class AsyncSpec extends SwaveSpec {
         .await(20.millis)
         .distinct shouldEqual List("swave-default-1")
     }
+
+    "external sub-stream starts" taggedAs NotOnTravis in {
+      Spout.ints(0)
+        .splitWhen(_ % 5 == 0)
+        .flatMap(_.drainToMkString(limit = 5, ","))
+        .take(3)
+        .async()
+        .drainToList(limit = 10)
+        .await(50.millis) shouldEqual List("0,1,2,3,4", "5,6,7,8,9", "10,11,12,13,14")
+    }
   }
 }
