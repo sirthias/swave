@@ -17,8 +17,8 @@ private[core] final class CancellingDrainStage extends DrainStage {
 
   def kind = Stage.Kind.Drain.Cancelling
 
-  connectInAndSealWith { (ctx, in) ⇒
-    ctx.registerForXStart(this)
+  connectInAndSealWith { in ⇒
+    region.impl.registerForXStart(this)
     awaitingXStart(in)
   }
 

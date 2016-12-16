@@ -19,8 +19,8 @@ private[core] final class IgnoreDrainStage(terminationPromise: Promise[Unit])
 
   def kind = Stage.Kind.Drain.Ignore(terminationPromise)
 
-  connectInAndSealWith { (ctx, in) ⇒
-    ctx.registerForXStart(this)
+  connectInAndSealWith { in ⇒
+    region.impl.registerForXStart(this)
     awaitingXStart(in)
   }
 

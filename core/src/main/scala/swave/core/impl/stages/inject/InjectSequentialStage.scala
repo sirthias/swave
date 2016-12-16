@@ -10,7 +10,7 @@ import scala.annotation.tailrec
 import swave.core.impl.stages.InOutStage
 import swave.core.impl.stages.spout.SubSpoutStage
 import swave.core.impl.util.RingBuffer
-import swave.core.impl.{Inport, Outport, RunSupport}
+import swave.core.impl.{Inport, Outport}
 import swave.core.macros._
 import swave.core.util._
 import swave.core.{Spout, Stage}
@@ -19,15 +19,14 @@ import swave.core.{Spout, Stage}
 
 // format: OFF
 @StageImplementation(fullInterceptions = true)
-private[core] final class InjectSequentialStage extends InOutStage with RunSupport.RunContextAccess { stage =>
+private[core] final class InjectSequentialStage extends InOutStage { stage =>
 
-  def kind = Stage.Kind.InOut.Inject
+  def kind = Stage.Kind.Inject.Sequential
 
   private[this] var buffer: RingBuffer[AnyRef] = _
 
-  connectInOutAndSealWith { (ctx, in, out) ⇒
-    ctx.registerForXStart(this)
-    ctx.registerForRunContextAccess(this)
+  connectInOutAndSealWith { (in, out) ⇒
+    region.impl.registerForXStart(this)
     running(in, out)
   }
 
@@ -35,7 +34,7 @@ private[core] final class InjectSequentialStage extends InOutStage with RunSuppo
 
     def awaitingXStart() = state(
       xStart = () => {
-        buffer = new RingBuffer[AnyRef](roundUpToPowerOf2(runContext.env.settings.maxBatchSize))
+        buffer = new RingBuffer[AnyRef](roundUpToPowerOf2(region.env.settings.maxBatchSize))
         in.request(buffer.capacity.toLong)
         noSubAwaitingElem(buffer.capacity, mainRemaining = 0)
       })
@@ -67,7 +66,7 @@ private[core] final class InjectSequentialStage extends InOutStage with RunSuppo
       request = (n, from) ⇒ {
         if (from eq out) {
           val s = emitNewSub()
-          s.xEvent(SubSpoutStage.EnableSubscriptionTimeout)
+          s.xEvent(SubSpoutStage.EnableSubStreamStartTimeout)
           awaitingSubDemandUpstreamGone(s, (n - 1).toLong)
         } else stay()
       },
@@ -123,7 +122,7 @@ private[core] final class InjectSequentialStage extends InOutStage with RunSuppo
           if (mainRemaining > 0) awaitingSubDemand(emitNewSub(), pending, mainRemaining - 1)
           else noSubAwaitingMainDemand(pending)
         case x if x eq out =>
-          sub.xEvent(SubSpoutStage.EnableSubscriptionTimeout)
+          sub.xEvent(SubSpoutStage.EnableSubStreamStartTimeout)
           awaitingSubDemandDownstreamGone(sub, pending)
         case _ => stay()
       },
@@ -134,7 +133,7 @@ private[core] final class InjectSequentialStage extends InOutStage with RunSuppo
       },
 
       onComplete = _ => {
-        sub.xEvent(SubSpoutStage.EnableSubscriptionTimeout)
+        sub.xEvent(SubSpoutStage.EnableSubStreamStartTimeout)
         awaitingSubDemandUpstreamGone(sub, mainRemaining)
       },
       onError = stopErrorSubAndMainF(sub))
@@ -243,7 +242,7 @@ private[core] final class InjectSequentialStage extends InOutStage with RunSuppo
       cancel = {
         case x if x eq sub => noSubAwaitingElem(pending, mainRemaining)
         case x if x eq out =>
-          sub.xEvent(SubSpoutStage.EnableSubscriptionTimeout)
+          sub.xEvent(SubSpoutStage.EnableSubStreamStartTimeout)
           awaitingElemDownstreamGone(sub, pending, subRemaining)
         case _ => stay()
       },
@@ -289,7 +288,7 @@ private[core] final class InjectSequentialStage extends InOutStage with RunSuppo
     ///////////////////////// helpers //////////////////////////
 
     def emitNewSub() = {
-      val s = new SubSpoutStage(runContext, this)
+      val s = new SubSpoutStage(this)
       out.onNext(new Spout(s).asInstanceOf[AnyRef])
       s
     }

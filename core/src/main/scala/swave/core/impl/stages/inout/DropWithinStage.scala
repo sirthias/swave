@@ -9,7 +9,7 @@ package swave.core.impl.stages.inout
 import scala.concurrent.duration._
 import swave.core.{Cancellable, Stage}
 import swave.core.impl.stages.InOutStage
-import swave.core.impl.{Inport, Outport, StreamRunner}
+import swave.core.impl.{Inport, Outport, RunContext}
 import swave.core.macros._
 
 // format: OFF
@@ -20,16 +20,16 @@ private[core] final class DropWithinStage(duration: FiniteDuration) extends InOu
 
   def kind = Stage.Kind.InOut.DropWithin(duration)
 
-  connectInOutAndSealWith { (ctx, in, out) ⇒
-    ctx.registerRunnerAssignment(StreamRunner.Assignment.Default(this))
-    ctx.registerForXStart(this)
+  connectInOutAndSealWith { (in, out) ⇒
+    region.impl.requestDispatcherAssignment()
+    region.impl.registerForXStart(this)
     running(in, out)
   }
 
   def running(in: Inport, out: Outport) = {
 
     def awaitingXStart() = state(
-      xStart = () => dropping(runner.scheduleTimeout(this, duration)))
+      xStart = () => dropping(region.impl.scheduleTimeout(this, duration)))
 
     /**
       * Dropping all elements while the timer hasn't fired yet.
@@ -57,7 +57,7 @@ private[core] final class DropWithinStage(duration: FiniteDuration) extends InOu
         stopError(e, out)
       },
 
-      xEvent = { case StreamRunner.Timeout(_) => draining() })
+      xEvent = { case RunContext.Timeout(_) => draining() })
 
     /**
       * Simply forwarding elements from upstream to downstream.
@@ -71,7 +71,7 @@ private[core] final class DropWithinStage(duration: FiniteDuration) extends InOu
       onComplete = stopCompleteF(out),
       onError = stopErrorF(out),
 
-      xEvent = { case StreamRunner.Timeout(_) => stay() })
+      xEvent = { case RunContext.Timeout(_) => stay() })
 
     awaitingXStart()
   }

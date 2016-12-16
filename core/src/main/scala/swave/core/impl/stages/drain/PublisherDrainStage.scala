@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicReference
 import org.reactivestreams.{Publisher, Subscriber, Subscription}
 import scala.annotation.tailrec
 import swave.core.{Stage, UnsupportedSecondSubscriptionException}
-import swave.core.impl.{Inport, StreamRunner}
+import swave.core.impl.{Inport, Region}
 import swave.core.impl.rs.{ForwardToRunnerSubscription, RSCompliance}
 import swave.core.impl.stages.{DrainStage, StreamTermination}
 import swave.core.macros.StageImplementation
@@ -26,14 +26,14 @@ private[core] final class PublisherDrainStage extends DrainStage {
   // holds exactly one of these values:
   // - `null`, when the stage is unstarted and no subscription requests has been received yet
   // - a `Subscriber` instance, when a subscription request has been received before the stage was started
-  // - `stage.runner`, when the stage was started
+  // - `stage.region.impl`, when the stage was started
   private[this] val refPub =
     new AtomicReference[AnyRef] with Publisher[AnyRef] {
       @tailrec def subscribe(subscriber: Subscriber[_ >: AnyRef]): Unit = {
         RSCompliance.verifyNonNull(subscriber, "Subscriber", "1.9")
         get match {
           case null => if (!compareAndSet(null, subscriber)) subscribe(subscriber)
-          case x: StreamRunner => x.enqueueXEvent(PublisherDrainStage.this, subscriber)
+          case x: Region#Impl => x.enqueueXEvent(PublisherDrainStage.this, subscriber)
           case _ => signalError(subscriber, new UnsupportedSecondSubscriptionException)
         }
       }
@@ -41,9 +41,9 @@ private[core] final class PublisherDrainStage extends DrainStage {
 
   def publisher: Publisher[AnyRef] = refPub
 
-  connectInAndSealWith { (ctx, in) ⇒
-    ctx.registerRunnerAssignment(StreamRunner.Assignment.Default(this))
-    ctx.registerForXStart(this)
+  connectInAndSealWith { in ⇒
+    region.impl.requestDispatcherAssignment()
+    region.impl.registerForXStart(this)
     awaitingXStart(in)
   }
 
@@ -51,10 +51,10 @@ private[core] final class PublisherDrainStage extends DrainStage {
     xStart = () => {
       @tailrec def rec(): State =
         refPub.get match {
-          case null if refPub.compareAndSet(null, runner) => awaitingSubscriber(in, StreamTermination.None)
+          case null if refPub.compareAndSet(null, region.impl) => awaitingSubscriber(in, StreamTermination.None)
           case null => rec()
           case sub: Subscriber[_] =>
-            refPub.set(runner)
+            refPub.set(region.impl)
             becomeRunning(in, sub)
         }
       rec()
@@ -112,7 +112,7 @@ private[core] final class PublisherDrainStage extends DrainStage {
         signalError(sub, new UnsupportedSecondSubscriptionException)
         stay()
 
-      case ForwardToRunnerSubscription.IllegalRequest(n) =>
+      case ForwardToRunnerSubscription.IllegalRequest(_) =>
         subscriber.onError(new RSCompliance.IllegalRequestCountException)
         stopCancel(in)
     })

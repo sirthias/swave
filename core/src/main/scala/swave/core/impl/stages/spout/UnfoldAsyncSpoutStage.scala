@@ -12,7 +12,7 @@ import scala.util.control.NonFatal
 import swave.core.Stage
 import swave.core.Spout.Unfolding
 import swave.core.impl.stages.SpoutStage
-import swave.core.impl.{CallingThreadExecutionContext, Outport, StreamRunner}
+import swave.core.impl.{CallingThreadExecutionContext, Outport}
 import swave.core.macros._
 import swave.core.util._
 
@@ -23,8 +23,8 @@ private[core] final class UnfoldAsyncSpoutStage(zero: AnyRef, f: AnyRef => Futur
 
   def kind = Stage.Kind.Spout.UnfoldAsync(zero, f)
 
-  connectOutAndSealWith { (ctx, out) ⇒
-    ctx.registerRunnerAssignment(StreamRunner.Assignment.Default(this))
+  connectOutAndSealWith { out ⇒
+    region.impl.requestDispatcherAssignment()
     awaitingDemand(out, zero)
   }
 
@@ -74,7 +74,7 @@ private[core] final class UnfoldAsyncSpoutStage(zero: AnyRef, f: AnyRef => Futur
     if (funError eq null) {
       // when the future completes we want to receive an XEvent,
       // since enqueueing is extremely lightweight we can do it directly on the calling thread
-      unfoldingFuture.onComplete(runner.enqueueXEvent(this, _))(CallingThreadExecutionContext)
+      unfoldingFuture.onComplete(region.impl.enqueueXEvent(this, _))(CallingThreadExecutionContext)
       awaitingUnfolding(out, remaining)
     } else stopError(funError, out)
   }

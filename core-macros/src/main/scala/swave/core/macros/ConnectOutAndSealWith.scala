@@ -11,10 +11,9 @@ private[macros] trait ConnectOutAndSealWith { this: Util =>
   import c.universe._
 
   def connectOutAndSealWith(f: Tree): List[Tree] = unblock {
-    val q"($ctx0: $_, $out0: $_) => $block0" = f
-    val ctx                                  = freshName("ctx")
-    val out                                  = freshName("out")
-    val block                                = replaceIdents(block0, ctx0 -> ctx, out0 -> out)
+    val q"($out0: $_) => $block0" = f
+    val out                       = freshName("out")
+    val block                     = replaceIdents(block0, out0 -> out)
 
     q"""
       initialState(awaitingSubscribe())
@@ -31,10 +30,8 @@ private[macros] trait ConnectOutAndSealWith { this: Util =>
       def ready(out: Outport) = state(
         intercept = false,
 
-        xSeal = c ⇒ {
-          configureFrom(c)
-          out.xSeal(c)
-          val $ctx = c
+        xSeal = () ⇒ {
+          out.xSeal(region)
           val $out = out
           $block
         })

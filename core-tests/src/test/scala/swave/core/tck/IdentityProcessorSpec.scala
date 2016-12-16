@@ -15,7 +15,7 @@ class IdentityProcessorSpec(ignore: Any) // disabled by default, remove paramete
   implicit val env = StreamEnv()
 
   override def createIdentityProcessor(maxBufferSize: Int): Processor[Int, Int] =
-    Pipe[Int].toProcessor.run().result.get
+    Pipe[Int].toProcessor.run().get.result.get
 
   override def createElement(element: Int): Int = element
 

@@ -9,7 +9,7 @@ package swave.core.impl.stages.inout
 import scala.concurrent.duration._
 import swave.core.impl.stages.InOutStage
 import swave.core.{Cancellable, Stage}
-import swave.core.impl.{Inport, Outport, StreamRunner}
+import swave.core.impl.{Inport, Outport, RunContext}
 import swave.core.macros._
 
 // format: OFF
@@ -20,14 +20,14 @@ private[core] final class TakeWithinStage(duration: FiniteDuration) extends InOu
 
   def kind = Stage.Kind.InOut.TakeWithin(duration)
 
-  connectInOutAndSealWith { (ctx, in, out) ⇒
-    ctx.registerRunnerAssignment(StreamRunner.Assignment.Default(this))
-    ctx.registerForXStart(this)
+  connectInOutAndSealWith { (in, out) ⇒
+    region.impl.requestDispatcherAssignment()
+    region.impl.registerForXStart(this)
     awaitingXStart(in, out)
   }
 
   def awaitingXStart(in: Inport, out: Outport) = state(
-    xStart = () => running(in, out, runner.scheduleTimeout(this, duration)))
+    xStart = () => running(in, out, region.impl.scheduleTimeout(this, duration)))
 
   def running(in: Inport, out: Outport, timer: Cancellable) = state(
     intercept = false,
@@ -54,5 +54,5 @@ private[core] final class TakeWithinStage(duration: FiniteDuration) extends InOu
       stopError(e, out)
     },
 
-    xEvent = { case StreamRunner.Timeout(t) if t eq timer => stopComplete(out) })
+    xEvent = { case RunContext.Timeout(t) if t eq timer => stopComplete(out) })
 }

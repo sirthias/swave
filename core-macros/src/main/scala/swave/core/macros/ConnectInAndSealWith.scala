@@ -11,10 +11,9 @@ private[macros] trait ConnectInAndSealWith { this: Util =>
   import c.universe._
 
   def connectInAndSealWith(f: Tree): List[Tree] = unblock {
-    val q"($ctx0: $_, $in0: $_) => $block0" = f
-    val ctx                                 = freshName("ctx")
-    val in                                  = freshName("in")
-    val block                               = replaceIdents(block0, ctx0 -> ctx, in0 -> in)
+    val q"($in0: $_) => $block0" = f
+    val in                       = freshName("in")
+    val block                    = replaceIdents(block0, in0 -> in)
 
     q"""
       initialState(awaitingOnSubscribe())
@@ -28,10 +27,8 @@ private[macros] trait ConnectInAndSealWith { this: Util =>
         })
 
       def ready(in: Inport) = state(
-        xSeal = c ⇒ {
-          configureFrom(c)
-          in.xSeal(c)
-          val $ctx = c
+        xSeal = () ⇒ {
+          in.xSeal(region)
           val $in = in
           $block
         })

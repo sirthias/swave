@@ -7,11 +7,10 @@
 package swave.core.impl.stages.spout
 
 import java.util.concurrent.atomic.AtomicReference
-
-import scala.annotation.tailrec
 import org.reactivestreams.{Subscriber, Subscription}
+import scala.annotation.tailrec
 import swave.core.Stage
-import swave.core.impl.{Outport, StreamRunner}
+import swave.core.impl.{Outport, Region}
 import swave.core.impl.rs.RSCompliance
 import swave.core.impl.stages.SpoutStage
 import swave.core.macros.StageImplementation
@@ -28,35 +27,35 @@ private[core] final class SubscriberSpoutStage extends SpoutStage { stage =>
   // - a `Subscription` instance, when a subscription request has been received before the stage was started
   // - the stage instance, when a subscription and completion has been received before the stage was started
   // - a `Throwable` instance, when a subscription and error has been received before the stage was started
-  // - `stage.runner`, when the stage was started
+  // - `stage.region.impl`, when the stage was started
   private val refSub =
     new AtomicReference[AnyRef] with Subscriber[AnyRef] {
       @tailrec def onSubscribe(s: Subscription): Unit = {
         RSCompliance.verifyNonNull(s, "Subscription", "2.13")
         get match {
           case null => if (!compareAndSet(null, s)) onSubscribe(s)
-          case x: StreamRunner => x.enqueueXEvent(stage, s)
+          case x: Region#Impl => x.enqueueXEvent(stage, s)
           case _ => s.cancel()
         }
       }
       def onNext(elem: AnyRef) = {
         RSCompliance.verifyNonNull(elem, "Element", "2.13")
         get match {
-          case x: StreamRunner => x.enqueueOnNext(stage, elem)(stage)
+          case x: Region#Impl => x.enqueueOnNext(stage, elem)(stage)
           case _ => // drop
         }
       }
       @tailrec def onComplete() =
         get match {
-          case _: Subscription => if (!compareAndSet(null, stage)) onComplete()
-          case x: StreamRunner => x.enqueueOnComplete(stage)(stage)
+          case x: Subscription => if (!compareAndSet(x, stage)) onComplete()
+          case x: Region#Impl => x.enqueueOnComplete(stage)(stage)
           case _ => // drop
         }
       @tailrec def onError(e: Throwable) = {
         RSCompliance.verifyNonNull(e, "Throwable", "2.13")
         get match {
-          case _: Subscription => if (!compareAndSet(null, e)) onError(e)
-          case x: StreamRunner => x.enqueueOnError(stage, e)(stage)
+          case x: Subscription => if (!compareAndSet(x, e)) onError(e)
+          case x: Region#Impl => x.enqueueOnError(stage, e)(stage)
           case _ => // drop
         }
       }
@@ -64,9 +63,9 @@ private[core] final class SubscriberSpoutStage extends SpoutStage { stage =>
 
   def subscriber: Subscriber[AnyRef] = refSub
 
-  connectOutAndSealWith { (ctx, out) ⇒
-    ctx.registerRunnerAssignment(StreamRunner.Assignment.Default(this))
-    ctx.registerForXStart(this)
+  connectOutAndSealWith { out ⇒
+    region.impl.requestDispatcherAssignment()
+    region.impl.registerForXStart(this)
     awaitingXStart(out)
   }
 
@@ -74,11 +73,10 @@ private[core] final class SubscriberSpoutStage extends SpoutStage { stage =>
     xStart = () => {
       @tailrec def rec(): State =
         refSub.get match {
-          case null if refSub.compareAndSet(null, runner) => awaitingSubscription(out, 0)
-          case null => rec()
-          case sub: Subscription => { refSub.set(runner); running(out, sub) }
-          case `stage` => { refSub.set(runner); stopComplete(out) }
-          case e: Throwable => { refSub.set(runner); stopError(e, out) }
+          case null => if (refSub.compareAndSet(null, region.impl)) awaitingSubscription(out, 0) else rec()
+          case sub: Subscription => { refSub.set(region.impl); running(out, sub) }
+          case `stage` => { refSub.set(region.impl); stopComplete(out) }
+          case e: Throwable => { refSub.set(region.impl); stopError(e, out) }
         }
       rec()
     })

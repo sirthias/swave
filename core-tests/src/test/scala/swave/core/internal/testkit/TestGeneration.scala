@@ -273,7 +273,7 @@ object TestGeneration {
         } catch {
           case NonFatal(e) ⇒
             val graphRendering = testStages.mapFind { stage ⇒
-              try Some(Graph.render(stage))
+              try Some(Graph.from(stage).render())
               catch { case e: IllegalStateException if e.getMessage contains "inconsistent edge data" ⇒ None }
             }
             println(graphRendering getOrElse "(no graph rendering available)")

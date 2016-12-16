@@ -10,7 +10,7 @@ import scala.util.control.NonFatal
 import scala.concurrent.duration._
 import swave.core.{Cancellable, Stage}
 import swave.core.impl.stages.InOutStage
-import swave.core.impl.{Inport, Outport, StreamRunner}
+import swave.core.impl.{Inport, Outport, RunContext}
 import swave.core.impl.util.NanoTimeTokenBucket
 import swave.core.macros._
 import swave.core.util._
@@ -30,9 +30,9 @@ private[core] final class ThrottleStage(cost: Int, per: FiniteDuration, burst: I
 
   def kind = Stage.Kind.InOut.Throttle(cost, per, burst, costFn)
 
-  connectInOutAndSealWith { (ctx, in, out) ⇒
-    ctx.registerRunnerAssignment(StreamRunner.Assignment.Default(this))
-    ctx.registerForXStart(this)
+  connectInOutAndSealWith { (in, out) ⇒
+    region.impl.requestDispatcherAssignment()
+    region.impl.registerForXStart(this)
     running(in, out)
   }
 
@@ -82,7 +82,7 @@ private[core] final class ThrottleStage(cost: Int, per: FiniteDuration, burst: I
       onError = (e, _) => { timer.cancel(); stopError(e, out) },
 
       xEvent = {
-        case StreamRunner.Timeout(_) =>
+        case RunContext.Timeout(_) =>
           out.onNext(currentElem)
           in.request(1)
           awaitingElement(remaining - 1)
@@ -113,7 +113,7 @@ private[core] final class ThrottleStage(cost: Int, per: FiniteDuration, burst: I
       cancel = _ => { timer.cancel(); stop() },
 
       xEvent = {
-        case StreamRunner.Timeout(_) =>
+        case RunContext.Timeout(_) =>
           out.onNext(currentElem)
           stopComplete(out)
       })
@@ -125,7 +125,7 @@ private[core] final class ThrottleStage(cost: Int, per: FiniteDuration, burst: I
         requireState(rem > 0, s"`remaining` must be > 0")
         val delay = tokenBucket.offer(elemCost.toLong)
         if (delay > 0L) {
-          val t = runner.scheduleTimeout(this, delay.nanos)
+          val t = region.impl.scheduleTimeout(this, delay.nanos)
           awaitingTimeout(t, elem, rem)
         } else {
           out.onNext(elem)

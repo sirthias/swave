@@ -10,9 +10,8 @@ import scala.util.{Failure, Success, Try}
 import scala.util.control.NonFatal
 import scala.concurrent.Future
 import swave.core.impl.stages.StageImpl
-import swave.core.impl.RunSupport
-import swave.core.impl.RunSupport.RunContext
-import swave.core.impl.TypeLogic
+import swave.core.impl.{RunContext, TypeLogic}
+import swave.core.util._
 
 /**
   * A [[StreamGraph]] represents a stream graph in which the ports of all stages
@@ -40,10 +39,9 @@ final class StreamGraph[+A] private[core] (val result: A, stageImpl: StageImpl) 
     * Prepares this [[StreamGraph]] for starting and verifies that the ports of all stages are properly connected.
     */
   def seal()(implicit env: StreamEnv): Try[SealedStreamGraph[A]] = {
-    val sctx = new RunSupport.SealingContext(env)
     try {
-      val rctx = RunSupport.seal(stageImpl, sctx)
-      Success(new SealedStreamGraph(result, stageImpl, sctx, rctx))
+      val ctx = RunContext.seal(stageImpl, env)
+      Success(new SealedStreamGraph(result, ctx))
     } catch {
       case NonFatal(e) => Failure(e)
     }
@@ -59,20 +57,19 @@ final class StreamGraph[+A] private[core] (val result: A, stageImpl: StageImpl) 
     * Otherwise, if the stream runs asynchronously, it will return (more or less) immediately and the stream
     * will run detached from the caller thread.
     */
-  def run()(implicit env: StreamEnv, ev: TypeLogic.ToTryOrFuture[A]): StreamRun[ev.Out] = {
-    val sctx = new RunSupport.SealingContext(env)
+  def run()(implicit env: StreamEnv, ev: TypeLogic.ToTryOrFuture[A]): Try[StreamRun[ev.Out]] = {
     try {
-      val rctx = RunSupport.seal(stageImpl, sctx)
+      val ctx = RunContext.seal(stageImpl, env)
       val res =
         try {
-          RunSupport.start(stageImpl, sctx, rctx)
+          ctx.impl.start()
           ev.success(result)
         } catch {
           case NonFatal(e) ⇒ ev.failure(e)
         }
-      new StreamRun(res, stageImpl, rctx)
+      Success(new StreamRun(res, ctx))
     } catch {
-      case NonFatal(e) => new StreamRun(ev.failure(e), stageImpl, new RunContext(isAsync = false, env))
+      case NonFatal(e) => Failure(e)
     }
   }
 }
@@ -82,16 +79,12 @@ final class StreamGraph[+A] private[core] (val result: A, stageImpl: StageImpl) 
   *
   * If the type parameter `A` is a [[Future]] then `run().result` returns an `A`, otherwise a `Try[A]`.
   */
-final class SealedStreamGraph[+A] private[core] (val result: A,
-                                                 stageImpl: StageImpl,
-                                                 sctx: RunSupport.SealingContext,
-                                                 rctx: RunSupport.RunContext) {
+final class SealedStreamGraph[+A] private[core] (val result: A, ctx: RunContext) {
 
   /**
-    * A [[Stage]] of the graph that can serve as a basis for exploring the graph's stage layout.
-    * Often used for rendering via the [[Graph.render]] method.
+    * Entry points for exploring the structure of the graph.
     */
-  def stage: Stage = stageImpl
+  def regions: List[Stage.Region] = ctx.impl.regions
 
   /**
     * Turns this [[SealedStreamGraph]] into one with a different result by mapping over the result value.
@@ -99,7 +92,7 @@ final class SealedStreamGraph[+A] private[core] (val result: A,
     * NOTE: The result of this call and the underlying [[SealedStreamGraph]] share the same stages.
     * This means that only one of them can be run (once).
     */
-  def mapResult[B](f: A ⇒ B): SealedStreamGraph[B] = new SealedStreamGraph(f(result), stageImpl, sctx, rctx)
+  def mapResult[B](f: A ⇒ B): SealedStreamGraph[B] = new SealedStreamGraph(f(result), ctx)
 
   /**
     * Starts this [[SealedStreamGraph]] and returns the [[StreamRun]] instance for the run.
@@ -114,12 +107,12 @@ final class SealedStreamGraph[+A] private[core] (val result: A,
   def run()(implicit ev: TypeLogic.ToTryOrFuture[A]): StreamRun[ev.Out] = {
     val res =
       try {
-        RunSupport.start(stageImpl, sctx, rctx)
+        ctx.impl.start()
         ev.success(result)
       } catch {
         case NonFatal(e) ⇒ ev.failure(e)
       }
-    new StreamRun(res, stageImpl, rctx)
+    new StreamRun(res, ctx)
   }
 }
 
@@ -129,22 +122,25 @@ final class SealedStreamGraph[+A] private[core] (val result: A,
   *
   * @tparam A the type of the `result` member
   */
-final class StreamRun[+A] private[core] (val result: A, stageImpl: StageImpl, rctx: RunSupport.RunContext) {
+final class StreamRun[+A] private[core] (val result: A, ctx: RunContext) {
 
   /**
-    * A [[Stage]] of the graph that can serve as a basis for exploring the graph's stage layout.
-    * Often used for rendering via the [[Graph.render]] method.
+    * Entry points for exploring the stage graph structure.
     */
-  def stage: Stage = stageImpl
+  def regions: List[Stage.Region] = ctx.impl.regions
+
+  def stagesTotalCount: Int = regions.sumBy(_.stagesTotalCount)
+
+  def stagesActiveCount: Int = regions.sumBy(_.stagesActiveCount)
 
   /**
     * Turns this [[StreamRun]] into one with a different result by mapping over the result value.
     */
-  def mapResult[B](f: A ⇒ B): StreamRun[B] = new StreamRun(f(result), stageImpl, rctx)
+  def mapResult[B](f: A ⇒ B): StreamRun[B] = new StreamRun(f(result), ctx)
 
   /**
     * A [[Future]] that is completed when all stages of the graph, in all async regions, have terminated.
     * This future can, for example, serve as a trigger for safely shutting down the [[StreamEnv]].
     */
-  def termination: Future[Unit] = rctx.terminationFuture
+  def termination: Future[Unit] = ctx.impl.termination
 }

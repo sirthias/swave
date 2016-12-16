@@ -45,18 +45,17 @@ private[testkit] final class TestSpoutStage(val id: Int,
     })
 
   def ready(out: Outport): State = state(
-    xSeal = c ⇒ {
+    xSeal = () ⇒ {
       ctx.trace("Received XSEAL in 'ready'")
-      configureFrom(c)
-      c.disableErrorOnSyncUnstopped()
       ctx.trace("⇢ XSEAL")
-      out.xSeal(c)
+      region.runContext.impl.suppressSyncUnterminatedError()
+      out.xSeal(region)
       if (elems.hasNext) {
         fixtureState = TestFixture.State.Running
         producing(out)
       } else {
         ctx.trace("Registering for XSTART reception")
-        c.registerForXStart(this)
+        region.impl.registerForXStart(this)
         awaitingXStart(out)
       }
     })

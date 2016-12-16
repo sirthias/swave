@@ -22,7 +22,7 @@ private[core] final class GroupedStage(groupSize: Int, emitSingleEmpty: Boolean,
 
   def kind = Stage.Kind.InOut.Grouped(groupSize, emitSingleEmpty, builder)
 
-  connectInOutAndSealWith { (ctx, in, out) ⇒ running(in, out) }
+  connectInOutAndSealWith { (in, out) ⇒ running(in, out) }
 
   def running(in: Inport, out: Outport): State = {
 

@@ -7,6 +7,7 @@
 package swave.core.impl.stages.flatten
 
 import scala.annotation.tailrec
+import scala.util.control.NonFatal
 import swave.core.impl._
 import swave.core.impl.stages.InOutStage
 import swave.core.impl.stages.drain.SubDrainStage
@@ -18,18 +19,17 @@ import swave.core.{Stage, Streamable}
 // format: OFF
 @StageImplementation(fullInterceptions = true)
 private[core] final class FlattenMergeStage(streamable: Streamable.Aux[Any, AnyRef], parallelism: Int)
-  extends InOutStage with RunSupport.RunContextAccess {
+  extends InOutStage {
 
   requireArg(parallelism > 0, "`parallelism` must be > 0")
 
-  def kind = Stage.Kind.InOut.FlattenMerge(parallelism)
+  def kind = Stage.Kind.Flatten.Merge(parallelism)
 
   // stores (sub, elem) records in the order they arrived so we can dispatch them quickly when they are requested
   private[this] val buffer: RingBuffer[InportAnyRefList] = new RingBuffer(roundUpToPowerOf2(parallelism))
 
-  connectInOutAndSealWith { (ctx, in, out) ⇒
-    ctx.registerForXStart(this)
-    ctx.registerForRunContextAccess(this)
+  connectInOutAndSealWith { (in, out) ⇒
+    region.impl.registerForXStart(this)
     running(in, out)
   }
 
@@ -51,7 +51,19 @@ private[core] final class FlattenMergeStage(streamable: Streamable.Aux[Any, AnyR
     def active(subscribing: InportList, subscribed: InportAnyRefList, remaining: Long): State = {
       requireState(remaining >= 0)
       state(
-        onSubscribe = sub ⇒ active(activateSub(sub, subscribing), sub +: subscribed, remaining),
+        onSubscribe = sub ⇒ {
+          try {
+            val newSubscribing = subscribing.remove_!(sub)
+            region.sealAndStart(sub.stageImpl)
+            sub.stageImpl.request(1)
+            active(newSubscribing, sub +: subscribed, remaining)
+          } catch {
+            case NonFatal(e) =>
+              in.cancel()
+              cancelAll(subscribed)
+              stopError(e, out)
+          }
+        },
 
         request = (n, _) ⇒ {
           @tailrec def rec(n: Int): State =
@@ -121,7 +133,7 @@ private[core] final class FlattenMergeStage(streamable: Streamable.Aux[Any, AnyR
     }
 
     def subscribeSubDrain(elem: AnyRef): SubDrainStage = {
-      val sub = new SubDrainStage(runContext, this)
+      val sub = new SubDrainStage(this)
       streamable(elem).inport.subscribe()(sub)
       sub
     }
@@ -134,14 +146,25 @@ private[core] final class FlattenMergeStage(streamable: Streamable.Aux[Any, AnyR
     *
     * @param out         the active downstream
     * @param subscribing subs from which we are awaiting an onSubscribe, may be empty
-    * @param subscribed  active subs, ma be empty
+    * @param subscribed  active subs, may be empty
     * @param remaining   number of elements already requested by downstream but not yet delivered, >= 0
     */
   def activeUpstreamCompleted(out: Outport, subscribing: InportList, subscribed: InportAnyRefList,
                               remaining: Long): State = {
     requireState(remaining >= 0)
     state(
-      onSubscribe = sub ⇒ activeUpstreamCompleted(out, activateSub(sub, subscribing), sub +: subscribed, remaining),
+      onSubscribe = sub ⇒ {
+        try {
+          val newSubscribing = subscribing.remove_!(sub)
+          region.sealAndStart(sub.stageImpl)
+          sub.stageImpl.request(1)
+          activeUpstreamCompleted(out, newSubscribing, sub +: subscribed, remaining)
+        } catch {
+          case NonFatal(e) =>
+            cancelAll(subscribed)
+            stopError(e, out)
+        }
+      },
 
       request = (n, _) ⇒ {
         @tailrec def rec(n: Int): State =
@@ -186,14 +209,6 @@ private[core] final class FlattenMergeStage(streamable: Streamable.Aux[Any, AnyR
         cancelAll(subscribing)
         stopError(e, out)
       })
-  }
-
-  private def activateSub(sub: Inport, subscribing: InportList): InportList = {
-    val newSubscribing = subscribing.remove_!(sub)
-    val subStage = sub.asInstanceOf[SubDrainStage]
-    subStage.sealAndStart()
-    subStage.request(1)
-    newSubscribing
   }
 
   @tailrec private def store(elem: AnyRef, from: Inport, current: InportAnyRefList): State = {

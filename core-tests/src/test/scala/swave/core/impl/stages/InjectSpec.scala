@@ -20,7 +20,7 @@ final class InjectSpec extends SyncPipeSpec with Inspectors {
 
   implicit val integerInput = Gen.chooseNum(0, 999)
 
-  "Inject" in check {
+  "injectSequential" in check {
     testSetup
       .input[Int]
       .output[Spout[Int]]

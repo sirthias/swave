@@ -37,8 +37,8 @@ private[core] final class ToProductStage(val kind: Stage.Kind.FanIn,
       cancelStillActive(rem.tail, compMask >> 1)
     }
 
-  connectFanInAndSealWith { (ctx, out) ⇒
-    ctx.registerForXStart(this)
+  connectFanInAndSealWith { out ⇒
+    region.impl.registerForXStart(this)
     awaitingXStart(out)
   }
 

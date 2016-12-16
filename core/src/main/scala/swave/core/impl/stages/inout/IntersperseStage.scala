@@ -18,7 +18,7 @@ private[core] final class IntersperseStage(start: AnyRef, inject: AnyRef, end: A
 
   def kind = Stage.Kind.InOut.Intersperse(start, inject, end)
 
-  connectInOutAndSealWith { (ctx, in, out) ⇒ running(in, out) }
+  connectInOutAndSealWith { (in, out) ⇒ running(in, out) }
 
   def running(in: Inport, out: Outport) = {
 

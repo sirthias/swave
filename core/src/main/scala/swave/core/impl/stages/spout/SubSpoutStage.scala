@@ -7,14 +7,14 @@
 package swave.core.impl.stages.spout
 
 import swave.core.{Cancellable, Stage}
-import swave.core.impl.{Outport, RunSupport, StreamRunner}
+import swave.core.impl.{Outport, RunContext}
 import swave.core.impl.stages.{SpoutStage, StageImpl, StreamTermination}
 import swave.core.macros.StageImplementation
 import SubSpoutStage._
 
 // format: OFF
 @StageImplementation
-private[core] class SubSpoutStage(runContext: RunSupport.RunContext, val in: StageImpl) extends SpoutStage {
+private[core] class SubSpoutStage(val in: StageImpl) extends SpoutStage {
 
   def kind = Stage.Kind.Spout.Sub(in)
 
@@ -22,57 +22,59 @@ private[core] class SubSpoutStage(runContext: RunSupport.RunContext, val in: Sta
 
   def awaitingSubscribe(term: StreamTermination, timer: Cancellable): State = state(
     subscribe = from ⇒ {
-      if (timer ne null) timer.cancel()
       _outputStages = from.stageImpl :: Nil
       from.onSubscribe()
-      ready(from, term)
+      ready(from, term, timer)
     },
 
     onComplete = _ => awaitingSubscribe(term transitionTo StreamTermination.Completed, timer),
     onError = (e, _) => awaitingSubscribe(term transitionTo StreamTermination.Error(e), timer),
 
     xEvent = {
-      case EnableSubscriptionTimeout if timer eq null =>
-        val t = runContext.scheduleSubscriptionTimeout(this)
-        awaitingSubscribe(term, t)
-      case RunSupport.SubscriptionTimeout =>
-        stopCancel(in)
+      case EnableSubStreamStartTimeout if timer eq null =>
+        awaitingSubscribe(term, in.region.impl.scheduleSubStreamStartTimeout(this))
+      case RunContext.SubStreamStartTimeout => stopCancel(in)
     })
 
-  def ready(out: Outport, term: StreamTermination): State = state(
-    xSeal = ctx ⇒ {
-      configureFrom(ctx)
-      ctx.assignRunContext(runContext)
-      if (in.hasRunner) ctx.registerRunnerAssignment(StreamRunner.Assignment.Runner(this, in.runner))
-      out.xSeal(ctx)
-      if (term != StreamTermination.None) {
-        ctx.registerForXStart(this)
-        awaitingXStart(out, term)
-      } else running(out)
+  def ready(out: Outport, term: StreamTermination, timer: Cancellable): State = state(
+    xSeal = () ⇒ {
+      region.impl.becomeSubRegionOf(in.region)
+      region.impl.registerForXStart(this)
+      out.xSeal(region)
+      awaitingXStart(out, term, timer)
     },
 
-    onComplete = _ => ready(out, term transitionTo StreamTermination.Completed),
-    onError = (e, _) => ready(out, term transitionTo StreamTermination.Error(e)),
+    onComplete = _ => ready(out, term transitionTo StreamTermination.Completed, timer),
+    onError = (e, _) => ready(out, term transitionTo StreamTermination.Error(e), timer),
 
     xEvent = {
-      case EnableSubscriptionTimeout => stay() // ignore
-      case RunSupport.SubscriptionTimeout => stay() // ignore
+      case EnableSubStreamStartTimeout if timer eq null =>
+        ready(out, term, in.region.impl.scheduleSubStreamStartTimeout(this))
+      case RunContext.SubStreamStartTimeout => stopCancel(in)
     })
 
-  def awaitingXStart(out: Outport, termination: StreamTermination): State = state(
+  def awaitingXStart(out: Outport, term: StreamTermination, timer: Cancellable): State = state(
+    intercept = false,
+
+    request = (n, _) => { interceptRequest(n.toLong, out); stay() },
+    cancel = _ => { interceptCancel(out); stay() },
+
     xStart = () => {
-      termination match {
+      if (timer ne null) timer.cancel()
+      term match {
+        case StreamTermination.None => running(out)
         case StreamTermination.Error(e) => stopError(e, out)
         case _ => stopComplete(out)
       }
     },
 
-    onComplete = _ => stay(),
-    onError = (e, _) => stay(),
+    onComplete = _ => awaitingXStart(out, term transitionTo StreamTermination.Completed, timer),
+    onError = (e, _) => awaitingXStart(out, term transitionTo StreamTermination.Error(e), timer),
 
     xEvent = {
-      case EnableSubscriptionTimeout => stay() // ignore
-      case RunSupport.SubscriptionTimeout => stay() // ignore
+      case EnableSubStreamStartTimeout if timer eq null =>
+        awaitingXStart(out, term, in.region.impl.scheduleSubStreamStartTimeout(this))
+      case RunContext.SubStreamStartTimeout => stopCancel(in)
     })
 
   def running(out: Outport) = state(
@@ -85,12 +87,12 @@ private[core] class SubSpoutStage(runContext: RunSupport.RunContext, val in: Sta
     onError = stopErrorF(out),
 
     xEvent = {
-      case EnableSubscriptionTimeout => stay() // ignore
-      case RunSupport.SubscriptionTimeout => stay() // ignore
+      case EnableSubStreamStartTimeout => stay() // ignore
+      case RunContext.SubStreamStartTimeout => stay() // ignore
     })
 }
 
 private[core] object SubSpoutStage {
 
-  case object EnableSubscriptionTimeout
+  case object EnableSubStreamStartTimeout
 }

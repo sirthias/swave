@@ -112,4 +112,109 @@ Example 8:
  |
  o Drain.Head()
 
+Example 9:
+ o Spout.FromIterator(non-empty iterator)
+ |
+ |
+ o Map(<function1>)
+ |
+ |
+ o OnSignal(<function1>)
+ |
+ |
+ o AsyncBoundary(foo)
+ |
+ |
+ o BufferWithBackpressure(16, 8)
+ |
+ |
+ o OnSignal(<function1>)
+ |
+ |
+ o--+ FanOut.Broadcast(false)
+ |  |
+ |  |
+ |  o Drop(2)
+ |  |
+ |  |
+ |  o OnSignal(<function1>)
+ |  |
+ |  |
+ o  | Take(2)
+ |  |
+ |  |
+ o  | OnSignal(<function1>)
+ |  |
+ |  |
+ o  | AsyncBoundary()
+ |  |
+ |  |
+ o  | BufferWithBackpressure(16, 8)
+ |  |
+ |  |
+ o  | {multiply}
+ |  |
+ |  |
+ |  |  o Spout.FromIterator(non-empty iterator)
+ |  |  |
+ |  |  |
+ |  |  o--+ Map(<function1>)
+ |  |     |
+ |  |     |
+ |  +--+  o AsyncBoundary()
+ |     |  |
+ |     |  |
+ +--+  |  o BufferWithBackpressure(16, 8)
+    |  |  |
+    |  |  |
+ o--|--+--+ FanIn.Concat()
+ |  |
+ |  |
+ o--+ FanIn.Concat()
+ |
+ |
+ o OnSignal(<function1>)
+ |
+ |
+ o--+ {tee}
+ |  |
+ |  |
+ o  | Map(<function1>)
+ |  |
+ |  |
+ o  | OnSignal(<function1>)
+ |  |
+ |  |
+ o  | Fold(, <function2>)
+ |  |
+ |  |
+ o  | Map(<function1>)
+ |  |
+ |  |
+ o  | Drain.Head()
+    |
+    |
+ o--+ AsyncBoundary()
+ |
+ |
+ o BufferWithBackpressure(16, 8)
+ |
+ |
+ o OnSignal(<function1>)
+ |
+ |
+ o Deduplicate()
+ |
+ |
+ o AsyncDispatcher(bar)
+ |
+ |
+ o Fold(, <function2>)
+ |
+ |
+ o Map(<function1>)
+ |
+ |
+ o Drain.Head()
+
 -- last line -- do not remove --

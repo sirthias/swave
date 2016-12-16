@@ -7,7 +7,7 @@
 package swave.core.impl.stages.inout
 
 import scala.concurrent.duration._
-import swave.core.impl.{Inport, Outport, StreamRunner}
+import swave.core.impl.{Inport, Outport, RunContext}
 import swave.core.impl.stages.InOutStage
 import swave.core.{Cancellable, Stage, StreamTimeoutException}
 import swave.core.macros._
@@ -21,8 +21,8 @@ private[core] final class WithIdleTimeoutStage(timeout: FiniteDuration) extends 
 
   def kind = Stage.Kind.InOut.WithIdleTimeout(timeout)
 
-  connectInOutAndSealWith { (ctx, in, out) ⇒
-    ctx.registerRunnerAssignment(StreamRunner.Assignment.Default(this))
+  connectInOutAndSealWith { (in, out) ⇒
+    region.impl.requestDispatcherAssignment()
     running(in, out)
   }
 
@@ -31,7 +31,7 @@ private[core] final class WithIdleTimeoutStage(timeout: FiniteDuration) extends 
     def awaitingDemand() = state(
       request = (n, _) => {
         in.request(n.toLong)
-        active(runner.scheduleTimeout(this, timeout), n.toLong)
+        active(region.impl.scheduleTimeout(this, timeout), n.toLong)
       },
 
       cancel = stopCancelF(in),
@@ -52,7 +52,7 @@ private[core] final class WithIdleTimeoutStage(timeout: FiniteDuration) extends 
       onNext = (elem, _) => {
         timer.cancel()
         out.onNext(elem)
-        if (remaining > 1) active(runner.scheduleTimeout(this, timeout), remaining - 1)
+        if (remaining > 1) active(region.impl.scheduleTimeout(this, timeout), remaining - 1)
         else awaitingDemand()
       },
 
@@ -67,7 +67,7 @@ private[core] final class WithIdleTimeoutStage(timeout: FiniteDuration) extends 
       },
 
       xEvent = {
-        case StreamRunner.Timeout(t) =>
+        case RunContext.Timeout(t) =>
           if (t eq timer) {
             in.cancel()
             val e = new StreamTimeoutException(s"No elements passed in the last $timeout")

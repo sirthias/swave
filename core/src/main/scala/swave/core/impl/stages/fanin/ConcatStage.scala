@@ -21,7 +21,7 @@ private[core] final class ConcatStage(subs: InportList) extends FanInStage(subs)
 
   def kind = Stage.Kind.FanIn.Concat
 
-  connectFanInAndSealWith { (ctx, out) ⇒ running(out, subs, 0) }
+  connectFanInAndSealWith { out ⇒ running(out, subs, 0) }
 
   /**
     * @param out     the active downstream

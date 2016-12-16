@@ -9,21 +9,19 @@ package swave.core.impl.stages.inject
 import scala.util.control.NonFatal
 import swave.core.impl.stages.InOutStage
 import swave.core.impl.stages.spout.SubSpoutStage
-import swave.core.impl.{Inport, Outport, RunSupport}
+import swave.core.impl.{Inport, Outport}
 import swave.core.macros._
 import swave.core.util._
 import swave.core.{Split, Spout, Stage}
 
 // format: OFF
 @StageImplementation(fullInterceptions = true)
-private[core] final class SplitStage(commandFor: Any ⇒ Split.Command, eagerCancel: Boolean)
-  extends InOutStage with RunSupport.RunContextAccess {
+private[core] final class SplitStage(commandFor: Any ⇒ Split.Command, eagerCancel: Boolean) extends InOutStage {
 
-  def kind = Stage.Kind.InOut.Split(commandFor, eagerCancel)
+  def kind = Stage.Kind.Inject.Split(commandFor, eagerCancel)
 
-  connectInOutAndSealWith { (ctx, in, out) ⇒
-    ctx.registerForXStart(this)
-    ctx.registerForRunContextAccess(this)
+  connectInOutAndSealWith { (in, out) ⇒
+    region.impl.registerForXStart(this)
     running(in, out)
   }
 
@@ -61,7 +59,7 @@ private[core] final class SplitStage(commandFor: Any ⇒ Split.Command, eagerCan
       request = (_, from) ⇒ {
         if (from eq out) {
           val s = emitNewSub()
-          s.xEvent(SubSpoutStage.EnableSubscriptionTimeout)
+          s.xEvent(SubSpoutStage.EnableSubStreamStartTimeout)
           awaitingSubDemandUpstreamGone(s, elem)
         } else stay()
       },
@@ -134,13 +132,13 @@ private[core] final class SplitStage(commandFor: Any ⇒ Split.Command, eagerCan
             noSubAwaitingElem(mainRemaining)
           }
         case x if x eq out =>
-          sub.xEvent(SubSpoutStage.EnableSubscriptionTimeout)
+          sub.xEvent(SubSpoutStage.EnableSubStreamStartTimeout)
           awaitingSubDemandDownstreamGone(sub, elem, lastInSub)
         case _ => stay()
       },
 
       onComplete = _ => {
-        sub.xEvent(SubSpoutStage.EnableSubscriptionTimeout)
+        sub.xEvent(SubSpoutStage.EnableSubStreamStartTimeout)
         awaitingSubDemandUpstreamGone(sub, elem)
       },
       onError = stopErrorSubAndMainF(sub))
@@ -229,7 +227,7 @@ private[core] final class SplitStage(commandFor: Any ⇒ Split.Command, eagerCan
       cancel = {
         case x if x eq sub => noSubAwaitingElem(mainRemaining)
         case x if x eq out =>
-          sub.xEvent(SubSpoutStage.EnableSubscriptionTimeout)
+          sub.xEvent(SubSpoutStage.EnableSubStreamStartTimeout)
           awaitingElemDownstreamGone(sub, subRemaining)
         case _ => stay()
       },
@@ -321,7 +319,7 @@ private[core] final class SplitStage(commandFor: Any ⇒ Split.Command, eagerCan
     ///////////////////////// helpers //////////////////////////
 
     def emitNewSub() = {
-      val s = new SubSpoutStage(runContext, this)
+      val s = new SubSpoutStage(this)
       out.onNext(new Spout(s).asInstanceOf[AnyRef])
       s
     }

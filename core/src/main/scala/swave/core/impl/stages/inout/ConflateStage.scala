@@ -19,8 +19,8 @@ private[core] final class ConflateStage(lift: Any => AnyRef, aggregate: (Any, An
 
   def kind = Stage.Kind.InOut.Conflate(lift, aggregate)
 
-  connectInOutAndSealWith { (ctx, in, out) ⇒
-    ctx.registerForXStart(this)
+  connectInOutAndSealWith { (in, out) ⇒
+    region.impl.registerForXStart(this)
     running(in, out)
   }
 

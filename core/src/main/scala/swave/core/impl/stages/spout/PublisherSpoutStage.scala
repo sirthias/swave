@@ -8,7 +8,7 @@ package swave.core.impl.stages.spout
 
 import org.reactivestreams.{Publisher, Subscriber, Subscription}
 import swave.core.Stage
-import swave.core.impl.{Outport, StreamRunner}
+import swave.core.impl.Outport
 import swave.core.impl.rs.RSCompliance
 import swave.core.impl.stages.SpoutStage
 import swave.core.macros.StageImplementation
@@ -20,9 +20,9 @@ private[core] final class PublisherSpoutStage(publisher: Publisher[AnyRef]) exte
 
   def kind = Stage.Kind.Spout.FromPublisher(publisher)
 
-  connectOutAndSealWith { (ctx, out) ⇒
-    ctx.registerRunnerAssignment(StreamRunner.Assignment.Default(this))
-    ctx.registerForXStart(this)
+  connectOutAndSealWith { out ⇒
+    region.impl.requestDispatcherAssignment()
+    region.impl.registerForXStart(this)
     awaitingXStart(out)
   }
 
@@ -32,16 +32,16 @@ private[core] final class PublisherSpoutStage(publisher: Publisher[AnyRef]) exte
         new Subscriber[AnyRef] {
           def onSubscribe(s: Subscription) = {
             RSCompliance.verifyNonNull(s, "Subscription", "2.13")
-            runner.enqueueXEvent(stage, s)
+            region.impl.enqueueXEvent(stage, s)
           }
           def onNext(elem: AnyRef) = {
             RSCompliance.verifyNonNull(elem, "Element", "2.13")
-            runner.enqueueOnNext(stage, elem)(stage)
+            region.impl.enqueueOnNext(stage, elem)(stage)
           }
-          def onComplete() = runner.enqueueOnComplete(stage)(stage)
+          def onComplete() = region.impl.enqueueOnComplete(stage)(stage)
           def onError(e: Throwable) = {
             RSCompliance.verifyNonNull(e, "Throwable", "2.13")
-            stage.runner.enqueueOnError(stage, e)(stage)
+            region.impl.enqueueOnError(stage, e)(stage)
           }
         }
       }

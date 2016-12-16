@@ -19,8 +19,8 @@ private[core] final class DropStage(count: Long) extends InOutStage {
 
   def kind = Stage.Kind.InOut.Drop(count)
 
-  connectInOutAndSealWith { (ctx, in, out) ⇒
-    ctx.registerForXStart(this)
+  connectInOutAndSealWith { (in, out) ⇒
+    region.impl.registerForXStart(this)
     running(in, out)
   }
 

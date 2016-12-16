@@ -18,7 +18,7 @@ private[core] final class MapStage(f: Any ⇒ AnyRef) extends InOutStage {
 
   def kind = Stage.Kind.InOut.Map(f)
 
-  connectInOutAndSealWith { (ctx, in, out) ⇒ running(in, out) }
+  connectInOutAndSealWith { (in, out) ⇒ running(in, out) }
 
   def running(in: Inport, out: Outport): State = state(
     intercept = false,

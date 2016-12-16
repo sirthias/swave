@@ -8,7 +8,7 @@ package swave.core.impl.stages.inout
 
 import scala.concurrent.duration._
 import scala.util.control.NonFatal
-import swave.core.impl.{Inport, Outport, StreamRunner}
+import swave.core.impl.{Inport, Outport, RunContext}
 import swave.core.impl.stages.InOutStage
 import swave.core.{Cancellable, Stage}
 import swave.core.macros._
@@ -20,8 +20,8 @@ private[core] final class DelayStage(delayFor: AnyRef => FiniteDuration) extends
 
   def kind = Stage.Kind.InOut.Delay(delayFor)
 
-  connectInOutAndSealWith { (ctx, in, out) ⇒
-    ctx.registerRunnerAssignment(StreamRunner.Assignment.Default(this))
+  connectInOutAndSealWith { (in, out) ⇒
+    region.impl.requestDispatcherAssignment()
     running(in, out)
   }
 
@@ -37,7 +37,7 @@ private[core] final class DelayStage(delayFor: AnyRef => FiniteDuration) extends
         cancel = stopCancelF(in),
         onComplete = stopCompleteF(out),
         onError = stopErrorF(out),
-        xEvent = { case StreamRunner.Timeout(_) => stay() })
+        xEvent = { case RunContext.Timeout(_) => stay() })
 
     /**
       * @param remaining number of elements already requested by downstream but not yet delivered, > 0
@@ -53,7 +53,7 @@ private[core] final class DelayStage(delayFor: AnyRef => FiniteDuration) extends
           val d = try delayFor(elem) catch { case NonFatal(e) => { funError = e; Duration.Zero } }
           if (funError eq null) {
             if (d <= Duration.Zero) dispatch(elem, remaining)
-            else awaitingTimeout(elem, runner.scheduleTimeout(this, d), remaining)
+            else awaitingTimeout(elem, region.impl.scheduleTimeout(this, d), remaining)
           } else {
             in.cancel()
             stopError(funError, out)
@@ -62,7 +62,7 @@ private[core] final class DelayStage(delayFor: AnyRef => FiniteDuration) extends
 
         onComplete = stopCompleteF(out),
         onError = stopErrorF(out),
-        xEvent = { case StreamRunner.Timeout(_) => stay() })
+        xEvent = { case RunContext.Timeout(_) => stay() })
     }
 
     /**
@@ -91,7 +91,7 @@ private[core] final class DelayStage(delayFor: AnyRef => FiniteDuration) extends
           stopError(e, out)
         },
 
-        xEvent = { case StreamRunner.Timeout(t) => if (t eq timer) dispatch(elem, remaining) else stay() })
+        xEvent = { case RunContext.Timeout(t) => if (t eq timer) dispatch(elem, remaining) else stay() })
     }
 
     def dispatch(elem: AnyRef, remaining: Long) = {

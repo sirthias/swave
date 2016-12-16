@@ -1,0 +1,95 @@
+Example 1:
+= Spout.FromIterator: 0
+|
+o Map: 0
+|
+= Drain.Head: 0
+
+Example 2:
+= Spout.FromIterator: 1
+|
+o Take: 1
+|
+o AsyncBoundary: 1
+|
+o BufferWithBackpressure: 0
+|
+o Map: 0
+|
+= Drain.Head: 0
+
+Example 3:
+= Spout.FromIterator: 0
+|
+o-+ FanOut.Broadcast: 0
+| |
+o | Map: 0
+| |
+| o AsyncBoundary: 0
+| |
+| o BufferWithBackpressure: 0
+| |
+o-+ FanIn.Concat: 0
+|
+= Drain.Head: 0
+
+Example 4:
+= Spout.FromIterator: 3
+|
+o Map: 3
+|
+o AsyncBoundary: 3
+|
+o BufferWithBackpressure: 0
+|
+o-+ FanOut.Broadcast: 0
+| |
+o | Drop: 0
+| |
+| o Take: 0
+| |
+| o AsyncBoundary: 0
+| |
+| o BufferWithBackpressure: 0
+| |
+| o Map: 0
+| |
+| o Flatten.Concat: 0
+| |
+| | = Spout.FromIterator: 2
+| | |
+| | o Map: 2
+| | |
+| | o AsyncBoundary: 2
+| | |
+| | o BufferWithBackpressure: 0
+| | |
+o-|-+ FanIn.Concat: 0
+| |
+o-+ FanIn.Concat: 0
+|
+o-+ FanOut.Broadcast: 0
+| |
+| o Map: 0
+| |
+| o Fold: 0
+| |
+| o Map: 0
+| |
+| = Drain.Head: 0
+|
+o AsyncBoundary: 0
+|
+o BufferWithBackpressure: 1
+|
+o Deduplicate: 1
+|
+o AsyncDispatcher: 1
+|
+o Fold: 1
+|
+o Map: 1
+|
+= Drain.Head: 1
+
+-- last line -- do not remove --

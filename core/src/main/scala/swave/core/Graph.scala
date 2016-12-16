@@ -7,7 +7,7 @@
 package swave.core
 
 import scala.annotation.tailrec
-import scala.collection.immutable.BitSet
+import scala.collection.immutable.{BitSet, ListSet}
 import scala.collection.mutable
 import swave.core.graph.{Digraph, GlyphSet}
 import swave.core.macros._
@@ -28,35 +28,57 @@ object Graph {
     def Some(names: List[String]) = ExpandModules(id ⇒ names contains id.name)
   }
 
-  def render(stage: Stage,
-             expandModules: ExpandModules = ExpandModules.None,
-             glyphSet: GlyphSet = GlyphSet.`3x3 ASCII`,
-             showParams: Boolean = false,
-             showRunners: Boolean = false,
-             showNops: Boolean = false) = {
+  def from(stage: Stage, expandModules: ExpandModules = ExpandModules.None): Renderable =
+    Renderable(create(stage, expandModules))
 
-    val graph = create(stage, expandModules)
-    if (!showNops) graph.markHidden { case Right(x) if x.kind == Stage.Kind.InOut.Nop ⇒ true; case _ ⇒ false }
-    graph.render(glyphSet).format {
-      case x @ Right(st) ⇒
-        val label =
-          if (showParams || showRunners) {
-            val sb = new java.lang.StringBuilder(st.kind.name)
-            if (showParams) sb.append(st.kind.productIterator.mkString("(", ", ", ")"))
-            if (showRunners) sb.append(" ^").append(if (st.stageImpl.hasRunner) st.stageImpl.runner else "none")
-            sb.toString
-          } else st.kind.name
-        graph.attributes(x) match {
-          case Nil     ⇒ label
-          case modules ⇒ label + modules.mkString(" [", ", ", "]")
+  val DefaultStageFormat: (Stage, List[Module.ID]) => String = {
+    case (s, Nil) ⇒ s.kind.name
+    case (s, ids) ⇒ s.kind.name + ids.mkString(" [", ", ", "]")
+  }
+
+  final case class Renderable(graph: Digraph[Vertex],
+                              glyphSet: GlyphSet = GlyphSet.`3x3 ASCII`,
+                              showNops: Boolean = false,
+                              formatStage: (Stage, List[Module.ID]) => String = DefaultStageFormat,
+                              formatModuleId: Module.ID => String = id => s"{${id.name}}") {
+    def withGlyphSet(glyphSet: GlyphSet): Renderable                       = copy(glyphSet = glyphSet)
+    def withNops: Renderable                                               = copy(showNops = true)
+    def withStageFormat(f: (Stage, List[Module.ID]) => String): Renderable = copy(formatStage = f)
+    def withModuleIdFormat(f: Module.ID => String): Renderable             = copy(formatModuleId = f)
+
+    def render(): String = {
+      if (!showNops) {
+        graph.markHidden {
+          case Right(x) if x.kind == Stage.Kind.InOut.Nop ⇒ true
+          case _                                          ⇒ false
         }
-      case Left(moduleID) ⇒ s"{${moduleID.name}}"
+      }
+      graph.render(glyphSet).format {
+        case x @ Right(st)  ⇒ formatStage(st, graph.attributes(x).asInstanceOf[List[Module.ID]])
+        case Left(moduleID) ⇒ formatModuleId(moduleID)
+      }
     }
   }
 
+  def superRegions(regions: List[Stage.Region]): List[List[Stage.Region]] =
+    regions
+      .foldLeft(new mutable.ArrayBuffer[(Set[Stage], List[Stage.Region])]) {
+        case (buf, region) =>
+          buf.indexWhere(_._1 contains region.entryPoint) match {
+            case -1 => buf += (explore(region.entryPoint) -> List(region))
+            case ix => { buf(ix) = buf(ix)._1 -> (region :: buf(ix)._2); buf }
+          }
+      }
+      .map(_._2)(collection.breakOut)
+
+  def explore(regions: List[Stage.Region]): Set[Stage] =
+    regions.foldLeft(Set.empty[Stage]) { (set, r) =>
+      if (set contains r.entryPoint) set else set ++ explore(r.entryPoint)
+    }
+
   def explore(entryStage: Stage): Set[Stage] = {
     final class Rec extends (Stage ⇒ Unit) {
-      var result                     = Set.empty[Stage]
+      var result                     = ListSet.empty[Stage] // not great but provides stable order
       var seenModules                = Set.empty[Module.ID]
       var remainingEntryPoints       = Iterator.single(entryStage)
       def _apply(stage: Stage): Unit = apply(stage)
@@ -104,7 +126,7 @@ object Graph {
     ///////////////// STEP 1: discover complete graph ///////////////////////
 
     val allElems = explore(entryStage)
-    val graph0   = Digraph[Stage](entryStage :: allElems.toList, _.inputStages, _.outputStages)
+    val graph0   = Digraph[Stage](allElems.toList, _.inputStages, _.outputStages)
 
     ///////////////// STEP 2: identify modules, apply markers //////////////////////
 
@@ -202,7 +224,7 @@ object Graph {
 
       val collapsedGraph = Digraph[Vertex](visibleCollapsed.map(info ⇒ Left(info.id)), preds, succs)
       for (info ← allModuleInfos) {
-        collapsedGraph.addVertexAttributes(collapsedGraph.migrateVertexSet(graph0, info.vertices), info.id.name)
+        collapsedGraph.addVertexAttributes(collapsedGraph.migrateVertexSet(graph0, info.vertices), info.id)
       }
       collapsedGraph.vertices.foreach {
         case x @ Right(stage) if stage.kind == Stage.Kind.InOut.Coupling ⇒
@@ -212,7 +234,7 @@ object Graph {
       collapsedGraph
     } else {
       // all modules are expanded
-      for (info ← allModuleInfos) graph0.addVertexAttributes(info.vertices, info.id.name)
+      for (info ← allModuleInfos) graph0.addVertexAttributes(info.vertices, info.id)
       graph0.vertices.foreach { x =>
         if (x.kind == Stage.Kind.InOut.Coupling && x.inputStages.nonEmpty && x.outputStages.nonEmpty)
           graph0.markPaths(x.inputStages.head, x.outputStages.head, Reversaphile | Fusable)

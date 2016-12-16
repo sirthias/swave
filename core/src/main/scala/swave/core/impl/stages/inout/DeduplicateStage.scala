@@ -17,7 +17,7 @@ private[core] final class DeduplicateStage extends InOutStage {
 
   def kind = Stage.Kind.InOut.Deduplicate
 
-  connectInOutAndSealWith { (ctx, in, out) ⇒ running(in, out, this) }
+  connectInOutAndSealWith { (in, out) ⇒ running(in, out, this) }
 
   def running(in: Inport, out: Outport, last: AnyRef): State = state(
     request = requestF(in),

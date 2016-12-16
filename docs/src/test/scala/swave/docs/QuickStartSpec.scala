@@ -89,7 +89,7 @@ class QuickStartSpec extends FreeSpec with Matchers {
       val result: Future[Unit] =
         Spout(1 to 100)
           .to(Drain.foreach(println))
-          .run().result
+          .run().get.result
       //#run
 
       //#shortcuts

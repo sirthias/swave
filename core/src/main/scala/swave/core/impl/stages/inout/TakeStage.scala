@@ -19,9 +19,9 @@ private[core] final class TakeStage(count: Long) extends InOutStage {
 
   def kind = Stage.Kind.InOut.Take(count)
 
-  connectInOutAndSealWith { (ctx, in, out) ⇒
+  connectInOutAndSealWith { (in, out) ⇒
     if (count == 0) {
-      ctx.registerForXStart(this)
+      region.impl.registerForXStart(this)
       awaitingXStart(in, out)
     } else running(in, out, count)
   }

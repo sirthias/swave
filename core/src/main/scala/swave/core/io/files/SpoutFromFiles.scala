@@ -48,5 +48,5 @@ trait SpoutFromFiles extends Any {
     * an async stream.
     */
   def fromPath[T: Bytes](path: Path, chunkSize: Int = 0): Spout[T] =
-    new Spout(new FileSpoutStage(path, chunkSize)).async("blocking-io")
+    new Spout(new FileSpoutStage(path, chunkSize)).asyncBoundary("blocking-io")
 }

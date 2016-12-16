@@ -8,8 +8,8 @@ package swave.core.impl.stages.inout
 
 import swave.core.Stage
 import swave.core.impl.stages.{InOutStage, StageImpl}
-import swave.core.impl.{Inport, Outport, StreamRunner}
-import swave.core.macros.StageImplementation
+import swave.core.impl.{Inport, Outport}
+import swave.core.macros._
 
 // format: OFF
 @StageImplementation
@@ -17,39 +17,65 @@ private[core] final class AsyncBoundaryStage(dispatcherId: String) extends InOut
 
   def kind = Stage.Kind.InOut.AsyncBoundary(dispatcherId)
 
-  connectInOutAndSealWith { (ctx, inport, outport) ⇒
+  connectInOutAndSealWith_NoAutoPropagation { (inport, outport) ⇒
     val inp = inport.stageImpl
     val outp = outport.stageImpl
-    ctx.registerRunnerAssignment(StreamRunner.Assignment(inp, dispatcherId))
-    ctx.registerRunnerAssignment(StreamRunner.Assignment.Default(outp))
-    running(inp, outp)
+
+    def completeSealing() = {
+      region.impl.requestDispatcherAssignment(dispatcherId)
+      running(inp, outp)
+    }
+
+    if (inp.isSealed) {
+      requireState(region eq inp.region)
+      if (outp.isSealed) requireState(region ne outp.region)
+      else region.runContext.impl.registerForSealing(outp)
+      completeSealing()
+    } else if (outp.isSealed) {
+      if (region eq outp.region) {
+        region.runContext.impl.registerForSealing(this)
+        resetRegion()
+        stay()
+      } else {
+        inp.xSeal(region)
+        completeSealing()
+      }
+    } else {
+      region.runContext.impl.registerForSealing(outp)
+      inp.xSeal(region)
+      completeSealing()
+    }
   }
 
   def running(inp: StageImpl, outp: StageImpl) = state(
     intercept = false,
 
     request = (n, _) ⇒ {
-      inp.runner.enqueueRequest(inp, n.toLong)
+      region.impl.enqueueRequest(inp, n.toLong)
       stay()
     },
 
-    cancel = _ => {
-      inp.runner.enqueueCancel(inp)
-      stop()
+    cancel = from => {
+      if (from ne this) {
+        // if we are called directly from downstream we are not on the right thread
+        // and must not mutate our state in any way
+        region.impl.enqueueCancel(this)
+        stay()
+      } else stopCancel(inp) // once we are on the right thread we can cancel and stop normally
     },
 
     onNext = (elem, _) ⇒ {
-      outp.runner.enqueueOnNext(outp, elem)
+      outp.region.impl.enqueueOnNext(outp, elem)
       stay()
     },
 
     onComplete = _ => {
-      outp.runner.enqueueOnComplete(outp)
+      outp.region.impl.enqueueOnComplete(outp)
       stop()
     },
 
     onError = (error, _) => {
-      outp.runner.enqueueOnError(outp, error)
+      outp.region.impl.enqueueOnError(outp, error)
       stop(error)
     })
 }

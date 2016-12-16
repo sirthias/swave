@@ -25,8 +25,8 @@ private[core] final class MergeStage(subs: InportList, eagerComplete: Boolean) e
   // stores (sub, elem) records in the order they arrived so we can dispatch them quickly when they are requested
   private[this] val buffer: RingBuffer[InportAnyRefList] = new RingBuffer(roundUpToPowerOf2(subs.size))
 
-  connectFanInAndSealWith { (ctx, out) ⇒
-    ctx.registerForXStart(this)
+  connectFanInAndSealWith { out ⇒
+    region.impl.registerForXStart(this)
     awaitingXStart(out)
   }
 

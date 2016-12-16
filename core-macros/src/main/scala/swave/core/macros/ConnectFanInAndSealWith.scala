@@ -11,10 +11,9 @@ private[macros] trait ConnectFanInAndSealWith { this: Util =>
   import c.universe._
 
   def connectFanInAndSealWith(f: Tree): List[Tree] = unblock {
-    val q"($ctx0: $_, $out0: $_) => $block0" = f
-    val ctx                                  = freshName("ctx")
-    val out                                  = freshName("out")
-    val block                                = replaceIdents(block0, ctx0 -> ctx, out0 -> out)
+    val q"($out0: $_) => $block0" = f
+    val out                       = freshName("out")
+    val block                     = replaceIdents(block0, out0 -> out)
 
     q"""
       initialState(connecting(null, subs))
@@ -39,11 +38,9 @@ private[macros] trait ConnectFanInAndSealWith { this: Util =>
       def ready(out: Outport) = state(
         intercept = false,
 
-        xSeal = c ⇒ {
-          configureFrom(c)
-          out.xSeal(c)
-          subs.foreach(_.in.xSeal(c)) // TODO: avoid function allocation
-          val $ctx = c
+        xSeal = () ⇒ {
+          out.xSeal(region)
+          subs.foreach(_.in.xSeal(region)) // TODO: avoid function allocation
           val $out = out
           $block
         })

@@ -17,7 +17,7 @@ private[core] final class NopStage extends InOutStage {
 
   def kind = Stage.Kind.InOut.Nop
 
-  connectInOutAndSealWith { (ctx, in, out) ⇒ running(in, out) }
+  connectInOutAndSealWith { (in, out) ⇒ running(in, out) }
 
   def running(in: Inport, out: Outport) = state(
     intercept = false,

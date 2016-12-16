@@ -10,7 +10,7 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success}
 import swave.core.Stage
 import swave.core.impl.stages.SpoutStage
-import swave.core.impl.{CallingThreadExecutionContext, Outport, StreamRunner}
+import swave.core.impl.{CallingThreadExecutionContext, Outport}
 import swave.core.macros.StageImplementation
 
 // format: OFF
@@ -19,9 +19,9 @@ private[core] final class FutureSpoutStage(future: Future[AnyRef]) extends Spout
 
   def kind = Stage.Kind.Spout.FromFuture(future)
 
-  connectOutAndSealWith { (ctx, out) ⇒
-    ctx.registerRunnerAssignment(StreamRunner.Assignment.Default(this))
-    ctx.registerForXStart(this)
+  connectOutAndSealWith { out ⇒
+    region.impl.requestDispatcherAssignment()
+    region.impl.registerForXStart(this)
     running(out)
   }
 
@@ -29,7 +29,7 @@ private[core] final class FutureSpoutStage(future: Future[AnyRef]) extends Spout
 
     def awaitingXStart() = state(
       xStart = () => {
-        future.onComplete(runner.enqueueXEvent(this, _))(CallingThreadExecutionContext)
+        future.onComplete(region.impl.enqueueXEvent(this, _))(CallingThreadExecutionContext)
         awaitingValueOrRequest()
       })
 

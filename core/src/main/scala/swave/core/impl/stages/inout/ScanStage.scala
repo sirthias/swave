@@ -18,7 +18,7 @@ private[core] final class ScanStage(zero: AnyRef, f: (Any, Any) ⇒ AnyRef) exte
 
   def kind = Stage.Kind.InOut.Scan(zero, f)
 
-  connectInOutAndSealWith { (ctx, in, out) ⇒ awaitingDemand(in, out) }
+  connectInOutAndSealWith { (in, out) ⇒ awaitingDemand(in, out) }
 
   /**
     * @param in  the active upstream

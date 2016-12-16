@@ -8,7 +8,7 @@ package swave.core.impl.stages.drain
 
 import scala.util.control.NonFatal
 import swave.core.impl.stages.spout.SubSpoutStage
-import swave.core.impl.{Inport, Outport, RunSupport}
+import swave.core.impl.{Inport, Outport}
 import swave.core.macros.StageImplementation
 import swave.core.impl.stages.DrainStage
 import swave.core._
@@ -16,13 +16,12 @@ import swave.core._
 // format: OFF
 @StageImplementation
 private[core] final class LazyStartDrainStage[R](onStart: () => Drain[_, R], connectResult: R => Unit)
-  extends DrainStage with RunSupport.RunContextAccess {
+  extends DrainStage {
 
   def kind = Stage.Kind.Drain.LazyStart(onStart)
 
-  connectInAndSealWith { (ctx, in) ⇒
-    ctx.registerForXStart(this)
-    ctx.registerForRunContextAccess(this)
+  connectInAndSealWith { in ⇒
+    region.impl.registerForXStart(this)
     awaitingXStart(in)
   }
 
@@ -36,10 +35,10 @@ private[core] final class LazyStartDrainStage[R](onStart: () => Drain[_, R], con
           d
         } catch { case NonFatal(e) => { funError = e; null } }
       if (funError eq null) {
-        val sub = new SubSpoutStage(runContext, this)
+        val sub = new SubSpoutStage(this)
         sub.subscribe()(innerDrain.outport)
         try {
-          RunSupport.sealAndStartSubStream(sub, runContext)
+          region.sealAndStart(sub)
           running(in, sub)
         } catch {
           case NonFatal(e) =>

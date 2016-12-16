@@ -21,8 +21,8 @@ private[core] final class DropLastStage(count: Int) extends InOutStage {
 
   private[this] val buffer = new RingBuffer[AnyRef](roundUpToPowerOf2(count))
 
-  connectInOutAndSealWith { (ctx, in, out) ⇒
-    ctx.registerForXStart(this)
+  connectInOutAndSealWith { (in, out) ⇒
+    region.impl.registerForXStart(this)
     awaitingXStart(in, out)
   }
 

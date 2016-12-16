@@ -18,7 +18,7 @@ private[core] final class RepeatSpoutStage(element: AnyRef) extends SpoutStage {
 
   def kind = Stage.Kind.Spout.Repeat(element)
 
-  connectOutAndSealWith { (ctx, out) ⇒ running(out) }
+  connectOutAndSealWith { out ⇒ running(out) }
 
   def running(out: Outport): State = state(
     request = (n, _) ⇒ {

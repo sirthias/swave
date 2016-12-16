@@ -19,11 +19,38 @@ abstract class Stage private[swave] {
   def inputStages: List[Stage]
   def outputStages: List[Stage]
   def boundaryOf: List[Module.ID]
+  def region: Stage.Region
+
+  final def params: Iterator[Any] = kind.productIterator
+  final def paramsStr: String     = params.mkString(", ")
+  def isStopped: Boolean
 
   private[swave] def stageImpl: StageImpl
 }
 
 object Stage {
+
+  trait Runner {
+    def dispatcher: Dispatcher
+  }
+
+  abstract class Region private[core] {
+    def state: Region.State
+    def entryPoint: Stage
+    def parent: Option[Region]
+    def stagesTotalCount: Int
+    def stagesActiveCount: Int
+    final def hashId: Int = System.identityHashCode(this)
+  }
+  object Region {
+    sealed abstract class State
+    object State {
+      case object PreStart                          extends State
+      case object SyncRunning                       extends State
+      final case class AsyncRunning(runner: Runner) extends State
+      case object Stopped                           extends State
+    }
+  }
 
   sealed abstract class Kind extends Product {
     def name: String
@@ -96,8 +123,6 @@ object Stage {
       final case class DropWithin(duration: FiniteDuration)                                 extends InOut
       final case class Expand(zero: Iterator[_], extrapolate: _ => Iterator[_])             extends InOut
       final case class Filter(predicate: Any ⇒ Boolean, negated: Boolean)                   extends InOut
-      final case class FlattenConcat(parallelism: Int)                                      extends InOut
-      final case class FlattenMerge(parallelism: Int)                                       extends InOut
       final case class Fold(zero: AnyRef, f: (_, _) ⇒ _)                                    extends InOut
       final case class GroupBy(maxSubstreams: Int, reopenCancelledSubs: Boolean, eagerComplete: Boolean, keyFun: _ ⇒ _)
           extends InOut
@@ -106,7 +131,6 @@ object Stage {
                                builder: scala.collection.mutable.Builder[_, _])
           extends InOut
       final case class GroupedWithin(maxSize: Int, duration: FiniteDuration)   extends InOut
-      case object Inject                                                       extends InOut
       final case class Intersperse(start: AnyRef, inject: AnyRef, end: AnyRef) extends InOut
       final case class Limit(max: Long, cost: _ ⇒ Long)                        extends InOut
       final case class Map(f: _ ⇒ _)                                           extends InOut
@@ -116,15 +140,14 @@ object Stage {
       final case class PrefixAndTail(prefixSize: Int)                          extends InOut
       final case class RecoverWith(maxRecoveries: Long, pf: PartialFunction[Throwable, swave.core.Spout[_]])
           extends InOut
-      final case class Scan(zero: AnyRef, f: (_, _) ⇒ _)                                          extends InOut
-      final case class Split(commandFor: AnyRef ⇒ swave.core.Split.Command, eagerCancel: Boolean) extends InOut
-      final case class Take(count: Long)                                                          extends InOut
-      final case class TakeWhile(predicate: Any ⇒ Boolean)                                        extends InOut
-      final case class TakeWithin(duration: FiniteDuration)                                       extends InOut
-      final case class Throttle(cost: Int, per: FiniteDuration, burst: Int, costFn: _ ⇒ Int)      extends InOut
-      final case class WithCompletionTimeout(timeout: FiniteDuration)                             extends InOut
-      final case class WithIdleTimeout(timeout: FiniteDuration)                                   extends InOut
-      final case class WithInitialTimeout(timeout: FiniteDuration)                                extends InOut
+      final case class Scan(zero: AnyRef, f: (_, _) ⇒ _)                                     extends InOut
+      final case class Take(count: Long)                                                     extends InOut
+      final case class TakeWhile(predicate: Any ⇒ Boolean)                                   extends InOut
+      final case class TakeWithin(duration: FiniteDuration)                                  extends InOut
+      final case class Throttle(cost: Int, per: FiniteDuration, burst: Int, costFn: _ ⇒ Int) extends InOut
+      final case class WithCompletionTimeout(timeout: FiniteDuration)                        extends InOut
+      final case class WithIdleTimeout(timeout: FiniteDuration)                              extends InOut
+      final case class WithInitialTimeout(timeout: FiniteDuration)                           extends InOut
     }
 
     sealed abstract class FanIn extends Kind {
@@ -147,6 +170,28 @@ object Stage {
       final case class FirstAvailable(eagerCancel: Boolean)                                            extends FanOut
       final case class RoundRobin(eagerCancel: Boolean)                                                extends FanOut
       final case class Switch(branchCount: Int, f: _ ⇒ Int, eagerCancel: Boolean)                      extends FanOut
+    }
+
+    sealed abstract class Inject extends Kind {
+      def name = "Inject." + productPrefix
+    }
+    object Inject {
+      case object Broadcast                                                                       extends Inject
+      case object RoundRobin                                                                      extends Inject
+      case object Sequential                                                                      extends Inject
+      case object ToAny                                                                           extends Inject
+      final case class Split(commandFor: AnyRef ⇒ swave.core.Split.Command, eagerCancel: Boolean) extends Inject
+    }
+
+    sealed abstract class Flatten extends Kind {
+      def name = "Flatten." + productPrefix
+    }
+    object Flatten {
+      final case class Concat(parallelism: Int) extends Flatten
+      final case class Merge(parallelism: Int)  extends Flatten
+      case object RoundRobin                    extends Flatten
+      case object Sorted                        extends Flatten
+      case object ToSeq                         extends Flatten
     }
   }
 }

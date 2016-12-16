@@ -6,12 +6,11 @@
 
 package swave.core.impl.stages.inout
 
+import scala.util.control.NonFatal
 import swave.core.Stage
 import swave.core.impl.stages.InOutStage
 import swave.core.impl.{Inport, Outport}
 import swave.core.macros.StageImplementation
-
-import scala.util.control.NonFatal
 
 // format: OFF
 @StageImplementation
@@ -19,7 +18,7 @@ private[core] final class TakeWhileStage(predicate: Any ⇒ Boolean) extends InO
 
   def kind = Stage.Kind.InOut.TakeWhile(predicate)
 
-  connectInOutAndSealWith { (ctx, in, out) ⇒ running(in, out) }
+  connectInOutAndSealWith { (in, out) ⇒ running(in, out) }
 
   def running(in: Inport, out: Outport) = state(
     intercept = false,

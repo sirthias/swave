@@ -101,7 +101,6 @@ class SyncVsAsyncSpec extends FreeSpec with Matchers {
       import swave.core._
 
       implicit val env = StreamEnv()
-      import env.defaultDispatcher // for the `termination.onComplete(...)` below
 
       val run: StreamRun[Future[Seq[String]]] =
         Spout.ints(0)
@@ -109,11 +108,11 @@ class SyncVsAsyncSpec extends FreeSpec with Matchers {
           .asyncBoundary() // adds an explicit async boundary here
           .map(_.toString)
           .take(10)
-          .to(Drain.seq(limit = 100)).run()
+          .to(Drain.seq(limit = 100)).run().get
 
       run.result.await() shouldEqual (0 to 45 by 5).map(_.toString)
 
-      run.termination.onComplete(_ => env.shutdown())
+      env.shutdownOn(run.termination)
       //#async-boundary
     }
 
@@ -141,7 +140,7 @@ class SyncVsAsyncSpec extends FreeSpec with Matchers {
           .async("bar")
 
       val result2 = Promise[String]()
-      val result: Future[String] =
+      val run: StreamRun[Future[String]] =
         upperChars("Hello")
           .asyncBoundary("foo")
           .fanOutBroadcast()
@@ -150,12 +149,13 @@ class SyncVsAsyncSpec extends FreeSpec with Matchers {
           .fanInConcat()
           .tee(Pipe[Char].asyncBoundary().deduplicate.to(drain(result2)))
           .map(_.toLower)
-          .drainToMkString(limit = 100)
+          .to(Drain.mkString(limit = 100))
+          .run().get
 
-      result.await() shouldEqual "llo-friend-hhee"
+      run.result.await() shouldEqual "llo-friend-hhee"
       result2.future.await() shouldEqual "LO-FRIEND-HE"
 
-      env.shutdown()
+      env.shutdownOn(run.termination)
       //#complex-example
     }
   }

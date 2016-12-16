@@ -19,9 +19,9 @@ private[core] final class RingBufferSpoutStage(buffer: RingBuffer[AnyRef]) exten
 
   def kind = Stage.Kind.Spout.FromRingBuffer(buffer)
 
-  connectOutAndSealWith { (ctx, out) ⇒
+  connectOutAndSealWith { out ⇒
     if (buffer.isEmpty) {
-      ctx.registerForXStart(this)
+      region.impl.registerForXStart(this)
       awaitingXStart(out)
     } else running(out)
   }

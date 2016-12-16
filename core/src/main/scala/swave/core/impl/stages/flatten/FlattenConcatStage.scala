@@ -6,6 +6,7 @@
 
 package swave.core.impl.stages.flatten
 
+import scala.util.control.NonFatal
 import swave.core.impl._
 import swave.core.impl.stages.InOutStage
 import swave.core.impl.stages.drain.SubDrainStage
@@ -17,15 +18,14 @@ import swave.core.{Stage, Streamable}
 // format: OFF
 @StageImplementation(fullInterceptions = true)
 private[core] final class FlattenConcatStage(streamable: Streamable.Aux[Any, AnyRef], parallelism: Int)
-  extends InOutStage with RunSupport.RunContextAccess {
+  extends InOutStage {
 
   requireArg(parallelism > 0, "`parallelism` must be > 0")
 
-  def kind = Stage.Kind.InOut.FlattenConcat(parallelism)
+  def kind = Stage.Kind.Flatten.Concat(parallelism)
 
-  connectInOutAndSealWith { (ctx, in, out) ⇒
-    ctx.registerForXStart(this)
-    ctx.registerForRunContextAccess(this)
+  connectInOutAndSealWith { (in, out) ⇒
+    region.impl.registerForXStart(this)
     running(in, out)
   }
 
@@ -49,9 +49,16 @@ private[core] final class FlattenConcatStage(streamable: Streamable.Aux[Any, Any
       state(
         onSubscribe = sub ⇒ {
           markAsSubscribed(subs find_! sub)
-          sub.asInstanceOf[SubDrainStage].sealAndStart()
-          if ((subs.in eq sub) && remaining > 0) sub.request(remaining)
-          active(subs, remaining)
+          try {
+            region.sealAndStart(sub.stageImpl)
+            if ((subs.in eq sub) && remaining > 0) sub.request(remaining)
+            active(subs, remaining)
+          } catch {
+            case NonFatal(e) =>
+              in.cancel()
+              cancelAll(subs)
+              stopError(e, out)
+          }
         },
 
         request = (n, _) ⇒ {
@@ -95,7 +102,7 @@ private[core] final class FlattenConcatStage(streamable: Streamable.Aux[Any, Any
     }
 
     def subscribeSubDrain(elem: AnyRef): SubDrainStage = {
-      val sub = new SubDrainStage(runContext, this)
+      val sub = new SubDrainStage(this)
       streamable(elem).inport.subscribe()(sub)
       sub
     }
@@ -115,9 +122,15 @@ private[core] final class FlattenConcatStage(streamable: Streamable.Aux[Any, Any
     state(
       onSubscribe = sub ⇒ {
         markAsSubscribed(subs find_! sub)
-        sub.asInstanceOf[SubDrainStage].sealAndStart()
-        if ((subs.in eq sub) && remaining > 0) sub.request(remaining)
-        activeUpstreamCompleted(out, subs, remaining)
+        try {
+          region.sealAndStart(sub.stageImpl)
+          if ((subs.in eq sub) && remaining > 0) sub.request(remaining)
+          activeUpstreamCompleted(out, subs, remaining)
+        } catch {
+          case NonFatal(e) =>
+            cancelAll(subs)
+            stopError(e, out)
+        }
       },
 
       request = (n, _) ⇒ {

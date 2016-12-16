@@ -20,8 +20,8 @@ private[core] final class ForeachDrainStage(callback: AnyRef ⇒ Unit, terminati
 
   def kind = Stage.Kind.Drain.Foreach(callback, terminationPromise)
 
-  connectInAndSealWith { (ctx, in) ⇒
-    ctx.registerForXStart(this)
+  connectInAndSealWith { in ⇒
+    region.impl.registerForXStart(this)
     awaitingXStart(in)
   }
 

@@ -66,6 +66,6 @@ trait DrainToFiles extends Any {
                        chunkSize: Int = -1): Drain[T, Future[Long]] = {
     val promise = Promise[Long]()
     val drain   = new Drain(new FileDrainStage(path, options, chunkSize, promise), promise.future)
-    Pipe[T].async().to(drain.async("blocking-io"))
+    Pipe[T].asyncBoundary().to(drain.async("blocking-io"))
   }
 }

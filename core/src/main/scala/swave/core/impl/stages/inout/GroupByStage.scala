@@ -11,7 +11,7 @@ import java.util.function.BiConsumer
 import scala.util.control.NonFatal
 import swave.core.impl.stages.{InOutStage, StageImpl}
 import swave.core.impl.stages.spout.SubSpoutStage
-import swave.core.impl.{Inport, Outport, RunSupport}
+import swave.core.impl.{Inport, Outport}
 import swave.core.{Spout, Stage}
 import swave.core.macros._
 import swave.core.util._
@@ -20,8 +20,7 @@ import GroupByStage.Sub
 // format: OFF
 @StageImplementation(fullInterceptions = true)
 private[core] final class GroupByStage(maxSubstreams: Int, reopenCancelledSubs: Boolean, eagerComplete: Boolean,
-                                       keyFun: Any ⇒ AnyRef)
-  extends InOutStage with RunSupport.RunContextAccess { stage =>
+                                       keyFun: Any ⇒ AnyRef) extends InOutStage { stage =>
 
   require(maxSubstreams > 0, "`maxSubStreams` must be > 0")
 
@@ -29,9 +28,8 @@ private[core] final class GroupByStage(maxSubstreams: Int, reopenCancelledSubs: 
 
   private[this] val subMap = new java.util.HashMap[Any, Sub]()
 
-  connectInOutAndSealWith { (ctx, in, out) ⇒
-    ctx.registerForXStart(this)
-    ctx.registerForRunContextAccess(this)
+  connectInOutAndSealWith { (in, out) ⇒
+    region.impl.registerForXStart(this)
     running(in, out)
   }
 
@@ -407,7 +405,7 @@ private[core] final class GroupByStage(maxSubstreams: Int, reopenCancelledSubs: 
     }
 
     def createAndRegisterNewSub(key: AnyRef): Sub = {
-      val sub = new Sub(key, runContext, this)
+      val sub = new Sub(key, this)
       subMap.put(key, sub)
       sub
     }
@@ -469,8 +467,7 @@ private[core] final class GroupByStage(maxSubstreams: Int, reopenCancelledSubs: 
 
 private object GroupByStage {
 
-  private final class Sub(var key: AnyRef, _ctx: RunSupport.RunContext, _in: StageImpl)
-    extends SubSpoutStage(_ctx, _in) {
+  private final class Sub(var key: AnyRef, _in: StageImpl) extends SubSpoutStage(_in) {
 
     var remaining = 0L // the number of elements already requested by this sub but not yet delivered to it
 

@@ -8,12 +8,12 @@ package swave.core.impl.stages
 
 import scala.annotation.compileTimeOnly
 import swave.core.Stage
-import swave.core.impl.{Inport, Outport, RunSupport}
+import swave.core.impl.{Inport, Outport}
 
 // format: OFF
 private[core] abstract class InOutStage extends StageImpl {
 
-  override def kind: Stage.Kind.InOut
+  override def kind: Stage.Kind
 
   protected final var _inputStages: List[Stage] = Nil
   protected final var _outputStages: List[Stage] = Nil
@@ -22,5 +22,8 @@ private[core] abstract class InOutStage extends StageImpl {
   final def outputStages: List[Stage] = _outputStages
 
   @compileTimeOnly("Unresolved `connectInOutAndSealWith` call")
-  protected final def connectInOutAndSealWith(f: (RunSupport.SealingContext, Inport, Outport) ⇒ State): Unit = ()
+  protected final def connectInOutAndSealWith(f: (Inport, Outport) ⇒ State): Unit = ()
+
+  @compileTimeOnly("Unresolved `connectInOutAndSealWith_NoAutoPropagation` call")
+  protected final def connectInOutAndSealWith_NoAutoPropagation(f: (Inport, Outport) ⇒ State): Unit = ()
 }

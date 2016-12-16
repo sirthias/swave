@@ -18,8 +18,8 @@ private[core] final class OnStartStage(callback: () ⇒ Unit) extends InOutStage
 
   def kind = Stage.Kind.InOut.OnStart(callback)
 
-  connectInOutAndSealWith { (ctx, in, out) ⇒
-    ctx.registerForXStart(this)
+  connectInOutAndSealWith { (in, out) ⇒
+    region.impl.registerForXStart(this)
     awaitingXStart(in, out)
   }
 

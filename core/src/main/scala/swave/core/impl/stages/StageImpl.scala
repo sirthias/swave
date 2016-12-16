@@ -7,11 +7,10 @@
 package swave.core.impl.stages
 
 import scala.annotation.{compileTimeOnly, tailrec}
-import scala.concurrent.Promise
 import swave.core.impl.util.{AbstractInportList, ResizableRingBuffer}
-import swave.core.{IllegalReuseException, Module, UnclosedStreamGraphException}
 import swave.core.util._
 import swave.core.impl._
+import swave.core._
 
 /**
   * Signals:
@@ -72,41 +71,30 @@ private[swave] abstract class StageImpl extends PortImpl {
 
   type State = Int // semantic alias
 
-  // TODO: evaluate moving the two booleans into the (upper) _state integer bits
+  // TODO: evaluate moving the boolean into the (upper) _state integer bits
   private[this] var _intercepting                        = false
-  private[this] var _sealed                              = false
   private[this] var _state: State                        = _ // current state; the STOPPED state is always encoded as zero
-  private[this] var _mbs: Int                            = _ // configured max batch size
+  private[this] var _mbs: Int                            = _ // configured max batch size, cached
   private[this] var _inportState: InportContext          = _
   private[this] var _buffer: ResizableRingBuffer[AnyRef] = _
-  private[this] var _stopPromise: Promise[Unit]          = _ // TODO: consider removing, i.e. finding a solution that doesn't add a field here
   private[this] var _lastSubscribed: Outport             = _ // needed by `_request` when `fullInterceptions` is off
+  private[this] var _region: Region                      = _
+  protected final var interceptingStates: Int            = _ // bit mask holding a 1 bit for every state which requires interception support
 
-  private[swave] final var runner: StreamRunner = _ // null -> sync run, non-null -> async run
-
-  protected final var interceptingStates: Int = _ // bit mask holding a 1 bit for every state which requires interception support
-
-  protected final def configureFrom(ctx: RunSupport.SealingContext): Unit = _mbs = ctx.env.settings.maxBatchSize
-
-  protected final implicit def self: this.type = this
-
-  protected final def initialState(s: State): Unit = _state = s
-
-  protected final def stay(): State = _state
-
-  protected final def illegalState(msg: String) = new IllegalStateException(msg + " in " + this)
-
+  protected final implicit def self: this.type             = this
+  protected final def initialState(s: State): Unit         = _state = s
+  protected final def stay(): State                        = _state
+  protected final def illegalState(msg: String)            = new IllegalStateException(msg + " in " + this)
   protected final def setIntercepting(flag: Boolean): Unit = _intercepting = flag
 
-  override def toString = s"${getClass.getSimpleName}@${identityHash(this)}/$stateName"
+  final def region: Region       = _region
+  final def resetRegion(): Unit  = _region = null
+  final def stageImpl: StageImpl = this
+  final def isSealed: Boolean    = region ne null
+  final def isStopped: Boolean   = _state == 0
 
   def stateName: String = s"<unknown id ${_state}>"
-
-  final def stageImpl: StageImpl = this
-
-  final def isSealed: Boolean  = _sealed
-  final def isStopped: Boolean = _state == 0
-  final def hasRunner: Boolean = runner ne null
+  override def toString = s"${getClass.getSimpleName}@${identityHash(this)}/$stateName"
 
   /////////////////////////////////////// SUBSCRIBE ///////////////////////////////////////
 
@@ -135,8 +123,8 @@ private[swave] abstract class StageImpl extends PortImpl {
     if (!_intercepting) {
       _intercepting = interceptionNeeded
       _request(n, from)
-      handleInterceptions()
-    } else storeInterception(Statics._1L, if (n <= 16) Statics.LONGS(n.toInt - 1) else new java.lang.Long(n), from)
+      if (_intercepting) handleInterceptions()
+    } else interceptRequest(n, from)
 
   private def _request(n: Long, from: Outport): Unit = {
     val count =
@@ -159,18 +147,19 @@ private[swave] abstract class StageImpl extends PortImpl {
     stay()
   }
 
+  protected final def interceptRequest(n: Long, from: Outport): Unit =
+    storeInterception(Statics._1L, if (n <= 16) Statics.LONGS(n.toInt - 1) else new java.lang.Long(n), from)
+
   /////////////////////////////////////// CANCEL ///////////////////////////////////////
 
-  final def cancel()(implicit from: Outport): Unit =
+  final def cancel()(implicit from: Outport): Unit = {
+    from.stageImpl.clearInportState(this)
     if (!_intercepting) {
       _intercepting = interceptionNeeded
-      from.stageImpl.clearInportState(this)
       _cancel(from)
-      handleInterceptions()
-    } else {
-      from.stageImpl.clearInportState(this)
-      storeInterception(Statics._2L, from)
-    }
+      if (_intercepting) handleInterceptions()
+    } else interceptCancel(from)
+  }
 
   private def _cancel(from: Outport): Unit = _state = _cancel0(from)
 
@@ -180,13 +169,16 @@ private[swave] abstract class StageImpl extends PortImpl {
       case _ ⇒ throw illegalState(s"Unexpected cancel() from out '$from'")
     }
 
+  protected final def interceptCancel(from: Outport): Unit =
+    storeInterception(Statics._2L, from)
+
   /////////////////////////////////////// ONSUBSCRIBE ///////////////////////////////////////
 
   final def onSubscribe()(implicit from: Inport): Unit =
     if (!_intercepting) {
       _intercepting = interceptionNeeded
       _onSubscribe(from)
-      handleInterceptions()
+      if (_intercepting) handleInterceptions()
     } else storeInterception(Statics._3L, from)
 
   private def _onSubscribe(from: Inport): Unit = _state = _onSubscribe0(from)
@@ -206,8 +198,8 @@ private[swave] abstract class StageImpl extends PortImpl {
     if (!_intercepting) {
       _intercepting = interceptionNeeded
       _onNext(elem, from)
-      handleInterceptions()
-    } else storeInterception(Statics._4L, elem, from)
+      if (_intercepting) handleInterceptions()
+    } else interceptOnNext(elem, from)
 
   @tailrec
   private def _onNext(elem: AnyRef,
@@ -246,14 +238,17 @@ private[swave] abstract class StageImpl extends PortImpl {
     stay()
   }
 
+  protected final def interceptOnNext(elem: AnyRef, from: Inport): Unit =
+    storeInterception(Statics._4L, elem, from)
+
   /////////////////////////////////////// ONCOMPLETE ///////////////////////////////////////
 
   final def onComplete()(implicit from: Inport): Unit =
     if (!_intercepting) {
       _intercepting = interceptionNeeded
       _onComplete(from)
-      handleInterceptions()
-    } else storeInterception(Statics._5L, from)
+      if (_intercepting) handleInterceptions()
+    } else interceptOnComplete(from)
 
   private def _onComplete(from: Inport): Unit = {
     clearInportState(from)
@@ -266,14 +261,17 @@ private[swave] abstract class StageImpl extends PortImpl {
       case _ ⇒ throw illegalState(s"Unexpected onComplete() from out '$from'")
     }
 
+  protected final def interceptOnComplete(from: Inport): Unit =
+    storeInterception(Statics._5L, from)
+
   /////////////////////////////////////// ONERROR ///////////////////////////////////////
 
   final def onError(error: Throwable)(implicit from: Inport): Unit =
     if (!_intercepting) {
       _intercepting = interceptionNeeded
       _onError(error, from)
-      handleInterceptions()
-    } else storeInterception(Statics._6L, error, from)
+      if (_intercepting) handleInterceptions()
+    } else interceptOnError(error, from)
 
   private def _onError(error: Throwable, from: Inport): Unit = {
     clearInportState(from)
@@ -286,14 +284,23 @@ private[swave] abstract class StageImpl extends PortImpl {
       case _ ⇒ throw illegalState(s"Unexpected onError($error) from out '$from'")
     }
 
+  protected final def interceptOnError(error: Throwable, from: Inport): Unit =
+    storeInterception(Statics._6L, error, from)
+
   /////////////////////////////////////// XSEAL ///////////////////////////////////////
 
-  final def xSeal(ctx: RunSupport.SealingContext): Unit =
-    if (!_sealed) {
-      _sealed = true
+  final def xSeal(region: Region): Unit =
+    if (!isSealed) {
+      _region = region
+      _mbs = region.env.settings.maxBatchSize
+      _state = _xSeal()
+      if (_region ne null)
+        _region.impl.registerStageSealed() // don't call `region.impl...` here as `_region` might now be different!
+
       @tailrec def sealBoundaries(remaining: List[Module.Boundary]): Unit =
         if (remaining.nonEmpty) {
-          remaining.head.stage.stageImpl.xSeal(ctx)
+          val s = remaining.head.stage.stageImpl
+          s.xSeal(region)
           sealBoundaries(remaining.tail)
         }
       @tailrec def sealModules(remaining: List[Module.ID]): Unit =
@@ -302,14 +309,13 @@ private[swave] abstract class StageImpl extends PortImpl {
           sealModules(remaining.tail)
         }
       sealModules(boundaryOf)
-      _state = _xSeal(ctx)
     }
 
-  protected def _xSeal(ctx: RunSupport.SealingContext): State =
+  protected def _xSeal(): State =
     _state match {
       case 0 ⇒ stay()
       case _ ⇒
-        throw new UnclosedStreamGraphException(s"Unconnected Port in $this", illegalState("Unexpected xSeal(...)"))
+        throw new UnclosedStreamGraphException(s"Unconnected Port in $this", illegalState("Unexpected xSeal()"))
     }
 
   /////////////////////////////////////// XSTART ///////////////////////////////////////
@@ -317,7 +323,6 @@ private[swave] abstract class StageImpl extends PortImpl {
   final def xStart(): Unit =
     if (!isStopped) {
       _state = _xStart()
-      if (hasRunner) runner.registerStageStart(this)
       handleInterceptions()
     }
 
@@ -329,25 +334,16 @@ private[swave] abstract class StageImpl extends PortImpl {
     if (!_intercepting) {
       _intercepting = interceptionNeeded
       _xEvent(ev)
-      handleInterceptions()
+      if (_intercepting) handleInterceptions()
     } else storeInterception(Statics._7L, ev)
 
   private def _xEvent(ev: AnyRef): Unit = _state = _xEvent0(ev)
 
   protected def _xEvent0(ev: AnyRef): State =
-    ev match {
-      case StageImpl.RegisterStopPromise(p) ⇒
-        if (_stopPromise eq null) {
-          if (isStopped) p.success(())
-          else _stopPromise = p
-        } else p.completeWith(_stopPromise.future)
-        stay()
-      case _ if isStopped ⇒ stay()
-      case _              ⇒ throw illegalState(s"Unexpected xEvent($ev)")
-    }
+    if (isStopped) stay() else throw illegalState(s"Unexpected xEvent($ev)")
 
   final def enqueueXEvent(ev: AnyRef): Unit =
-    if (hasRunner) runner.enqueueXEvent(this, ev)
+    if (isSealed) region.impl.enqueueXEvent(this, ev)
     else xEvent(ev)
 
   /////////////////////////////////////// STATE DESIGNATOR ///////////////////////////////////////
@@ -361,18 +357,14 @@ private[swave] abstract class StageImpl extends PortImpl {
                             onNext: (AnyRef, Inport) ⇒ State = null,
                             onComplete: Inport ⇒ State = null,
                             onError: (Throwable, Inport) ⇒ State = null,
-                            xSeal: RunSupport.SealingContext ⇒ State = null,
+                            xSeal: () ⇒ State = null,
                             xStart: () ⇒ State = null,
                             xEvent: AnyRef ⇒ State = null): State = 0
 
   /////////////////////////////////////// STOPPERS ///////////////////////////////////////
 
   protected final def stop(e: Throwable = null): State = {
-    if (_stopPromise ne null) {
-      if (e ne null) _stopPromise.failure(e)
-      else _stopPromise.success(())
-    }
-    if (hasRunner) runner.registerStageStop(this)
+    if (isSealed) region.impl.registerStageStopped()
     _buffer = null // don't hang on to elements
     0 // STOPPED state encoding
   }
@@ -503,15 +495,6 @@ private[swave] abstract class StageImpl extends PortImpl {
 }
 
 private[swave] object StageImpl {
-
-  /**
-    * Can be sent as an `xEvent` to register the given promise for completion when the stage is stopped.
-    * If the stage is already stopped the promise is completed as soon as possible.
-    * Note that error completion of the promise is performed on a best-effort basis, i.e. it might
-    * happen that the stage was stopped due to an error but the promise is still completed with a `Success`
-    * (e.g. when the [[RegisterStopPromise]] command arrives *after* the stage has already been stopped.
-    */
-  final case class RegisterStopPromise(promise: Promise[Unit])
 
   private final class InportContext(in: Inport,
                                     tail: InportContext,

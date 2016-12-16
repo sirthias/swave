@@ -7,7 +7,7 @@
 package swave.core.impl.stages.inout
 
 import swave.core.Stage
-import swave.core.impl.{Inport, Outport, StreamRunner}
+import swave.core.impl.{Inport, Outport}
 import swave.core.impl.stages.InOutStage
 import swave.core.macros.StageImplementation
 
@@ -17,8 +17,8 @@ private[core] final class AsyncDispatcherStage(dispatcherId: String) extends InO
 
   def kind = Stage.Kind.InOut.AsyncDispatcher(dispatcherId)
 
-  connectInOutAndSealWith { (ctx, in, out) ⇒
-    ctx.registerRunnerAssignment(StreamRunner.Assignment(this, dispatcherId))
+  connectInOutAndSealWith { (in, out) ⇒
+    region.impl.requestDispatcherAssignment(dispatcherId)
     running(in, out)
   }
 

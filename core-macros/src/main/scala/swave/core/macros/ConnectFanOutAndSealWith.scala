@@ -11,11 +11,10 @@ private[macros] trait ConnectFanOutAndSealWith { this: Util =>
   import c.universe._
 
   def connectFanOutAndSealWith(f: Tree): List[Tree] = unblock {
-    val q"($ctx0: $_, $in0: $_, $outs0: $_) => $block0" = f
-    val ctx                                             = freshName("ctx")
-    val in                                              = freshName("in")
-    val outs                                            = freshName("outs")
-    val block                                           = replaceIdents(block0, ctx0 -> ctx, in0 -> in, outs0 -> outs)
+    val q"($in0: $_, $outs0: $_) => $block0" = f
+    val in                                   = freshName("in")
+    val outs                                 = freshName("outs")
+    val block                                = replaceIdents(block0, in0 -> in, outs0 -> outs)
 
     q"""
       initialState(connecting(null, null))
@@ -42,16 +41,14 @@ private[macros] trait ConnectFanOutAndSealWith { this: Util =>
           rec(from, outs)
         },
 
-        xSeal = c ⇒ {
+        xSeal = () ⇒ {
           if (in ne null) {
             if (outs.nonEmpty) {
-              configureFrom(c)
               _outputStages = _outputStages.reverse
-              in.xSeal(c)
+              in.xSeal(region)
               @tailrec def rec(current: OutportCtx): Unit =
-                if (current ne null) { current.out.xSeal(c); rec(current.tail) }
+                if (current ne null) { current.out.xSeal(region); rec(current.tail) }
               rec(outs)
-              val $ctx = c
               val $in = in
               val $outs = outs
               $block

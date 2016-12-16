@@ -144,12 +144,13 @@ private[swave] class StageImplementationMacro(val c: scala.reflect.macros.whiteb
     mapTemplate(stageImpl) {
       mapBody {
         _ flatMap {
-          case q"connectFanInAndSealWith { $f }"  ⇒ connectFanInAndSealWith(f)
-          case q"connectFanOutAndSealWith { $f }" ⇒ connectFanOutAndSealWith(f)
-          case q"connectInAndSealWith { $f }"     ⇒ connectInAndSealWith(f)
-          case q"connectInOutAndSealWith { $f }"  ⇒ connectInOutAndSealWith(f)
-          case q"connectOutAndSealWith { $f }"    ⇒ connectOutAndSealWith(f)
-          case x                                  ⇒ x :: Nil
+          case q"connectFanInAndSealWith { $f }"                   ⇒ connectFanInAndSealWith(f)
+          case q"connectFanOutAndSealWith { $f }"                  ⇒ connectFanOutAndSealWith(f)
+          case q"connectInAndSealWith { $f }"                      ⇒ connectInAndSealWith(f)
+          case q"connectInOutAndSealWith { $f }"                   ⇒ connectInOutAndSealWith(f, autoPropagate = true)
+          case q"connectInOutAndSealWith_NoAutoPropagation { $f }" ⇒ connectInOutAndSealWith(f, autoPropagate = false)
+          case q"connectOutAndSealWith { $f }"                     ⇒ connectOutAndSealWith(f)
+          case x                                                   ⇒ x :: Nil
         }
       }
     }
@@ -250,11 +251,11 @@ private[swave] class StageImplementationMacro(val c: scala.reflect.macros.whiteb
         }
         .reverse
 
-    def switch(signal: String, cases: List[CaseDef]): Tree = {
+    def switch(signal: String, cases: List[CaseDef], params: TermName*): Tree = {
       val theMatch = q"stay() match { case ..$cases }"
       if (tracing) {
         val res = freshName("res")
-        q"""println(this + ${Literal(Constant(s": entering `$signal`"))})
+        q"""println(this + ${Literal(Constant(s": entering `$signal"))} + List(..$params).mkString("(", ", ", ")`"))
             val $res = $theMatch
             println(this + ${Literal(Constant(s": exiting `$signal` with new state `"))} + stateName($res) + "`")
             $res
@@ -272,7 +273,8 @@ private[swave] class StageImplementationMacro(val c: scala.reflect.macros.whiteb
         }
       }
       if (cases.size > 1)
-        q"final protected override def _subscribe0($from: swave.core.impl.Outport): State = ${switch("subscribe", cases)}"
+        q"""final protected override def _subscribe0($from: swave.core.impl.Outport): State =
+           ${switch("subscribe", cases, from)}"""
       else q"()"
     }
 
@@ -291,7 +293,8 @@ private[swave] class StageImplementationMacro(val c: scala.reflect.macros.whiteb
         }
       }
       if (cases.size > 1) {
-        q"final protected override def _request0($n: Int, $from: swave.core.impl.Outport): State = ${switch("request", cases)}"
+        q"""final protected override def _request0($n: Int, $from: swave.core.impl.Outport): State =
+           ${switch("request", cases, n, from)}"""
       } else q"()"
     }
 
@@ -311,7 +314,8 @@ private[swave] class StageImplementationMacro(val c: scala.reflect.macros.whiteb
         }
       }
       if (cases.size > 1) {
-        q"final protected override def _cancel0($from: swave.core.impl.Outport): State = ${switch("cancel", cases)}"
+        q"""final protected override def _cancel0($from: swave.core.impl.Outport): State =
+           ${switch("cancel", cases, from)}"""
       } else q"()"
     }
 
@@ -325,7 +329,8 @@ private[swave] class StageImplementationMacro(val c: scala.reflect.macros.whiteb
         }
       }
       if (cases.size > 1) {
-        q"final protected override def _onSubscribe0($from: swave.core.impl.Inport): State = ${switch("onSubscribe", cases)}"
+        q"""final protected override def _onSubscribe0($from: swave.core.impl.Inport): State =
+           ${switch("onSubscribe", cases, from)}"""
       } else q"()"
     }
 
@@ -344,7 +349,8 @@ private[swave] class StageImplementationMacro(val c: scala.reflect.macros.whiteb
         }
       }
       if (cases.size > 1) {
-        q"final protected override def _onNext0($elem: AnyRef, $from: swave.core.impl.Inport): State = ${switch("onNext", cases)}"
+        q"""final protected override def _onNext0($elem: AnyRef, $from: swave.core.impl.Inport): State =
+           ${switch("onNext", cases, elem, from)}"""
       } else q"()"
     }
 
@@ -364,7 +370,8 @@ private[swave] class StageImplementationMacro(val c: scala.reflect.macros.whiteb
         }
       }
       if (cases.size > 1) {
-        q"final protected override def _onComplete0($from: swave.core.impl.Inport): State = ${switch("onComplete", cases)}"
+        q"""final protected override def _onComplete0($from: swave.core.impl.Inport): State =
+           ${switch("onComplete", cases, from)}"""
       } else q"()"
     }
 
@@ -383,26 +390,28 @@ private[swave] class StageImplementationMacro(val c: scala.reflect.macros.whiteb
         }
       }
       if (cases.size > 1) {
-        q"final protected override def _onError0($error: Throwable, $from: swave.core.impl.Inport): State = ${switch("onError", cases)}"
+        q"""final protected override def _onError0($error: Throwable, $from: swave.core.impl.Inport): State =
+           ${switch("onError", cases, error, from)}"""
       } else q"()"
     }
 
     def xSealDef = {
-      val ctx = freshName("ctx")
       val cases = compact {
-        stateHandlers.valuesIterator.foldLeft(cq"_ => super._xSeal($ctx)" :: Nil) { (acc, sh) ⇒
-          sh.xSeal.fold(acc) {
-            case q"($ctx0) => $body0" ⇒ cq"${sh.id} => ${replaceIdents(body0, ctx0.name → ctx)}" :: acc
-          }
+        stateHandlers.valuesIterator.foldLeft(cq"_ => super._xSeal()" :: Nil) { (acc, sh) ⇒
+          sh.xSeal.fold(acc) { case q"() => $body" ⇒ cq"${sh.id} => $body" :: acc }
         }
       }
       if (cases.size > 1) {
         val res = freshName("res")
-        val extraLine = stateHandlers.get("awaitingXStart") match {
-          case Some(sh) ⇒ q"setIntercepting($res == ${sh.id})"
-          case None     ⇒ q"()"
-        }
-        q"""final protected override def _xSeal($ctx: swave.core.impl.RunSupport.SealingContext): State = {
+        val extraLine =
+          stateHandlers.valuesIterator
+            .filter(sh => sh.xStart.isDefined && sh.intercept)
+            .map(sh => q"$res == ${sh.id}")
+            .toList match {
+            case Nil => q"()"
+            case x   => q"setIntercepting(${x.reduceLeft((a, b) => q"$a || $b")})"
+          }
+        q"""final protected override def _xSeal(): State = {
               val $res = ${switch("xSeal", cases)}
               $extraLine
               $res
@@ -430,8 +439,10 @@ private[swave] class StageImplementationMacro(val c: scala.reflect.macros.whiteb
           }
         }
       }
-      if (cases.size > 1) q"final protected override def _xEvent0($ev: AnyRef): State = ${switch("xEvent", cases)}"
-      else q"()"
+      if (cases.size > 1) {
+        q"""final protected override def _xEvent0($ev: AnyRef): State =
+           ${switch("xEvent", cases, ev)}"""
+      } else q"()"
     }
 
     List(

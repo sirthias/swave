@@ -29,9 +29,9 @@ private[core] final class FileSpoutStage[T](path: Path, _chunkSize: Int)(implici
   private[this] val log = Logger(getClass)
   private implicit def decorator(value: T): Bytes.Decorator[T] = Bytes.decorator(value)
 
-  connectOutAndSealWith { (ctx, out) ⇒
-    ctx.registerForXStart(this)
-    val cSize = if (_chunkSize > 0) _chunkSize else ctx.env.settings.fileIOSettings.defaultFileReadingChunkSize
+  connectOutAndSealWith { out ⇒
+    region.impl.registerForXStart(this)
+    val cSize = if (_chunkSize > 0) _chunkSize else region.env.settings.fileIOSettings.defaultFileReadingChunkSize
     val buf = ByteBuffer.allocate(cSize)
     running(out, cSize, buf)
   }

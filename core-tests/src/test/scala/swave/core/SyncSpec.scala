@@ -100,10 +100,11 @@ class SyncSpec extends SwaveSpec {
       Spout(1 to 50).takeEveryNth(10) should produce(10, 20, 30, 40, 50)
     }
 
-    "external sub-stream start" in {
-      val spout: Spout[Int] = Spout.ints(0).splitWhen(_ == 3).drainToHead().value.get.get
-      spout should produce(0, 1, 3)
-    }
+//    "external sub-stream start" in {
+//      implicit val env = StreamEnv(mapSettings = _.withSubscriptionTimeout(Duration.Undefined))
+//      val spout: Spout[Int] = Spout.ints(0).injectSequential.drainToHead().value.get.get
+//      spout.take(3) should produce(0, 1, 3)
+//    }
   }
 
   "Illegal usage" - {

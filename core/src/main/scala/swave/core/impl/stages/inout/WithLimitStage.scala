@@ -6,10 +6,9 @@
 
 package swave.core.impl.stages.inout
 
-import swave.core.impl.stages.InOutStage
-
 import scala.util.control.NonFatal
 import swave.core.{Stage, StreamLimitExceeded}
+import swave.core.impl.stages.InOutStage
 import swave.core.impl.{Inport, Outport}
 import swave.core.macros._
 
@@ -21,7 +20,7 @@ private[core] final class WithLimitStage(max: Long, cost: Any ⇒ Long) extends 
 
   def kind = Stage.Kind.InOut.Limit(max, cost)
 
-  connectInOutAndSealWith { (ctx, in, out) ⇒ running(in, out, max) }
+  connectInOutAndSealWith { (in, out) ⇒ running(in, out, max) }
 
   /**
     * @param in        the active upstream

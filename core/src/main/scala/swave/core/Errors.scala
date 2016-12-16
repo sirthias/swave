@@ -22,7 +22,7 @@ final class IllegalReuseException(msg: String, cause: Throwable = null) extends 
 
 final class UnclosedStreamGraphException(msg: String, cause: Throwable) extends RuntimeException(msg, cause)
 
-final class SubscriptionTimeoutException(msg: String) extends RuntimeException(msg)
+final class SubStreamStartTimeoutException(msg: String) extends RuntimeException(msg)
 
 final class StreamTimeoutException(msg: String) extends RuntimeException(msg)
 

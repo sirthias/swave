@@ -9,15 +9,14 @@ package swave.core.internal.testkit
 import scala.util.control.NonFatal
 import swave.core.Stage
 import swave.core.impl.stages.DrainStage
-import swave.core.impl.{Inport, RunSupport}
+import swave.core.impl.{Inport, RunContext}
 import swave.core.macros._
 
 @StageImplementation(fullInterceptions = true)
 private[testkit] final class TestDrainStage(val id: Int,
                                             val requestsIterable: Iterable[Long],
                                             val cancelAfterOpt: Option[Int],
-                                            testCtx: TestContext)
-  extends DrainStage with TestStage with RunSupport.RunContextAccess {
+                                            testCtx: TestContext) extends DrainStage with TestStage {
 
   def kind = Stage.Kind.Drain.Test(id)
 
@@ -49,22 +48,19 @@ private[testkit] final class TestDrainStage(val id: Int,
     })
 
   def ready(in: Inport): State = state(
-    xSeal = c ⇒ {
+    xSeal = () ⇒ {
       testCtx.trace("Received XSEAL in 'ready'")
-      configureFrom(c)
       testCtx.trace("⇠ XSEAL")
-      in.xSeal(c)
-
-      c.registerForXStart(this)
-      c.registerForRunContextAccess(this)
-      c.disableErrorOnSyncUnstopped()
+      region.impl.registerForXStart(this)
+      region.runContext.impl.registerForSyncPostRunEvent(this)
+      region.runContext.impl.suppressSyncUnterminatedError()
+      in.xSeal(region)
       awaitingXStart(in)
     })
 
   def awaitingXStart(in: Inport) = state(
     xStart = () => {
       testCtx.trace("Received XSTART in 'awaitingXStart'")
-      runContext.registerForSyncPostRunEvent(this)
       if (requests.hasNext) {
         val n = requests.next()
         testCtx.run("⇠ REQUEST " + n)(in.request(n))
@@ -105,7 +101,7 @@ private[testkit] final class TestDrainStage(val id: Int,
       else throw illegalState(s"Received ERROR [$e] from unexpected inport '$from' instead of inport '$in'")
     },
 
-    xEvent = { case RunSupport.PostRun => handlePostRun() })
+    xEvent = { case RunContext.PostRun => handlePostRun() })
 
   def cancel(in: Inport, pending: Long) = {
     testCtx.run("⇠ CANCEL")(in.cancel())
@@ -134,7 +130,7 @@ private[testkit] final class TestDrainStage(val id: Int,
       else throw illegalState(s"Received ERROR [$e] from unexpected inport '$from' instead of inport '$in")
     },
 
-    xEvent = { case RunSupport.PostRun => handlePostRun() })
+    xEvent = { case RunContext.PostRun => handlePostRun() })
 
   def completed(in: Inport): State = state(
     onNext = (elem, from) ⇒ {
@@ -155,7 +151,7 @@ private[testkit] final class TestDrainStage(val id: Int,
       else throw illegalState(s"Received ERROR [$e] from unexpected inport '$from' instead of inport '$in'")
     },
 
-    xEvent = { case RunSupport.PostRun => handlePostRun() })
+    xEvent = { case RunContext.PostRun => handlePostRun() })
 
   def errored(in: Inport): State = state(
     onNext = (elem, from) ⇒ {
@@ -176,13 +172,13 @@ private[testkit] final class TestDrainStage(val id: Int,
       else throw illegalState(s"Received ERROR [$e] from unexpected inport '$from' instead of inport '$in'")
     },
 
-    xEvent = { case RunSupport.PostRun => handlePostRun() })
+    xEvent = { case RunContext.PostRun => handlePostRun() })
 
   def handlePostRun(): State = {
     if (testCtx.hasSchedulings) {
       testCtx.trace(s"Running schedulings...")
       testCtx.processSchedulings()
-      runContext.registerForSyncPostRunEvent(this)
+      region.runContext.impl.registerForSyncPostRunEvent(this)
     }
     stay()
   }

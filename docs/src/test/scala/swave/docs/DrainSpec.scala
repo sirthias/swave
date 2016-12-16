@@ -25,7 +25,8 @@ class DrainSpec extends FreeSpec with Matchers {
 
       Spout(1 to 100)  // Spout[Int]
         .to(sumDrain)  // StreamGraph[Int]
-        .run()         // StreamRun[Future[Int]]
+        .run()         // Try[StreamRun[Future[Int]]]
+        .get           // StreamRun[Future[Int]
         .result        // Future[Int]
         .value         // Option[Try[Int]]
         .get           // Try[Int]
@@ -33,7 +34,7 @@ class DrainSpec extends FreeSpec with Matchers {
 
       // same but shorter
       Spout(1 to 100)
-        .drainTo(sumDrain) // shortcut for `.to(sumDrain).run()`
+        .drainTo(sumDrain) // shortcut for `.to(sumDrain).run().get.result`
         .value.get.get shouldEqual 5050
       //#examples
     }

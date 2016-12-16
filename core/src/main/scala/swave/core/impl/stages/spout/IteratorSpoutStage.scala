@@ -6,8 +6,8 @@
 
 package swave.core.impl.stages.spout
 
-import scala.util.control.NonFatal
 import scala.annotation.tailrec
+import scala.util.control.NonFatal
 import swave.core.macros.StageImplementation
 import swave.core.Stage
 import swave.core.impl.Outport
@@ -19,9 +19,9 @@ private[core] final class IteratorSpoutStage(iterator: Iterator[AnyRef]) extends
 
   def kind = Stage.Kind.Spout.FromIterator(iterator)
 
-  connectOutAndSealWith { (ctx, out) ⇒
+  connectOutAndSealWith { out ⇒
     if (!iterator.hasNext) {
-      ctx.registerForXStart(this)
+      region.impl.registerForXStart(this)
       awaitingXStart(out)
     } else running(out)
   }

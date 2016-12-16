@@ -6,11 +6,10 @@
 
 package swave.core.impl.stages.inout
 
-import swave.core.impl.stages.InOutStage
-
 import scala.annotation.tailrec
 import swave.core.{Buffer, BufferOverflowFailure, Stage}
 import swave.core.impl.{Inport, Outport}
+import swave.core.impl.stages.InOutStage
 import swave.core.impl.util.RingBuffer
 import swave.core.macros._
 import swave.core.util._
@@ -25,8 +24,8 @@ private[core] final class BufferDroppingStage(size: Int, overflowStrategy: Buffe
 
   private[this] val buffer = new RingBuffer[AnyRef](roundUpToPowerOf2(size))
 
-  connectInOutAndSealWith { (ctx, in, out) ⇒
-    ctx.registerForXStart(this)
+  connectInOutAndSealWith { (in, out) ⇒
+    region.impl.registerForXStart(this)
     awaitingXStart(in, out)
   }
 

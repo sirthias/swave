@@ -12,7 +12,7 @@ import java.util.concurrent.{LinkedBlockingQueue, TimeUnit}
 import scala.annotation.tailrec
 import scala.util.DynamicVariable
 import scala.collection.immutable
-import scala.concurrent.{Await, Future, Promise, TimeoutException}
+import scala.concurrent.TimeoutException
 import scala.concurrent.duration._
 import swave.core.impl.stages.{DrainStage, SpoutStage, StageImpl}
 import swave.core.impl.{Inport, Outport}
@@ -44,9 +44,9 @@ trait Probes {
       def kind = Stage.Kind.Spout.TestProbe
       override def toString = s"SpoutProbe.stage@${identityHash(this)}/$stateName"
 
-      connectOutAndSealWith { (ctx, out) ⇒
-        ctx.registerForXStart(this)
-        ctx.disableErrorOnSyncUnstopped()
+      connectOutAndSealWith { out ⇒
+        region.impl.registerForXStart(this)
+        region.runContext.impl.suppressSyncUnterminatedError()
         awaitingXStart(out, immutable.Queue.empty)
       }
 
@@ -151,9 +151,9 @@ trait Probes {
       def kind = Stage.Kind.Drain.TestProbe
       override def toString = s"DrainProbe.stage@${identityHash(this)}/$stateName"
 
-      connectInAndSealWith { (ctx, in) ⇒
-        ctx.registerForXStart(this)
-        ctx.disableErrorOnSyncUnstopped()
+      connectInAndSealWith { in ⇒
+        region.impl.registerForXStart(this)
+        region.runContext.impl.suppressSyncUnterminatedError()
         awaitingXStart(in, immutable.Queue.empty)
       }
 
@@ -228,7 +228,7 @@ trait Probes {
 
     final def expectSignal(): Option[Signal] =
       if (nextSignal.isEmpty) Option {
-        if (stage.isSync) {
+        if (stage.region.runContext.impl.isSync) {
           requireState(deadlineNanos.value == 0L, "Expect `within` duration doesn't make sense for sync runs")
           stage.log.poll()
         } else stage.log.poll(withinTimeoutNanos, TimeUnit.NANOSECONDS)
@@ -250,35 +250,18 @@ trait Probes {
     final def expectNoSignal(): this.type                    = { verifyEquals(peekSignal(), None); this }
     final def expectNoSignal(max: FiniteDuration): this.type = { within(max)(expectSignal(None)); this }
 
-    final def verifyCleanStop(): Unit =
-      if (stage.isAsync) {
-        val futures: List[(StageImpl, Future[Unit])] = Graph
-          .explore(stage)
-          .map { stage ⇒
-            val p = Promise[Unit]()
-            stage.stageImpl.runner.enqueueXEvent(stage.stageImpl, StageImpl.RegisterStopPromise(p))
-            stage.stageImpl → p.future
-          }(collection.breakOut)
-        import env.defaultDispatcher
-        try {
-          Await.ready(Future.sequence(futures.map(_._2)), withinTimeoutNanos.nanos)
-          ()
-        } catch {
-          case _: TimeoutException ⇒
-            val unstoppedStages = futures.collect { case (stage, future) if !future.isCompleted ⇒ stage }
-            throw ExpectationFailedException(
-              unstoppedStages
-                .mkString("At least one stage is still running when it shouldn't be:\n    ", "\n    ", "\n"))
-        }
-      } else {
-        requireState(
-          deadlineNanos.value == 0L,
-          "`verifyCleanStop` wrapped by `within` doesn't make sense for sync runs")
-        Graph
-          .explore(stage)
-          .find(!_.stageImpl.isStopped)
-          .foreach(stage ⇒ throw ExpectationFailedException(s"Stage `$stage` is still running when it shouldn't be."))
+    final def verifyCleanStop(): Unit = {
+      val timout = withinTimeoutNanos.nanos
+      val ctx    = stage.region.runContext
+      try ctx.impl.termination.await(timout)
+      catch {
+        case _: TimeoutException ⇒
+          val unstoppedStages = Graph.explore(ctx.impl.regions).filterNot(_.isStopped)
+          throw ExpectationFailedException(
+            unstoppedStages
+              .mkString("At least one stage is still running when it shouldn't be:\n    ", "\n    ", "\n"))
       }
+    }
 
     /**
       * Receives a series of signals until any one of these conditions becomes true:
@@ -311,20 +294,13 @@ trait Probes {
     }
 
     protected trait ProbeStage extends StageImpl {
-      val log                       = new LinkedBlockingQueue[Signal]
-      def streamRunner              = runner
-      def onSignal(s: Signal): Unit = xEvent(s)
-      def isSync                    = streamRunner eq null
-      def isAsync                   = streamRunner ne null
+      val log = new LinkedBlockingQueue[Signal]
     }
 
     protected def stage: ProbeStage
 
     protected final def runOrEnqueue(signals: Signal*): this.type = {
-      signals.foreach {
-        if (stage.isSync) stage.onSignal
-        else stage.streamRunner.scheduleEvent(stage, Duration.Zero, _)
-      }
+      signals.foreach(stage.region.impl.enqueueXEvent(stage, _))
       this
     }
 

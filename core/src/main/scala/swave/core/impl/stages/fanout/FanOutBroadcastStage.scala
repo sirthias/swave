@@ -24,7 +24,7 @@ private[core] final class FanOutBroadcastStage(eagerCancel: Boolean) extends Fan
   protected def createOutportCtx(out: Outport, tail: OutportCtx): OutportCtx =
     new FanOutStage.SimpleOutportContext(out, tail)
 
-  connectFanOutAndSealWith { (ctx, in, outs) ⇒ running(in, outs, 0) }
+  connectFanOutAndSealWith { (in, outs) ⇒ running(in, outs, 0) }
 
   /**
     * @param in        the active upstream

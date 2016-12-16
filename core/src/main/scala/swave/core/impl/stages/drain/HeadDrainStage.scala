@@ -18,8 +18,8 @@ private[core] final class HeadDrainStage(headPromise: Promise[AnyRef]) extends D
 
   def kind = Stage.Kind.Drain.Head
 
-  connectInAndSealWith { (ctx, in) ⇒
-    ctx.registerForXStart(this)
+  connectInAndSealWith { in ⇒
+    region.impl.registerForXStart(this)
     awaitingXStart(in)
   }
 

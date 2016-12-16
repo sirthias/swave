@@ -7,7 +7,7 @@
 package swave.core
 
 import com.typesafe.config.{Config, ConfigFactory}
-import scala.concurrent.Future
+import scala.concurrent.{Future, Promise}
 import scala.concurrent.duration._
 import com.typesafe.scalalogging.Logger
 import swave.core.io.files.FileIO
@@ -38,6 +38,12 @@ abstract class StreamEnv private[core] {
 
   def shutdown(): StreamEnv.Termination
 
+  final def shutdownOn(future: Future[_]): Future[StreamEnv.Termination] = {
+    val p = Promise[StreamEnv.Termination]()
+    future.onComplete(_ => p.success(shutdown()))
+    p.future
+  }
+
   def getOrLoadExtension[T <: Extension](ext: ExtensionId[T]): Future[T]
 }
 
@@ -46,7 +52,7 @@ object StreamEnv {
   final case class Settings(throughput: Int,
                             maxBatchSize: Int,
                             logConfigOnStart: Boolean,
-                            subscriptionTimeout: Duration,
+                            subStreamStartTimeout: Duration,
                             dispatcherSettings: Dispatchers.Settings,
                             schedulerSettings: Scheduler.Settings,
                             fileIOSettings: FileIO.Settings,
@@ -58,7 +64,8 @@ object StreamEnv {
     def withThroughput(throughput: Int)                        = copy(throughput = throughput)
     def withMaxBatchSize(maxBatchSize: Int)                    = copy(maxBatchSize = maxBatchSize)
     def withLogConfigOnStart(logConfigOnStart: Boolean = true) = copy(logConfigOnStart = logConfigOnStart)
-    def withSubscriptionTimeout(subscriptionTimeout: Duration) = copy(subscriptionTimeout = subscriptionTimeout)
+    def withSubStreamStartTimeout(subStreamStartTimeout: Duration) =
+      copy(subStreamStartTimeout = subStreamStartTimeout)
 
     def withDispatcherSettingsMapped(f: Dispatchers.Settings => Dispatchers.Settings) =
       copy(dispatcherSettings = f(dispatcherSettings))
@@ -75,7 +82,7 @@ object StreamEnv {
         throughput = c getInt "throughput",
         maxBatchSize = c getInt "max-batch-size",
         logConfigOnStart = c getBoolean "log-config-on-start",
-        subscriptionTimeout = c getScalaDuration "subscription-timeout",
+        subStreamStartTimeout = c getScalaDuration "sub-stream-start-timeout",
         dispatcherSettings = Dispatchers.Settings fromSubConfig c.getConfig("dispatcher"),
         schedulerSettings = Scheduler.Settings fromSubConfig c.getConfig("scheduler"),
         fileIOSettings = FileIO.Settings fromSubConfig c.getConfig("file-io"),

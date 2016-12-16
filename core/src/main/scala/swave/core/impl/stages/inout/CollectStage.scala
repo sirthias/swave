@@ -18,7 +18,7 @@ private[core] final class CollectStage(pf: PartialFunction[AnyRef, AnyRef]) exte
 
   def kind = Stage.Kind.InOut.Collect(pf)
 
-  connectInOutAndSealWith { (ctx, in, out) ⇒
+  connectInOutAndSealWith { (in, out) ⇒
     val mismatchF: AnyRef => this.type = { elem =>
       in.request(1)
       this // we use `this` as a special result instance signalling the mismatch of a single collect

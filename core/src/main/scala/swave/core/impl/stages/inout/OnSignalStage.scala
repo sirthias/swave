@@ -6,11 +6,10 @@
 
 package swave.core.impl.stages.inout
 
-import swave.core.impl.stages.InOutStage
-
 import scala.util.control.NonFatal
-import swave.core.impl.{Inport, Outport}
 import swave.core.macros.StageImplementation
+import swave.core.impl.{Inport, Outport}
+import swave.core.impl.stages.InOutStage
 import swave.core.{Stage, StreamEvent}
 
 // format: OFF
@@ -19,7 +18,7 @@ private[core] final class OnSignalStage(callback: StreamEvent[Any] ⇒ Unit) ext
 
   def kind = Stage.Kind.InOut.OnSignal(callback)
 
-  connectInOutAndSealWith { (ctx, in, out) ⇒ running(in, out) }
+  connectInOutAndSealWith { (in, out) ⇒ running(in, out) }
 
   def running(in: Inport, out: Outport) = state(
     intercept = false,

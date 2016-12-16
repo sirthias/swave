@@ -21,7 +21,7 @@ private[core] final class FirstNonEmptyStage(subs: InportList) extends FanInStag
 
   def kind = Stage.Kind.FanIn.FirstNonEmpty
 
-  connectFanInAndSealWith { (ctx, out) ⇒ awaitingFirstElement(subs, out, 0) }
+  connectFanInAndSealWith { out ⇒ awaitingFirstElement(subs, out, 0) }
 
   /**
     * Waiting for the first element to arrive from the ins head.

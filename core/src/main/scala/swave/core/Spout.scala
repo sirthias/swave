@@ -72,7 +72,10 @@ final class Spout[+A](private[swave] val inport: Inport) extends StreamOps[A @uV
     * Attaches the given [[Drain]] and immediately starts the stream.
     */
   def drainTo[R](drain: Drain[A, R])(implicit env: StreamEnv, ev: TypeLogic.ToTryOrFuture[R]): ev.Out =
-    to(drain).run().result
+    to(drain).run() match {
+      case Success(run) => run.result
+      case Failure(e)   => ev.failure(e)
+    }
 
   /**
     * Attaches a [[Drain]] which executes the given callback for all stream elements

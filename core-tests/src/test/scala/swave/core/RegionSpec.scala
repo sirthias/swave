@@ -6,76 +6,43 @@
 
 package swave.core
 
-import scala.io.Source
-import scala.concurrent.Promise
-import scala.util.control.NonFatal
 import org.scalatest.{FreeSpec, Matchers}
+import swave.core.graph.GlyphSet
 import swave.core.macros._
 
+import scala.concurrent.Promise
+import scala.io.Source
+import scala.util.control.NonFatal
+
 // format: OFF
-class RenderingSpec extends FreeSpec with Matchers {
+class RegionSpec extends FreeSpec with Matchers {
+
+  implicit val env = StreamEnv()
 
   "Example 1" tests {
-    Spout.repeat(42).to(Drain.head)
+    Spout.ints(0)
+      .map(_.toString)
+      .to(Drain.head)
   }
 
   "Example 2" tests {
-    Spout(1, 2, 3).map(_.toString).to(Drain.foreach(println))
+    Spout.ints(0)
+      .take(10)
+      .asyncBoundary()
+      .map(_.toString)
+      .to(Drain.head)
   }
 
   "Example 3" tests {
-    val c = Coupling[Int]
     Spout(1, 2, 3)
-      .concat(c.out)
-      .fanOutBroadcast(eagerCancel = false)
-        .sub.first.buffer(1).map(_ + 3).to(c.in)
-        .subContinue.to(Drain.head)
+      .fanOutBroadcast()
+        .sub.map(_.toString).end
+        .sub.asyncBoundary().end
+      .fanInConcat()
+      .to(Drain.head)
   }
 
   "Example 4" tests {
-    val foo = Module.Forward.from2[Int, String] { (a, b) ⇒
-      a.attachN(2, b.fanOutBroadcast())
-    } named "foo"
-    Spout.ints(0)
-      .duplicate
-      .attach(Spout("x", "y", "z"))
-      .fromFanInVia(foo)
-      .fanInConcat()
-      .map(_.toString)
-      .to(Drain.first(2))
-  }
-
-  "Example 5" tests {
-    Spout(1, 2, 3)
-      .fanOutBroadcast()
-        .sub.end
-        .sub.end
-      .fanInConcat()
-      .to(Drain.head)
-  }
-
-  "Example 6" tests {
-    Spout.ints(0)
-      .deduplicate
-      .zip(Spout(4, 5, 6))
-      .to(Drain.head)
-  }
-
-  "Example 7" tests {
-    Spout(1, 2, 3)
-      .tee(Drain.ignore.dropResult)
-      .to(Drain.head)
-  }
-
-  "Example 8" tests {
-    Spout.ints(0)
-      .map(_ * 2)
-      .via(Pipe.fromDrainAndSpout[Int, String](Drain.cancelling, Spout.empty))
-      .filterNot(_.isEmpty)
-      .to(Drain.head)
-  }
-
-  "Example 9" tests {
     def upperChars(s: String): Spout[Char] =
       Spout(s.iterator).map(_.toUpper)
 
@@ -86,24 +53,20 @@ class RenderingSpec extends FreeSpec with Matchers {
 
     val result2 = Promise[String]()
     upperChars("Hello")
-      .logEvent("A")
       .asyncBoundary("foo")
-      .logEvent("B")
       .fanOutBroadcast()
-      .sub.drop(2).logEvent("C").concat(upperChars("-Friend-").asyncBoundary()).end
-        .sub.take(2).logEvent("D").asyncBoundary().multiply(2).end
+        .sub.drop(2).concat(upperChars("-Friend-").asyncBoundary()).end
+        .sub.take(2).asyncBoundary().multiply(2).end
       .fanInConcat()
-      .logEvent("E")
-      .tee(Pipe[Char].asyncBoundary().logEvent("F").deduplicate.to(drain(result2)))
+      .tee(Pipe[Char].asyncBoundary().deduplicate.to(drain(result2)))
       .map(_.toLower)
-      .logEvent("G")
       .to(Drain.mkString(100))
   }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   val examples: Map[String, String] =
-    Source.fromInputStream(getClass.getResourceAsStream("/RenderingSpec.examples.txt"))
+    Source.fromInputStream(getClass.getResourceAsStream("/RegionSpec.examples.txt"))
       .getLines()
       .scanLeft(Left(Nil): Either[List[String], List[String]]) {
         case (Left(lines), "")   ⇒ Right(lines.reverse)
@@ -124,9 +87,14 @@ class RenderingSpec extends FreeSpec with Matchers {
       name in {
         val expectedRendering =
           examples.getOrElse(name + ':', sys.error(s"Section for '$name' not found in examples.txt"))
-        val rendering = Graph.from(pipeNet.stage)
-          .withStageFormat((s, _) => s"${s.kind.name}(${s.paramsStr})")
-          .render()
+        val superRegions = Graph.superRegions(pipeNet.seal().get.regions)
+        val rendering =
+          superRegions.map { sr =>
+            Graph.from(sr.head.entryPoint, Graph.ExpandModules.All)
+              .withGlyphSet(GlyphSet.`2x2 ASCII`)
+              .withStageFormat((s, _) => s"${s.kind.name}: ${sr.indexOf(s.region)}")
+              .render()
+          }.mkString("\n***\n")
         try rendering shouldEqual expectedRendering
         catch {
           case NonFatal(e) ⇒

@@ -20,7 +20,7 @@ private[core] final class UnfoldSpoutStage(zero: AnyRef, f: AnyRef => Unfolding[
 
   def kind = Stage.Kind.Spout.Unfold(zero, f)
 
-  connectOutAndSealWith { (ctx, out) ⇒ running(out, zero) }
+  connectOutAndSealWith { out ⇒ running(out, zero) }
 
   def running(out: Outport, s: AnyRef): State = state(
     request = (n, _) ⇒ {

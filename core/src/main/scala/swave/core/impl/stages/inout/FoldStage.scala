@@ -18,7 +18,7 @@ private[core] final class FoldStage(zero: AnyRef, f: (Any, Any) ⇒ AnyRef) exte
 
   def kind = Stage.Kind.InOut.Fold(zero, f)
 
-  connectInOutAndSealWith { (ctx, in, out) ⇒ running(in, out) }
+  connectInOutAndSealWith { (in, out) ⇒ running(in, out) }
 
   def running(in: Inport, out: Outport) = {
 

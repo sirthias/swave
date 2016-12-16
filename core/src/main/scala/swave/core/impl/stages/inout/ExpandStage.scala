@@ -21,8 +21,8 @@ private[core] final class ExpandStage(zero: Iterator[AnyRef], extrapolate: Any =
 
   def kind = Stage.Kind.InOut.Expand(zero, extrapolate)
 
-  connectInOutAndSealWith { (ctx, in, out) ⇒
-    ctx.registerForXStart(this)
+  connectInOutAndSealWith { (in, out) ⇒
+    region.impl.registerForXStart(this)
     awaitingXStart(in, out)
   }
 

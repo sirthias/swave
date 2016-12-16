@@ -64,7 +64,7 @@ private[impl] abstract class StreamActor(final val dispatcher: Dispatcher, final
 
   protected def receive(msg: MessageType): Unit
 
-  protected final def enqueue(msg: MessageType): Unit = {
+  private[impl] final def enqueue(msg: MessageType): Unit = {
     mailbox.offer(msg)
     trySchedule()
   }

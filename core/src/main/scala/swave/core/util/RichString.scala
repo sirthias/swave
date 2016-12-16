@@ -55,13 +55,18 @@ final class RichString(val underlying: String) extends AnyVal {
     * Returns Some(String) if the underlying string is non-empty, None otherwise
     */
   def toOption: Option[String] =
-    if ((underlying eq null) || underlying.isEmpty) None else Some(underlying)
+    if ((underlying eq null) || (underlying.length == 0)) None else Some(underlying)
 
   /**
     * If the underlying string is null the method returns the empty string, otherwise the underlying string.
     */
   def nullAsEmpty: String =
     if (underlying eq null) "" else underlying
+
+  /**
+    * If the underlying string is null the method returns the empty string, otherwise the underlying string.
+    */
+  def isNullOrEmpty: Boolean = (underlying eq null) || (underlying.length == 0)
 
   /**
     * Returns the ASCII encoded bytes of this string. Truncates characters to 8-bit byte value.
@@ -102,12 +107,12 @@ final class RichString(val underlying: String) extends AnyVal {
   /**
     * Determines whether the underlying String starts with the given character.
     */
-  def startsWith(c: Char): Boolean = underlying.nonEmpty && underlying.charAt(0) == c
+  def startsWith(c: Char): Boolean = (underlying.length != 0) && underlying.charAt(0) == c
 
   /**
     * Determines whether the underlying String ends with the given character.
     */
-  def endsWith(c: Char): Boolean = underlying.nonEmpty && underlying.charAt(underlying.length - 1) == c
+  def endsWith(c: Char): Boolean = (underlying.length != 0) && underlying.charAt(underlying.length - 1) == c
 
   /** Strips margin and fixes the newline sequence to the given one preventing dependencies on the build platform */
   def stripMarginWithNewline(newline: String) = underlying.stripMargin.replace("\r\n", "\n").replace("\n", newline)

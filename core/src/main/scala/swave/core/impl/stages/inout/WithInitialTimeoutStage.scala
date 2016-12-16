@@ -8,7 +8,7 @@ package swave.core.impl.stages.inout
 
 import scala.concurrent.duration._
 import swave.core.impl.stages.InOutStage
-import swave.core.impl.{Inport, Outport, StreamRunner}
+import swave.core.impl.{Inport, Outport, RunContext}
 import swave.core.macros._
 import swave.core.{Cancellable, Stage, StreamTimeoutException}
 
@@ -20,8 +20,8 @@ private[core] final class WithInitialTimeoutStage(timeout: FiniteDuration) exten
 
   def kind = Stage.Kind.InOut.WithInitialTimeout(timeout)
 
-  connectInOutAndSealWith { (ctx, in, out) ⇒
-    ctx.registerRunnerAssignment(StreamRunner.Assignment.Default(this))
+  connectInOutAndSealWith { (in, out) ⇒
+    region.impl.requestDispatcherAssignment()
     running(in, out)
   }
 
@@ -30,7 +30,7 @@ private[core] final class WithInitialTimeoutStage(timeout: FiniteDuration) exten
     def awaitingFirstDemand() = state(
       request = (n, _) => {
         in.request(n.toLong)
-        awaitingFirstElem(runner.scheduleTimeout(this, timeout))
+        awaitingFirstElem(region.impl.scheduleTimeout(this, timeout))
       },
 
       cancel = stopCancelF(in),
@@ -62,7 +62,7 @@ private[core] final class WithInitialTimeoutStage(timeout: FiniteDuration) exten
       },
 
       xEvent = {
-        case StreamRunner.Timeout(_) =>
+        case RunContext.Timeout(_) =>
           val e = new StreamTimeoutException(s"The first element was not received within $timeout")
           stopError(e, out)
       })
@@ -75,7 +75,7 @@ private[core] final class WithInitialTimeoutStage(timeout: FiniteDuration) exten
       onNext = onNextF(out),
       onComplete = stopCompleteF(out),
       onError = stopErrorF(out),
-      xEvent = { case StreamRunner.Timeout(_) => stay() })
+      xEvent = { case RunContext.Timeout(_) => stay() })
 
     awaitingFirstDemand()
   }

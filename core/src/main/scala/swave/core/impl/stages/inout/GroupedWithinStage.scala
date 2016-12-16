@@ -9,7 +9,7 @@ package swave.core.impl.stages.inout
 import scala.concurrent.duration._
 import scala.collection.immutable.VectorBuilder
 import swave.core.impl.stages.InOutStage
-import swave.core.impl.{Inport, Outport, StreamRunner}
+import swave.core.impl.{Inport, Outport, RunContext}
 import swave.core.{Cancellable, Stage}
 import swave.core.macros._
 import swave.core.util._
@@ -26,9 +26,9 @@ private[core] final class GroupedWithinStage(maxSize: Int, duration: FiniteDurat
   private[this] val builder = new VectorBuilder[AnyRef]
   private[this] var builderSize = 0 // TODO: remove when https://issues.scala-lang.org/browse/SI-9904 is fixed
 
-  connectInOutAndSealWith { (ctx, in, out) ⇒
-    ctx.registerRunnerAssignment(StreamRunner.Assignment.Default(this))
-    ctx.registerForXStart(this)
+  connectInOutAndSealWith { (in, out) ⇒
+    region.impl.requestDispatcherAssignment()
+    region.impl.registerForXStart(this)
     running(in, out)
   }
 
@@ -36,7 +36,7 @@ private[core] final class GroupedWithinStage(maxSize: Int, duration: FiniteDurat
 
     def awaitingXStart() = state(
       xStart = () => {
-        val timer = runner.scheduleTimeout(this, duration)
+        val timer = region.impl.scheduleTimeout(this, duration)
         in.request(maxSize.toLong)
         awaitingElem(timer, 0L)
       })
@@ -76,11 +76,11 @@ private[core] final class GroupedWithinStage(maxSize: Int, duration: FiniteDurat
       },
 
       xEvent = {
-        case StreamRunner.Timeout(t) if t eq timer =>
+        case RunContext.Timeout(t) if t eq timer =>
           if (builderSize > 0) {
             if (mainRemaining > 0) emitCurrentGroup(mainRemaining) else awaitingDemand()
           } else awaitingKickerElem(mainRemaining)
-        case StreamRunner.Timeout(_) => stay() // old timeout whose delivery raced with the cancel we already did
+        case RunContext.Timeout(_) => stay() // old timeout whose delivery raced with the cancel we already did
       })
 
     /**
@@ -101,7 +101,7 @@ private[core] final class GroupedWithinStage(maxSize: Int, duration: FiniteDurat
 
         onComplete = _ => awaitingDemandUpstreamGone(),
         onError = stopErrorF(out),
-        xEvent = { case StreamRunner.Timeout(_) => stay() })
+        xEvent = { case RunContext.Timeout(_) => stay() })
     }
 
     /**
@@ -124,7 +124,7 @@ private[core] final class GroupedWithinStage(maxSize: Int, duration: FiniteDurat
 
         onComplete = stopCompleteF(out),
         onError = stopErrorF(out),
-        xEvent = { case StreamRunner.Timeout(_) => stay() })
+        xEvent = { case RunContext.Timeout(_) => stay() })
     }
 
     /**
@@ -140,7 +140,7 @@ private[core] final class GroupedWithinStage(maxSize: Int, duration: FiniteDurat
       },
 
       cancel = stopF,
-      xEvent = { case StreamRunner.Timeout(_) => stay() })
+      xEvent = { case RunContext.Timeout(_) => stay() })
 
     def emitCurrentGroup(mainRemaining: Long): State = {
       val group = builder.result()
@@ -148,7 +148,7 @@ private[core] final class GroupedWithinStage(maxSize: Int, duration: FiniteDurat
       out.onNext(group)
       builder.clear()
       builderSize = 0
-      val newTimer = runner.scheduleTimeout(this, duration)
+      val newTimer = region.impl.scheduleTimeout(this, duration)
       in.request(group.size.toLong) // bring pending element count back up to maxSize
       awaitingElem(newTimer, mainRemaining - 1)
     }

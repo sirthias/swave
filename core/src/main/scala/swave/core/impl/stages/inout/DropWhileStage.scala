@@ -18,7 +18,7 @@ private[core] final class DropWhileStage(predicate: Any ⇒ Boolean) extends InO
 
   def kind = Stage.Kind.InOut.DropWhile(predicate)
 
-  connectInOutAndSealWith { (ctx, in, out) ⇒ running(in, out) }
+  connectInOutAndSealWith { (in, out) ⇒ running(in, out) }
 
   def running(in: Inport, out: Outport) = {
 

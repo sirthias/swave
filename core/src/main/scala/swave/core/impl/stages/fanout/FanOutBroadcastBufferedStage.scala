@@ -30,8 +30,8 @@ private[core] final class FanOutBroadcastBufferedStage(bufferSize: Int, requestT
   protected def createOutportCtx(out: Outport, tail: OutportCtx): OutportCtx =
     new FanOutBroadcastBufferedStage.OutportContextWithCursor(out, tail)
 
-  connectFanOutAndSealWith { (ctx, in, outs) ⇒
-    ctx.registerForXStart(this)
+  connectFanOutAndSealWith { (in, outs) ⇒
+    region.impl.registerForXStart(this)
     awaitingXStart(in, outs)
   }
 

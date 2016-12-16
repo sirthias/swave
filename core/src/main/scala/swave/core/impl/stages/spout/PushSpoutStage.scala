@@ -7,7 +7,6 @@
 package swave.core.impl.stages.spout
 
 import org.jctools.queues.MpscChunkedArrayQueue
-
 import scala.annotation.tailrec
 import swave.core.Stage
 import swave.core.impl.Outport
@@ -45,12 +44,11 @@ private[core] final class PushSpoutStage(initialBufferSize: Int, maxBufferSize: 
   def ready(out: Outport, term: StreamTermination): State = state(
     intercept = false,
 
-    xSeal = c ⇒ {
-      configureFrom(c)
-      c.disableErrorOnSyncUnstopped() // since we can be syncly driven from a single thread
-      out.xSeal(c)
+    xSeal = () ⇒ {
+      region.runContext.impl.suppressSyncUnterminatedError()
+      out.xSeal(region)
       if (term != StreamTermination.None) {
-        c.registerForXStart(this)
+        region.impl.registerForXStart(this)
         awaitingXStart(out, term)
       } else running(out)
     },

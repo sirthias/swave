@@ -24,8 +24,8 @@ private[core] final class BufferStage(size: Int, requestThreshold: Int) extends 
 
   private[this] val buffer = new RingBuffer[AnyRef](roundUpToPowerOf2(size))
 
-  connectInOutAndSealWith { (ctx, in, out) ⇒
-    ctx.registerForXStart(this)
+  connectInOutAndSealWith { (in, out) ⇒
+    region.impl.registerForXStart(this)
     awaitingXStart(in, out)
   }
 

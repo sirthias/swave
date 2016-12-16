@@ -9,7 +9,7 @@ package swave.core.impl.stages.inout
 import scala.util.control.NonFatal
 import swave.core.impl.stages.drain.SubDrainStage
 import swave.core.impl.stages.InOutStage
-import swave.core.impl.{Inport, Outport, RunSupport}
+import swave.core.impl.{Inport, Outport}
 import swave.core.{Spout, Stage}
 import swave.core.macros._
 import swave.core.util._
@@ -17,7 +17,7 @@ import swave.core.util._
 // format: OFF
 @StageImplementation(fullInterceptions = true)
 private[core] final class RecoverWithStage(maxRecoveries: Long, pf: PartialFunction[Throwable, Spout[AnyRef]])
-  extends InOutStage with RunSupport.RunContextAccess {
+  extends InOutStage {
 
   import RecoverWithStage._
 
@@ -25,8 +25,7 @@ private[core] final class RecoverWithStage(maxRecoveries: Long, pf: PartialFunct
 
   def kind = Stage.Kind.InOut.RecoverWith(maxRecoveries, pf)
 
-  connectInOutAndSealWith { (ctx, in, out) ⇒
-    ctx.registerForRunContextAccess(this)
+  connectInOutAndSealWith { (in, out) ⇒
     active(in, out, 0L, maxRecoveries)
   }
 
@@ -55,10 +54,10 @@ private[core] final class RecoverWithStage(maxRecoveries: Long, pf: PartialFunct
         var funError: Throwable = null
         val spout =
           try pf.asInstanceOf[PartialFunction[Throwable, AnyRef]].applyOrElse(e, YieldNull)
-          catch { case NonFatal(e) => { funError = e; null } }
+          catch { case NonFatal(x) => { funError = x; null } }
         if (funError eq null) {
           if (spout ne null) {
-            val sub = new SubDrainStage(runContext, this)
+            val sub = new SubDrainStage(this)
             spout.asInstanceOf[Spout[_]].inport.subscribe()(sub)
             awaitingSubOnSubscribe(sub, out, remaining, recoveriesLeft - 1)
           } else stopError(e, out)
@@ -69,9 +68,13 @@ private[core] final class RecoverWithStage(maxRecoveries: Long, pf: PartialFunct
   def awaitingSubOnSubscribe(sub: SubDrainStage, out: Outport, remaining: Long, recoveriesLeft: Long): State = state(
     onSubscribe = from ⇒ {
       requireState(from eq sub)
-      sub.sealAndStart()
-      if (remaining > 0) sub.request(remaining)
-      active(sub, out, remaining, recoveriesLeft)
+      try {
+        region.sealAndStart(sub)
+        if (remaining > 0) sub.request(remaining)
+        active(sub, out, remaining, recoveriesLeft)
+      } catch {
+        case NonFatal(e) => stopError(e, out)
+      }
     },
 
     request = (n, _) => awaitingSubOnSubscribe(sub, out, remaining ⊹ n, recoveriesLeft),

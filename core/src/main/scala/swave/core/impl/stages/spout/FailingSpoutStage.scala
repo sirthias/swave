@@ -17,9 +17,9 @@ private[core] final class FailingSpoutStage(error: Throwable, eager: Boolean) ex
 
   def kind = Stage.Kind.Spout.Failing(error, eager)
 
-  connectOutAndSealWith { (ctx, out) ⇒
+  connectOutAndSealWith { out ⇒
     if (eager) {
-      ctx.registerForXStart(this)
+      region.impl.registerForXStart(this)
       awaitingXStart(out)
     } else awaitingRequest(out)
   }

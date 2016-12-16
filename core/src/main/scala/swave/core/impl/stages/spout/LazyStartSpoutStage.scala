@@ -8,7 +8,7 @@ package swave.core.impl.stages.spout
 
 import scala.util.control.NonFatal
 import swave.core.impl.stages.drain.SubDrainStage
-import swave.core.impl.{Inport, Outport, RunSupport}
+import swave.core.impl.{Inport, Outport}
 import swave.core.macros.StageImplementation
 import swave.core.util._
 import swave.core._
@@ -16,14 +16,12 @@ import swave.core.impl.stages.SpoutStage
 
 // format: OFF
 @StageImplementation
-private[core] final class LazyStartSpoutStage(onStart: () => Spout[AnyRef])
-  extends SpoutStage with RunSupport.RunContextAccess {
+private[core] final class LazyStartSpoutStage(onStart: () => Spout[AnyRef]) extends SpoutStage {
 
   def kind = Stage.Kind.Spout.LazyStart(onStart)
 
-  connectOutAndSealWith { (ctx, out) ⇒
-    ctx.registerForXStart(this)
-    ctx.registerForRunContextAccess(this)
+  connectOutAndSealWith { out ⇒
+    region.impl.registerForXStart(this)
     awaitingXStart(out)
   }
 
@@ -32,7 +30,7 @@ private[core] final class LazyStartSpoutStage(onStart: () => Spout[AnyRef])
       var funError: Throwable = null
       val inport = try onStart().inport catch { case NonFatal(e) => { funError = e; null } }
       if (funError eq null) {
-        val sub = new SubDrainStage(runContext, this)
+        val sub = new SubDrainStage(this)
         inport.subscribe()(sub)
         awaitingOnSubscribe(sub, out, 0L)
       } else stopError(funError, out)
@@ -48,7 +46,7 @@ private[core] final class LazyStartSpoutStage(onStart: () => Spout[AnyRef])
 
     onSubscribe = _ => {
       var funError: Throwable = null
-      try RunSupport.sealAndStartSubStream(in.stageImpl, runContext)
+      try region.sealAndStart(in.stageImpl)
       catch { case NonFatal(e) => funError = e }
       if (funError eq null) {
         if (requested != 0) {

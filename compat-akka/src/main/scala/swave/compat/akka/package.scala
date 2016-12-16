@@ -91,7 +91,7 @@ package object akka {
       val (spout, subscriber) = Spout.withSubscriber[T]
       val streamGraph         = spout.to(underlying)
       Sink.fromSubscriber(subscriber).mapMaterializedValue { _ ⇒
-        streamGraph.run().result.get // provoke exception on start error
+        streamGraph.run().get.result.get // provoke exception on start error
       }
     }
   }
@@ -107,7 +107,7 @@ package akka {
       val drain       = Drain.toPublisher[T]()
       val streamGraph = new Spout(underlying).to(drain)
       Source.fromPublisher(drain.result).mapMaterializedValue { notUsed ⇒
-        streamGraph.run().result.get // provoke exception on start error
+        streamGraph.run().get.result.get // provoke exception on start error
         notUsed
       }
     }

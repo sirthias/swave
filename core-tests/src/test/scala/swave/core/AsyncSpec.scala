@@ -117,7 +117,7 @@ class AsyncSpec extends SwaveSpec {
         .get
         .getMessage
         .shouldEqual(
-          "Conflicting dispatcher assignment to async region containing stage 'NopStage': [disp1] vs. [disp0]")
+          "Conflicting dispatcher assignment to async region: [disp0] vs. [disp1]")
     }
 
     "conflicting async markers" taggedAs NotOnTravis in {
@@ -131,7 +131,7 @@ class AsyncSpec extends SwaveSpec {
         .get
         .getMessage
         .shouldEqual(
-          "Conflicting dispatcher assignment to async region containing stage 'AsyncDispatcherStage': [disp1] vs. [disp0]")
+          "Conflicting dispatcher assignment to async region: [disp1] vs. [disp0]")
     }
 
     "sync sub-stream in sync parent stream" in {
