@@ -13,7 +13,7 @@ import swave.core._
 final class LazyStartSpoutSpec extends SyncPipeSpec with Inspectors {
 
   implicit val env    = StreamEnv()
-  implicit val config = PropertyCheckConfig(minSuccessful = 100)
+  implicit val config = PropertyCheckConfiguration(minSuccessful = 100)
 
   implicit val integerInput = Gen.chooseNum(0, 999)
 

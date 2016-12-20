@@ -39,11 +39,7 @@ final class PushSpout[+A] private (val initialBufferSize: Int,
                                    notifyOnDequeued: (PushSpout[A], Int) ⇒ Unit,
                                    notifyOnCancel: PushSpout[A] ⇒ Unit) {
 
-  private[this] val stage = new PushSpoutStage(
-    initialBufferSize,
-    maxBufferSize,
-    growByInitialSize,
-    notifyOnDequeued(this, _),
+  private[this] val stage = new PushSpoutStage(initialBufferSize, maxBufferSize, notifyOnDequeued(this, _),
     () ⇒ notifyOnCancel(this))
 
   /**

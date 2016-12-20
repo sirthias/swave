@@ -8,13 +8,13 @@ package swave.core.impl.stages
 
 import org.scalacheck.Gen
 import org.scalatest.Inspectors
-import swave.core.internal.testkit.{ TestError, TestFixture }
+import swave.core.internal.testkit.{TestError, TestFixture}
 import swave.core.{Buffer, StreamEnv, StreamLimitExceeded}
 
 final class SimpleOpSpec extends SyncPipeSpec with Inspectors {
 
   implicit val env    = StreamEnv()
-  implicit val config = PropertyCheckConfig(minSuccessful = 1000)
+  implicit val config = PropertyCheckConfiguration(minSuccessful = 1000)
 
   implicit val integerInput = Gen.chooseNum(0, 999)
   implicit val stringInput  = Gen.listOfN(3, Gen.alphaNumChar).map(_.mkString)

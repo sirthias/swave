@@ -4,9 +4,10 @@ import com.lightbend.paradox.ParadoxProcessor
 lazy val contributors = Seq(
   "Mathias Doenitz" -> "sirthias")
 
-lazy val commonSettings = reformatOnCompileSettings ++ Seq(
+lazy val commonSettings = Seq( // reformatOnCompileSettings ++ Seq(
   organization := "io.swave",
-  scalaVersion := "2.11.8",
+  scalaVersion := "2.12.1",
+  crossScalaVersions := Seq("2.12.1", "2.11.8"),
   homepage := Some(url("http://swave.io")),
   description := "A Reactive Streams infrastructure implementation in Scala",
   startYear := Some(2016),
@@ -21,15 +22,15 @@ lazy val commonSettings = reformatOnCompileSettings ++ Seq(
 
   // code formatting
   headers := Map("scala" -> de.heikoseeberger.sbtheader.license.MPLv2_NoCopyright("", "")),
-  scalafmtConfig := Some(file(".scalafmt.conf")),
-  formatSbtFiles := false,
+  // scalafmtConfig := Some(file(".scalafmt.conf")),
+  // formatSbtFiles := false,
 
   // test coverage
   coverageMinimum := 90,
   coverageFailOnMinimum := false,
   coverageExcludedPackages := """swave\.benchmarks\..*;swave\.examples\..*""")
 
-lazy val noScalaFmtFormatting = includeFilter in hasScalafmt := NothingFilter
+// lazy val noScalaFmtFormatting = includeFilter in hasScalafmt := NothingFilter
 
 lazy val publishingSettings = Seq(
   useGpg := true,
@@ -89,20 +90,20 @@ lazy val commonScalacOptions = Seq(
   "-deprecation",
   "-encoding", "UTF-8",
   "-feature",
-  "-language:existentials",
-  "-language:higherKinds",
-  "-language:implicitConversions",
-  "-language:experimental.macros",
+  "-language:_",
   "-unchecked",
   "-Xfatal-warnings",
   "-Xlint",
-  "-Yinline-warnings",
+  "-Xfuture",
   "-Yno-adapted-args",
   "-Ywarn-dead-code",
+  "-Ywarn-inaccessible",
+  "-Ywarn-infer-any",
+  "-Ywarn-nullary-override",
+  "-Ywarn-nullary-unit",
   "-Ywarn-numeric-widen",
-  "-Ywarn-value-discard",
   "-Ywarn-unused-import",
-  "-Xfuture")
+  "-Ywarn-value-discard")
 
 lazy val macroParadise =
   addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
@@ -111,23 +112,22 @@ lazy val macroParadise =
 
 // core
 val `reactive-streams`     = "org.reactivestreams"        %   "reactive-streams"      % "1.0.0"
-val `jctools-core`         = "org.jctools"                %   "jctools-core"          % "1.2.1"
-val `typesafe-config`      = "com.typesafe"               %   "config"                % "1.3.0"
-val shapeless              = "com.chuusai"                %%  "shapeless"             % "2.3.1"
-val `scala-logging`        = "com.typesafe.scala-logging" %%  "scala-logging"         % "3.4.0"
+val `jctools-core`         = "org.jctools"                %   "jctools-core"          % "2.0"
+val `typesafe-config`      = "com.typesafe"               %   "config"                % "1.3.1"
+val shapeless              = "com.chuusai"                %%  "shapeless"             % "2.3.2"
+val `scala-logging`        = "com.typesafe.scala-logging" %%  "scala-logging"         % "3.5.0"
 
 // *-compat
-val `akka-stream`          = "com.typesafe.akka"          %%  "akka-stream"           % "2.4.8"
-val `scodec-bits`          = "org.scodec"                 %%  "scodec-bits"           % "1.1.0"
+val `akka-stream`          = "com.typesafe.akka"          %%  "akka-stream"           % "2.4.14"
+val `scodec-bits`          = "org.scodec"                 %%  "scodec-bits"           % "1.1.2"
 
 // test
-val scalatest              = "org.scalatest"              %%  "scalatest"             % "2.2.6"   % "test"
-val scalacheck             = "org.scalacheck"             %%  "scalacheck"            % "1.12.6"  % "test"
+val scalatest              = "org.scalatest"              %%  "scalatest"             % "3.0.1"   % "test"
 val `reactive-streams-tck` = "org.reactivestreams"        %   "reactive-streams-tck"  % "1.0.0"   % "test"
 
 // examples
-val `akka-http-core`       = "com.typesafe.akka"          %%  "akka-http-core"        % "2.4.11"
-val logback                = "ch.qos.logback"             %   "logback-classic"       % "1.1.7"
+val `akka-http-core`       = "com.typesafe.akka"          %%  "akka-http-core"        % "10.0.0"
+val logback                = "ch.qos.logback"             %   "logback-classic"       % "1.1.8"
 
 /////////////////////// PROJECTS /////////////////////////
 
@@ -173,7 +173,7 @@ lazy val core = project
     moduleName := "swave-core",
     macroParadise,
     libraryDependencies ++= Seq(`reactive-streams`,  `jctools-core`, `typesafe-config`, shapeless, `scala-logging`,
-      scalatest, scalacheck))
+      scalatest))
 
 lazy val `core-macros` = project
   .enablePlugins(AutomateHeaderPlugin)
@@ -184,14 +184,14 @@ lazy val `core-macros` = project
     libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value)
 
 lazy val `core-tests` = project
-  .dependsOn(core, testkit, `core-macros` % "test-internal")
+  .dependsOn(core % "test->test", testkit, `core-macros` % "test-internal")
   .enablePlugins(AutomateHeaderPlugin)
   .settings(commonSettings: _*)
   .settings(noPublishingSettings: _*)
   .settings(
-    noScalaFmtFormatting,
+    // noScalaFmtFormatting,
     macroParadise,
-    libraryDependencies ++= Seq(shapeless, scalatest, `reactive-streams-tck`, scalacheck, logback % "test"))
+    libraryDependencies ++= Seq(shapeless, scalatest, `reactive-streams-tck`, logback % "test"))
 
 lazy val docs = project
   .dependsOn(`compat-akka`, `compat-scodec`, core, testkit)
@@ -200,7 +200,7 @@ lazy val docs = project
   .settings(noPublishingSettings: _*)
   .settings(ghpages.settings)
   .settings(
-    noScalaFmtFormatting,
+    // noScalaFmtFormatting,
     git.remoteRepo := scmInfo.value.get.connection.drop("scm:git:".length),
     libraryDependencies ++= Seq(shapeless, scalatest),
     apiURL := Some(url("http://swave.io/api/")),
@@ -250,7 +250,7 @@ lazy val examples = project
   .settings(commonSettings: _*)
   .settings(noPublishingSettings: _*)
   .settings(
-    noScalaFmtFormatting,
+    // noScalaFmtFormatting,
     fork in run := true,
     connectInput in run := true,
     javaOptions in run ++= Seq("-XX:+UnlockCommercialFeatures", "-XX:+FlightRecorder"),

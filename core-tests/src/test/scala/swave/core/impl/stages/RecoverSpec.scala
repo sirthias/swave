@@ -19,7 +19,7 @@ import swave.testkit.Probes._
 final class RecoverSpec extends SyncPipeSpec {
 
   implicit val env          = StreamEnv()
-  implicit val config       = PropertyCheckConfig(minSuccessful = 100)
+  implicit val config       = PropertyCheckConfiguration(minSuccessful = 100)
   implicit val integerInput = Gen.chooseNum(0, 999)
 
   "RecoverWith" - {

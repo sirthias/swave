@@ -1,41 +1,41 @@
 Example 1:
- o Spout.Repeat(42)
+ o Spout.Repeat
  |
  |
- o Drain.Head()
+ o Drain.Head
 
 Example 2:
  o {Spout.apply}
  |
  |
- o Map(<function1>)
+ o Map
  |
  |
- o Drain.Foreach(<function1>, List())
+ o Drain.Foreach
 
 Example 3:
  o {Spout.apply}
  |
  |
- o-----+ FanIn.Concat()
+ o-----+ FanIn.Concat
  |     |
  |     ^
- o--+  ^ FanOut.Broadcast(false)
+ o--+  ^ FanOut.Broadcast
  |  |  ^
  |  |  ^
- o  |  ^ Drain.Head()
+ o  |  ^ Drain.Head
     |  ^
     |  ^
  o--+  ^ {first}
  |     ^
  |     ^
- o  >>>^ BufferWithBackpressure(1, 0)
+ o  >>>^ BufferWithBackpressure
  |  ^
  |  ^
- o  ^ Map(<function1>)
+ o  ^ Map
  |  ^
  |  |
- o--+ Coupling()
+ o--+ Coupling
 
 Example 4:
  o {Spout.ints}
@@ -50,10 +50,10 @@ Example 4:
  o--+--+ {foo}
  |  |  |
  |  |  |
- o--+--+ FanIn.Concat()
+ o--+--+ FanIn.Concat
  |
  |
- o Map(<function1>)
+ o Map
  |
  |
  o {Drain.first}
@@ -62,19 +62,19 @@ Example 5:
  o {Spout.apply}
  |
  |
- o--+ FanOut.Broadcast(false)
+ o--+ FanOut.Broadcast
  |  |
  |  |
- o--+ FanIn.Concat()
+ o--+ FanIn.Concat
  |
  |
- o Drain.Head()
+ o Drain.Head
 
 Example 6:
  o {Spout.ints}
  |
  |
- o Deduplicate()
+ o Deduplicate
  |
  |
  |  o {Spout.apply}
@@ -83,7 +83,7 @@ Example 6:
  o--+ {zip}
  |
  |
- o Drain.Head()
+ o Drain.Head
 
 Example 7:
  o {Spout.apply}
@@ -92,129 +92,129 @@ Example 7:
  o--+ {tee}
  |  |
  |  |
- o  | Drain.Head()
+ o  | Drain.Head
     |
     |
-    o Drain.Ignore(List())
+    o Drain.Ignore
 
 Example 8:
  o {Spout.ints}
  |
  |
- o Map(<function1>)
+ o Map
  |
  |
  o {Pipe.fromDrainAndSpout}
  |
  |
- o Filter(<function1>, true)
+ o Filter
  |
  |
- o Drain.Head()
+ o Drain.Head
 
 Example 9:
- o Spout.FromIterator(non-empty iterator)
+ o Spout.FromIterator
  |
  |
- o Map(<function1>)
+ o Map
  |
  |
- o OnSignal(<function1>)
+ o OnSignal
  |
  |
- o AsyncBoundary(foo)
+ o AsyncBoundary
  |
  |
- o BufferWithBackpressure(16, 8)
+ o BufferWithBackpressure
  |
  |
- o OnSignal(<function1>)
+ o OnSignal
  |
  |
- o--+ FanOut.Broadcast(false)
+ o--+ FanOut.Broadcast
  |  |
  |  |
- |  o Drop(2)
+ |  o Drop
  |  |
  |  |
- |  o OnSignal(<function1>)
+ |  o OnSignal
  |  |
  |  |
- o  | Take(2)
+ o  | Take
  |  |
  |  |
- o  | OnSignal(<function1>)
+ o  | OnSignal
  |  |
  |  |
- o  | AsyncBoundary()
+ o  | AsyncBoundary
  |  |
  |  |
- o  | BufferWithBackpressure(16, 8)
+ o  | BufferWithBackpressure
  |  |
  |  |
  o  | {multiply}
  |  |
  |  |
- |  |  o Spout.FromIterator(non-empty iterator)
+ |  |  o Spout.FromIterator
  |  |  |
  |  |  |
- |  |  o--+ Map(<function1>)
+ |  |  o--+ Map
  |  |     |
  |  |     |
- |  +--+  o AsyncBoundary()
+ |  +--+  o AsyncBoundary
  |     |  |
  |     |  |
- +--+  |  o BufferWithBackpressure(16, 8)
+ +--+  |  o BufferWithBackpressure
     |  |  |
     |  |  |
- o--|--+--+ FanIn.Concat()
+ o--|--+--+ FanIn.Concat
  |  |
  |  |
- o--+ FanIn.Concat()
+ o--+ FanIn.Concat
  |
  |
- o OnSignal(<function1>)
+ o OnSignal
  |
  |
  o--+ {tee}
  |  |
  |  |
- o  | Map(<function1>)
+ o  | Map
  |  |
  |  |
- o  | OnSignal(<function1>)
+ o  | OnSignal
  |  |
  |  |
- o  | Fold(, <function2>)
+ o  | Fold
  |  |
  |  |
- o  | Map(<function1>)
+ o  | Map
  |  |
  |  |
- o  | Drain.Head()
+ o  | Drain.Head
     |
     |
- o--+ AsyncBoundary()
+ o--+ AsyncBoundary
  |
  |
- o BufferWithBackpressure(16, 8)
+ o BufferWithBackpressure
  |
  |
- o OnSignal(<function1>)
+ o OnSignal
  |
  |
- o Deduplicate()
+ o Deduplicate
  |
  |
- o AsyncDispatcher(bar)
+ o AsyncDispatcher
  |
  |
- o Fold(, <function2>)
+ o Fold
  |
  |
- o Map(<function1>)
+ o Map
  |
  |
- o Drain.Head()
+ o Drain.Head
 
 -- last line -- do not remove --

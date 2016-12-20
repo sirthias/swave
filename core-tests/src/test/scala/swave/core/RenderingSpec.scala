@@ -125,7 +125,7 @@ class RenderingSpec extends FreeSpec with Matchers {
         val expectedRendering =
           examples.getOrElse(name + ':', sys.error(s"Section for '$name' not found in examples.txt"))
         val rendering = Graph.from(pipeNet.stage)
-          .withStageFormat((s, _) => s"${s.kind.name}(${s.paramsStr})")
+          .withStageFormat((s, _) => s.kind.name)
           .render()
         try rendering shouldEqual expectedRendering
         catch {

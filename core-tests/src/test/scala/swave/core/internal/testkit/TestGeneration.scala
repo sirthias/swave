@@ -6,9 +6,8 @@
 
 package swave.core.internal.testkit
 
-import org.scalacheck.{Gen, Prop}
-
 import scala.util.control.{NoStackTrace, NonFatal}
+import org.scalacheck.{Gen, Prop}
 import shapeless.ops.function.FnToProduct
 import shapeless.ops.hlist.{Reverse, Tupler}
 import shapeless._
@@ -19,7 +18,7 @@ import swave.core.macros._
 trait TestGeneration {
   import TestGeneration._
 
-  def testSetup: TestSetupDef = new TestSetupDefImpl(Default.asyncRates, Default.asyncSchedulings, tracing = false)
+  def testSetup: TestSetupDef = new TestSetupDefImpl("", Default.asyncRates, Default.asyncSchedulings, tracing = false)
 
   def asScripted(in: TestInput[_]): TestFixture.TerminalStateValidation = { outTermination ⇒
     import TestFixture.State._
@@ -65,6 +64,7 @@ trait TestGeneration {
 object TestGeneration {
 
   sealed abstract class TestSetupDef extends MainDef0[HNil] {
+    def withRandomSeed(seed: String): TestSetupDef
     def withAsyncRates(asyncRates: Gen[Double]): TestSetupDef
     def withAsyncSchedulings(asyncRates: Gen[AsyncScheduling]): TestSetupDef
     def withTracing(): TestSetupDef
@@ -102,7 +102,6 @@ object TestGeneration {
 
   sealed abstract class Propper[F] {
     def from(f: F): Prop
-    def withRandomSeed(seed: String): Propper[F]
   }
 
   sealed abstract class AsyncScheduling
@@ -164,48 +163,54 @@ object TestGeneration {
 
   ////////////////////////////////// DSL IMPLEMENTATION ///////////////////////////////////////////
 
-  private class TestSetupDefImpl(asyncRates: Gen[Double], asyncSchedulings: Gen[AsyncScheduling], tracing: Boolean)
+  private class TestSetupDefImpl(seed: String, asyncRates: Gen[Double], asyncSchedulings: Gen[AsyncScheduling],
+                                 tracing: Boolean)
     extends TestSetupDef {
     private[this] val runCounter = Iterator from 0
 
-    def withAsyncRates(asyncRates: Gen[Double]) = new TestSetupDefImpl(asyncRates, asyncSchedulings, tracing)
+    def withRandomSeed(seed: String): TestSetupDef =
+      new TestSetupDefImpl(seed, asyncRates, asyncSchedulings, tracing)
+    def withAsyncRates(asyncRates: Gen[Double]) =
+      new TestSetupDefImpl(seed, asyncRates, asyncSchedulings, tracing)
     def withAsyncSchedulings(asyncSchedulings: Gen[AsyncScheduling]) =
-      new TestSetupDefImpl(asyncRates, asyncSchedulings, tracing)
-    def withTracing()                      = new TestSetupDefImpl(asyncRates, asyncSchedulings, tracing = true)
+      new TestSetupDefImpl(seed, asyncRates, asyncSchedulings, tracing)
+    def withTracing() =
+      new TestSetupDefImpl(seed, asyncRates, asyncSchedulings, tracing = true)
     def param[T](implicit gen: Gen[T])     = finish.param[T]
     def fixture[T](f: FixtureDef ⇒ Gen[T]) = finish.fixture(f)
 
     private def finish = {
+      val (effectiveSeed, random) =
+        XorShiftRandom.parseSeed(seed) match {
+          case Some(x) => seed -> XorShiftRandom(x)
+          case None => { val r = XorShiftRandom(); XorShiftRandom.formatSeed(r.seed) -> r}
+        }
       val contexts =
         for {
           asyncRate       ← asyncRates
           asyncScheduling ← asyncSchedulings
-          random          ← Gen.parameterized(params ⇒ Gen.const(params.rng))
         } yield {
-          val xorShiftRandom = random match {
-            case x: XorShiftRandom.Random ⇒ x.xorShiftRandom
-            case _                        ⇒ XorShiftRandom()
-          }
           val runNr = runCounter.next()
-          new TestContext(runNr, asyncRate, asyncScheduling, xorShiftRandom, tracing && runNr == 0)
+          new TestContext(runNr, asyncRate, asyncScheduling, random, tracing && runNr == 0)
         }
-      new DefImpl[HNil](contexts, Nil)
+      new DefImpl[HNil](effectiveSeed, random, contexts, Nil)
     }
   }
 
-  private class DefImpl[L <: HList](contexts: Gen[TestContext], creatorsList: List[FixtureDef ⇒ Gen[Any]])
+  private class DefImpl[L <: HList](seed: String, random: XorShiftRandom, contexts: Gen[TestContext],
+                                    creatorsList: List[FixtureDef ⇒ Gen[Any]])
     extends MainDef[L] {
 
     def param[T](implicit gen: Gen[T]): MainDef[T :: L] = fixture(_ ⇒ gen)
 
     def fixture[T](f: FixtureDef ⇒ Gen[T]): MainDef[T :: L] =
-      new DefImpl(contexts, f :: creatorsList)
+      new DefImpl(seed, random, contexts, f :: creatorsList)
 
     def gen[R <: HList, T](implicit rev: Reverse.Aux[L, R], tupler: Tupler.Aux[R, T]): Gen[T] =
       revGen map { case (_, hlist) ⇒ tupler(hlist) }
 
     def prop[R <: HList, F](implicit rev: Reverse.Aux[L, R], fn: FnToProduct.Aux[F, R ⇒ Unit]) =
-      new PropperImpl[R, F](revGen, fn.apply, "")
+      new PropperImpl[R, F](seed, random, revGen, fn.apply)
 
     private def revGen[R <: HList](implicit rev: Reverse.Aux[L, R]): Gen[(TestContext, R)] =
       for {
@@ -242,20 +247,16 @@ object TestGeneration {
       }
   }
 
-  private class PropperImpl[L <: HList, F](gen: Gen[(TestContext, L)], convertF: F ⇒ L ⇒ Unit, seed: String)
+  private class PropperImpl[L <: HList, F](seed: String, random: XorShiftRandom, gen: Gen[(TestContext, L)],
+                                           convertF: F ⇒ L ⇒ Unit)
     extends Propper[F] {
-    def withRandomSeed(seed: String): Propper[F] = new PropperImpl[L, F](gen, convertF, seed)
 
     def from(f: F): Prop = Prop { params ⇒
-      val random = params.rng match {
-        case x: XorShiftRandom.Random if seed.isEmpty ⇒ x
-        case _                                        ⇒ XorShiftRandom(seed).asScalaRandom
-      }
-      val prop = Prop.forAll(gen)(propFun(convertF(f), random.xorShiftRandom.seed))
-      prop(params withRng random)
+      val prop = Prop.forAll(gen)(propFun(convertF(f)))
+      prop(params withInitialSeed random.nextLong())
     }
 
-    private def propFun(f: L ⇒ Unit, randomSeed: (Long, Long)): ((TestContext, L)) ⇒ Prop = {
+    private def propFun(f: L ⇒ Unit): ((TestContext, L)) ⇒ Prop = {
       case (ctx, l) ⇒
         def filterStages(untypedList: List[Any]): List[TestStage] =
           untypedList flatMap {
@@ -291,7 +292,7 @@ object TestGeneration {
               })
               .distinct
             println(s"""|Error Context
-                        |  randomSeed     : ${XorShiftRandom.formatSeed(randomSeed)}
+                        |  randomSeed     : $seed
                         |  runNr          : ${ctx.runNr}
                         |  asyncScheduling: ${ctx.asyncScheduling}
                         |  asyncRate      : ${ctx.asyncRate}

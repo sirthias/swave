@@ -25,7 +25,7 @@ object MonteCarloPiAsync extends App {
       .sub.filter(_.isInner).map(_ => InnerSample).end
       .sub.filterNot(_.isInner).map(_ => OuterSample).end
     .fanInMerge()
-    .async()
+    .asyncBoundary()
     .scan(State(0, 0)) { _ withNextSample _ }
     .drop(1)
     .injectSequential

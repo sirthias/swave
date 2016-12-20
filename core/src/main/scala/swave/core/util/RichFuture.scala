@@ -10,10 +10,8 @@ import java.util.concurrent.TimeoutException
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future, Promise}
 import swave.core.StreamEnv
-import swave.core.impl.util.FastFuture
 
 final class RichFuture[T](val underlying: Future[T]) extends AnyVal {
-  private[swave] def fast: FastFuture[T] = new FastFuture[T](underlying)
 
   def await(timeout: FiniteDuration = 1.second): T =
     underlying.value match {

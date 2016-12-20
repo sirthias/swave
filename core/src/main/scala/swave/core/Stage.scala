@@ -69,7 +69,6 @@ object Stage {
       final case class LazyStart(onStart: () => swave.core.Spout[_]) extends Spout
       final case class Push(initialBufferSize: Int,
                             maxBufferSize: Int,
-                            growByInitialSize: Boolean,
                             notifyOnDequeued: Int => Unit,
                             notifyOnCancel: () => Unit)
           extends Spout

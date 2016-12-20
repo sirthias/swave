@@ -16,13 +16,13 @@ import swave.core.util._
 
 // format: OFF
 @StageImplementation
-private[core] final class PushSpoutStage(initialBufferSize: Int, maxBufferSize: Int, growByInitialSize: Boolean,
+private[core] final class PushSpoutStage(initialBufferSize: Int, maxBufferSize: Int,
                                          notifyOnDequeued: Int => Unit, notifyOnCancel: () => Unit) extends SpoutStage {
   import PushSpoutStage._
 
-  private[core] val queue = new MpscChunkedArrayQueue[AnyRef](initialBufferSize, maxBufferSize, growByInitialSize)
+  private[core] val queue = new MpscChunkedArrayQueue[AnyRef](initialBufferSize, maxBufferSize)
 
-  def kind = Stage.Kind.Spout.Push(initialBufferSize, maxBufferSize, growByInitialSize, notifyOnDequeued, notifyOnCancel)
+  def kind = Stage.Kind.Spout.Push(initialBufferSize, maxBufferSize, notifyOnDequeued, notifyOnCancel)
 
   initialState(awaitingSubscribe(StreamTermination.None))
 

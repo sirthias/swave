@@ -9,12 +9,12 @@ package swave.core.impl.stages
 import org.scalacheck.Gen
 import org.scalatest.Inspectors
 import swave.core.StreamEnv
-import swave.core.internal.testkit.{ TestError, TestFixture }
+import swave.core.internal.testkit.{TestError, TestFixture}
 
 final class FanInSpec extends SyncPipeSpec with Inspectors {
 
   implicit val env    = StreamEnv()
-  implicit val config = PropertyCheckConfig(minSuccessful = 1000)
+  implicit val config = PropertyCheckConfiguration(minSuccessful = 1000)
 
   implicit val integerInput = Gen.chooseNum(0, 999)
   implicit val charInput    = Gen.alphaNumChar
