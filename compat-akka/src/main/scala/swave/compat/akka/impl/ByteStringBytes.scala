@@ -82,6 +82,7 @@ class ByteStringBytes extends Bytes[ByteString] {
   def copyToArray(value: ByteString, xs: Array[Byte], offset: Int) = value.copyToArray(xs, offset)
   def copyToArray(value: ByteString, sourceOffset: Long, xs: Array[Byte], destOffset: Int, len: Int) =
     drop(value, sourceOffset).copyToArray(xs, destOffset, len)
+  def copyToBuffer(value: ByteString, buffer: ByteBuffer): Int = value.copyToBuffer(buffer)
   def copyToOutputStream(value: ByteString, s: OutputStream) = ??? // TODO
   def toByteBuffer(value: ByteString)                        = value.toByteBuffer
   def toIndexedSeq(value: ByteString): IndexedSeq[Byte]      = value

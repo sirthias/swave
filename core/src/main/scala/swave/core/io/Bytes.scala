@@ -64,6 +64,7 @@ trait Bytes[T] {
   def toArray(value: T): Array[Byte]
   def copyToArray(value: T, xs: Array[Byte], offset: Int): Unit
   def copyToArray(value: T, sourceOffset: Long, xs: Array[Byte], destOffset: Int, len: Int): Unit
+  def copyToBuffer(value: T, buffer: ByteBuffer): Int
   def copyToOutputStream(value: T, s: OutputStream): Unit
   def toByteBuffer(value: T): ByteBuffer
   def toIndexedSeq(value: T): IndexedSeq[Byte]
@@ -154,7 +155,7 @@ object Bytes {
     def copyToArray(xs: Array[Byte], offset: Int)(implicit b: Bytes[T]): Unit = b.copyToArray(value, xs, offset)
     def copyToArray(sourceOffset: Long, xs: Array[Byte], destOffset: Int, len: Int)(implicit b: Bytes[T]): Unit =
       b.copyToArray(value, sourceOffset, xs, destOffset, len)
-
+    def copyToBuffer(buffer: ByteBuffer)(implicit b: Bytes[T]): Int = b.copyToBuffer(value, buffer)
     def copyToOutputStream(s: OutputStream)(implicit b: Bytes[T]): Unit = b.copyToOutputStream(value, s)
     def toByteBuffer(implicit b: Bytes[T]): ByteBuffer                  = b.toByteBuffer(value)
 

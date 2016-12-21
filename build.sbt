@@ -154,7 +154,7 @@ lazy val `compat-akka` = project
     libraryDependencies ++= Seq(`akka-stream`, scalatest))
 
 lazy val `compat-scodec` = project
-  .dependsOn(core, `core-macros` % "compile-internal", testkit, `core-tests` % "test->test")
+  .dependsOn(core, `core-macros` % "compile-internal", testkit)
   .enablePlugins(AutomateHeaderPlugin)
   .settings(commonSettings: _*)
   .settings(releaseSettings: _*)
@@ -184,7 +184,7 @@ lazy val `core-macros` = project
     libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value)
 
 lazy val `core-tests` = project
-  .dependsOn(core % "test->test", testkit, `core-macros` % "test-internal")
+  .dependsOn(core % "test->test", testkit, `core-macros` % "test-internal", `compat-scodec` % "test")
   .enablePlugins(AutomateHeaderPlugin)
   .settings(commonSettings: _*)
   .settings(noPublishingSettings: _*)

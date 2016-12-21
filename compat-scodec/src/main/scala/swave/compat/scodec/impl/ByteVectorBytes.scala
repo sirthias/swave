@@ -54,6 +54,12 @@ class ByteVectorBytes extends Bytes[ByteVector] {
   def copyToArray(value: ByteVector, xs: Array[Byte], offset: Int) = value.copyToArray(xs, offset)
   def copyToArray(value: ByteVector, sourceOffset: Long, xs: Array[Byte], destOffset: Int, len: Int) =
     value.copyToArray(xs, destOffset, sourceOffset, len)
+  def copyToBuffer(value: ByteVector, buffer: ByteBuffer): Int = {
+    val array = new Array[Byte](math.min(value.size, buffer.remaining.toLong).toInt)
+    value.copyToArray(array, 0, 0, array.length)
+    buffer.put(array)
+    array.length
+  }
   def copyToOutputStream(value: ByteVector, s: OutputStream) = value.copyToStream(s)
   def toByteBuffer(value: ByteVector)                        = value.toByteBuffer
   def toIndexedSeq(value: ByteVector): IndexedSeq[Byte]      = value.toIndexedSeq
