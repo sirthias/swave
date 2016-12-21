@@ -72,10 +72,7 @@ final class Spout[+A](private[swave] val inport: Inport) extends StreamOps[A @uV
     * Attaches the given [[Drain]] and immediately starts the stream.
     */
   def drainTo[R](drain: Drain[A, R])(implicit env: StreamEnv, ev: TypeLogic.ToTryOrFuture[R]): ev.Out =
-    to(drain).run() match {
-      case Success(run) => run.result
-      case Failure(e)   => ev.failure(e)
-    }
+    to(drain).run().result
 
   /**
     * Attaches a [[Drain]] which executes the given callback for all stream elements
@@ -115,7 +112,8 @@ final class Spout[+A](private[swave] val inport: Inport) extends StreamOps[A @uV
     drainTo(Drain.head[A])
 
   /**
-    * Attaches a [[Drain]] which drops all elements produced by the stream.
+    * Attaches a [[Drain]] which requests and drops all elements produced by the stream.
+    * The stream is therefore only run for its side-effects.
     */
   def drainToBlackHole()(implicit env: StreamEnv): Future[Unit] =
     drainTo(Drain.ignore)
@@ -200,6 +198,8 @@ object Spout {
 
   /**
     * A [[Spout]] which never produces any elements but terminates when the given future is fulfilled.
+    *
+    * The returned [[Spout]] instance cannot run synchronously.
     */
   def emptyFrom[T](future: Future[Unit]): Spout[T] =
     fromFuture(future).drop(1).named("Spout.emptyFrom").asInstanceOf[Spout[T]]
@@ -297,7 +297,7 @@ object Spout {
     new Spout(new LazyStartSpoutStage(onStart.asInstanceOf[() ⇒ Spout[AnyRef]]))
 
   /**
-    * A [[Spout]] which produces only the given element.
+    * A [[Spout]] which produces the given element only once before completing.
     */
   def one[T](element: T): Spout[T] =
     fromIterator(Iterator single element) named "Spout.one"
@@ -307,10 +307,9 @@ object Spout {
     */
   def push[T](initialBufferSize: Int,
               maxBufferSize: Int,
-              growByInitialSize: Boolean = false,
               notifyOnDequeued: (PushSpout[T], Int) ⇒ Unit = dropFunc2,
               notifyOnCancel: PushSpout[T] ⇒ Unit = dropFunc): PushSpout[T] =
-    PushSpout(initialBufferSize, maxBufferSize, growByInitialSize, notifyOnDequeued, notifyOnCancel)
+    PushSpout(initialBufferSize, maxBufferSize, notifyOnDequeued, notifyOnCancel)
 
   /**
     * A [[Spout]] which produced an infinite stream of identical elements.

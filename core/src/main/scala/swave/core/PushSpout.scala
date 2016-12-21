@@ -21,8 +21,6 @@ import swave.core.util._
   * @param initialBufferSize the initial buffer size, must be >= 2.
   * @param maxBufferSize the max size the buffer is allowed to grow to if required, must be >= 4, will be rounded up to
   *                      the closest power of 2 and round up to a larger power of 2 than `initialBufferSize`.
-  * @param growByInitialSize if the true the buffer size is incremented in steps of `initialBufferSize`, otherwise
-  *                          it grows exponentially by doubling in size at each resize step
   * @param notifyOnDequeued callback that will be called each time a `request` signal from downstream has been handled,
   *                         i.e. whenever one or more elements have been dequeued and pushed to downstream.
   *                         The argument to the handler is the number of elements dequeued and is always > 0.
@@ -35,7 +33,6 @@ import swave.core.util._
   */
 final class PushSpout[+A] private (val initialBufferSize: Int,
                                    val maxBufferSize: Int,
-                                   val growByInitialSize: Boolean,
                                    notifyOnDequeued: (PushSpout[A], Int) ⇒ Unit,
                                    notifyOnCancel: PushSpout[A] ⇒ Unit) {
 
@@ -51,18 +48,18 @@ final class PushSpout[+A] private (val initialBufferSize: Int,
   val spout: Spout[A] = new Spout(stage)
 
   /**
-    * Returns true if the queue still has buffer space available.
+    * The number of elements in the queue.
     *
-    * NOTE: If more than one thread push elements in an unsynchronized fashion
-    * the result of this method is essentially meaningless.
+    * NOTE: Due to the inherent raciness the result of this method is essentially meaningless
+    * if more than one thread push elements in an unsynchronized fashion.
     */
   def queueSize: Int = stage.queue.size()
 
   /**
     * Returns true if the queue still has buffer space available.
     *
-    * NOTE: If more than one thread push elements in an unsynchronized fashion
-    * the result of this method is essentially meaningless.
+    * NOTE: Due to the inherent raciness the result of this method is essentially meaningless
+    * if more than one thread push elements in an unsynchronized fashion.
     */
   def acceptsNext: Boolean = queueSize < maxBufferSize
 
@@ -114,10 +111,9 @@ object PushSpout {
     */
   def apply[T](initialBufferSize: Int,
                maxBufferSize: Int,
-               growByInitialSize: Boolean = false,
                notifyOnDequeued: (PushSpout[T], Int) ⇒ Unit = dropFunc2,
                notifyOnCancel: PushSpout[T] ⇒ Unit = dropFunc): PushSpout[T] =
-    new PushSpout(initialBufferSize, maxBufferSize, growByInitialSize, notifyOnDequeued, notifyOnCancel)
+    new PushSpout(initialBufferSize, maxBufferSize, notifyOnDequeued, notifyOnCancel)
 
   /**
     * Allows a [[PushSpout] to be used (almost) everywhere where a [[Spout]] is expected.

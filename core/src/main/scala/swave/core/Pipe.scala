@@ -43,7 +43,7 @@ final class Pipe[-A, +B] private (private[core] val firstStage: Outport, private
     new Drain(firstStage, drain.result)
   }
 
-  def via[C](pipe: B =>> C): Repr[C] = {
+  def via[C](pipe: Pipe[B, C]): Repr[C] = {
     lastStage.subscribe()(pipe.firstStage)
     new Pipe(firstStage, pipe.lastStage)
   }
@@ -76,25 +76,25 @@ final class Pipe[-A, +B] private (private[core] val firstStage: Outport, private
 
 object Pipe {
 
-  def apply[T]: T =>> T = {
+  def apply[T]: Pipe[T, T] = {
     val stage = new NopStage
     new Pipe(stage, stage)
   }
 
-  def fromDrainAndSpout[A, B](drain: Drain[A, Unit], spout: Spout[B]): A =>> B =
+  def fromDrainAndSpout[A, B](drain: Drain[A, Unit], spout: Spout[B]): Pipe[A, B] =
     new Pipe(drain.outport, spout.inport) named "Pipe.fromDrainAndSpout"
 
-  def fromProcessor[A, B](processor: Processor[A, B]): A =>> B =
+  def fromProcessor[A, B](processor: Processor[A, B]): Pipe[A, B] =
     fromDrainAndSpout(Drain.fromSubscriber(processor), Spout.fromPublisher(processor))
 
-  def lazyStart[A, B](onStart: () ⇒ A =>> B): A =>> B = {
-    val innerPipeRef = new AtomicReference[A =>> B]
-    val placeholder  = Pipe[A].asInstanceOf[A =>> B]
-    @tailrec def innerPipe: A =>> B =
+  def lazyStart[A, B](onStart: () ⇒ Pipe[A, B]): Pipe[A, B] = {
+    val innerPipeRef = new AtomicReference[Pipe[A, B]]
+    val placeholder  = Pipe[A].asInstanceOf[Pipe[A, B]]
+    @tailrec def innerPipe: Pipe[A, B] =
       innerPipeRef.get match {
         case null ⇒
           if (innerPipeRef.compareAndSet(null, placeholder)) {
-            val pipe: A =>> B =
+            val pipe: Pipe[A, B] =
               try onStart()
               catch { case NonFatal(e) ⇒ fromDrainAndSpout(Drain.cancelling, Spout.failing(e)) }
             innerPipeRef.set(pipe)

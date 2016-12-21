@@ -124,7 +124,7 @@ object Module {
   /**
    * Packages the given [[Pipe]] as a [[Module]].
    */
-  def fromPipe[A, B](pipe: A =>> B): Forward[A :: HNil, B :: HNil] =
+  def fromPipe[A, B](pipe: Pipe[A, B]): Forward[A :: HNil, B :: HNil] =
     ModuleImpl(1, 0)(inports ⇒ InportList(pipe.transform(new Spout(inports.in)).inport))
 
   /**

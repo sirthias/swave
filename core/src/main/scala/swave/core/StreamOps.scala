@@ -83,6 +83,8 @@ abstract class StreamOps[A] private[core] { self ⇒
   final def collect[B](pf: PartialFunction[A, B]): Repr[B] =
     append(new CollectStage(pf.asInstanceOf[PartialFunction[AnyRef, AnyRef]]))
 
+  final def ++[B >: A](other: Spout[B]): Repr[B] = concat(other)
+
   final def concat[B >: A](other: Spout[B]): Repr[B] =
     attach(other).fanInConcat()
 
@@ -448,7 +450,7 @@ abstract class StreamOps[A] private[core] { self ⇒
   final def throttle(cost: Int, per: FiniteDuration, burst: Int, costFn: A ⇒ Int): Repr[A] =
     append(new ThrottleStage(cost, per, burst, costFn.asInstanceOf[Any ⇒ Int]))
 
-  def via[B](pipe: A =>> B): Repr[B]
+  def via[B](pipe: Pipe[A, B]): Repr[B]
 
   // timeout = time after demand signal for first element
   final def withCompletionTimeout(timeout: FiniteDuration): Repr[A] =
@@ -664,7 +666,7 @@ object StreamOps {
       fo.asInstanceOf[F#FI[L, S]]
     }
 
-    def via[B](pipe: A =>> B): Repr[B] = new SubStreamOps(fo, spout via pipe)
+    def via[B](pipe: Pipe[A, B]): Repr[B] = new SubStreamOps(fo, spout via pipe)
 
     def via[P <: HList, R, Out](joined: Module.TypeLogic.Joined[A :: HNil, P, R])(
         implicit vr: TypeLogic.ViaResult[P, F, Repr, Out]): Out = {

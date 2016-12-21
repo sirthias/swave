@@ -55,7 +55,7 @@ final class RichString(val underlying: String) extends AnyVal {
     * Returns Some(String) if the underlying string is non-empty, None otherwise
     */
   def toOption: Option[String] =
-    if ((underlying eq null) || (underlying.length == 0)) None else Some(underlying)
+    if ((underlying eq null) || underlying.isEmpty) None else Some(underlying)
 
   /**
     * If the underlying string is null the method returns the empty string, otherwise the underlying string.
@@ -66,7 +66,7 @@ final class RichString(val underlying: String) extends AnyVal {
   /**
     * If the underlying string is null the method returns the empty string, otherwise the underlying string.
     */
-  def isNullOrEmpty: Boolean = (underlying eq null) || (underlying.length == 0)
+  def isNullOrEmpty: Boolean = (underlying eq null) || underlying.isEmpty
 
   /**
     * Returns the ASCII encoded bytes of this string. Truncates characters to 8-bit byte value.

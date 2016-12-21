@@ -15,7 +15,7 @@ import swave.core.impl.Outport
 import swave.core.impl.stages.drain._
 
 /**
-  * A `Drain` is a streaming component] with one input port and a no output port. As such it serves
+  * A `Drain` is a streaming component] with one input port and no output port. As such it serves
   * as a "point of exit" from a stream graph to other destinations (e.g. to memory, disk or the network).
   *
   * @tparam T the type of the data elements consumed
@@ -69,13 +69,6 @@ final class Drain[-T, +R] private[swave] (private[swave] val outport: Outport, v
     * Turns this [[Drain]] into one that causes the stream graph it's incorporated into to run asynchronously.
     * If the given `dispatcherId` is empty the default dispatcher will be assigned if no other non-default
     * assignment has been made for the async region the drain is placed in.
-    *
-    * Since this [[Drain]] might internally consist of a whole other stream graph the full description of
-    * this method's effect is: Marks all primary drains in the graph behind this drain's stage as
-    * "to be run on the dispatcher with the given id" or the default-dispatcher.
-    *
-    * NOTE: The (internal) graph behind this drain's stage must not contain any explicit async boundaries.
-    * Otherwise an [[IllegalStateException]] will be thrown.
     */
   def async(dispatcherId: String = ""): Drain[T, R] =
     Pipe[T].async(dispatcherId).to(this)
@@ -177,7 +170,7 @@ object Drain {
     Pipe[T].last.to(headOption) named "Drain.lastOption"
 
   /**
-    * A [[Drain]] which forward the stream to the [[Drain]] instance returned by the given
+    * A [[Drain]] which forwards the stream to the [[Drain]] instance returned by the given
     * function. The given function is only executed when the outer stream is started.
     *
     * If the outer stream is synchronous the [[Drain]] returned by `onStart` must be able to run synchronously
@@ -224,7 +217,7 @@ object Drain {
     * Depending on the arrival rate of the stream elements as well as the runtime of the callback up to
     * `parallelism` invocations of the callback function will be run in parallel, i.e. in an overlapping fashion.
     *
-    * CAUTION: `callback` will be called from another thread if the stream is asynchronous!
+    * CAUTION: The given callback might be called from several threads concurrently!
     */
   def parallelForeach[T](parallelism: Int)(f: T ⇒ Unit)(implicit ec: ExecutionContext): Drain[T, Future[Unit]] =
     Pipe[T].mapAsyncUnordered(parallelism)(x ⇒ Future(f(x))).to(Drain.ignore)

@@ -37,15 +37,23 @@ final class StreamGraph[+A] private[core] (val result: A, stageImpl: StageImpl) 
 
   /**
     * Prepares this [[StreamGraph]] for starting and verifies that the ports of all stages are properly connected.
+    *
+    * If there is any problem with the stream setup (for example because the graph is not closed or dispatcher
+    * assignments are conflicting) a respective [[Exception]] will be thrown.
+    *
+    * The non-throwing variant of this method is [[StreamGraph.trySeal]]
     */
-  def seal()(implicit env: StreamEnv): Try[SealedStreamGraph[A]] = {
-    try {
-      val ctx = RunContext.seal(stageImpl, env)
-      Success(new SealedStreamGraph(result, ctx))
-    } catch {
-      case NonFatal(e) => Failure(e)
-    }
+  def seal()(implicit env: StreamEnv): SealedStreamGraph[A] = {
+    val ctx = RunContext.seal(stageImpl, env)
+    new SealedStreamGraph(result, ctx)
   }
+
+  /**
+    * Same as [[StreamGraph.seal]] but never throwing.
+    */
+  def trySeal()(implicit env: StreamEnv): Try[SealedStreamGraph[A]] =
+    try Success(seal())
+    catch { case NonFatal(e) => Failure(e) }
 
   /**
     * Seals and starts this [[StreamGraph]] and returns the [[StreamRun]] instance for the run.
@@ -56,22 +64,28 @@ final class StreamGraph[+A] private[core] (val result: A, stageImpl: StageImpl) 
     *
     * Otherwise, if the stream runs asynchronously, it will return (more or less) immediately and the stream
     * will run detached from the caller thread.
+    *
+    * If there are any problems with sealing the stream setup a respective [[Exception]] will be thrown.
+    * The non-throwing variant of this method is [[StreamGraph.tryRun]].
     */
-  def run()(implicit env: StreamEnv, ev: TypeLogic.ToTryOrFuture[A]): Try[StreamRun[ev.Out]] = {
-    try {
-      val ctx = RunContext.seal(stageImpl, env)
-      val res =
-        try {
-          ctx.impl.start()
-          ev.success(result)
-        } catch {
-          case NonFatal(e) ⇒ ev.failure(e)
-        }
-      Success(new StreamRun(res, ctx))
-    } catch {
-      case NonFatal(e) => Failure(e)
-    }
+  def run()(implicit env: StreamEnv, ev: TypeLogic.ToTryOrFuture[A]): StreamRun[ev.Out] = {
+    val ctx = RunContext.seal(stageImpl, env)
+    val res =
+      try {
+        ctx.impl.start()
+        ev.success(result)
+      } catch {
+        case NonFatal(e) ⇒ ev.failure(e)
+      }
+    new StreamRun(res, ctx)
   }
+
+  /**
+    * Same as [[StreamGraph.run]] but never throwing.
+    */
+  def tryRun()(implicit env: StreamEnv, ev: TypeLogic.ToTryOrFuture[A]): Try[StreamRun[ev.Out]] =
+    try Success(run())
+    catch { case NonFatal(e) => Failure(e) }
 }
 
 /**
@@ -85,6 +99,11 @@ final class SealedStreamGraph[+A] private[core] (val result: A, ctx: RunContext)
     * Entry points for exploring the structure of the graph.
     */
   def regions: List[Stage.Region] = ctx.impl.regions
+
+  /**
+    * The total number of stages in the underlying stream graph.
+    */
+  def stagesTotalCount: Int = regions.sumBy(_.stagesTotalCount)
 
   /**
     * Turns this [[SealedStreamGraph]] into one with a different result by mapping over the result value.
@@ -129,8 +148,16 @@ final class StreamRun[+A] private[core] (val result: A, ctx: RunContext) {
     */
   def regions: List[Stage.Region] = ctx.impl.regions
 
+  /**
+    * The total number of stages in the underlying stream graph.
+    */
   def stagesTotalCount: Int = regions.sumBy(_.stagesTotalCount)
 
+  /**
+    * The total number of active stages in the underlying stream graph.
+    * Note that this method is inherently racy!
+    * It is mainly provided for debugging help and not for driving actual business logic.
+    */
   def stagesActiveCount: Int = regions.sumBy(_.stagesActiveCount)
 
   /**
@@ -139,7 +166,7 @@ final class StreamRun[+A] private[core] (val result: A, ctx: RunContext) {
   def mapResult[B](f: A ⇒ B): StreamRun[B] = new StreamRun(f(result), ctx)
 
   /**
-    * A [[Future]] that is completed when all stages of the graph, in all async regions, have terminated.
+    * A [[Future]] that is completed when all stages of the graph, in all regions, have terminated.
     * This future can, for example, serve as a trigger for safely shutting down the [[StreamEnv]].
     */
   def termination: Future[Unit] = ctx.impl.termination

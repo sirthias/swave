@@ -225,7 +225,7 @@ public class TimerWheel
         }
     }
 
-    private static Timer[] addTimeoutToArray(final Timer[] oldArray, final Timer timeout)
+    private static TimerWheel.Timer[] addTimeoutToArray(final TimerWheel.Timer[] oldArray, final TimerWheel.Timer timeout)
     {
         for (int i = 0; i < oldArray.length; i++)
         {

@@ -87,7 +87,7 @@ class RegionSpec extends FreeSpec with Matchers {
       name in {
         val expectedRendering =
           examples.getOrElse(name + ':', sys.error(s"Section for '$name' not found in examples.txt"))
-        val superRegions = Graph.superRegions(pipeNet.seal().get.regions)
+        val superRegions = Graph.superRegions(pipeNet.seal().regions)
         val rendering =
           superRegions.map { sr =>
             Graph.from(sr.head.entryPoint, Graph.ExpandModules.All)

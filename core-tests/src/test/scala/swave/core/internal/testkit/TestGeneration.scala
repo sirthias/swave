@@ -300,7 +300,7 @@ object TestGeneration {
                         |  fixtures:
                         |  ${fixtures.mkString("\n\n  ")}
                         |
-                  |  specimens:
+                        |  specimens:
                         |    ${specimens.mkString("\n\n    ")}""".stripMargin)
             Prop.exception(e)
         }
