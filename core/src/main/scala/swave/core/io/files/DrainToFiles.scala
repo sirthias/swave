@@ -13,7 +13,7 @@ import swave.core.io.files.impl.FileDrainStage
 import swave.core.io.Bytes
 import swave.core._
 
-trait DrainToFiles extends Any {
+trait DrainToFiles {
 
   /**
     * Creates a [[Drain]] instance that sinks the incoming byte chunks into the given file.
@@ -30,7 +30,7 @@ trait DrainToFiles extends Any {
   def toFileName[T: Bytes](fileName: String,
                            options: Set[StandardOpenOption] = FileIO.WriteCreateOptions,
                            chunkSize: Int = -1): Drain[T, Future[Long]] =
-    toPath(resolveFileSystemPath(fileName), options)
+    toPath(FileIO.resolveFileSystemPath(fileName), options)
 
   /**
     * Creates a [[Drain]] instance that sinks the incoming byte chunks into the given file.

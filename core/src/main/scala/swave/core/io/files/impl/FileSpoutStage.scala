@@ -16,7 +16,7 @@ import swave.core.Stage
 import swave.core.impl.Outport
 import swave.core.impl.stages.SpoutStage
 import swave.core.io.Bytes
-import swave.core.io.files.quietClose
+import swave.core.io.files.FileIO
 import swave.core.macros._
 
 // format: OFF
@@ -54,7 +54,7 @@ private[core] final class FileSpoutStage[T](path: Path, _chunkSize: Int)(implici
         } catch {
           case e: IOException =>
             log.debug(msg, path, e.toString)
-            if (chan ne null) quietClose(chan)
+            if (chan ne null) FileIO.quietClose(chan)
             stopError(e, out)
         }
       })
@@ -72,14 +72,23 @@ private[core] final class FileSpoutStage[T](path: Path, _chunkSize: Int)(implici
               out.onNext(chunk.asInstanceOf[AnyRef])
               rec(remaining - 1, readChunk(channel))
             } else reading(channel, chunk)
-          } else stopComplete(out)
+          } else {
+            try {
+              channel.close()
+              stopComplete(out)
+            } catch {
+              case e: IOException =>
+                log.debug("Error closing `{}`: {}", path, e)
+                stopError(e, out)
+            }
+          }
 
         out.onNext(nextChunk.asInstanceOf[AnyRef])
         try rec(n - 1, readChunk(channel))
         catch {
           case e: IOException =>
             log.debug("Error reading from `{}`: {}", path, e)
-            quietClose(channel)
+            FileIO.quietClose(channel)
             stopError(e, out)
         }
       },
@@ -87,9 +96,7 @@ private[core] final class FileSpoutStage[T](path: Path, _chunkSize: Int)(implici
       cancel = _ => {
         try channel.close()
         catch {
-          case e: IOException =>
-            log.debug("Error closing `{}`: {}", path, e)
-            stopError(e, out)
+          case e: IOException => log.debug("Error closing `{}`: {}", path, e)
         }
         stop()
       })

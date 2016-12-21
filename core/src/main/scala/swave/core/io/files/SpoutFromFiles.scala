@@ -12,7 +12,7 @@ import swave.core.io.files.impl.FileSpoutStage
 import swave.core.io.Bytes
 import swave.core._
 
-trait SpoutFromFiles extends Any {
+trait SpoutFromFiles {
 
   /**
     * Creates a `Spout` instance that streams the contents of the given file in chunks of the
@@ -24,7 +24,7 @@ trait SpoutFromFiles extends Any {
     * an async stream.
     */
   def fromFileName[T: Bytes](fileName: String, chunkSize: Int = 0): Spout[T] =
-    fromPath(resolveFileSystemPath(fileName))
+    fromPath(FileIO.resolveFileSystemPath(fileName))
 
   /**
     * Creates a `Spout` instance that streams the contents of the given file in chunks of the

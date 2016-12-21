@@ -4,16 +4,16 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package swave.core.impl.stages
+package swave.core.io.files
 
 import java.nio.charset.StandardCharsets._
 import java.nio.file.Files
 import scodec.bits.ByteVector
-import swave.core._
 import swave.testkit.Probes._
+import swave.compat.scodec._
+import swave.core._
 
 class FileSpoutSpec extends SwaveSpec {
-  import swave.compat.scodec._
   import swave.core.io.files._
 
   implicit val env = StreamEnv()

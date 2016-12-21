@@ -7,13 +7,23 @@
 package swave.core.io.files
 
 import java.io.File
-import java.nio.file.{Files, Path, StandardOpenOption}
+import java.nio.channels.FileChannel
+import java.nio.file.{FileSystems, Files, Path, StandardOpenOption}
+
+import scala.util.control.NonFatal
 import com.typesafe.config.Config
 import swave.core.impl.util.SettingsCompanion
 import swave.core.io.Bytes
 import swave.core.macros._
 
 object FileIO extends SpoutFromFiles with DrainToFiles {
+
+  lazy val userHomePath: Path = FileSystems.getDefault.getPath(System getProperty "user.home")
+
+  def resolveFileSystemPath(pathName: String): Path =
+    if (pathName.length >= 2 && pathName.charAt(0) == '~' && pathName.charAt(1) == File.separatorChar) {
+      userHomePath.resolve(pathName substring 2)
+    } else FileSystems.getDefault.getPath(pathName)
 
   val WriteCreateOptions: Set[StandardOpenOption] = {
     import StandardOpenOption._
@@ -49,4 +59,7 @@ object FileIO extends SpoutFromFiles with DrainToFiles {
   def readFile[T: Bytes](file: File): T       = readFile(file.toPath)
   def readFile[T: Bytes](path: Path): T       = implicitly[Bytes[T]].apply(Files.readAllBytes(path))
 
+  private[io] def quietClose(channel: FileChannel): Unit =
+    try channel.close()
+    catch { case NonFatal(_) ⇒ }
 }

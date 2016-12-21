@@ -4,16 +4,16 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package swave.core.impl.stages
+package swave.core.io.files
 
 import java.nio.file.{Files, Path}
 import scodec.bits.ByteVector
+import swave.compat.scodec._
 import swave.core.util._
 import swave.core._
 
 class FileDrainSpec extends SwaveSpec {
   import swave.core.io.files._
-  import swave.compat.scodec._
 
   implicit val env = StreamEnv()
 

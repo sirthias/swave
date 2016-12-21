@@ -16,6 +16,7 @@ import swave.core.Stage
 import swave.core.impl.Inport
 import swave.core.impl.stages.DrainStage
 import swave.core.io.Bytes
+import swave.core.io.files.FileIO
 import swave.core.macros.StageImplementation
 
 // format: OFF
@@ -61,7 +62,7 @@ private[core] final class FileDrainStage[T](path: Path, options: Set[StandardOpe
         } catch {
           case e: IOException =>
             log.debug("Error writing to `{}`: {}", path, e)
-            swave.core.io.files.quietClose(channel)
+            FileIO.quietClose(channel)
             in.cancel()
             stop(e)
         }
