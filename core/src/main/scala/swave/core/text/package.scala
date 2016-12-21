@@ -11,7 +11,7 @@ import swave.core.io.Bytes
 
 package object text {
 
-  implicit class RichBytesStreamOps[T, S[X] <: StreamOps[X]](val underlying: S[T]) extends AnyVal {
+  implicit class RichBytesStreamOpsText[T, S[X] <: StreamOps[X]](val underlying: S[T]) extends AnyVal {
 
     def decode(charset: Charset,
                onMalformedInput: CodingErrorAction = CodingErrorAction.REPORT,
@@ -23,7 +23,7 @@ package object text {
       underlying.via(Text.utf8Decode)
   }
 
-  implicit class RichStringStreamOps[S <: StreamOps[String]](val underlying: S) extends AnyVal {
+  implicit class RichStringStreamOpsText[S <: StreamOps[String]](val underlying: S) extends AnyVal {
 
     def encode[T :Bytes](charset: Charset): S#Repr[T] =
       underlying.via(Text.encode(charset))

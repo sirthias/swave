@@ -15,14 +15,13 @@ import swave.core.io.Bytes
 import swave.core.macros._
 import swave.core.util._
 
-
 object Text extends TextTransformations
 
 trait TextTransformations {
 
   final def utf8Decode[T :Bytes]: Pipe[T, String] = decode(UTF8)
 
-  def decode[T :Bytes](charset: Charset,
+  final def decode[T :Bytes](charset: Charset,
                        onMalformedInput: CodingErrorAction = CodingErrorAction.REPORT,
                        onUnmappableCharacter: CodingErrorAction = CodingErrorAction.REPLACE): Pipe[T, String] =
     Pipe[T].map {
@@ -74,11 +73,11 @@ trait TextTransformations {
           }
         }
       }
-    }
+    } named "decode"
 
   final def utf8Encode[T :Bytes]: Pipe[String, T] = encode(UTF8)
 
-  def encode[T](charset: Charset)(implicit ev: Bytes[T]): Pipe[String, T] =
+  final def encode[T](charset: Charset)(implicit ev: Bytes[T]): Pipe[String, T] =
     Pipe[String] map {
       new (String => T) {
         implicit def decorator(value: T): Bytes.Decorator[T] = Bytes.decorator(value)
@@ -115,11 +114,11 @@ trait TextTransformations {
           }
         }
       }
-    }
+    } named "encode"
 
   private val EOI = new String
 
-  def lines: Pipe[String, String] = // TODO: upgrade to more efficient custom stage once it's available
+  final def lines: Pipe[String, String] = // TODO: upgrade to more efficient custom stage once it's available
     Pipe[String].concat(Spout.one(EOI)) flatMap {
       new (String => List[String]) {
         private[this] val sb = new java.lang.StringBuilder
@@ -141,5 +140,5 @@ trait TextTransformations {
             rec(0, null)
           } else if (sb.length > 0) sb.toString :: Nil else Nil
       }
-    }
+    } named "lines"
 }
