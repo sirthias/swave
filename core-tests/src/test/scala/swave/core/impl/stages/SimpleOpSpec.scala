@@ -176,13 +176,18 @@ final class SimpleOpSpec extends SyncPipeSpec with Inspectors {
       .input[Int]
       .output[Seq[Int]]
       .param(Gen.chooseNum(1, 10))
-      .prop.from { (in, out, param) ⇒
+      .param(Gen.oneOf(false, true))
+      .prop.from { (in, out, param, emitSingleEmpty) ⇒
 
       in.spout
-        .grouped(param)
+        .grouped(param, emitSingleEmpty)
         .drainTo(out.drain) shouldTerminate asScripted(in)
 
-      out.received shouldEqual in.produced.grouped(param).take(out.size).toList
+      val expected =
+        if (emitSingleEmpty && in.produced.isEmpty &&
+          out.scriptedSize >= 1 && !out.terminalState.isInstanceOf[TestFixture.State.Error]) Nil :: Nil
+        else in.produced.grouped(param).take(out.size).toList
+      out.received shouldEqual expected
     }
   }
 

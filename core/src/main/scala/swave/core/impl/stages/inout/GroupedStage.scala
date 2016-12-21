@@ -28,15 +28,22 @@ private[core] final class GroupedStage(groupSize: Int, emitSingleEmpty: Boolean,
 
     /**
       * Waiting for a request from downstream.
+      *
+      * @param firstElem true if we are still awaiting the very first element from upstream
       */
-    def awaitingDemand() = state(
+    def awaitingDemand(firstElem: Boolean) = state(
       request = (n, _) ⇒ {
         in.request(groupSize.toLong)
-        collecting(groupSize, n.toLong, firstElem = true)
+        collecting(groupSize, n.toLong, firstElem)
       },
 
       cancel = stopCancelF(in),
-      onComplete = stopCompleteF(out),
+
+      onComplete = _ => {
+        if (firstElem && emitSingleEmpty) awaitingDemandForSingleEmpty()
+        else stopComplete(out)
+      },
+
       onError = stopErrorF(out))
 
     /**
@@ -60,7 +67,7 @@ private[core] final class GroupedStage(groupSize: Int, emitSingleEmpty: Boolean,
           if (remaining > 1) {
             in.request(groupSize.toLong)
             collecting(groupSize, remaining - 1, firstElem = false)
-          } else awaitingDemand()
+          } else awaitingDemand(false)
         } else collecting(pending - 1, remaining, firstElem = false)
       },
 
@@ -73,6 +80,17 @@ private[core] final class GroupedStage(groupSize: Int, emitSingleEmpty: Boolean,
 
       onError = stopErrorF(out))
 
-    awaitingDemand()
+    /**
+      * Waiting for a request from downstream for the single empty group we need to emit.
+      */
+    def awaitingDemandForSingleEmpty() = state(
+      request = (_, _) ⇒ {
+        out.onNext(builder.result())
+        stopComplete(out)
+      },
+
+      cancel = stopF)
+
+    awaitingDemand(true)
   }
 }
