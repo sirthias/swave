@@ -43,15 +43,15 @@ final class StreamGraph[+A] private[core] (val result: A, stageImpl: StageImpl) 
     *
     * The non-throwing variant of this method is [[StreamGraph.trySeal]]
     */
-  def seal()(implicit env: StreamEnv): SealedStreamGraph[A] = {
+  def seal()(implicit env: StreamEnv): RunnableStreamGraph[A] = {
     val ctx = RunContext.seal(stageImpl, env)
-    new SealedStreamGraph(result, ctx)
+    new RunnableStreamGraph(result, ctx)
   }
 
   /**
     * Same as [[StreamGraph.seal]] but never throwing.
     */
-  def trySeal()(implicit env: StreamEnv): Try[SealedStreamGraph[A]] =
+  def trySeal()(implicit env: StreamEnv): Try[RunnableStreamGraph[A]] =
     try Success(seal())
     catch { case NonFatal(e) => Failure(e) }
 
@@ -89,11 +89,11 @@ final class StreamGraph[+A] private[core] (val result: A, stageImpl: StageImpl) 
 }
 
 /**
-  * R [[SealedStreamGraph]] represents a stream graph that has already been sealed and that is ready to be run.
+  * R [[RunnableStreamGraph]] represents a stream graph that has already been sealed and that is ready to be run.
   *
   * If the type parameter `A` is a [[Future]] then `run().result` returns an `A`, otherwise a `Try[A]`.
   */
-final class SealedStreamGraph[+A] private[core] (val result: A, ctx: RunContext) {
+final class RunnableStreamGraph[+A] private[core] (val result: A, ctx: RunContext) {
 
   /**
     * Entry points for exploring the structure of the graph.
@@ -106,15 +106,15 @@ final class SealedStreamGraph[+A] private[core] (val result: A, ctx: RunContext)
   def stagesTotalCount: Int = regions.sumBy(_.stagesTotalCount)
 
   /**
-    * Turns this [[SealedStreamGraph]] into one with a different result by mapping over the result value.
+    * Turns this [[RunnableStreamGraph]] into one with a different result by mapping over the result value.
     *
-    * NOTE: The result of this call and the underlying [[SealedStreamGraph]] share the same stages.
+    * NOTE: The result of this call and the underlying [[RunnableStreamGraph]] share the same stages.
     * This means that only one of them can be run (once).
     */
-  def mapResult[B](f: A ⇒ B): SealedStreamGraph[B] = new SealedStreamGraph(f(result), ctx)
+  def mapResult[B](f: A ⇒ B): RunnableStreamGraph[B] = new RunnableStreamGraph(f(result), ctx)
 
   /**
-    * Starts this [[SealedStreamGraph]] and returns the [[StreamRun]] instance for the run.
+    * Starts this [[RunnableStreamGraph]] and returns the [[StreamRun]] instance for the run.
     * The `result` of the returned [[StreamRun]] has either type `A` if `A` is a [[Future]], or otherwise `Try[A]`.
     *
     * If the stream runs synchronously the call will not return before the stream has finished running completely.
