@@ -17,35 +17,71 @@ private[core] final class AsyncBoundaryStage(dispatcherId: String) extends InOut
 
   def kind = Stage.Kind.InOut.AsyncBoundary(dispatcherId)
 
-  connectInOutAndSealWith_NoAutoPropagation { (inport, outport) ⇒
-    val inp = inport.stageImpl
-    val outp = outport.stageImpl
+  initialState(awaitingSubscribeOrOnSubscribe())
 
-    def completeSealing() = {
-      region.impl.requestDispatcherAssignment(dispatcherId)
-      running(inp, outp)
-    }
+  def awaitingSubscribeOrOnSubscribe() = state(
+    intercept = false,
 
-    if (inp.isSealed) {
-      requireState(region eq inp.region)
-      if (outp.isSealed) requireState(region ne outp.region)
-      else region.runContext.impl.registerForSealing(outp)
-      completeSealing()
-    } else if (outp.isSealed) {
-      if (region eq outp.region) {
-        region.runContext.impl.registerForSealing(this)
-        resetRegion()
-        stay()
+    onSubscribe = from ⇒ {
+      _inputStages = from.stageImpl :: Nil
+      awaitingSubscribe(from)
+    },
+
+    subscribe = from ⇒ {
+      _outputStages = from.stageImpl :: Nil
+      from.onSubscribe()
+      awaitingOnSubscribe(from)
+    })
+
+  def awaitingSubscribe(in: Inport) = state(
+    intercept = false,
+
+    subscribe = from ⇒ {
+      _outputStages = from.stageImpl :: Nil
+      from.onSubscribe()
+      ready(in, from)
+    })
+
+  def awaitingOnSubscribe(out: Outport) = state(
+    intercept = false,
+
+    onSubscribe = from ⇒ {
+      _inputStages = from.stageImpl :: Nil
+      ready(from, out)
+    })
+
+  def ready(in: Inport, out: Outport) = state(
+    intercept = false,
+
+    xSeal = () ⇒ {
+      val inp = in.stageImpl
+      val outp = out.stageImpl
+
+      def completeSealing() = {
+        region.impl.requestDispatcherAssignment(dispatcherId)
+        running(inp, outp)
+      }
+
+      if (inp.isSealed) {
+        requireState(region eq inp.region)
+        if (outp.isSealed) requireState(region ne outp.region)
+        else region.runContext.impl.registerForSealing(outp)
+        completeSealing()
+      } else if (outp.isSealed) {
+        if (region eq outp.region) {
+          region.runContext.impl.registerForSealing(this)
+          resetRegion()
+          stay()
+        } else {
+          inp.xSeal(region)
+          completeSealing()
+        }
       } else {
+        region.runContext.impl.registerForSealing(outp)
         inp.xSeal(region)
         completeSealing()
       }
-    } else {
-      region.runContext.impl.registerForSealing(outp)
-      inp.xSeal(region)
-      completeSealing()
-    }
-  }
+    })
 
   def running(inp: StageImpl, outp: StageImpl) = state(
     intercept = false,

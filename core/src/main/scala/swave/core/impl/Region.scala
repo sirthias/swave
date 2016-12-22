@@ -39,6 +39,8 @@ private[swave] final class Region private[impl] (val entryPoint: StageImpl, val 
     def stagesTotalCount: Int
     def stagesActiveCount: Int
 
+    def enqueueRequest(target: StageImpl, n: Long)(implicit from: Outport): Unit
+
     // PreStart only
     def becomeSubRegionOf(parent: Region): Unit   = `n/a`
     def registerForXStart(stage: StageImpl): Unit = `n/a`
@@ -64,7 +66,6 @@ private[swave] final class Region private[impl] (val entryPoint: StageImpl, val 
     def enqueueOnError(target: StageImpl, e: Throwable)(implicit from: Inport): Unit = `n/a`
 
     // SyncRunning + AsyncRunning + Stopped
-    def enqueueRequest(target: StageImpl, n: Long)(implicit from: Outport): Unit     = `n/a`
     def enqueueXEvent(target: StageImpl, ev: AnyRef): Unit = `n/a`
 
     private def `n/a` = throw new IllegalStateException(toString)
@@ -73,10 +74,15 @@ private[swave] final class Region private[impl] (val entryPoint: StageImpl, val 
   private[swave] final class PreStart extends Impl {
     private[this] var _dispatcherId: String                = _
     private[this] var _needXStart: List[StageImpl]         = Nil
+    private[this] var _queuedRequests: List[(StageImpl, Long, Outport)] = Nil
     def state                                              = Stage.Region.State.PreStart
     var parent: Region                                     = _
     var stagesTotalCount                                   = 0
     def stagesActiveCount                                  = 0
+
+    def enqueueRequest(target: StageImpl, n: Long)(implicit from: Outport): Unit =
+      _queuedRequests ::= ((target, n, from))
+
     override def registerForXStart(stage: StageImpl): Unit = _needXStart ::= stage
     override def registerStageSealed(): Unit               = stagesTotalCount += 1
     override def becomeSubRegionOf(parent: Region): Unit =
@@ -116,6 +122,8 @@ private[swave] final class Region private[impl] (val entryPoint: StageImpl, val 
         requireState(_dispatcherId eq null)
         startSync()
       }
+      if (_queuedRequests ne Nil)
+        _queuedRequests.foreach { case (target, n, from) => _impl.enqueueRequest(target, n)(from) }
     }
     private def startSync(): Unit = {
       _impl = new SyncRunning(parent, stagesTotalCount)

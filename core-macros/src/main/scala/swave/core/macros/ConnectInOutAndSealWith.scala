@@ -10,13 +10,11 @@ private[macros] trait ConnectInOutAndSealWith { this: Util =>
   val c: scala.reflect.macros.whitebox.Context
   import c.universe._
 
-  def connectInOutAndSealWith(f: Tree, autoPropagate: Boolean): List[Tree] = unblock {
+  def connectInOutAndSealWith(f: Tree): List[Tree] = unblock {
     val q"($in0: $_, $out0: $_) => $block0" = f
     val in                                  = freshName("in")
     val out                                 = freshName("out")
     val block                               = replaceIdents(block0, in0 -> in, out0 -> out)
-
-    val autoPropagation = if (autoPropagate) { q"in.xSeal(region); out.xSeal(region)" } else q""
 
     q"""
       initialState(awaitingSubscribeOrOnSubscribe())
@@ -56,7 +54,8 @@ private[macros] trait ConnectInOutAndSealWith { this: Util =>
         intercept = false,
 
         xSeal = () ⇒ {
-          $autoPropagation
+          in.xSeal(region)
+          out.xSeal(region)
           val $in = in
           val $out = out
           $block

@@ -147,8 +147,7 @@ private[swave] class StageImplementationMacro(val c: scala.reflect.macros.whiteb
           case q"connectFanInAndSealWith { $f }"                   ⇒ connectFanInAndSealWith(f)
           case q"connectFanOutAndSealWith { $f }"                  ⇒ connectFanOutAndSealWith(f)
           case q"connectInAndSealWith { $f }"                      ⇒ connectInAndSealWith(f)
-          case q"connectInOutAndSealWith { $f }"                   ⇒ connectInOutAndSealWith(f, autoPropagate = true)
-          case q"connectInOutAndSealWith_NoAutoPropagation { $f }" ⇒ connectInOutAndSealWith(f, autoPropagate = false)
+          case q"connectInOutAndSealWith { $f }"                   ⇒ connectInOutAndSealWith(f)
           case q"connectOutAndSealWith { $f }"                     ⇒ connectOutAndSealWith(f)
           case x                                                   ⇒ x :: Nil
         }

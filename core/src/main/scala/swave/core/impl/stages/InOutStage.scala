@@ -23,7 +23,4 @@ private[core] abstract class InOutStage extends StageImpl {
 
   @compileTimeOnly("Unresolved `connectInOutAndSealWith` call")
   protected final def connectInOutAndSealWith(f: (Inport, Outport) ⇒ State): Unit = ()
-
-  @compileTimeOnly("Unresolved `connectInOutAndSealWith_NoAutoPropagation` call")
-  protected final def connectInOutAndSealWith_NoAutoPropagation(f: (Inport, Outport) ⇒ State): Unit = ()
 }
