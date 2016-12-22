@@ -87,6 +87,8 @@
                             <ul class="nav nav-children">
                               <li><a href="../usage/show-off/overview.html">Show-Off Overview</a></li>
                               <li><a href="../usage/show-off/md5.html">MD5 Example</a></li>
+                              <li><a href="../usage/show-off/fahrenheit.html">Fahrenheit Example</a></li>
+                              <li><a href="../usage/show-off/monte-carlo-pi.html">Monte Carlo Pi Example</a></li>
                               <li><a href="../usage/show-off/fibonacci.html">Fibonacci Example</a></li>
                             </ul></li>
                             <li><a href="../usage/setup.html">Setup</a></li>
@@ -115,10 +117,12 @@
                               <li><a href="../usage/further/configuration.html">Configuration</a></li>
                               <li><a href="../usage/further/best-practices.html">Best Practices</a></li>
                             </ul></li>
-                            <li class="nav-parent"><a>IO Adapters</a>
+                            <li class="nav-parent"><a>Domain Adapters</a>
                             <ul class="nav nav-children">
-                              <li><a href="../usage/io/file-io.html">File IO</a></li>
-                              <li><a href="../usage/io/tcp.html">Network IO (TCP)</a></li>
+                              <li><a href="../usage/domain/file-io.html">File IO</a></li>
+                              <li><a href="../usage/domain/tcp.html">Network IO (TCP)</a></li>
+                              <li><a href="../usage/domain/text.html">Text Transformations</a></li>
+                              <li><a href="../usage/domain/hash.html">Hashing Support</a></li>
                             </ul></li>
                             <li><a href="../usage/swave-core-api.html">API Docs (ScalaDoc)</a></li>
                             <li><a href="../usage/swave-akka-compat/index.html">swave-akka-compat</a></li>
@@ -168,8 +172,31 @@
 <h1><a href="#changelog" name="changelog" class="anchor"><span class="anchor-link"></span></a>Changelog</h1>
 <p>This is the current <em>swave</em> <a href="https://github.com/sirthias/swave/tree/master/CHANGELOG">CHANGELOG</a>:</p>
 <br/>
-<pre><code>Version 0.5 (2016-10-28)
-------------------------
+<pre><code>Version 0.6.0 (2016-12-22)
+--------------------------
+
+- Added `conflateToLast`, `fanOutBroadcastBuffered`, `flatMap`, `prefixAndTailTo`, `sliceEvery`,
+  `sliding`, `slidingTo`, `takeEveryNth` transformations
+- Added `foldAsync`, `scanAsync` and `fanOutUnZip` stubs
+- Introduced `IllegalReuseException`, `UnclosedStreamGraphException`
+- Introduced `swave.core.text` and `swave.core.hash` helpers
+- Renamed `onEvent` to `onSignal`, `limit` to `withLimit`, `limitWeighted` to `withLimitWeighted`,
+  `nonEmptyOr` to `orElse`, `switch` to `fanOutSwitch`
+- Renamed `async` to `asyncBoundary`, add new `async` transformation
+- Renamed `Spout.from` to `Spout.ints`, add `Spout.longs` and `Spout.doubles`
+- Renamed `Drain::capture` to `Drain::captureResult`, add `Drain::drainToLast` and `Drain.mkString`
+- Refactored naming of fan-out, fan-in, inject and flatten transformations
+- Replaced `PipeElem` with `Stage`
+- Removed `A =&gt;&gt; B` alias
+- Separated `seal` and `trySeal` as well as `run` and `tryRun`
+- Renamed `Piping` to `StreamGraph`, introduce `StreamRun`
+- Significantly improved internal stream execution infrastructure
+- Added lots of documentation
+- Many other fixes and improvements
+
+
+Version 0.5.0 (2016-10-28)
+--------------------------
 
 - Added `docs` sub-project
 - Added `split` transformation

@@ -87,6 +87,8 @@
                             <ul class="nav nav-children">
                               <li><a href="../usage/show-off/overview.html">Show-Off Overview</a></li>
                               <li><a href="../usage/show-off/md5.html">MD5 Example</a></li>
+                              <li><a href="../usage/show-off/fahrenheit.html">Fahrenheit Example</a></li>
+                              <li><a href="../usage/show-off/monte-carlo-pi.html">Monte Carlo Pi Example</a></li>
                               <li><a href="../usage/show-off/fibonacci.html">Fibonacci Example</a></li>
                             </ul></li>
                             <li><a href="../usage/setup.html">Setup</a></li>
@@ -115,10 +117,12 @@
                               <li><a href="../usage/further/configuration.html">Configuration</a></li>
                               <li><a href="../usage/further/best-practices.html">Best Practices</a></li>
                             </ul></li>
-                            <li class="nav-parent"><a>IO Adapters</a>
+                            <li class="nav-parent"><a>Domain Adapters</a>
                             <ul class="nav nav-children">
-                              <li><a href="../usage/io/file-io.html">File IO</a></li>
-                              <li><a href="../usage/io/tcp.html">Network IO (TCP)</a></li>
+                              <li><a href="../usage/domain/file-io.html">File IO</a></li>
+                              <li><a href="../usage/domain/tcp.html">Network IO (TCP)</a></li>
+                              <li><a href="../usage/domain/text.html">Text Transformations</a></li>
+                              <li><a href="../usage/domain/hash.html">Hashing Support</a></li>
                             </ul></li>
                             <li><a href="../usage/swave-core-api.html">API Docs (ScalaDoc)</a></li>
                             <li><a href="../usage/swave-akka-compat/index.html">swave-akka-compat</a></li>
@@ -166,19 +170,24 @@
             <div id="main-content">
                 <!-- start: page -->
 <h1><a href="#quick-start" name="quick-start" class="anchor"><span class="anchor-link"></span></a>Quick Start</h1>
-<p>After having added <em>swave</em> to your build (as described in the <a href="setup.html">Setup</a> chapter) you bring all the key identifiers into scope with:</p>
+<p>Like most other Scala streaming toolkits <em>swave</em> fully separates stream construction and stream execution into two distinct phases. First, you define your stream setup using a concise and flexible DSL. During this phase no resources are being claimed (apart from the memory for the graph structures) and no data start to flow. Only when everything is fully assembled and you explicitly start the stream will the internal machinery actually spring to life.</p>
+<p>But let&rsquo;s start from the beginning&hellip;</p>
+<h2><a href="#required-imports" name="required-imports" class="anchor"><span class="anchor-link"></span></a>Required Imports</h2>
+<p>After having added <em>swave</em> to your build (as described in the <a href="setup.html">Setup</a> chapter) you bring all the key identifiers into scope with this single import:</p>
 <pre><code class="scala">import swave.core._</code></pre>
+<p>In most cases this is all you need, but sometimes additional imports are required in order to enable certain support functionality (like the <a href="domain/index.html">Domain Adapters</a>).</p>
 <h2><a href="#creating-spouts" name="creating-spouts" class="anchor"><span class="anchor-link"></span></a>Creating Spouts</h2>
-<p>With this in place we can create a simple source of stream elements, which are called <a href="spouts.html">Spouts</a> in <em>swave</em>:</p>
+<p>With the main import in place we can create sources of stream elements, which are called <a href="spouts.html">Spouts</a> in <em>swave</em>.<br/> (&ldquo;spout&rdquo; is an English word for a tube or lip projecting from a container, through which liquid can be poured.)</p>
+<p>Here is a simple one:</p>
 <pre><code class="scala">def tenInts: Spout[Int] = Spout(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)</code></pre>
-<p>As you can probably guess a <code>Spout[T]</code> is parameterized with the type of the elements that the spout produces. <em>swave</em> predefines quite a few ways to create spouts from other types, e.g. from <a href="http://www.scala-lang.org/api/2.11.8/#scala.collection.immutable.Iterable">Iterable</a>, <a href="http://www.scala-lang.org/api/2.11.8/#scala.collection.Iterator">Iterators</a>, <a href="http://www.scala-lang.org/api/2.11.8/#scala.Option">Option</a> and <a href="http://www.scala-lang.org/api/2.11.8/#scala.util.Try">Try</a>, but also <a href="http://www.scala-lang.org/api/2.11.8/#scala.concurrent.Future">Future</a> or <a href="http://www.reactive-streams.org/reactive-streams-1.0.0-javadoc/#org.reactivestreams.Publisher">Publisher</a>. Check out the chapter on <a href="spouts.html">Spouts</a> for more details.</p>
+<p>As you can probably guess a <code>Spout[T]</code> is parameterized with the type of the elements that the spout produces. <em>swave</em> predefines quite a few ways to create spouts from other types, e.g. from <a href="http://www.scala-lang.org/api/2.12.1/#scala.collection.immutable.Iterable">Iterable</a>, <a href="http://www.scala-lang.org/api/2.12.1/#scala.collection.Iterator">Iterators</a>, <a href="http://www.scala-lang.org/api/2.12.1/#scala.Option">Option</a> and <a href="http://www.scala-lang.org/api/2.12.1/#scala.util.Try">Try</a>, but also <a href="http://www.scala-lang.org/api/2.12.1/#scala.concurrent.Future">Future</a> or <a href="http://www.reactive-streams.org/reactive-streams-1.0.0-javadoc/#org.reactivestreams.Publisher">Publisher</a>. Check out the chapter on <a href="spouts.html">Spouts</a> for more details.</p>
 <h2><a href="#attaching-transformations" name="attaching-transformations" class="anchor"><span class="anchor-link"></span></a>Attaching Transformations</h2>
 <p>Once you have a <code>Spout</code> you can define <a href="transformations/overview.html">transformations</a> on it, e.g. like this:</p>
 <pre><code class="scala">def threeInts = tenInts
   .map(_ * 2)
   .filter(_ &gt; 6)
   .take(3)</code></pre>
-<p>Most <a href="transformations/overview.html">transformations</a> give you back another <code>Spout</code> of the same or a different type, but some, especially the <a href="transformations/fan-outs.html">fan-outs</a> and <a href="transformations/fan-ins.html">fan-ins</a> work a bit differently.<br/> The predefined <a href="transformations/overview.html">transformations</a> represent the real &ldquo;meat&rdquo; of <em>swave</em>. They encode a lot of the general logic that is typically required when working with streams. The power of stream-processing stems in large parts from being able to nicely assemble higher-level logic from lower-level primitives in a concise and elegant fashion. Therefore a central part of learning to program with streams is understanding which transformations already exist and how a given piece of business logic might be encoded by combining them in the right way. As with most programs there are usually many ways to achieve the same thing. For example, here are ten ways of producing the same stream (the first 100 natural numbers) with <em>swave</em>:</p>
+<p>Most <a href="transformations/overview.html">transformations</a> give you back another <code>Spout</code> of the same or a different type, but some, especially the <a href="transformations/fan-outs.html">fan-outs</a> and <a href="transformations/fan-ins.html">fan-ins</a> work a bit differently.<br/> The predefined <a href="transformations/overview.html">transformations</a> represent the real &ldquo;meat&rdquo; of <em>swave</em>. They encode a lot of the general logic that is typically required when working with streams. The power of stream-processing stems in large parts from being able to nicely assemble higher-level logic from lower-level primitives in a concise and elegant fashion. Therefore a central part of learning to program with streams is understanding which transformations already exist and how a given piece of business logic might be encoded by combining them in the right way. As with most programs there are usually many ways to achieve the same thing.<br/> For example, here are ten ways of producing the same stream (the first 100 natural numbers) with <em>swave</em>:</p>
 <pre><code class="scala">def a = Spout(1 to 100)
 
 def b = Spout(1, 2, 3 to 100: _*)
@@ -208,32 +217,32 @@ def j = Spout.unfold(1) { i =&gt;
 }</code></pre>
 <h2><a href="#attaching-drains" name="attaching-drains" class="anchor"><span class="anchor-link"></span></a>Attaching Drains</h2>
 <p>After you&rsquo;ve finished defining transformations you&rsquo;ll want to run your stream, i.e. have it produce its output.<br/> In order to do that, however, we first have to define what should happen with the stream output, i.e. where it should be produced <em>to</em>. This is done by attaching a <a href="drains.html">Drain</a> to the spout.</p>
-<p>A <a href="drains.html">Drain</a> consumes the data elements of a stream for the purpose of producing some <em>result</em>. For example, this result could be a <a href="http://www.scala-lang.org/api/2.11.8/#scala.collection.immutable.Seq">Seq</a> of all elements, just the first or just the last element, or no element at all. In the latter case the drain might merely serve to achieve some kind of side-effect, like the execution of a function for each element produced by the stream.</p>
+<p>A <a href="drains.html">Drain</a> consumes the data elements of a stream for the purpose of producing some <em>result</em>. For example, this result could be a <a href="http://www.scala-lang.org/api/2.12.1/#scala.collection.immutable.Seq">Seq</a> of all elements, just the first or just the last element, or no element at all. In the latter case the drain might merely serve to achieve some kind of side-effect, like the execution of a function for each element produced by the stream.</p>
 <p>Here is a <code>Drain</code> that collects all incoming elements into a <code>Vector</code>:</p>
 <pre><code class="scala">def drain[T]: Drain[T, Future[immutable.Seq[T]]] = Drain.seq[T](limit = 1000)</code></pre>
-<p>In addition to the type parameter for the element type (that we&rsquo;ve already seen on <code>Spout</code>) a <code>Drain</code> has a second one, which defines the type of the <em>result</em> that the drain produces. For most drains this will be a <a href="http://www.scala-lang.org/api/2.11.8/#scala.concurrent.Future">Future</a>, since the <code>Drain</code> has to work with synchronous as well as asynchronous streams.</p>
+<p>In addition to the type parameter for the element type (that we&rsquo;ve already seen on <code>Spout</code>) a <code>Drain</code> has a second one, which defines the type of the <em>result</em> that the drain produces. For most drains this will be a <a href="http://www.scala-lang.org/api/2.12.1/#scala.concurrent.Future">Future</a>, since the <code>Drain</code> has to work with synchronous as well as asynchronous streams.</p>
 <p>Here are some other frequently used drains:</p>
 <pre><code class="scala">def drain1[T]: Drain[T, Future[T]] = Drain.head
 def drain2[T]: Drain[T, Future[Unit]] = Drain.foreach(println)</code></pre>
-<p>As you can see, even the drains that produce &ldquo;no&rdquo; result, still produce one :).<br/> For example the <code>Drain.foreach</code>, which runs a stream to completion only for side-effects, produces a<code>Future[Unit]</code>. Even though in the happy case the future&rsquo;s value isn&rsquo;t very interesting (the <code>Unit</code> value), it still signals two things:</p>
+<p>As you can see, even the drains that produce &ldquo;no&rdquo; result, still produce one :).<br/> For example the <code>Drain.foreach</code>, which runs a stream to completion only for side-effects, produces a <code>Future[Unit]</code>. Even though in the happy case the future&rsquo;s value isn&rsquo;t very interesting (the <code>Unit</code> value), it still signals two things:</p>
 <ul>
-  <li>if and when the stream completed</li>
+  <li>if and when the stream completed (at the drain)</li>
   <li>whether it terminated successfully or with an error</li>
 </ul>
 <p>Once you have a drain you can attach it to a matching (type-wise) <code>Spout</code> with <code>to(...)</code>, e.g.: </p>
-<pre><code class="scala">def piping: Piping[Future[Unit]] =
+<pre><code class="scala">def streamGraph: StreamGraph[Future[Unit]] =
   Spout(1 to 100).to(Drain.foreach(println))</code></pre>
-<p>The result of attaching a <code>Drain</code> to a <code>Spout</code> is a <a href="http://swave.io/api/core/latest/#swave.core.Piping">Piping</a>, a type you&rsquo;ll probably use less frequently in your own code. A <code>Piping</code> represents a complete stream pipeline or graph setup, which is ready to be run. Its single type parameter is the result type of the <code>Drain</code> that was used to &ldquo;close&rdquo; the stream pipeline.</p>
+<p>The result of attaching a <code>Drain</code> to a <code>Spout</code> is a <a href="http://swave.io/api/core/latest/#swave.core.StreamGraph">StreamGraph</a>, a type you&rsquo;ll probably use less frequently in your own code. A <code>StreamGraph</code> represents a complete stream pipeline or graph setup, which is ready to be run. Its single type parameter is the result type of the <code>Drain</code> that was used to &ldquo;close&rdquo; the stream pipeline.</p>
 <p>Note that up until this point, including the attachment of a <code>Drain</code>, nothing has really happened apart from <em>describing</em> what your stream setup looks like. No data has started to flow and no resources (apart from the memory for the pipeline) have been claimed.</p>
 <h2><a href="#running-a-stream" name="running-a-stream" class="anchor"><span class="anchor-link"></span></a>Running a Stream</h2>
-<p>It is only when you call <code>.run()</code> on a <code>Piping</code> that the whole stream machinery kicks into motion and data elements start to flow. Thereby one very important thing to have in mind is that you can only ever call <code>.run()</code> <strong>once</strong> on any given stream setup. After the first <code>.run()</code> call all elements of the stream setup, i.e. all involved spouts and drains (as well as, potentially, <a href="further/pipes.html">Pipes</a> and <a href="further/modules.html">Modules</a>) have been &ldquo;spent&rdquo;. They cannot be used again and will cause all subsequent streams that they are incorporated into to fail with an <a href="http://swave.io/api/core/latest/#swave.core.IllegalReuseException">IllegalReuseException</a>.</p>
-<p><em>swave</em> streams can run synchronously (yet without any blocking!) purely on the caller thread. All the examples we&rsquo;ve looked at so far are of this kind. However, there might be components in your stream setup that require asynchronous dispatch and therefore cannot run purely on the caller thread in a non-blocking fashion. For example, a spout or drain might be connected to a network socket and thus must be &ldquo;woken up&rdquo; when new data arrive or the kernel signals that the socket is now ready to accept data. Or the stream might contain a transformation that requires the concept of &ldquo;time&rdquo; in order to do its thing (like <code>throttle</code> or <code>takeWithin</code>). Or you might want to introduce an asynchronous boundary manually (see the <code>async</code> transformation), in order to allow for different parts of your pipeline to be run in parallel. In all of these cases the stream will be started asynchronously when you call <code>.run()</code>, which means it will be started and run on another thread.</p>
+<p>It is only when you call <code>.run()</code> on a <code>StreamGraph</code> that the whole stream machinery kicks into motion and data elements start to flow. Thereby one very important thing to have in mind is that you can only ever call <code>.run()</code> <strong>once</strong> on any given stream setup. After the first <code>.run()</code> call all elements of the stream setup, i.e. all involved spouts and drains (as well as, potentially, <a href="further/pipes.html">Pipes</a> and <a href="further/modules.html">Modules</a>) have been &ldquo;spent&rdquo;. They cannot be used again and will cause all subsequent streams that they are incorporated into to fail with an <a href="http://swave.io/api/core/latest/#swave.core.IllegalReuseException">IllegalReuseException</a>. If you want to re-run the stream another fresh <code>StreamGraph</code> instance must be created. </p>
+<p><em>swave</em> streams can run synchronously (yet without any blocking!) purely on the caller thread. All the examples we&rsquo;ve looked at so far are of this kind. However, there might be components in your stream setup that require asynchronous dispatch and therefore cannot run purely on the caller thread in a non-blocking fashion. For example, a spout or drain might be connected to a network socket and thus must be &ldquo;woken up&rdquo; when new data arrive or the kernel signals that the socket is now ready to accept data. Or the stream might contain a transformation that requires the concept of &ldquo;time&rdquo; in order to do its thing (like <a href="transformations/reference/throttle.html">throttle</a> or <a href="transformations/reference/takeWithin.html">takeWithin</a>).<br/> Or you might want to introduce an asynchronous boundary manually (see the <a href="transformations/reference/asyncBoundary.html">asyncBoundary</a> transformation), in order to allow for different parts of your pipeline to be run in parallel. In all of these cases the stream will be started asynchronously when you call <code>.run()</code>, which means it will be started and run on another thread.</p>
 <h2><a href="#streamenv" name="streamenv" class="anchor"><span class="anchor-link"></span></a>StreamEnv</h2>
 <p>When you try to run a stream now, only with what we&rsquo;ve talked about so far, you&rsquo;ll see that there is still one final thing missing. For example if we try to compile this snippet:</p>
 <pre><code class="scala">val result: Future[Unit] =
   Spout(1 to 100)
     .to(Drain.foreach(println))
-    .run()</code></pre>
+    .run().result</code></pre>
 <p>the compiler would stop us with this error message:</p>
 <pre><code class="nohighlight">... : could not find implicit value for parameter env: swave.core.StreamEnv
         .run()

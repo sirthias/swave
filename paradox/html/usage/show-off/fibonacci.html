@@ -87,6 +87,8 @@
                             <ul class="nav nav-children">
                               <li><a href="../../usage/show-off/overview.html">Show-Off Overview</a></li>
                               <li><a href="../../usage/show-off/md5.html">MD5 Example</a></li>
+                              <li><a href="../../usage/show-off/fahrenheit.html">Fahrenheit Example</a></li>
+                              <li><a href="../../usage/show-off/monte-carlo-pi.html">Monte Carlo Pi Example</a></li>
                               <li class="nav-expanded nav-active"><a href="../../usage/show-off/fibonacci.html">Fibonacci Example</a></li>
                             </ul></li>
                             <li><a href="../../usage/setup.html">Setup</a></li>
@@ -115,10 +117,12 @@
                               <li><a href="../../usage/further/configuration.html">Configuration</a></li>
                               <li><a href="../../usage/further/best-practices.html">Best Practices</a></li>
                             </ul></li>
-                            <li class="nav-parent"><a>IO Adapters</a>
+                            <li class="nav-parent"><a>Domain Adapters</a>
                             <ul class="nav nav-children">
-                              <li><a href="../../usage/io/file-io.html">File IO</a></li>
-                              <li><a href="../../usage/io/tcp.html">Network IO (TCP)</a></li>
+                              <li><a href="../../usage/domain/file-io.html">File IO</a></li>
+                              <li><a href="../../usage/domain/tcp.html">Network IO (TCP)</a></li>
+                              <li><a href="../../usage/domain/text.html">Text Transformations</a></li>
+                              <li><a href="../../usage/domain/hash.html">Hashing Support</a></li>
                             </ul></li>
                             <li><a href="../../usage/swave-core-api.html">API Docs (ScalaDoc)</a></li>
                             <li><a href="../../usage/swave-akka-compat/index.html">swave-akka-compat</a></li>
@@ -169,7 +173,9 @@
 <h1><a href="#fibonacci-example" name="fibonacci-example" class="anchor"><span class="anchor-link"></span></a>Fibonacci Example</h1>
 <p>This example shows how you can use a stream graph to model recursive algorithms like the generation of the stream of all fibonacci numbers.</p>
 <p>Here is a very simple way to create an infinite stream of all Fibonacci numbers that relies on an <code>unfold</code> <a href="../spouts.html">Spout</a>:</p>
-<pre><code class="scala">import swave.core._
+<pre><code class="scala">import scala.concurrent.Future
+import swave.core._
+
 implicit val env = StreamEnv()
 
 // the &quot;infinite&quot; stream of all Fibonacci numbers
@@ -178,16 +184,22 @@ def fibonacciNumbers: Spout[Int] =
     Spout.Unfolding.Emit(elem = a, next = b -&gt; (a + b))
   }
 
-fibonacciNumbers
-  .take(8)
-  .drainToList(limit = 100)
-  .value.get.get shouldEqual List(0, 1, 1, 2, 3, 5, 8, 13)</code></pre>
+val result: Future[List[Int]] =
+  fibonacciNumbers
+    .take(8)
+    .drainToList(limit = 100)
+
+result.value.get.get shouldEqual List(0, 1, 1, 2, 3, 5, 8, 13)</code></pre>
+<p>Since the stream graph here does not include any stages that require asynchronous dispatch everything runs synchronously on the caller thread and the result future will be already completed when we get a hold of it.</p>
 <p>While this is a concise and efficient implementation the recursion required for the stream generation is hereby provided by the &ldquo;unfolding&rdquo; feature. As such it is &ldquo;built-in&rdquo; and not that interesting from a &ldquo;show-off&rdquo; perspective.</p>
 <p>A maybe more illustrative way to construct the same stream is the following one, which makes the recursion explicit in the stream graph structure:</p>
-<pre><code class="scala">import swave.core._
+<pre><code class="scala">import scala.concurrent.Future
+import swave.core._
+
 implicit val env = StreamEnv()
 
-def fibonacciNumbers = {
+// the &quot;infinite&quot; stream of all Fibonacci numbers
+def fibonacciNumbers: Spout[Int] = {
   val c = Coupling[Int]
   Spout(0, 1)
     .concat(c.out)
@@ -196,12 +208,28 @@ def fibonacciNumbers = {
       .subContinue
 }
 
-fibonacciNumbers
-  .take(8)
-  .drainToList(limit = 100)
-  .value.get.get shouldEqual List(0, 1, 1, 2, 3, 5, 8, 13)</code></pre>
+val result: Future[List[Int]] =
+  fibonacciNumbers
+    .take(8)
+    .drainToList(limit = 100)
+
+result.value.get.get shouldEqual List(0, 1, 1, 2, 3, 5, 8, 13)</code></pre>
 <p>The stream graph defined by this code can be visualized like this:</p><p class="centered"><img src="../../assets/img/fibobacci-graph.svg" alt="Fibonacci Example Stream Graph" /></p>
-<p>As you can see this graph contains a cycle, which is the source for the infinite nature of the stream.<br/> Let&rsquo;s understand how this setup works by tracing the initial phase of the stream execution step by step:</p>
+<h2><a href="#high-level-mechanics" name="high-level-mechanics" class="anchor"><span class="anchor-link"></span></a>High-Level Mechanics</h2>
+<p>From a high-level perspective this stream setup is built around a graph cycle that only contains two semantically significant logic stages:</p>
+<ol>
+  <li>A <a href="../transformations/reference/take.html">sliding</a> stage, which produces, for every incoming element, a <code>Seq</code> containing the last two elements.</li>
+  <li>A <a href="../transformations/reference/take.html">map</a> stage, which takes the <code>Seq</code> produced by the <a href="../transformations/reference/take.html">sliding</a> stage, computes the sum of both its elements  and pushes this sum into the loop as the next element.</li>
+</ol>
+<p>This simple setup is the core of the stream graph and suffices for generating the &ldquo;infinite&rdquo; sequence of Fibonacci numbers. Everything else is required infrastructure for</p>
+<ul>
+  <li>seeding the loop with the two initial numbers (the <code>Spout(0, 1)</code>)</li>
+  <li>closing the loop, which cannot be constructued by the fluent DSL alone (the <a href="../transformations/couplings.html">Coupling</a>)</li>
+  <li>creating sufficient demand in the loop to &ldquo;kick&rdquo; the process into the motion  (the <a href="../transformations/reference/buffer.html">buffer</a> stage, see section below)</li>
+  <li>syphoning off the generated values and stopping the loop when nobody is interested in its results any more  (the <a href="../transformations/reference/fanOutBroadcast.html">fanOutBroadcast</a> stage with the <code>eagerCancel = true</code> configuration)</li>
+</ul>
+<h2><a href="#low-level-mechanics" name="low-level-mechanics" class="anchor"><span class="anchor-link"></span></a>Low-Level Mechanics</h2>
+<p>If you are interested, here&rsquo;s how this setup works in detail, explained by tracing the initial phase of the stream execution step by step:</p>
 <ol>
   <li>
   <p>When the stream is started three <a href="../basics.html">stages</a> begin to actively send signals: the main <a href="../drains.html">Drain</a> at the very end,  the <a href="../transformations/reference/buffer.html">buffer</a> stage in the first fan-out sub branch and the <a href="../transformations/reference/take.html">sliding</a> stage right behind it.  All 3 stages signal demand to the upstreams. The main drain signals demand for <code>Int.MaxValue</code> elements and the  <a href="../transformations/reference/buffer.html">buffer</a> and <a href="../transformations/reference/take.html">sliding</a> stages each signal demand for 2 elements.</p></li>

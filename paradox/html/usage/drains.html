@@ -87,6 +87,8 @@
                             <ul class="nav nav-children">
                               <li><a href="../usage/show-off/overview.html">Show-Off Overview</a></li>
                               <li><a href="../usage/show-off/md5.html">MD5 Example</a></li>
+                              <li><a href="../usage/show-off/fahrenheit.html">Fahrenheit Example</a></li>
+                              <li><a href="../usage/show-off/monte-carlo-pi.html">Monte Carlo Pi Example</a></li>
                               <li><a href="../usage/show-off/fibonacci.html">Fibonacci Example</a></li>
                             </ul></li>
                             <li><a href="../usage/setup.html">Setup</a></li>
@@ -115,10 +117,12 @@
                               <li><a href="../usage/further/configuration.html">Configuration</a></li>
                               <li><a href="../usage/further/best-practices.html">Best Practices</a></li>
                             </ul></li>
-                            <li class="nav-parent"><a>IO Adapters</a>
+                            <li class="nav-parent"><a>Domain Adapters</a>
                             <ul class="nav nav-children">
-                              <li><a href="../usage/io/file-io.html">File IO</a></li>
-                              <li><a href="../usage/io/tcp.html">Network IO (TCP)</a></li>
+                              <li><a href="../usage/domain/file-io.html">File IO</a></li>
+                              <li><a href="../usage/domain/tcp.html">Network IO (TCP)</a></li>
+                              <li><a href="../usage/domain/text.html">Text Transformations</a></li>
+                              <li><a href="../usage/domain/hash.html">Hashing Support</a></li>
                             </ul></li>
                             <li><a href="../usage/swave-core-api.html">API Docs (ScalaDoc)</a></li>
                             <li><a href="../usage/swave-akka-compat/index.html">swave-akka-compat</a></li>
@@ -170,7 +174,7 @@
 <p><em>swave</em> provides constructors for the most frequently used <a href="http://swave.io/api/core/latest/#swave.core.Drain">Drains</a> on the <a href="http://swave.io/api/core/latest/#swave.core.Drain$">Drain companion object</a>. You can also look directly into <a href="https://github.com/sirthias/swave/tree/master/core/src/main/scala/swave/core/Drain.scala">the sources</a> for the complete reference.</p>
 <h2><a href="#drain-result" name="drain-result" class="anchor"><span class="anchor-link"></span></a>Drain Result</h2>
 <p>The type <code>Drain[-T, +R]</code> carries two type parameters. The first specifies the type of stream elements that the drain is ready to receive and the second is the drain&rsquo;s &ldquo;result type&rdquo;. A drain&rsquo;s <em>result</em> is the vehicle for getting data out of a stream.</p>
-<p>When a drain is used to close a stream graph, e.g. via the <code>to(...)</code> method of a <a href="spouts.html">Spout</a>, the result type is carried over to the <a href="http://swave.io/api/core/latest/#swave.core.Piping">Piping</a> where it defines the type of the <code>run()</code> call, i.e. what you get back when the stream is started.</p>
+<p>When a drain is used to close a stream graph, e.g. via the <code>to(...)</code> method of a <a href="spouts.html">Spout</a>, the result type is carried over to the <a href="http://swave.io/api/core/latest/#swave.core.StreamGraph">StreamGraph</a> where it defines the type of the <code>run()</code> call, i.e. what you get back when the stream is started.</p>
 <p>For example:</p>
 <pre><code class="scala">import scala.concurrent.Future
 import swave.core._
@@ -182,18 +186,19 @@ def sumDrain: Drain[Int, Future[Int]] =
   Drain.fold(0)(_ + _)
 
 Spout(1 to 100)  // Spout[Int]
-  .to(sumDrain)  // Piping[Int]
-  .run()         // Future[Int]
+  .to(sumDrain)  // StreamGraph[Int]
+  .run()         // StreamRun[Future[Int]
+  .result        // Future[Int]
   .value         // Option[Try[Int]]
   .get           // Try[Int]
   .get shouldEqual 5050
 
 // same but shorter
 Spout(1 to 100)
-  .drainTo(sumDrain) // shortcut for `.to(sumDrain).run()`
+  .drainTo(sumDrain) // shortcut for `.to(sumDrain).run().result`
   .value.get.get shouldEqual 5050</code></pre>
 <h2><a href="#result-types-are-async" name="result-types-are-async" class="anchor"><span class="anchor-link"></span></a>Result Types are Async</h2>
-<p>One consequence of the fact that every stage must be able to run asynchronously, off the caller thread, is that the drain result (which is returned by the <code>run()</code> call on a <a href="http://swave.io/api/core/latest/#swave.core.Piping">Piping</a>) cannot directly contain stream elements. As blocking is not an option the <code>run()</code> call must return right away if the stream is running asynchronously, often before the first data elements have even begun their traversal of the stream graph.<br/></p>
+<p>One consequence of the fact that every stage must be able to run asynchronously, off the caller thread, is that the drain result (which you get by calling <code>streamGraph.run().result</code>) cannot directly contain stream elements. As blocking is not an option the <code>run()</code> call must return right away if the stream is running asynchronously, often before the first data elements have even begun their traversal of the stream graph.<br/></p>
 <p>In consequence most kinds of drains have a result type of <code>Future[T]</code> rather than just <code>T</code>.</p>
 <p>However, if you know that a stream runs synchronously (because it doesn&rsquo;t contain asynchronous stages) the <code>Future</code> instance you&rsquo;ll get back from the <code>run()</code> call will be already fulfilled. This is because, in those cases, the complete stream execution will happen &ldquo;inside&rdquo; the <code>run()</code> call. Then, and only then, it&rsquo;s fine to directly access the future&rsquo;s value via <code>future.value.get</code> directly after the <code>run()</code> call.</p>
                 <div class="nav-next">

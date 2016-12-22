@@ -87,6 +87,8 @@
                             <ul class="nav nav-children">
                               <li><a href="../../usage/show-off/overview.html">Show-Off Overview</a></li>
                               <li><a href="../../usage/show-off/md5.html">MD5 Example</a></li>
+                              <li><a href="../../usage/show-off/fahrenheit.html">Fahrenheit Example</a></li>
+                              <li><a href="../../usage/show-off/monte-carlo-pi.html">Monte Carlo Pi Example</a></li>
                               <li><a href="../../usage/show-off/fibonacci.html">Fibonacci Example</a></li>
                             </ul></li>
                             <li><a href="../../usage/setup.html">Setup</a></li>
@@ -115,10 +117,12 @@
                               <li><a href="../../usage/further/configuration.html">Configuration</a></li>
                               <li><a href="../../usage/further/best-practices.html">Best Practices</a></li>
                             </ul></li>
-                            <li class="nav-parent"><a>IO Adapters</a>
+                            <li class="nav-parent"><a>Domain Adapters</a>
                             <ul class="nav nav-children">
-                              <li><a href="../../usage/io/file-io.html">File IO</a></li>
-                              <li><a href="../../usage/io/tcp.html">Network IO (TCP)</a></li>
+                              <li><a href="../../usage/domain/file-io.html">File IO</a></li>
+                              <li><a href="../../usage/domain/tcp.html">Network IO (TCP)</a></li>
+                              <li><a href="../../usage/domain/text.html">Text Transformations</a></li>
+                              <li><a href="../../usage/domain/hash.html">Hashing Support</a></li>
                             </ul></li>
                             <li><a href="../../usage/swave-core-api.html">API Docs (ScalaDoc)</a></li>
                             <li><a href="../../usage/swave-akka-compat/index.html">swave-akka-compat</a></li>
@@ -170,10 +174,10 @@
 <p>Streams, like most other abstractions, can be nested. This means that you can have a <code>Spout[Spout[T]]</code> like you can have a <code>List[List[T]]</code>. <em>swave</em> offers a number of <a href="overview.html">transformations</a> that either</p>
 <ol>
   <li>
-    <p>create a stream-of-streams from in incoming stream of &ldquo;regular&rdquo; elements (which we call &ldquo;injecting&rdquo;)</p><p class="centered"><img src="../../assets/img/injecting.svg" alt="An Injecting Transformation" /></p>
+    <p>create a stream-of-streams from in incoming stream of &ldquo;regular&rdquo; elements (which we call <strong>injecting</strong>)</p><p class="centered"><img src="../../assets/img/injecting.svg" alt="An Injecting Transformation" /></p>
   </li>
   <li>
-    <p>or flatten a stream-of-streams back to an outgoing stream of &ldquo;regular&rdquo; elements (which we call &ldquo;flattening&rdquo;)</p><p class="centered"><img src="../../assets/img/flattening.svg" alt="A Flattening Transformation" /></p>
+    <p>or flatten a stream-of-streams back to an outgoing stream of &ldquo;regular&rdquo; elements (which we call <strong>flattening</strong>)</p><p class="centered"><img src="../../assets/img/flattening.svg" alt="A Flattening Transformation" /></p>
   </li>
 </ol>
 <p>While the shape of these stream-of-streams transformations is the same as for <a href="simple.html">Simple Transformations</a> the internal and external complexity is significantly higher. This is because the state-space of the state-machines implementing the transformation logic increases significantly with the number of open streams that a stage has to concurrently deal with. We therefore categorize stream-of-streams transformations as a separate group.</p>
@@ -181,10 +185,10 @@
 <p><em>swave</em> currently defines these injecting transformations:</p>
 <ul>
   <li><a href="reference/groupBy.html">groupBy</a></li>
-  <li><a href="reference/headAndTail.html">headAndTail</a></li>
+  <li><a href="reference/injectBroadcast.html">injectBroadcast</a></li>
+  <li><a href="reference/injectRoundRobin.html">injectRoundRobin</a></li>
   <li><a href="reference/injectSequential.html">injectSequential</a></li>
-  <li><a href="reference/prefixAndTail.html">prefixAndTail</a></li>
-  <li><a href="reference/prefixAndTailTo.html">prefixAndTailTo</a></li>
+  <li><a href="reference/injectToAny.html">injectToAny</a></li>
   <li><a href="reference/split.html">split</a></li>
   <li><a href="reference/splitAfter.html">splitAfter</a></li>
   <li><a href="reference/splitWhen.html">splitWhen</a></li>
@@ -201,7 +205,9 @@
 </ul>
 <h2><a href="#example" name="example" class="anchor"><span class="anchor-link"></span></a>Example</h2>
 <p>As an example of a stream-of-streams application let&rsquo;s look at a (slightly simplified) implementation of the <a href="reference/takeEveryNth.html">takeEveryNth</a> transformation, which we call <code>takeEvery</code> here in order to avoid name clashes:</p>
-<pre><code class="scala">import swave.core._
+<pre><code class="scala">import scala.concurrent.Future
+import swave.core._
+
 implicit val env = StreamEnv()
 
 // simple extension for `Spout[T]`, could also be a value class
@@ -213,11 +219,13 @@ implicit class RichSpout[T](underlying: Spout[T]) {
       .flattenConcat()          // Spout[T]
 }
 
-Spout.ints(from = 1)
-  .takeEvery(10)
-  .take(5)
-  .drainToList(limit = 100)
-  .value.get.get shouldEqual Seq(10, 20, 30, 40, 50)</code></pre>
+val result: Future[List[Int]] =
+  Spout.ints(from = 1)
+    .takeEvery(10)
+    .take(5)
+    .drainToList(limit = 100)
+
+result.value.get.get shouldEqual Seq(10, 20, 30, 40, 50)</code></pre>
 <p>This is a typical application of the <a href="reference/injectSequential.html">injectSequential</a> transformation, which creates a sub stream, pushes as many elements into it as the sub stream accepts, then opens the next sub stream and so on. Every sub stream accepts <code>n</code> elements, of which only the last one is produced. When all sub streams are concatenated we get exactly the kind of &ldquo;take every n-th element&rdquo; effect that we intended. </p>
 <h2><a href="#relationship-to-fan-ins-and-fan-outs" name="relationship-to-fan-ins-and-fan-outs" class="anchor"><span class="anchor-link"></span></a>Relationship to Fan-Ins and Fan-Outs</h2>
 <p>The injecting and flattening transformations have a very close relationship to <a href="fan-outs.html">fan-outs</a> and <a href="fan-ins.html">fan-ins</a>, respectively.<br/> Check out the the <a href="relationships.html">next chapter</a> for more details.</p>

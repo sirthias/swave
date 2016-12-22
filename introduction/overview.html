@@ -87,6 +87,8 @@
                             <ul class="nav nav-children">
                               <li><a href="../usage/show-off/overview.html">Show-Off Overview</a></li>
                               <li><a href="../usage/show-off/md5.html">MD5 Example</a></li>
+                              <li><a href="../usage/show-off/fahrenheit.html">Fahrenheit Example</a></li>
+                              <li><a href="../usage/show-off/monte-carlo-pi.html">Monte Carlo Pi Example</a></li>
                               <li><a href="../usage/show-off/fibonacci.html">Fibonacci Example</a></li>
                             </ul></li>
                             <li><a href="../usage/setup.html">Setup</a></li>
@@ -115,10 +117,12 @@
                               <li><a href="../usage/further/configuration.html">Configuration</a></li>
                               <li><a href="../usage/further/best-practices.html">Best Practices</a></li>
                             </ul></li>
-                            <li class="nav-parent"><a>IO Adapters</a>
+                            <li class="nav-parent"><a>Domain Adapters</a>
                             <ul class="nav nav-children">
-                              <li><a href="../usage/io/file-io.html">File IO</a></li>
-                              <li><a href="../usage/io/tcp.html">Network IO (TCP)</a></li>
+                              <li><a href="../usage/domain/file-io.html">File IO</a></li>
+                              <li><a href="../usage/domain/tcp.html">Network IO (TCP)</a></li>
+                              <li><a href="../usage/domain/text.html">Text Transformations</a></li>
+                              <li><a href="../usage/domain/hash.html">Hashing Support</a></li>
                             </ul></li>
                             <li><a href="../usage/swave-core-api.html">API Docs (ScalaDoc)</a></li>
                             <li><a href="../usage/swave-akka-compat/index.html">swave-akka-compat</a></li>
@@ -167,11 +171,11 @@
                 <!-- start: page -->
 <h1><a href="#overview" name="overview" class="anchor"><span class="anchor-link"></span></a>Overview</h1>
 <h2><a href="#what-is-" name="what-is-" class="anchor"><span class="anchor-link"></span></a>What is <em>swave</em>?</h2>
-<p><em>swave</em> is a library providing a general, <a href="reactive-streams.html">Reactive-Streams</a>-compliant streaming infrastructure for applications written in <a href="http://www.scala-lang.org/">Scala</a>. As such it plays in the same space as <a href="http://doc.akka.io/docs/akka/2.4/scala/stream/index.html">Akka-Stream</a>, but differs from it in some important aspects. (For more info on this check out <a href="swave-vs-akka-stream.html">swave vs Akka-Stream</a>)</p>
+<p><em>swave</em> is a library providing a general, <a href="reactive-streams.html">Reactive-Streams</a>-compliant streaming infrastructure for applications written in <a href="http://www.scala-lang.org/">Scala</a>. As such it plays in the same space as <a href="http://doc.akka.io/docs/akka/2.4/scala/stream/index.html">Akka-Stream</a>, but differs from it in some important aspects. (For more info on this check out <a href="swave-vs-akka-stream.html">swave vs Akka-Stream</a>.)</p>
 <h2><a href="#motivation" name="motivation" class="anchor"><span class="anchor-link"></span></a>Motivation</h2>
 <p>The requirements imposed on today&rsquo;s software are manifold. Apart from simply &ldquo;working&rdquo; the applications we write are supposed to be responsive, resilient and elastic (as defined, for example, by the <a href="http://www.reactivemanifesto.org/">Reactive Manifesto</a>). Additionally they are expected to digest ever-growing data volumes and make efficient use of their increasingly parallel and distributed hardware basis. All this presents significant challenges, which fuel the continuing search for programming models that are attractive and advantageous in today computing environments.</p>
-<p>One such programming model, albeit hardly a recent invention at its core, is <a href="https://en.wikipedia.org/wiki/Stream_processing">Stream Processing</a>.</p>
-<p>Although <a href="http://www.scala-lang.org/">Scala</a> provides the <a href="http://www.scala-lang.org/api/2.11.8/#scala.immutable.Stream">scala.immutable.Stream</a> datatype with its standard library this abstraction is quite limited in its functionality and barely scratches the surface of the benefits that <a href="https://en.wikipedia.org/wiki/Stream_processing">Stream Processing</a> as a programming abstraction is able to provide. Therefore a number of stream processing libraries have recently emerged in the <a href="http://www.scala-lang.org/">Scala</a> eco-system, the most prominent of which are probably <a href="http://doc.akka.io/docs/akka/2.4/scala/stream/index.html">Akka-Stream</a> and <a href="https://github.com/functional-streams-for-scala/fs2">FS2</a> (formally <a href="https://github.com/scalaz/scalaz-stream">Scalaz Stream</a>), which approach the field from two different angles.</p>
+<p>One such programming model, although hardly a recent invention at its core, is <a href="https://en.wikipedia.org/wiki/Stream_processing">Stream Processing</a>.</p>
+<p><a href="http://www.scala-lang.org/">Scala</a> provides the <a href="http://www.scala-lang.org/api/2.12.1/#scala.immutable.Stream">scala.immutable.Stream</a> datatype with its standard library but this abstraction is quite limited in its functionality and barely scratches the surface of the benefits that <a href="https://en.wikipedia.org/wiki/Stream_processing">Stream Processing</a> as a programming abstraction is able to provide. Therefore a number of stream processing libraries have recently emerged in the <a href="http://www.scala-lang.org/">Scala</a> eco-system, the most prominent of which are probably <a href="http://doc.akka.io/docs/akka/2.4/scala/stream/index.html">Akka-Stream</a> and <a href="https://github.com/functional-streams-for-scala/fs2">FS2</a> (formally <a href="https://github.com/scalaz/scalaz-stream">Scalaz Stream</a>), which approach the field from two different angles.</p>
 <p>Since modern stream processing, especially with support for non-blocking backpressure, is both incredibly sexy and still relatively new, with plenty of learnings still to be unearthed, we believe that there is more than enough space for a few more approaches to be tried and tested before settling on one or two &ldquo;standard implementations&rdquo;.</p>
 <p><em>swave</em> attempts to be just that: A stream processing implementation, purely in and for <a href="http://www.scala-lang.org/">Scala</a>, which further explores the boundaries of the possible, sometimes by being intentionally different.</p>
 <h2><a href="#design-principles" name="design-principles" class="anchor"><span class="anchor-link"></span></a>Design Principles</h2>

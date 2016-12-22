@@ -87,6 +87,8 @@
                             <ul class="nav nav-children">
                               <li><a href="../usage/show-off/overview.html">Show-Off Overview</a></li>
                               <li><a href="../usage/show-off/md5.html">MD5 Example</a></li>
+                              <li><a href="../usage/show-off/fahrenheit.html">Fahrenheit Example</a></li>
+                              <li><a href="../usage/show-off/monte-carlo-pi.html">Monte Carlo Pi Example</a></li>
                               <li><a href="../usage/show-off/fibonacci.html">Fibonacci Example</a></li>
                             </ul></li>
                             <li><a href="../usage/setup.html">Setup</a></li>
@@ -115,10 +117,12 @@
                               <li><a href="../usage/further/configuration.html">Configuration</a></li>
                               <li><a href="../usage/further/best-practices.html">Best Practices</a></li>
                             </ul></li>
-                            <li class="nav-parent"><a>IO Adapters</a>
+                            <li class="nav-parent"><a>Domain Adapters</a>
                             <ul class="nav nav-children">
-                              <li><a href="../usage/io/file-io.html">File IO</a></li>
-                              <li><a href="../usage/io/tcp.html">Network IO (TCP)</a></li>
+                              <li><a href="../usage/domain/file-io.html">File IO</a></li>
+                              <li><a href="../usage/domain/tcp.html">Network IO (TCP)</a></li>
+                              <li><a href="../usage/domain/text.html">Text Transformations</a></li>
+                              <li><a href="../usage/domain/hash.html">Hashing Support</a></li>
                             </ul></li>
                             <li><a href="../usage/swave-core-api.html">API Docs (ScalaDoc)</a></li>
                             <li><a href="../usage/swave-akka-compat/index.html">swave-akka-compat</a></li>
@@ -166,8 +170,8 @@
             <div id="main-content">
                 <!-- start: page -->
 <h1><a href="#reactive-streams" name="reactive-streams" class="anchor"><span class="anchor-link"></span></a>Reactive Streams</h1>
-<p><a href="http://www.reactive-streams.org/">Reactive Streams</a> (<abbr title="Reactive Streams">RS</abbr>) is an initiative to provide a standard for asynchronous stream processing with non-blocking backpressure. At its core it defines a <strong>protocol</strong> for moving streaming data across an asynchronous boundary (e.g. between threads or machines) in a way that allows both sides to run within bounded memory (no unlimited buffering) and without any blocking.</p>
-<p>Like many other protocols this <abbr title="Reactive Streams">RS</abbr> protocol is not something that developers of higher-level applications typically implement themselves (HTTP, for example, is another protocol that you don&rsquo;t want to implement yourself only to be able to use it). Rather one normally relies on a specific implementation (e.g. in the form of a library) which provides higher-level interfaces idiomatic to the respective (language) environment.</p>
+<p><a href="http://www.reactive-streams.org/">Reactive Streams</a> (<abbr title="Reactive Streams">RS</abbr>) is an initiative to provide a standard for asynchronous stream processing with non-blocking backpressure. At its core it defines a <strong>protocol</strong> for moving streaming data across an asynchronous boundary (e.g. between threads or machines) in a way that allows both sides to run independently, in their own time and space, within bounded memory (no unlimited buffering) and without any blocking.</p>
+<p>Like many other protocols this <abbr title="Reactive Streams">RS</abbr> protocol is not something that developers of higher-level applications typically implement themselves. (HTTP, for example, is another protocol that you don&rsquo;t want to implement yourself only to be able to use it.) Rather one normally relies on a specific implementation (e.g. in the form of a library) which provides higher-level interfaces idiomatic to the respective (language) environment.</p>
 <p><em>swave</em> is such an implementation of the <abbr title="Reactive Streams">RS</abbr> protocol for <a href="http://www.scala-lang.org/">Scala</a>.</p>
 <h2><a href="#the-artifact" name="the-artifact" class="anchor"><span class="anchor-link"></span></a>The &ldquo;org.reactivestreams&rdquo; % &ldquo;reactive-streams&rdquo; Artifact</h2>
 <p>One output of the <a href="http://www.reactive-streams.org/">Reactive Streams</a> initiative is a set of Java interfaces that are provided to the public as a Java library under the <a href="http://creativecommons.org/publicdomain/zero/1.0">Creative Commons Zero</a> Public Domain license (group-id <code>org.reactivestreams</code>, artifact-id <code>reactive-streams</code>). The interface types defined in this library, most importantly <a href="http://www.reactive-streams.org/reactive-streams-1.0.0-javadoc/#org.reactivestreams.Publisher">org.reactivestreams.Publisher</a> and <a href="http://www.reactive-streams.org/reactive-streams-1.0.0-javadoc/#org.reactivestreams.Publisher">org.reactivestreams.Subscriber</a>, are implemented by <abbr title="Reactive Streams">RS</abbr>-compatible libraries and thus allow for seamless integration between different <abbr title="Reactive Streams">RS</abbr>-implementations on the JVM.</p>
@@ -176,12 +180,11 @@
 <p><em>swave</em> allows you to interface with other <abbr title="Reactive Streams">RS</abbr>-implementations in any way you want.</p>
 <p>You can:</p>
 <ul>
-  <li>Consume <a href="http://www.reactive-streams.org/reactive-streams-1.0.0-javadoc/#org.reactivestreams.Publisher">Publishers</a></li>
-  <li>Provide <a href="http://www.reactive-streams.org/reactive-streams-1.0.0-javadoc/#org.reactivestreams.Publisher">Publishers</a></li>
-  <li>Feed into <a href="http://www.reactive-streams.org/reactive-streams-1.0.0-javadoc/#org.reactivestreams.Subscriber">Subscribers</a></li>
-  <li>Provide <a href="http://www.reactive-streams.org/reactive-streams-1.0.0-javadoc/#org.reactivestreams.Subscriber">Subscribers</a></li>
+  <li>Provide and consume <a href="http://www.reactive-streams.org/reactive-streams-1.0.0-javadoc/#org.reactivestreams.Publisher"><abbr title="Reactive Streams">RS</abbr> Publishers</a></li>
+  <li>Provide and feed into <a href="http://www.reactive-streams.org/reactive-streams-1.0.0-javadoc/#org.reactivestreams.Subscriber"><abbr title="Reactive Streams">RS</abbr> Subscribers</a></li>
+  <li>Provide and use <a href="http://www.reactive-streams.org/reactive-streams-1.0.0-javadoc/#org.reactivestreams.Processor"><abbr title="Reactive Streams">RS</abbr> Processors</a></li>
 </ul>
-<p>Check the respective documentation on <a href="../usage/spouts.html">Spouts</a> and <a href="../usage/drains.html">Drains</a> for more details. </p>
+<p>Check the respective documentation on <a href="../usage/spouts.html">Spouts</a>, <a href="../usage/drains.html">Drains</a> and <a href="../usage/further/pipes.html">Pipes</a> for more details. </p>
                 <div class="nav-next">
                     <p><strong>Next:</strong> <a href="../introduction/swave-vs-akka-stream.html"><em>swave</em> vs. Akka-Stream</a></p>
                 </div>

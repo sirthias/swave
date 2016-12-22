@@ -87,6 +87,8 @@
                             <ul class="nav nav-children">
                               <li><a href="../../usage/show-off/overview.html">Show-Off Overview</a></li>
                               <li><a href="../../usage/show-off/md5.html">MD5 Example</a></li>
+                              <li><a href="../../usage/show-off/fahrenheit.html">Fahrenheit Example</a></li>
+                              <li><a href="../../usage/show-off/monte-carlo-pi.html">Monte Carlo Pi Example</a></li>
                               <li><a href="../../usage/show-off/fibonacci.html">Fibonacci Example</a></li>
                             </ul></li>
                             <li><a href="../../usage/setup.html">Setup</a></li>
@@ -115,10 +117,12 @@
                               <li><a href="../../usage/further/configuration.html">Configuration</a></li>
                               <li><a href="../../usage/further/best-practices.html">Best Practices</a></li>
                             </ul></li>
-                            <li class="nav-parent"><a>IO Adapters</a>
+                            <li class="nav-parent"><a>Domain Adapters</a>
                             <ul class="nav nav-children">
-                              <li><a href="../../usage/io/file-io.html">File IO</a></li>
-                              <li><a href="../../usage/io/tcp.html">Network IO (TCP)</a></li>
+                              <li><a href="../../usage/domain/file-io.html">File IO</a></li>
+                              <li><a href="../../usage/domain/tcp.html">Network IO (TCP)</a></li>
+                              <li><a href="../../usage/domain/text.html">Text Transformations</a></li>
+                              <li><a href="../../usage/domain/hash.html">Hashing Support</a></li>
                             </ul></li>
                             <li><a href="../../usage/swave-core-api.html">API Docs (ScalaDoc)</a></li>
                             <li><a href="../../usage/swave-akka-compat/index.html">swave-akka-compat</a></li>
@@ -174,17 +178,19 @@
   <li><a href="reference/fanOutBroadcastBuffered.html">fanOutBroadcastBuffered</a></li>
   <li><a href="reference/fanOutRoundRobin.html">fanOutRoundRobin</a></li>
   <li><a href="reference/fanOutSequential.html">fanOutSequential</a></li>
+  <li><a href="reference/fanOutSwitch.html">fanOutSwitch</a></li>
   <li><a href="reference/fanOutToAny.html">fanOutToAny</a></li>
-  <li><a href="reference/switch.html">switch</a></li>
+  <li><a href="reference/fanOutUnZip.html">fanOutUnZip</a></li>
 </ul>
 <p>Additionally these fan-out shortcut transformations are defined:</p>
 <ul>
   <li><a href="reference/tee.html">tee</a></li>
-  <li><a href="reference/switchIf.html">switchIf</a></li>
 </ul>
 <h2><a href="#basic-example" name="basic-example" class="anchor"><span class="anchor-link"></span></a>Basic Example</h2>
 <p><em>swave&rsquo;s</em> streaming DSL allows you to define fan-outs in a flexible yet concise way.<br/> Here is a basic example:</p>
-<pre><code class="scala">import swave.core._
+<pre><code class="scala">import scala.concurrent.Future
+import swave.core._
+
 implicit val env = StreamEnv()
 
 val promise1 = Promise[Seq[String]]()
@@ -195,16 +201,17 @@ val promise2 = Promise[Seq[Int]]()
 val drain2 =
   Drain.seq(limit = 10).captureResult(promise2)
 
-Spout.ints(from = 0)
-  .fanOutBroadcast(eagerCancel = true)
-    .sub.filter(_ &gt; 45).map(_.toString).to(drain1)
-    .sub.map(_.toString).end
-    .sub.slice(42, 7).to(drain2) // terminates the stream by cancelling after the 48th element
-  .continue
-  .drop(10)
-  .drainToMkString(limit = 100)
-  .value.get.get shouldEqual (10 to 48).mkString
+val result: Future[String] =
+  Spout.ints(from = 0)
+    .fanOutBroadcast(eagerCancel = true)
+      .sub.filter(_ &gt; 45).map(_.toString).to(drain1)
+      .sub.map(_.toString).end
+      .sub.slice(42, 7).to(drain2) // terminates the stream by cancelling after the 48th element
+    .continue
+    .drop(10)
+    .drainToMkString(limit = 100)
 
+result.value.get.get shouldEqual (10 to 48).mkString
 promise1.future.value.get.get shouldEqual (46 to 48).map(_.toString)
 promise2.future.value.get.get shouldEqual (42 to 48)</code></pre>
 <p>This example encodes this stream graph:</p><p class="centered"><img src="../../assets/img/basic-fan-out.svg" alt="Fan-Out Example" /></p>
@@ -223,32 +230,40 @@ promise2.future.value.get.get shouldEqual (42 to 48)</code></pre>
 <h2><a href="#diamond-example" name="diamond-example" class="anchor"><span class="anchor-link"></span></a>Diamond Example</h2>
 <p>A common stream graph pattern is a &ldquo;diamond&rdquo; setup, where a fan-out first defines several sub branches, which each apply some specific transformations to &ldquo;their&rdquo; elements, before the ends of the sub branches are re-joined with some kind of <a href="fan-ins.html">fan-in</a> logic. For example this graph:</p><p class="centered"><img src="../../assets/img/diamond.svg" alt="Diamond Graph" /></p>
 <p>can be encoded like this:</p>
-<pre><code class="scala">import swave.core._
+<pre><code class="scala">import scala.concurrent.Future
+import swave.core._
+
 implicit val env = StreamEnv()
 
-Spout(1, 2, 3)
-  .fanOutBroadcast()
-    .sub.map(&quot;A&quot; + _).end
-    .sub.map(&quot;B&quot; + _).end
-  .fanInToTuple // Spout[(String, String)]
-  .drainToMkString(limit = 10, sep = &quot;;&quot;)
-  .value.get.get shouldEqual &quot;(A1,B1);(A2,B2);(A3,B3)&quot;</code></pre>
+val result: Future[String] =
+  Spout(1, 2, 3)
+    .fanOutBroadcast()
+      .sub.map(&quot;A&quot; + _).end
+      .sub.map(&quot;B&quot; + _).end
+    .fanInToTuple // Spout[(String, String)]
+    .drainToMkString(limit = 10, sep = &quot;;&quot;)
+
+result.value.get.get shouldEqual &quot;(A1,B1);(A2,B2);(A3,B3)&quot;</code></pre>
 <p>Adding one or even more sub branches that aren&rsquo;t left open (i.e. drain into some <a href="../drains.html">Drain</a>) wouldn&rsquo;t affect the fan-in in any way. And if you add another fan-out sub that is left open (i.e. ends with <code>.end</code>) the fan-in would work just as well but produce a <code>Tuple3</code> instead of a <code>Tuple2</code>.</p>
 <h2><a href="#mixing-fan-outs-and-fan-ins" name="mixing-fan-outs-and-fan-ins" class="anchor"><span class="anchor-link"></span></a>Mixing Fan-Outs and Fan-Ins</h2>
 <p>Mixing fan-outs and <a href="fan-ins.html">fan-ins</a> is possible even beyond what was shown in the examples above.<br/> Take this code for example:</p>
-<pre><code class="scala">import swave.core._
+<pre><code class="scala">import scala.concurrent.Future
+import swave.core._
+
 implicit val env = StreamEnv()
 
-Spout(1, 2, 3)
-  .fanOutBroadcast()
-    .sub.map(_.toString).end
-    .attach(Spout.longs(from = 10))
-    .sub.to(Drain.ignore.dropResult) // just for fun
-    .sub.end
-    .attachLeft(Spout.doubles(from = 0, step = 0.5))
-  .fanInToTuple // Spout[(Double, String, Long, Int)]
-  .drainToList(limit = 10)
-  .value.get.get shouldEqual Seq(
+val result: Future[List[(Double, String, Long, Int)]] =
+  Spout(1, 2, 3)
+    .fanOutBroadcast()
+      .sub.map(_.toString).end
+      .attach(Spout.longs(from = 10))
+      .sub.to(Drain.ignore.dropResult) // just for fun
+      .sub.end
+      .attachLeft(Spout.doubles(from = 0, step = 0.5))
+    .fanInToTuple // Spout[(Double, String, Long, Int)]
+    .drainToList(limit = 10)
+
+result.value.get.get shouldEqual Seq(
   (0.0, &quot;1&quot;, 10, 1),
   (0.5, &quot;2&quot;, 11, 2),
   (1.0, &quot;3&quot;, 12, 3))</code></pre>
@@ -259,7 +274,9 @@ Spout(1, 2, 3)
 <p>In some of the &ldquo;<a href="../show-off/overview.html">Show Off Examples</a>&rdquo; as well as in the <em>swave</em> sources you are going to come across a shortcut that is frequently used in fan-outs: <code>subContinue</code>.</p>
 <p><code>subContinue</code> is simply short-hand for <code>.sub.end.continue</code>, i.e. the addition of another fan-out sub branch that is immediately used to &ldquo;close&rdquo; the fan-out and continue the definition of the &ldquo;main&rdquo; stream pipeline.</p>
 <p>As an example, this is a simple re-implementation of the <code>tee</code> transformation, which we call <code>teee</code> here in order to avoid a name clash with the existing <a href="reference/tee.html">tee</a>: </p>
-<pre><code class="scala">import swave.core._
+<pre><code class="scala">import scala.concurrent.Future
+import swave.core._
+
 implicit val env = StreamEnv()
 
 // simple extension for `Spout[T]`, could also be a value class
@@ -273,11 +290,12 @@ implicit class RichSpout[T](underlying: Spout[T]) {
 
 val promise = Promise[Seq[Int]]()
 
-Spout(1, 2, 3)
-  .teee(Drain.seq(limit = 10).captureResult(promise))
-  .drainToList(limit = 10)
-  .value.get.get shouldEqual Seq(1, 2, 3)
+val result: Future[List[Int]] =
+  Spout(1, 2, 3)
+    .teee(Drain.seq(limit = 10).captureResult(promise))
+    .drainToList(limit = 10)
 
+result.value.get.get shouldEqual Seq(1, 2, 3)
 promise.future.value.get.get shouldEqual Seq(1, 2, 3)</code></pre>
 <h2><a href="#captureresult-and-dropresult" name="captureresult-and-dropresult" class="anchor"><span class="anchor-link"></span></a>captureResult and dropResult</h2>
 <p>In the examples above you might have noticed the <code>.captureResult</code> and <code>.dropResult</code> calls, of which one is required for most types of <a href="../drains.html">Drains</a> if they are to be used as the target of a fan-out sub branch.</p>

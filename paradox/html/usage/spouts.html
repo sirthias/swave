@@ -87,6 +87,8 @@
                             <ul class="nav nav-children">
                               <li><a href="../usage/show-off/overview.html">Show-Off Overview</a></li>
                               <li><a href="../usage/show-off/md5.html">MD5 Example</a></li>
+                              <li><a href="../usage/show-off/fahrenheit.html">Fahrenheit Example</a></li>
+                              <li><a href="../usage/show-off/monte-carlo-pi.html">Monte Carlo Pi Example</a></li>
                               <li><a href="../usage/show-off/fibonacci.html">Fibonacci Example</a></li>
                             </ul></li>
                             <li><a href="../usage/setup.html">Setup</a></li>
@@ -115,10 +117,12 @@
                               <li><a href="../usage/further/configuration.html">Configuration</a></li>
                               <li><a href="../usage/further/best-practices.html">Best Practices</a></li>
                             </ul></li>
-                            <li class="nav-parent"><a>IO Adapters</a>
+                            <li class="nav-parent"><a>Domain Adapters</a>
                             <ul class="nav nav-children">
-                              <li><a href="../usage/io/file-io.html">File IO</a></li>
-                              <li><a href="../usage/io/tcp.html">Network IO (TCP)</a></li>
+                              <li><a href="../usage/domain/file-io.html">File IO</a></li>
+                              <li><a href="../usage/domain/tcp.html">Network IO (TCP)</a></li>
+                              <li><a href="../usage/domain/text.html">Text Transformations</a></li>
+                              <li><a href="../usage/domain/hash.html">Hashing Support</a></li>
                             </ul></li>
                             <li><a href="../usage/swave-core-api.html">API Docs (ScalaDoc)</a></li>
                             <li><a href="../usage/swave-akka-compat/index.html">swave-akka-compat</a></li>
@@ -192,7 +196,8 @@ val fooSpout = Spout(foo)
   <li><code>Publisher[T]</code></li>
   <li><code>Future[T]</code></li>
   <li><code>Try[T]</code></li>
-  <li><code>() =&gt; T</code> (for all <code>T: Streamable</code>)</li>
+  <li><code>T</code> for all <code>T :Bytes</code> (see the <a href="domain/file-io.html">File IO</a> chapter for details)</li>
+  <li><code>() =&gt; T</code> for all <code>T: Streamable</code></li>
 </ul>
 <p>The following snippet, for example, shows, that flatmapping <code>Spout[Option[Int]]</code> to <code>Spout[Int]</code> works as expected without further ado:</p>
 <pre><code class="scala">import scala.concurrent.Future
@@ -208,8 +213,8 @@ def evenIntsViaFilter =
   Spout.ints(from = 0)
     .filter(_ % 2 == 0)
 
-val a: Future[List[Int]] = evenIntsViaFlatmap.take(5).drainToList(5)
-val b: Future[List[Int]] = evenIntsViaFilter.take(5).drainToList(5)
+val a: Future[List[Int]] = evenIntsViaFlatmap.take(5).drainToList(limit = 5)
+val b: Future[List[Int]] = evenIntsViaFilter.take(5).drainToList(limit = 5)
 
 // since both streams in this example run synchronously
 // both futures are already fulfilled and we can access
@@ -219,23 +224,27 @@ a.value.get shouldEqual b.value.get</code></pre>
 <p>You can easily make a custom type <code>T</code> fully &ldquo;streamable&rdquo; by defining the semantics for how instances of <code>T</code> can be turned into a <code>Spout</code>. The way to do this is through a custom <code>Streamable[T]</code> implementation.</p>
 <p>For example, suppose we&rsquo;d like to be able to flatten streams of <code>Either[A, B]</code> instances into a stream of the most specific common super-type of <code>A</code> and <code>B</code>. Here is how this could be done:</p>
 <pre><code class="scala">import scala.util.Success
+import shapeless.Lub
 import swave.core._
 
 implicit val env = StreamEnv()
 
-implicit def forEither[C, A &lt;: C, B &lt;: C] =
+implicit def forEither[A, B, C](implicit ev: Lub[A, B, C]) =
   new Streamable[Either[A, B]] {
     type Out = C
     def apply(value: Either[A, B]): Spout[C] =
-      value.fold(Spout.one[C], Spout.one[C])
+      value.fold(a =&gt; Spout.one(ev left a), b =&gt; Spout.one(ev right b))
   }
 
 def eitherStream: Spout[Either[(Char, Int), String]] =
   Spout(Left(&#39;0&#39; -&gt; 0), Right(&quot;1&quot;), Right(&quot;2&quot;))
 
-eitherStream
-  .flattenConcat() // = Spout[AnyRef]
-  .drainToList(5).value.get shouldEqual Success(List(&#39;0&#39; -&gt; 0, &quot;1&quot;, &quot;2&quot;))</code></pre>
+def anyRefStream: Spout[AnyRef] =
+   eitherStream.flattenConcat()
+
+anyRefStream
+  .drainToList(5)
+  .value.get shouldEqual Success(List(&#39;0&#39; -&gt; 0, &quot;1&quot;, &quot;2&quot;))</code></pre>
                 <div class="nav-next">
                     <p><strong>Next:</strong> <a href="../usage/drains.html">Drains</a></p>
                 </div>
