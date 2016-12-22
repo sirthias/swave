@@ -118,7 +118,7 @@ val shapeless              = "com.chuusai"                %%  "shapeless"       
 val `scala-logging`        = "com.typesafe.scala-logging" %%  "scala-logging"         % "3.5.0"
 
 // *-compat
-val `akka-stream`          = "com.typesafe.akka"          %%  "akka-stream"           % "2.4.14"
+val `akka-stream`          = "com.typesafe.akka"          %%  "akka-stream"           % "2.4.16"
 val `scodec-bits`          = "org.scodec"                 %%  "scodec-bits"           % "1.1.2"
 
 // test
@@ -132,7 +132,7 @@ val logback                = "ch.qos.logback"             %   "logback-classic" 
 /////////////////////// PROJECTS /////////////////////////
 
 lazy val swave = project.in(file("."))
-  .aggregate(benchmarks, `compat-akka`, `compat-scodec`, core, `core-macros`, `core-tests`, docs, examples, testkit)
+  .aggregate(benchmarks, `compat-akka`, `compat-scodec`, core, `core-macros`, `core-tests`, docs, testkit)
   .settings(commonSettings: _*)
   .settings(releaseSettings: _*)
   .settings(noPublishingSettings: _*)
@@ -202,7 +202,7 @@ lazy val docs = project
   .settings(
     // noScalaFmtFormatting,
     git.remoteRepo := scmInfo.value.get.connection.drop("scm:git:".length),
-    libraryDependencies ++= Seq(shapeless, scalatest),
+    libraryDependencies ++= Seq(shapeless, scalatest, `akka-stream`, `akka-http-core`, logback),
     apiURL := Some(url("http://swave.io/api/")),
     siteSubdirName in Paradox := "",
     paradoxTheme := None,
@@ -215,6 +215,9 @@ lazy val docs = project
       java.awt.Desktop.getDesktop.browse(new java.net.URI(uri))
       state
     },
+    fork in (Test, run) := true,
+    connectInput in (Test, run) := true,
+    javaOptions in (Test, run) ++= Seq("-XX:+UnlockCommercialFeatures", "-XX:+FlightRecorder"),
     paradoxProperties in Paradox ++= Map(
       "latest-version" -> "0.5.0",
       "scala.binaryVersion" -> scalaBinaryVersion.value,
@@ -243,18 +246,6 @@ lazy val docs = project
           yield f -> s"api/$n/latest/$d"
       }
     List(apiDocs(`compat-akka`), apiDocs(core), apiDocs(`compat-scodec`), apiDocs(testkit))}: _*)
-
-lazy val examples = project
-  .dependsOn(core, `compat-akka`)
-  .enablePlugins(AutomateHeaderPlugin)
-  .settings(commonSettings: _*)
-  .settings(noPublishingSettings: _*)
-  .settings(
-    // noScalaFmtFormatting,
-    fork in run := true,
-    connectInput in run := true,
-    javaOptions in run ++= Seq("-XX:+UnlockCommercialFeatures", "-XX:+FlightRecorder"),
-    libraryDependencies ++= Seq(`akka-stream`, `akka-http-core`, logback))
 
 lazy val testkit = project
   .dependsOn(core, `core-macros` % "compile-internal")
