@@ -88,11 +88,14 @@ abstract class StreamOps[A] private[core] { self ⇒
   final def concat[B >: A](other: Spout[B]): Repr[B] =
     attach(other).fanInConcat()
 
-  final def conflateWithSeed[B](lift: A ⇒ B)(aggregate: (B, A) ⇒ B): Repr[B] =
-    append(new ConflateStage(lift.asInstanceOf[Any ⇒ AnyRef], aggregate.asInstanceOf[(Any, Any) ⇒ AnyRef]))
-
   final def conflate[B >: A](aggregate: (B, A) ⇒ B): Repr[B] =
     conflateWithSeed[B](identityFunc)(aggregate)
+
+  final def conflateToLast[B >: A]: Repr[B] =
+    conflate[B]((_, x) => x)
+
+  final def conflateWithSeed[B](lift: A ⇒ B)(aggregate: (B, A) ⇒ B): Repr[B] =
+    append(new ConflateStage(lift.asInstanceOf[Any ⇒ AnyRef], aggregate.asInstanceOf[(Any, Any) ⇒ AnyRef]))
 
   final def deduplicate: Repr[A] =
     append(new DeduplicateStage)

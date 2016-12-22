@@ -6,11 +6,13 @@ This is the alphabetical list of all predefined transformation currently offered
 @@@index
 
 * [-](async.md)
+* [-](asyncBoundary.md)
 * [-](buffer.md)
 * [-](bufferDropping.md)
 * [-](collect.md)
 * [-](concat.md)
 * [-](conflate.md)
+* [-](conflateToLast.md)
 * [-](conflateWithSeed.md)
 * [-](deduplicate.md)
 * [-](delay.md)

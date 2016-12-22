@@ -30,6 +30,7 @@ data elements.
 * @ref[bufferDropping](reference/bufferDropping.md)
 * @ref[collect](reference/collect.md)
 * @ref[conflate](reference/conflate.md)
+* @ref[conflateToLast](reference/conflateToLast.md)
 * @ref[conflateWithSeed](reference/conflateWithSeed.md)
 * @ref[deduplicate](reference/deduplicate.md)
 * @ref[drop](reference/drop.md)
@@ -84,6 +85,7 @@ data elements.
 ## Asynchronous Simple Transformations 
 
 * [async](reference/async.md)
+* [asyncBoundary](reference/asyncBoundary.md)
 * [delay](reference/delay.md)
 * [dropWithin](reference/dropWithin.md)
 * [groupedWithin](reference/groupedWithin.md)
