@@ -35,8 +35,8 @@ final class XorShiftRandom(seed0: Long, seed1: Long) {
   private var s0 = seed0
   private var s1 = seed1
 
-  private val DOUBLE_UNIT = 1.1102230246251565E-16 // 0x1.0p-53 which is 1.0 / (1L << 53)
-  private val FLOAT_UNIT  = 5.9604645E-8f          // 0x1.0p-24 which is 1.0 / (1L << 24)
+  private final val DOUBLE_UNIT = 1.1102230246251565E-16 // 0x1.0p-53 which is 1.0 / (1L << 53)
+  private final val FLOAT_UNIT  = 5.9604645E-8f          // 0x1.0p-24 which is 1.0 / (1L << 24)
 
   /**
     * Returns the current 128-bit seed.

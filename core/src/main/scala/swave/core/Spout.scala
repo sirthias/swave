@@ -112,6 +112,12 @@ final class Spout[+A](private[swave] val inport: Inport) extends StreamOps[A @uV
     drainTo(Drain.head[A])
 
   /**
+    * Attaches a [[Drain]] which produces the last element as result and immediately starts the stream.
+    */
+  def drainToLast()(implicit env: StreamEnv): Future[A] =
+    drainTo(Drain.last[A])
+
+  /**
     * Attaches a [[Drain]] which requests and drops all elements produced by the stream.
     * The stream is therefore only run for its side-effects.
     */
