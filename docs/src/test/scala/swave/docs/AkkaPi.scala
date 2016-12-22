@@ -4,14 +4,14 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package swave.examples.pi
+package swave.docs
 
-import akka.NotUsed
 import scala.util.{Failure, Success}
-import swave.core.util.XorShiftRandom
+import akka.NotUsed
 import akka.actor.ActorSystem
-import akka.stream.{ActorMaterializer, ActorMaterializerSettings, FlowShape}
 import akka.stream.scaladsl._
+import akka.stream.{ActorMaterializer, ActorMaterializerSettings, FlowShape}
+import swave.core.util.XorShiftRandom
 
 object AkkaPi extends App {
   implicit val system = ActorSystem("AkkaPi")
@@ -28,7 +28,7 @@ object AkkaPi extends App {
     .grouped(2)
     .map { case x +: y +: Nil ⇒ Point(x, y) }
     .via(broadcastFilterMerge)
-    .async
+    //.async
     .scan(State(0, 0)) { _ withNextSample _ }
     .splitWhen(_.totalSamples % 1000000 == 1)
     .drop(999999)

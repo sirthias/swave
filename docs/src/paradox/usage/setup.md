@@ -22,7 +22,7 @@ swave-core
 Using *swave* with [SBT]
 ------------------------
 
-*swave* is currently built for Scala 2.11 only.
+*swave* is available for Scala 2.11 and 2.12.
 
 This is how you add the modules as dependencies to your [SBT] build:
 
@@ -43,7 +43,7 @@ Dependencies
 
 *swave-core* has the following dependencies that it will transitively pull into your classpath:
 
-- `org.reactivestreams % reactive-streams` (non-scala, see @ref[here](../introduction/reactive-streams.md#the-artifact) for more info)
+- `org.reactivestreams % reactive-streams` (non-scala, see @ref[here] for more info)
 - `org.jctools % jctools-core` (non-scala)
 - `com.typesafe % config` (non-scala)
 - `com.chuusai %% shapeless`
@@ -53,3 +53,4 @@ Dependencies
   [Akka-Stream]: akka:stream/index
   [Scodec]: http://scodec.org/
   [SBT]: http://www.scala-sbt.org/
+  [here]: ../introduction/reactive-streams.md#the-artifact

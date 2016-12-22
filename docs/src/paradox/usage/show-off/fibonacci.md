@@ -8,6 +8,9 @@ Here is a very simple way to create an infinite stream of all Fibonacci numbers 
 
 @@snip [-]($test/FibonacciSpec.scala) { #unfold }
 
+Since the stream graph here does not include any stages that require asynchronous dispatch everything runs synchronously
+on the caller thread and the result future will be already completed when we get a hold of it.
+
 While this is a concise and efficient implementation the recursion required for the stream generation is hereby provided
 by the "unfolding" feature. As such it is "built-in" and not that interesting from a "show-off" perspective.
   
@@ -47,7 +50,7 @@ numbers. Everything else is required infrastructure for
 Low-Level Mechanics
 -------------------
 
-If you are interested, let's understand how this setup works in detail by tracing the initial phase of the stream
+If you are interested, here's how this setup works in detail, explained by tracing the initial phase of the stream
 execution step by step:
 
 1. When the stream is started three @ref[stages] begin to actively send signals: the main @ref[Drain] at the very end,

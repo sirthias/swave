@@ -11,7 +11,7 @@ User Documentation
 * [-](drains.md)
 * [-](transformations/index.md)
 * [-](further/index.md)
-* [-](io/index.md)
+* [-](domain/index.md)
 * [-](swave-core-api.md)
 * [-](swave-akka-compat/index.md)
 * [-](swave-scodec-compat/index.md)

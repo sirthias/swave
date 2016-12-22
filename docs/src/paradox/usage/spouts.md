@@ -47,7 +47,8 @@ automatically work on streams of type `T`.
 - `Publisher[T]`
 - `Future[T]`
 - `Try[T]`
-- `() => T` (for all `T: Streamable`)
+- `T` for all `T :Bytes` (see the @ref[File IO] chapter for details)
+- `() => T` for all `T: Streamable`
 
 The following snippet, for example, shows, that flatmapping `Spout[Option[Int]]` to `Spout[Int]` works as expected
 without further ado:
@@ -72,3 +73,4 @@ specific common super-type of `A` and `B`. Here is how this could be done:
   [stream graph component]: basics.md#streams-as-graphs
   [transformations]: transformations/index.md
   [predefines]: /core/src/main/scala/swave/core/Streamable.scala
+  [File IO]: domain/file-io.md

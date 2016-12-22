@@ -4,7 +4,7 @@ MD5 Example
 This example demonstrates a small practical application of file streaming in *swave*.<br/>
 The following code shows how one could compute an MD5 hash string for files of arbitrary size:
  
-@@snip [-]($test/MD5Spec.scala) { #example }
+@@snip [-]($test/MD5Spec.scala) { #example-0 }
 
 The stream graph defined by this code is quite straight-forward (a simple pipeline), but there are still a few
 interesting points to discuss:
@@ -39,7 +39,8 @@ Here is a visualization of the example's stream pipeline:
 
 As you can see there is an asynchronous boundary between the first two stages of the graph, which causes both parts
 to run independently from each other and thus concurrently. Adding additional asynchronous boundaries, for increasing
-the degree of concurrency, is as easy as adding an @ref[.async()] transformation at arbitrary points in the pipeline.
+the degree of concurrency, is as easy as adding an @ref[.asyncBoundary()] transformation at arbitrary points in the
+pipeline.
 
 This makes trying out different distribution patterns of your business logic over several threads and cores extremely
 easy. Adding a boundary means adding a single line of code. Moving a boundary means moving a single line of code.
@@ -47,12 +48,23 @@ If you contrast that with the amount of work required for introducing, moving or
 traditional thread-based applications or even actor-based ones some of the benefits of stream-based programming should
 become apparent.
 
+
+Improved Version
+----------------
+
+Because computing hashes across streams of bytes is such a common task *swave* provides
+@ref[built-in support for the most common hashes][hashing].
+By relying on the `md5` transformation the example above can be somewhat simplified to the following snippet,
+which will also perform slightly better:
+
+@@snip [-]($test/MD5Spec.scala) { #example-1 }
+
   
   [Spout]: ../spouts.md
   [asynchronous]: ../further/sync-vs-async.md
   [configured]: ../further/configuration.md
   [configurable]: ../further/configuration.md
-  [File IO]: ../io/file-io.md
+  [File IO]: ../domain/file-io.md
   [Akka]: http://akka.io
   [scodec]: http://scodec.io
   [Bytes]: /core/src/main/scala/swave/core/io/Bytes.scala
@@ -60,4 +72,5 @@ become apparent.
   [scodec.bits.ByteVector]: scodec.bits.ByteVector
   [swave-akka-compat]: ../swave-akka-compat/index.md
   [swave-scodec-compat]: ../swave-scodec-compat/index.md
-  [.async()]: ../transformations/reference/async.md
+  [.asyncBoundary()]: ../transformations/reference/asyncBoundary.md
+  [hashing]: ../domain/hash.md

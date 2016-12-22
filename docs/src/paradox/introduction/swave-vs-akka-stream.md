@@ -16,9 +16,9 @@ Non-Lifted vs. Lifted Design
 Sync + Async vs. Async only
 : In addition to scheduling tasks onto configurable thread-pools *swave* allows for synchronous
   (but still non-blocking!) execution on the caller thread, if the stream setup permits it.
-  @extref[Akka-Stream] always runs its streams on independent Akka Actors (and thus thread-pools).
+  @extref[Akka-Stream] always runs its streams off the caller thread on independent Akka Actors (and thus thread-pools).
   
-Shapeless-based DSL vs. Point-to-point Graph DSL
+Fluent DSL vs. Point-to-point Graph DSL
 : While *swave* tries to keep individual transformations named similarly to @extref[Akka-Stream] the DSL for creating
   more complex stream setups, with fan-outs, fan-ins, loops, etc. is substantially different between the two.
   

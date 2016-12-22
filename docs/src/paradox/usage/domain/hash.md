@@ -1,0 +1,4 @@
+Hashing Support
+===============
+
+... TODO ...

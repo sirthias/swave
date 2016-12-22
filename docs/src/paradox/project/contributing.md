@@ -165,7 +165,6 @@ are identified with these simple 3-letter abbreviations:
 |compat-akka  |   `cak`    |
 |compat-scodec|   `csc`    |
 |docs         |   `doc`    |
-|examples     |   `exa`    |
 |testkit      |   `tkt`    |
 |benchmarks   |   `bhm`    |
 |sbt project  |   `pro`    |

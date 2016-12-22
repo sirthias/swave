@@ -20,11 +20,11 @@ class SyncVsAsyncSpec extends FreeSpec with Matchers {
 
       implicit val env = StreamEnv()
 
-      val result: Future[List[Int]] =
+      val result: Future[Seq[Int]] =
         Spout.ints(0)
           .map(i => 1000 / (i - 10))
           .take(50)
-          .drainToList(limit = 50) // shortcut for `to(...).run()`
+          .to(Drain.seq(limit = 50)).run().result // shortcut: .drainToVector(limit = 50)
 
       result.value.get shouldBe a [Failure[_]]
 
@@ -44,14 +44,14 @@ class SyncVsAsyncSpec extends FreeSpec with Matchers {
           .filter(_ % 5 == 0)
           .map(_.toString)
           .take(10)
-          .drainToList(limit = 100) // shortcut for `to(...).run()`
+          .drainToList(limit = 100) // shortcut for `to(...).run().result`
 
       result.value.get.get shouldEqual (0 to 45 by 5).map(_.toString)
       //#base-example
     }
 
-    "drain-async" in {
-      //#drain-async
+    "async" in {
+      //#async
       import scala.concurrent.Future
       import swave.core.util._
       import swave.core._
@@ -63,12 +63,13 @@ class SyncVsAsyncSpec extends FreeSpec with Matchers {
           .filter(_ % 5 == 0)
           .map(_.toString)
           .take(10)
-          .drainTo(Drain.seq(limit = 100).async()) // shortcut for `to(...).run()`
+          .async()
+          .drainToList(limit = 100) // shortcut for `to(...).run().result`
 
       result.await() shouldEqual (0 to 45 by 5).map(_.toString)
 
       env.shutdown()
-      //#drain-async
+      //#async
     }
 
     "withCompletionTimeout" in {
@@ -108,7 +109,7 @@ class SyncVsAsyncSpec extends FreeSpec with Matchers {
           .asyncBoundary() // adds an explicit async boundary here
           .map(_.toString)
           .take(10)
-          .to(Drain.seq(limit = 100)).run().get
+          .to(Drain.seq(limit = 100)).run()
 
       run.result.await() shouldEqual (0 to 45 by 5).map(_.toString)
 
@@ -120,6 +121,7 @@ class SyncVsAsyncSpec extends FreeSpec with Matchers {
       //#complex-example
       import com.typesafe.config.ConfigFactory
       import scala.concurrent.{Future, Promise}
+      import scala.concurrent.duration._
       import swave.core.util._
       import swave.core._
 
@@ -137,7 +139,7 @@ class SyncVsAsyncSpec extends FreeSpec with Matchers {
       def drain(promise: Promise[String]): Drain[Char, Unit] =
         Drain.mkString(limit = 100)
           .captureResult(promise)
-          .async("bar")
+          .async("bar") // same as adding `.async` to all regions this drain is placed in
 
       val result2 = Promise[String]()
       val run: StreamRun[Future[String]] =
@@ -150,11 +152,12 @@ class SyncVsAsyncSpec extends FreeSpec with Matchers {
           .tee(Pipe[Char].asyncBoundary().deduplicate.to(drain(result2)))
           .map(_.toLower)
           .to(Drain.mkString(limit = 100))
-          .run().get
+          .run() // not using `.drainTo(...)` allows us access to the `StreamRun`
 
-      run.result.await() shouldEqual "llo-friend-hhee"
-      result2.future.await() shouldEqual "LO-FRIEND-HE"
+      run.result.await(5.seconds) shouldEqual "llo-friend-hhee"
+      result2.future.await(5.seconds) shouldEqual "LO-FRIEND-HE"
 
+      // only shut down when all regions have properly terminated
       env.shutdownOn(run.termination)
       //#complex-example
     }

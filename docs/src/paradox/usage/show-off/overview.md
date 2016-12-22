@@ -9,7 +9,9 @@ looked through subsequent chapters.
 
 These are the examples that are currently available:
 
-* @ref[MD5](md5.md)
+* @ref[MD5 Computation](md5.md)
+* @ref[Fahrenheit Conversion](fahrenheit.md)
+* @ref[Monte Carlo Pi](monte-carlo-pi.md)
 * @ref[Fibonacci](fibonacci.md)
 
 

@@ -17,7 +17,10 @@ Here is an example of a stream that contains a cycle and therefore requires the 
  
 @@snip [-]($test/CouplingSpec.scala) { #fibonacci } 
 
+(For an in-depth discussion of this stream setup check out the @ref[Fibonacci Example]!)
+
   [Couplings]: swave.core.Coupling
   [stream graph components]: ../basics.md#streams-as-graphs
   [Spout]: ../spouts.md
   [Drain]: ../drains.md
+  [Fibonacci Example]: ../show-off/fibonacci.md

@@ -6,11 +6,11 @@
 
 package swave.docs
 
-import org.scalatest.{FreeSpec, Matchers}
+import org.scalatest.FreeSpec
 import scala.concurrent.Future
 import swave.core._
 
-class BasicSpec extends FreeSpec with Matchers {
+class BasicSpec extends FreeSpec {
 
   implicit val env = StreamEnv()
 

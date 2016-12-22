@@ -105,10 +105,10 @@ As you can see attaching @ref[transformations] to @ref[spouts] will always conne
 produce new unconnected ones. Only by attaching @ref[drains] can a graph become fully **closed**, without any ports
 left unconnected:
 
-@@snip [-]($test/BasicSpec.scala) { #piping }
+@@snip [-]($test/BasicSpec.scala) { #streamGraph }
 
 @@@ p { .centered }
-![Simple Piping](.../simple-piping.svg)
+![Simple StreamGraph](.../simple-streamgraph.svg)
 @@@
 
 
@@ -116,8 +116,8 @@ left unconnected:
 
 As you might have already seen in the @ref[Quick-Start] chapter a graph has to be closed first, by connecting up all
 open ports, before it can be started. Most of the time this is hard to get wrong because the DSL will only give you a
-@scaladoc[Piping] if the final port is connected to a @ref[drain], and a stream can only be started
-via a @scaladoc[Piping].<br/>
+@scaladoc[StreamGraph] if the final port is connected to a @ref[drain], and a stream can only be started
+via a @scaladoc[StreamGraph].<br/>
 Sometimes however, for example when using @ref[Couplings], there is a chance that some ports are not connected yet
 when the stream is started. Therefore, just before starting, *swave* sends a special `xSeal` signal across all stages
 of the graph, which causes them to verify their being fully connected. If any port is still unconnected the stream will
@@ -139,7 +139,7 @@ After having been started most stages will either begin to immediately send out 
 signals from their peers, depending on their own logic and configuration. In the process data elements will start to
 flow from the @ref[spouts] to the @ref[drains].
 
-A @scaladoc[Piping] can only be started once. Trying to start it a second time will result in an
+A @scaladoc[StreamGraph] can only be started once. Trying to start it a second time will result in an
 @scaladoc[IllegalReuseException].
 
 
@@ -190,6 +190,11 @@ stage's logic. The basic @ref[spout] stages and most simple transformation stage
 Many times you are only interested in completion of the result `Future` that a final @ref[drain] produces. However,
 depending on the stream's execution mode, this might well be before all stages have terminated. It could even be that
 the stream continues to run indefinitely afterwards if it's set up in a way that allows this.
+
+If you need to run custom logic when a stream graph has fully terminated (as opposed to just the result having become
+available), for example because you want to gracefully shut down the @scaladoc[StreamEnv], you can attach an
+`onComplete` handler to the `streamRun.termination` @scaladoc[Future] that is made available by the
+@scaladoc[StreamRun] instance (which itself is returned by the `run` call). 
  
 
 Execution Model
@@ -198,7 +203,7 @@ Execution Model
 *swave* streams can run in one of two basic modes:
 
 1. Synchronously on the caller thread (yet without any blocking!)
-2. Asynchronously on a thread-pool detached from the caller thread
+2. Asynchronously on one or more thread-pool(s) detached from the caller thread
 
 Hereby the caller thread is the thread calling the `run` method. 
 
@@ -230,10 +235,13 @@ to properly synchronize all accesses yourself.
   [drains]: drains.md
   [IllegalReuseException]: swave.core.IllegalReuseException
   [UnclosedStreamGraphException]: swave.core.UnclosedStreamGraphException
-  [Piping]: swave.core.Piping
+  [StreamGraph]: swave.core.StreamGraph
   [Quick-Start]: quick-start.md
   [render]: further/rendering.md
   [Couplings]: transformations/couplings.md
   [fan-in]: transformations/fan-ins.md 
   [fan-out]: transformations/fan-outs.md 
   [Sync vs. Async Execution]: further/sync-vs-async.md
+  [Future]: scala.concurrent.Future
+  [StreamEnv]: swave.core.StreamEnv
+  [StreamRun]: swave.core.StreamRun

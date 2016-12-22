@@ -4,8 +4,9 @@ Talks on *swave*
 The currently best talk on *swave* is [>>> swave - Reactive Streams in Scala <<<](https://youtu.be/htwmROeki0c)
 from [ScalaDays 2016 @ Berlin](http://event.scaladays.org/scaladays-berlin-2016).
 
-It nicely introduces the key ideas and concepts and gives a good overview over the project. There is only one outdated
-element in this talk: The type called `swave.core.Stream[T]` in the talk is now called `swave.core.Spout[T]`.  
+It nicely introduces the key ideas and concepts and gives a good overview over the project.
+While quite a few things have evolved since this talk was given there is only one important change to be aware of:<br/>
+The type called `swave.core.Stream[T]` in the talk is now called `swave.core.Spout[T]`.  
 
 
 All talks in reverse chronological order

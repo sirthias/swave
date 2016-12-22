@@ -5,6 +5,8 @@ Show-Off
 
 * [-](overview.md)
 * [-](md5.md)
+* [-](fahrenheit.md)
+* [-](monte-carlo-pi.md)
 * [-](fibonacci.md)
 
 @@@

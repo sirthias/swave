@@ -1,17 +1,35 @@
 Quick Start
 ===========
 
+Like most other Scala streaming toolkits *swave* fully separates stream construction and stream execution into two
+distinct phases. First, you define your stream setup using a concise and flexible DSL. During this phase no resources
+are being claimed (apart from the memory for the graph structures) and no data start to flow.
+Only when everything is fully assembled and you explicitly start the stream will the internal machinery actually spring
+to life.
+
+But let's start from the beginning...
+
+
+Required Imports
+----------------
+
 After having added *swave* to your build (as described in the @ref[Setup] chapter) you bring all the key
-identifiers into scope with:
+identifiers into scope with this single import:
 
 @@snip [-]($test/QuickStartSpec.scala) { #core-import }
+
+In most cases this is all you need, but sometimes additional imports are required in order to enable certain support
+functionality (like the @ref[Domain Adapters]).
 
 
 Creating Spouts
 ---------------
 
-With this in place we can create a simple source of stream elements, which are called @ref[Spouts] in
-*swave*:
+With the main import in place we can create sources of stream elements, which are called @ref[Spouts] in
+*swave*.<br/>
+("spout" is an English word for a tube or lip projecting from a container, through which liquid can be poured.)
+
+Here is a simple one:
 
 @@snip [-]($test/QuickStartSpec.scala) { #spout }
 
@@ -21,7 +39,7 @@ As you can probably guess a `Spout[T]` is parameterized with the type of the ele
 @scaladoc[Iterators](scala.collection.Iterator),
 @scaladoc[Option](scala.Option) and @scaladoc[Try](scala.util.Try), but also
 @scaladoc[Future] or @scaladoc[Publisher](org.reactivestreams.Publisher).
-Check out the chapter on @ref[Spouts](spouts.md) for more details.
+Check out the chapter on @ref[Spouts] for more details.
 
 Attaching Transformations
 -------------------------
@@ -37,7 +55,7 @@ is typically required when working with streams. The power of stream-processing 
 nicely assemble higher-level logic from lower-level primitives in a concise and elegant fashion. Therefore a central
 part of learning to program with streams is understanding which transformations already exist and how a given piece of
 business logic might be encoded by combining them in the right way.
-As with most programs there are usually many ways to achieve the same thing.
+As with most programs there are usually many ways to achieve the same thing.<br/>
 For example, here are ten ways of producing the same stream (the first 100 natural numbers) with *swave*:
 
 @@snip [-]($test/QuickStartSpec.scala) { #ten-spouts }
@@ -67,19 +85,19 @@ Here are some other frequently used drains:
 @@snip [-]($test/QuickStartSpec.scala) { #more-drains }
 
 As you can see, even the drains that produce "no" result, still produce one :).<br/>
-For example the `Drain.foreach`, which runs a stream to completion only for side-effects, produces a`Future[Unit]`.
+For example the `Drain.foreach`, which runs a stream to completion only for side-effects, produces a `Future[Unit]`.
 Even though in the happy case the future's value isn't very interesting (the `Unit` value), it still signals two things:
 
-- if and when the stream completed
+- if and when the stream completed (at the drain)
 - whether it terminated successfully or with an error
 
 Once you have a drain you can attach it to a matching (type-wise) `Spout` with `to(...)`, e.g.: 
 
-@@snip [-]($test/QuickStartSpec.scala) { #piping }  
+@@snip [-]($test/QuickStartSpec.scala) { #streamGraph }  
 
-The result of attaching a `Drain` to a `Spout` is a @scaladoc[Piping](swave.core.Piping), a type you'll probably use
-less frequently in your own code. A `Piping` represents a complete stream pipeline or graph setup, which is ready to
-be run. Its single type parameter is the result type of the `Drain` that was used to "close" the stream pipeline.
+The result of attaching a `Drain` to a `Spout` is a @scaladoc[StreamGraph], a type you'll probably use less frequently
+in your own code. A `StreamGraph` represents a complete stream pipeline or graph setup, which is ready to be run.
+Its single type parameter is the result type of the `Drain` that was used to "close" the stream pipeline.
  
 Note that up until this point, including the attachment of a `Drain`, nothing has really happened apart from
 *describing* what your stream setup looks like. No data has started to flow and no resources (apart from the memory for
@@ -89,21 +107,22 @@ the pipeline) have been claimed.
 Running a Stream
 ----------------
 
-It is only when you call `.run()` on a `Piping` that the whole stream machinery kicks into motion and data elements
+It is only when you call `.run()` on a `StreamGraph` that the whole stream machinery kicks into motion and data elements
 start to flow.
 Thereby one very important thing to have in mind is that you can only ever call `.run()` **once** on any given
 stream setup. After the first `.run()` call all elements of the stream setup, i.e. all involved spouts and drains
 (as well as, potentially, @ref[Pipes] and @ref[Modules]) have been "spent". They cannot be used again and will cause all
 subsequent streams that they are incorporated into to fail with an @scaladoc[IllegalReuseException].
+If you want to re-run the stream another fresh `StreamGraph` instance must be created. 
 
 *swave* streams can run synchronously (yet without any blocking!) purely on the caller thread. All the examples we've
 looked at so far are of this kind. However, there might be components in your stream setup that require asynchronous
 dispatch and therefore cannot run purely on the caller thread in a non-blocking fashion.
 For example, a spout or drain might be connected to a network socket and thus must be "woken up" when new data arrive or
 the kernel signals that the socket is now ready to accept data. Or the stream might contain a transformation that
-requires the concept of "time" in order to do its thing (like `throttle` or `takeWithin`).
-Or you might want to introduce an asynchronous boundary manually (see the `async` transformation), in order to allow for
-different parts of your pipeline to be run in parallel.
+requires the concept of "time" in order to do its thing (like @ref[throttle] or @ref[takeWithin]).<br/>
+Or you might want to introduce an asynchronous boundary manually (see the @ref[asyncBoundary] transformation), in order
+to allow for different parts of your pipeline to be run in parallel.
 In all of these cases the stream will be started asynchronously when you call `.run()`, which means it will be started
 and run on another thread.
 
@@ -162,6 +181,7 @@ There are more `drain...` variants available on `Spout`, you might want to
 
 
   [Setup]: setup.md
+  [Domain Adapters]: domain/index.md
   [Spouts]: spouts.md
   [Drain]: drains.md
   [transformations]: transformations/overview.md
@@ -173,3 +193,7 @@ There are more `drain...` variants available on `Spout`, you might want to
   [configured]: further/configuration.md
   [Configuration]: further/configuration.md
   [Future]: scala.concurrent.Future
+  [StreamGraph]: swave.core.StreamGraph
+  [throttle]: transformations/reference/throttle.md
+  [takeWithin]: transformations/reference/takeWithin.md
+  [asyncBoundary]: transformations/reference/asyncBoundary.md

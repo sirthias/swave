@@ -27,8 +27,8 @@ class SpoutSpec extends FreeSpec with Matchers {
         Spout.ints(from = 0)
           .filter(_ % 2 == 0)
 
-      val a: Future[List[Int]] = evenIntsViaFlatmap.take(5).drainToList(5)
-      val b: Future[List[Int]] = evenIntsViaFilter.take(5).drainToList(5)
+      val a: Future[List[Int]] = evenIntsViaFlatmap.take(5).drainToList(limit = 5)
+      val b: Future[List[Int]] = evenIntsViaFilter.take(5).drainToList(limit = 5)
 
       // since both streams in this example run synchronously
       // both futures are already fulfilled and we can access
@@ -40,22 +40,25 @@ class SpoutSpec extends FreeSpec with Matchers {
     "streamable-either" in {
       //#streamable-either
       import scala.util.Success
+      import shapeless.Lub
       import swave.core._
 
       implicit val env = StreamEnv()
 
-      implicit def forEither[C, A <: C, B <: C] =
+      implicit def forEither[A, B, C](implicit ev: Lub[A, B, C]) =
         new Streamable[Either[A, B]] {
           type Out = C
           def apply(value: Either[A, B]): Spout[C] =
-            value.fold(Spout.one[C], Spout.one[C])
+            value.fold(a => Spout.one(ev left a), b => Spout.one(ev right b))
         }
 
       def eitherStream: Spout[Either[(Char, Int), String]] =
         Spout(Left('0' -> 0), Right("1"), Right("2"))
 
-      eitherStream
-        .flattenConcat() // = Spout[AnyRef]
+      def anyRefStream: Spout[AnyRef] =
+         eitherStream.flattenConcat()
+
+      anyRefStream
         .drainToList(5)
         .value.get shouldEqual Success(List('0' -> 0, "1", "2"))
       //#streamable-either

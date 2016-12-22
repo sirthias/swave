@@ -21,8 +21,8 @@ is ready to receive and the second is the drain's "result type". A drain's *resu
 of a stream.
 
 When a drain is used to close a stream graph, e.g. via the `to(...)` method of a @ref[Spout](spouts.md), the result type
-is carried over to the @scaladoc[Piping] where it defines the type of the `run()` call, i.e. what you get back when the
-stream is started.
+is carried over to the @scaladoc[StreamGraph] where it defines the type of the `run()` call, i.e. what you get back when
+the stream is started.
 
 For example:
  
@@ -33,8 +33,8 @@ Result Types are Async
 ----------------------
 
 One consequence of the fact that every stage must be able to run asynchronously, off the caller thread, is that the
-drain result (which is returned by the `run()` call on a @scaladoc[Piping]) cannot directly contain stream elements.
-As blocking is not an option the `run()` call must return right away if the stream is running asynchronously,
+drain result (which you get by calling `streamGraph.run().result`) cannot directly contain stream elements. As blocking
+is not an option the `run()` call must return right away if the stream is running asynchronously,
 often before the first data elements have even begun their traversal of the stream graph.<br/>
 
 In consequence most kinds of drains have a result type of `Future[T]` rather than just `T`.
@@ -45,7 +45,7 @@ complete stream execution will happen "inside" the `run()` call. Then, and only 
 future's value via `future.value.get` directly after the `run()` call.
 
   [stream graph component]: basics.md#streams-as-graphs
-  [Piping]: swave.core.Piping
+  [StreamGraph]: swave.core.StreamGraph
   [Drain]: swave.core.Drain
   [Drains]: swave.core.Drain
   [Drain companion object]: swave.core.Drain$
