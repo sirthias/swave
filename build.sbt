@@ -63,7 +63,7 @@ lazy val releaseSettings = {
     })
 
   Seq(
-    releaseCrossBuild := false,
+    releaseCrossBuild := true,
     releasePublishArtifactsAction := PgpKeys.publishSigned.value,
     releaseProcess := Seq[ReleaseStep](
       checkSnapshotDependencies,
@@ -76,9 +76,9 @@ lazy val releaseSettings = {
       tagRelease,
       publishArtifacts,
       setNextVersion,
-      commitNextVersion,
-      releaseStepCommand("sonatypeReleaseAll"),
-      pushChanges))
+      commitNextVersion))
+      //releaseStepCommand("sonatypeReleaseAll"),
+      //pushChanges))
 }
 
 lazy val commonJavacOptions = Seq(
@@ -144,7 +144,7 @@ lazy val benchmarks = project
   .settings(noPublishingSettings: _*)
 
 lazy val `compat-akka` = project
-  .dependsOn(core, `core-macros` % "compile-internal", testkit)
+  .dependsOn(core, `core-macros` % "compile-internal")
   .enablePlugins(AutomateHeaderPlugin)
   .settings(commonSettings: _*)
   .settings(releaseSettings: _*)
@@ -154,7 +154,7 @@ lazy val `compat-akka` = project
     libraryDependencies ++= Seq(`akka-stream`, scalatest))
 
 lazy val `compat-scodec` = project
-  .dependsOn(core, `core-macros` % "compile-internal", testkit)
+  .dependsOn(core, `core-macros` % "compile-internal")
   .enablePlugins(AutomateHeaderPlugin)
   .settings(commonSettings: _*)
   .settings(releaseSettings: _*)

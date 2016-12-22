@@ -1,5 +1,28 @@
-Version 0.5 (2016-10-28)
-------------------------
+Version 0.6.0 (2016-12-22)
+--------------------------
+
+- Added `conflateToLast`, `fanOutBroadcastBuffered`, `flatMap`, `prefixAndTailTo`, `sliceEvery`,
+  `sliding`, `slidingTo`, `takeEveryNth` transformations
+- Added `foldAsync`, `scanAsync` and `fanOutUnZip` stubs
+- Introduced `IllegalReuseException`, `UnclosedStreamGraphException`
+- Introduced `swave.core.text` and `swave.core.hash` helpers
+- Renamed `onEvent` to `onSignal`, `limit` to `withLimit`, `limitWeighted` to `withLimitWeighted`,
+  `nonEmptyOr` to `orElse`, `switch` to `fanOutSwitch`
+- Renamed `async` to `asyncBoundary`, add new `async` transformation
+- Renamed `Spout.from` to `Spout.ints`, add `Spout.longs` and `Spout.doubles`
+- Renamed `Drain::capture` to `Drain::captureResult`, add `Drain::drainToLast` and `Drain.mkString`
+- Refactored naming of fan-out, fan-in, inject and flatten transformations
+- Replaced `PipeElem` with `Stage`
+- Removed `A =>> B` alias
+- Separated `seal` and `trySeal` as well as `run` and `tryRun`
+- Renamed `Piping` to `StreamGraph`, introduce `StreamRun`
+- Significantly improved internal stream execution infrastructure
+- Added lots of documentation
+- Many other fixes and improvements
+
+
+Version 0.5.0 (2016-10-28)
+--------------------------
 
 - Added `docs` sub-project
 - Added `split` transformation
