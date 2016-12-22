@@ -7,11 +7,12 @@
 package swave.core
 
 import org.reactivestreams.Publisher
-import swave.core.impl.util.RingBuffer
 import scala.annotation.implicitNotFound
 import scala.collection.immutable
 import scala.concurrent.Future
 import scala.util.Try
+import swave.core.impl.util.RingBuffer
+import swave.core.io.Bytes
 
 @implicitNotFound(
   msg =
@@ -84,6 +85,12 @@ object Streamable {
       def apply(value: Try[AnyRef]) = Spout.fromTry(value)
     }
   implicit def forTry[T]: Aux[Try[T], T] = tryy.asInstanceOf[Aux[Try[T], T]]
+
+  implicit def forBytes[T](implicit ev: Bytes[T]): Aux[T, Byte] =
+    new Streamable[T] {
+      type Out = Byte
+      def apply(value: T): Spout[Byte] = Spout.fromIterator(ev.toSeq(value).iterator)
+    }
 
   implicit def lazyStreamable[T, O](implicit ev: Streamable.Aux[T, O]): Aux[() ⇒ T, O] =
     new Streamable[() ⇒ T] {

@@ -7,6 +7,7 @@
 package swave.core.io.files
 
 import java.nio.file.{Files, Path}
+import scala.concurrent.duration._
 import scodec.bits.ByteVector
 import swave.compat.scodec._
 import swave.core.util._
@@ -29,15 +30,21 @@ class FileDrainSpec extends SwaveSpec {
 
   "Drain.toPath must" - {
 
-    "write lines to a file" in withTempPath(create = true) { path ⇒
+    "write lines to a short file" in withTempPath(create = true) { path ⇒
+      val result = Spout.one(ByteVector("abc" getBytes UTF8)).drainTo(Drain.toPath(path, chunkSize = 512))
+      result.await(5.seconds) shouldEqual 3
+      verifyFileContents(path, "abc")
+    }
+
+    "write lines to a long file" in withTempPath(create = true) { path ⇒
       val result = Spout(TestBytes).drainTo(Drain.toPath(path, chunkSize = 512))
-      result.await() shouldEqual 6006
+      result.await(5.seconds) shouldEqual 6006
       verifyFileContents(path, TestLines mkString "")
     }
 
     "create new file if required" in withTempPath(create = false) { path ⇒
       val result = Spout(TestBytes).drainTo(Drain.toPath(path, chunkSize = 512))
-      result.await() shouldEqual 6006
+      result.await(5.seconds) shouldEqual 6006
       verifyFileContents(path, TestLines mkString "")
     }
   }

@@ -6,9 +6,10 @@
 
 package swave.core.io.files.impl
 
-import java.io.IOException
+import java.nio.ByteBuffer
 import java.nio.channels.FileChannel
 import java.nio.file.{Path, StandardOpenOption}
+import scala.util.control.NonFatal
 import scala.collection.JavaConverters._
 import scala.concurrent.Promise
 import com.typesafe.scalalogging.Logger
@@ -17,15 +18,15 @@ import swave.core.impl.Inport
 import swave.core.impl.stages.DrainStage
 import swave.core.io.Bytes
 import swave.core.io.files.FileIO
-import swave.core.macros.StageImplementation
+import swave.core.macros._
 
 // format: OFF
 @StageImplementation
-private[core] final class FileDrainStage[T](path: Path, options: Set[StandardOpenOption], _chunkSize: Int,
+private[core] final class FileDrainStage[T](path: Path, options: Set[StandardOpenOption], minChunkSize: Int,
                                             resultPromise: Promise[Long])(implicit bytes: Bytes[T])
   extends DrainStage {
 
-  def kind = Stage.Kind.Drain.ToFile(path, options, _chunkSize, resultPromise)
+  def kind = Stage.Kind.Drain.ToFile(path, options, minChunkSize, resultPromise)
 
   private[this] val log = Logger(getClass)
   private implicit def decorator(value: T): Bytes.Decorator[T] = Bytes.decorator(value)
@@ -34,33 +35,34 @@ private[core] final class FileDrainStage[T](path: Path, options: Set[StandardOpe
 
   connectInAndSealWith { in ⇒
     region.impl.registerForXStart(this)
-    val cSize = if (_chunkSize > 0) _chunkSize else region.env.settings.fileIOSettings.defaultFileWritingChunkSize
+    val cSize = if (minChunkSize > 0) minChunkSize else region.env.settings.fileIOSettings.defaultFileWritingChunkSize
     running(in, cSize)
   }
 
-  def running(in: Inport, chunkSize: Int) = {
+  def running(in: Inport, mcs: Int) = {
 
     def awaitingXStart() = state(
       xStart = () => {
         in.request(Long.MaxValue)
-        try writing(FileChannel.open(path, options.asJava), bytes.empty, 0L)
+        try writing(FileChannel.open(path, options.asJava), bytes.empty, null, 0L)
         catch {
-          case e: IOException =>
+          case NonFatal(e) =>
             log.debug("Couldn't open `{}` for writing: {}", path, e.toString)
             stopCancel(in)
         }
       })
 
-    def writing(channel: FileChannel, currentChunk: T, totalBytesWritten: Long): State = state(
+    def writing(channel: FileChannel, currentChunk: T, byteBuffer: ByteBuffer, totalBytesWritten: Long): State = state(
       onNext = (elem, _) ⇒ {
         try {
           val chunk = currentChunk ++ elem.asInstanceOf[T]
-          if (chunk.size >= chunkSize) {
-            channel.write(chunk.toByteBuffer)
-            writing(channel, bytes.empty, totalBytesWritten + chunk.size)
-          } else writing(channel, chunk, totalBytesWritten)
+          val chunkSize = chunk.size
+          if (chunkSize >= mcs) {
+            val buf = write(channel, chunk, byteBuffer)
+            writing(channel, bytes.empty, buf, totalBytesWritten + chunkSize)
+          } else writing(channel, chunk, byteBuffer, totalBytesWritten)
         } catch {
-          case e: IOException =>
+          case NonFatal(e) =>
             log.debug("Error writing to `{}`: {}", path, e)
             FileIO.quietClose(channel)
             in.cancel()
@@ -69,9 +71,21 @@ private[core] final class FileDrainStage[T](path: Path, options: Set[StandardOpe
       },
 
       onComplete = _ ⇒ {
-        close(channel)
-        resultPromise.success(totalBytesWritten)
-        stop()
+        try {
+          val totalBytes =
+            if (currentChunk.nonEmpty) {
+              write(channel, currentChunk, byteBuffer)
+              currentChunk.size + totalBytesWritten
+            } else totalBytesWritten
+          close(channel)
+          resultPromise.success(totalBytes)
+          stop()
+        } catch {
+          case NonFatal(e) =>
+            log.debug("Error writing to `{}`: {}", path, e)
+            FileIO.quietClose(channel)
+            stop(e)
+        }
       },
 
       onError = (e, _) ⇒ {
@@ -83,9 +97,26 @@ private[core] final class FileDrainStage[T](path: Path, options: Set[StandardOpe
     awaitingXStart()
   }
 
+  private def write(channel: FileChannel, chunk: T, buffer: ByteBuffer): ByteBuffer = {
+    val chunkSize =
+      chunk.size match {
+        case x if x > Int.MaxValue => sys.error("Cannot decode chunk with more than `Int.MaxValue` bytes")
+        case x => x.toInt
+      }
+    val buf =
+      if ((buffer ne null) && buffer.capacity >= chunkSize) buffer
+      else ByteBuffer.allocate(chunkSize)
+    val copied = chunk.copyToBuffer(buf)
+    requireState(copied == chunkSize)
+    buf.flip()
+    channel.write(buf)
+    buf.clear()
+    buf
+  }
+
   private def close(channel: FileChannel): Unit =
     try channel.close()
     catch {
-      case e: IOException => log.debug("Error closing `{}`: {}", path, e)
+      case NonFatal(e) => log.debug("Error closing `{}`: {}", path, e)
     }
 }
