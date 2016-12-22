@@ -105,12 +105,6 @@ private[testkit] final class TestSpoutStage(val id: Int,
     })
 
   def cancelled(out: Outport): State = state(
-    request = (n, from) ⇒ {
-      ctx.trace(s"Received REQUEST $n from $from in state 'cancelled'")
-      if (from eq out) throw illegalState(s"Received REQUEST $n after CANCEL from outport '$out'")
-      else throw illegalState(s"Received REQUEST $n from unexpected outport '$from' instead of outport '$out'")
-    },
-
     cancel = from ⇒ {
       ctx.trace(s"Received CANCEL from $from in state 'cancelled'")
       if (from eq out) throw illegalState(s"Received double CANCEL from outport '$out'")
@@ -118,12 +112,6 @@ private[testkit] final class TestSpoutStage(val id: Int,
     })
 
   def completed(out: Outport): State = state(
-    request = (n, from) ⇒ {
-      ctx.trace(s"Received REQUEST $n from $from in state 'completed'")
-      if (from eq out) stay()
-      else throw illegalState(s"Received REQUEST $n from unexpected outport '$from' instead of outport '$out'")
-    },
-
     cancel = from ⇒ {
       ctx.trace(s"Received CANCEL from $from in state 'completed'")
       if (from eq out) cancelled(out)
@@ -131,12 +119,6 @@ private[testkit] final class TestSpoutStage(val id: Int,
     })
 
   def errored(out: Outport): State = state(
-    request = (n, from) ⇒ {
-      ctx.trace(s"Received REQUEST $n from $from in state 'errored'")
-      if (from eq out) stay()
-      else throw illegalState(s"Received REQUEST $n from unexpected outport '$from' instead of outport '$out'")
-    },
-
     cancel = from ⇒ {
       ctx.trace(s"Received CANCEL from $from in state 'errored'")
       if (from eq out) cancelled(out)

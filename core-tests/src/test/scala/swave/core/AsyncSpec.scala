@@ -219,5 +219,14 @@ class AsyncSpec extends SwaveSpec {
         .drainToList(limit = 10)
         .await(50.millis) shouldEqual List("0,1,2,3,4", "5,6,7,8,9", "10,11,12,13,14")
     }
+
+    "rate detach" in {
+      Spout.repeat(42)
+        .conflateToLast
+        .throttle(1, per = 50.millis)
+        .take(3)
+        .drainToList(limit = 3)
+        .await(500.millis) shouldEqual List(42, 42, 42)
+    }
   }
 }

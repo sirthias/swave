@@ -55,7 +55,7 @@ private[core] final class SubDrainStage(val out: StageImpl) extends DrainStage {
   def awaitingXStart(in: Inport, cancelled: Boolean, timer: Cancellable): State = state(
     intercept = false,
 
-    request = (n, _) => { interceptRequest(n.toLong, out); stay() },
+    request = (n, _) => { interceptRequest(n, out); stay() },
     cancel = _ => awaitingXStart(in, cancelled = true, timer),
 
     xStart = () => {

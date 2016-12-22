@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.{AtomicInteger, AtomicReference}
 import scala.annotation.tailrec
 import scala.concurrent.{Future, Promise}
 import scala.concurrent.duration.FiniteDuration
+import swave.core.impl.util.AbstractInportList
 import swave.core.impl.stages.StageImpl
 import swave.core.macros._
 import swave.core.util._
@@ -36,6 +37,9 @@ private[swave] final class RunContext private (val env: StreamEnv) { self =>
 
     // PreStart + SyncRunning
     def registerForSyncPostRunEvent(stage: StageImpl): Unit = `n/a`
+
+    // SyncRunning
+    def enqueueSyncRequest(stage: StageImpl, n: Long)(implicit from: Outport): Unit = `n/a`
 
     // running only
     def regionsActiveCount: Int                                                             = `n/a`
@@ -98,7 +102,7 @@ private[swave] final class RunContext private (val env: StreamEnv) { self =>
         val imp = new SyncMainRunning(regions, syncNeedPostRun)
         _impl = imp
         doStart()
-        imp.syncPostRun()
+        imp.postRun()
         if (!_suppressSyncUnterminatedError && !imp.isTerminated) {
           throw new UnterminatedSynchronousStreamException
         }
@@ -143,11 +147,14 @@ private[swave] final class RunContext private (val env: StreamEnv) { self =>
       if (_regionsActiveCount == 0 && (subContexts eq Nil)) signalTermination()
   }
 
-  private[swave] final class SyncMainRunning(regs: List[Region], snpr: List[StageImpl]) extends SyncRunning(regs) {
-    private[this] var _termination: AnyRef                           = _ // null: unterminated, self: terminated, Promise[_]: promise
-    private[this] var syncNeedPostRun: List[StageImpl]               = snpr
-    private[this] var syncCleanUp: List[Runnable]                    = Nil
-    override def registerForSyncPostRunEvent(stage: StageImpl): Unit = syncNeedPostRun ::= stage
+    private[swave] final class SyncMainRunning(regs: List[Region], npr: List[StageImpl]) extends SyncRunning(regs) {
+    private[this] var needPostRun: List[StageImpl]         = npr
+    private[this] var queuedRequestList: QueuedRequestList = _
+    private[this] var cleanUp: List[Runnable]              = Nil
+    private[this] var _termination: AnyRef                 = _ // null: unterminated, self: terminated, Promise[_]: promise
+    override def registerForSyncPostRunEvent(stage: StageImpl): Unit = needPostRun ::= stage
+    override def enqueueSyncRequest(stage: StageImpl, n: Long)(implicit from: Outport): Unit =
+      queuedRequestList = new QueuedRequestList(stage, queuedRequestList, n, from)
     def isTerminated: Boolean =
       _termination match {
         case null          => false
@@ -169,24 +176,40 @@ private[swave] final class RunContext private (val env: StreamEnv) { self =>
       val timer =
         new Cancellable with Runnable {
           def run(): Unit          = stage.xEvent(SubStreamStartTimeout)
-          def stillActive: Boolean = syncCleanUp contains this
+          def stillActive: Boolean = cleanUp contains this
           def cancel(): Boolean = {
-            val x = syncCleanUp.remove(this)
-            (x ne syncCleanUp) && { syncCleanUp = x; true }
+            val x = cleanUp.remove(this)
+            (x ne cleanUp) && { cleanUp = x; true }
           }
         }
-      syncCleanUp ::= timer
+      cleanUp ::= timer
       timer
     }
-    def syncPostRun(): Unit = {
+    def postRun(): Unit = {
+      @tailrec def dispatchQueuedRequests(): Unit =
+        if (queuedRequestList ne null) {
+          val queued = queuedRequestList
+          queuedRequestList = null
+
+          @tailrec def rec(remaining: QueuedRequestList): Unit =
+            if (remaining ne null) {
+              val stage = remaining.in.stageImpl
+              stage.request(remaining.n)(remaining.from)
+              rec(remaining.tail)
+            }
+          rec(queued)
+          dispatchQueuedRequests()
+        }
+
       @tailrec def dispatchPostRunSignal(): Unit =
-        if (syncNeedPostRun ne Nil) {
-          val stages = syncNeedPostRun
-          syncNeedPostRun = Nil // allow for re-registration in signal handler
+        if (needPostRun ne Nil) {
+          val stages = needPostRun
+          needPostRun = Nil // allow for re-registration in signal handler
 
           @tailrec def rec(remaining: List[StageImpl]): Unit =
             if (remaining ne Nil) {
               remaining.head.xEvent(PostRun)
+              dispatchQueuedRequests()
               rec(remaining.tail)
             }
           rec(stages)
@@ -199,8 +222,9 @@ private[swave] final class RunContext private (val env: StreamEnv) { self =>
           runCleanups(remaining.tail)
         }
 
+      dispatchQueuedRequests()
       dispatchPostRunSignal()
-      runCleanups(syncCleanUp)
+      runCleanups(cleanUp)
     }
     override def toString: String = s"SyncMainRunning(regions:${regions.size})"
   }
@@ -209,6 +233,8 @@ private[swave] final class RunContext private (val env: StreamEnv) { self =>
     override def termination: Future[Unit] = parent.impl.termination
     override def registerForSyncPostRunEvent(stage: StageImpl): Unit =
       parent.impl.registerForSyncPostRunEvent(stage)
+    override def enqueueSyncRequest(stage: StageImpl, n: Long)(implicit from: Outport): Unit =
+      parent.impl.enqueueSyncRequest(stage, n)
     override def scheduleSyncSubStreamStartCleanup(stage: StageImpl, d: FiniteDuration): Cancellable =
       parent.impl.scheduleSyncSubStreamStartCleanup(stage, d)
     override def signalTermination(): Unit =
@@ -263,6 +289,9 @@ private[swave] object RunContext {
   case object PostRun
   case object SubStreamStartTimeout
   final case class Timeout(timer: Cancellable)
+
+  private final class QueuedRequestList(in: StageImpl, tail: QueuedRequestList, val n: Long, val from: Outport)
+    extends AbstractInportList[QueuedRequestList](in, tail)
 
   /**
     * Seals the stream by sending an `xSeal` signal through the stream graph starting from the given stage.

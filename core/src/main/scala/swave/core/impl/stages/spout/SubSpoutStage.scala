@@ -56,7 +56,7 @@ private[core] class SubSpoutStage(val in: StageImpl) extends SpoutStage {
   def awaitingXStart(out: Outport, term: StreamTermination, timer: Cancellable): State = state(
     intercept = false,
 
-    request = (n, _) => { interceptRequest(n.toLong, out); stay() },
+    request = (n, _) => { interceptRequest(n, out); stay() },
     cancel = _ => { interceptCancel(out); stay() },
 
     xStart = () => {

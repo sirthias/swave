@@ -77,7 +77,6 @@ private[swave] abstract class StageImpl extends PortImpl {
   private[this] var _mbs: Int                            = _ // configured max batch size, cached
   private[this] var _inportState: InportContext          = _
   private[this] var _buffer: ResizableRingBuffer[AnyRef] = _
-  private[this] var _lastSubscribed: Outport             = _ // needed by `_request` when `fullInterceptions` is off
   private[this] var _region: Region                      = _
   protected final var interceptingStates: Int            = _ // bit mask holding a 1 bit for every state which requires interception support
 
@@ -102,7 +101,6 @@ private[swave] abstract class StageImpl extends PortImpl {
     if (!_intercepting) {
       _intercepting = interceptionNeeded
       _subscribe(from)
-      _lastSubscribed = from // if `fullInterceptions` is off then we have only one downstream which we remember here
       handleInterceptions()
     } else storeInterception(Statics._0L, from)
 
@@ -119,36 +117,31 @@ private[swave] abstract class StageImpl extends PortImpl {
 
   /////////////////////////////////////// REQUEST ///////////////////////////////////////
 
-  final def request(n: Long)(implicit from: Outport): Unit =
-    if (!_intercepting) {
-      _intercepting = interceptionNeeded
-      _request(n, from)
-      if (_intercepting) handleInterceptions()
-    } else interceptRequest(n, from)
-
-  private def _request(n: Long, from: Outport): Unit = {
+  final def request(n: Long)(implicit from: Outport): Unit = {
     val count =
       if (n > _mbs) {
-        val effectiveFrom = if (from ne null) from else _lastSubscribed
-        effectiveFrom.stageImpl.updateInportState(this, n)
+        from.stageImpl.updateInportState(this, n)
         _mbs
       } else n.toInt
-    _state = _request0(count, from)
+
+    if (!_intercepting) {
+      _intercepting = interceptionNeeded
+      _request(count, from)
+      if (_intercepting) handleInterceptions()
+    } else interceptRequest(count, from)
   }
 
-  protected def _request0(n: Int, from: Outport): State =
-    _state match {
-      case 0 ⇒ stay()
-      case _ ⇒ throw illegalState(s"Unexpected request($n) from out '$from'")
-    }
+  private def _request(n: Int, from: Outport): Unit = _state = _request0(n, from)
+
+  protected def _request0(n: Int, from: Outport): State = stay()
 
   protected final def requestF(in: Inport)(n: Int, from: Outport): State = {
     in.request(n.toLong)
     stay()
   }
 
-  protected final def interceptRequest(n: Long, from: Outport): Unit =
-    storeInterception(Statics._1L, if (n <= 16) Statics.LONGS(n.toInt - 1) else new java.lang.Long(n), from)
+  protected final def interceptRequest(n: Int, from: Outport): Unit =
+    storeInterception(Statics._1L, if (n <= 16) Statics.INTS(n - 1) else new java.lang.Integer(n), from)
 
   /////////////////////////////////////// CANCEL ///////////////////////////////////////
 
@@ -214,14 +207,16 @@ private[swave] abstract class StageImpl extends PortImpl {
           val newPending = current.pending - 1
           if (newPending == 0) {
             val newRemaining = current.remaining - _mbs
-            if (newRemaining > 0) {
-              current.pending = _mbs
-              current.remaining = newRemaining
-              currentIn.request(_mbs.toLong)
-            } else {
-              if (last ne null) last.tail = current.tail else _inportState = current.tail
-              currentIn.request(current.remaining)
-            }
+            val n =
+              if (newRemaining > 0) {
+                current.pending = _mbs
+                current.remaining = newRemaining
+                _mbs.toLong
+              } else {
+                if (last ne null) last.tail = current.tail else _inportState = current.tail
+                current.remaining
+              }
+            region.impl.enqueueRequest(currentIn.stageImpl, n)
           } else current.pending = newPending
         }
       } else _onNext(elem, from, current, current.tail)
@@ -433,7 +428,7 @@ private[swave] abstract class StageImpl extends PortImpl {
   private def interceptionNeeded: Boolean = ((interceptingStates >> _state) & 1) != 0
   private def fullInterceptions: Boolean  = interceptingStates < 0
 
-  private def storeInterception(signal: java.lang.Long, from: Port): Unit =
+  private def storeInterception(signal: java.lang.Integer, from: Port): Unit =
     if (fullInterceptions) {
       if (!buffer.write(signal, from))
         throw illegalState(s"Interception buffer overflow on signal $signal($from)'")
@@ -442,11 +437,11 @@ private[swave] abstract class StageImpl extends PortImpl {
         throw illegalState(s"Interception buffer overflow on signal $signal()'")
     }
 
-  private def storeInterception(signal: java.lang.Long, arg: AnyRef): Unit =
+  private def storeInterception(signal: java.lang.Integer, arg: AnyRef): Unit =
     if (!buffer.write(signal, arg))
       throw illegalState(s"Interception buffer overflow on signal $signal($arg)'")
 
-  private def storeInterception(signal: java.lang.Long, arg0: AnyRef, from: Port): Unit =
+  private def storeInterception(signal: java.lang.Integer, arg0: AnyRef, from: Port): Unit =
     if (fullInterceptions) {
       if (!buffer.write(signal, arg0, from))
         throw illegalState(s"Interception buffer overflow on signal $signal($arg0, $from)")
@@ -466,11 +461,11 @@ private[swave] abstract class StageImpl extends PortImpl {
   @tailrec private def handleInterceptions(): Unit =
     if ((_buffer ne null) && _buffer.nonEmpty) {
       def read() = _buffer.unsafeRead()
-      val signal = read().asInstanceOf[java.lang.Long].intValue()
+      val signal = read().asInstanceOf[java.lang.Integer].intValue()
       def from() = if (fullInterceptions) read().asInstanceOf[StageImpl] else null
       signal match {
         case 0 ⇒ _subscribe(from())
-        case 1 ⇒ _request(read().asInstanceOf[java.lang.Long].longValue(), from())
+        case 1 ⇒ _request(read().asInstanceOf[java.lang.Integer].intValue(), from())
         case 2 ⇒ _cancel(from())
         case 3 ⇒ _onSubscribe(from())
         case 4 ⇒ _onNext(read(), from())

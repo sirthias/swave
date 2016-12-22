@@ -58,13 +58,13 @@ private[swave] final class Region private[impl] (val entryPoint: StageImpl, val 
     def scheduleTimeout(target: StageImpl, delay: FiniteDuration): Cancellable = `n/a`
 
     // AsyncRunning + Stopped
-    def enqueueRequest(target: StageImpl, n: Long)(implicit from: Outport): Unit     = `n/a`
     def enqueueCancel(target: StageImpl)(implicit from: Outport): Unit               = `n/a`
     def enqueueOnNext(target: StageImpl, elem: AnyRef)(implicit from: Inport): Unit  = `n/a`
     def enqueueOnComplete(target: StageImpl)(implicit from: Inport): Unit            = `n/a`
     def enqueueOnError(target: StageImpl, e: Throwable)(implicit from: Inport): Unit = `n/a`
 
     // SyncRunning + AsyncRunning + Stopped
+    def enqueueRequest(target: StageImpl, n: Long)(implicit from: Outport): Unit     = `n/a`
     def enqueueXEvent(target: StageImpl, ev: AnyRef): Unit = `n/a`
 
     private def `n/a` = throw new IllegalStateException(toString)
@@ -152,6 +152,8 @@ private[swave] final class Region private[impl] (val entryPoint: StageImpl, val 
         case d: FiniteDuration ⇒ runContext.impl.scheduleSyncSubStreamStartCleanup(stage, d)
         case _                 ⇒ Cancellable.Inactive
       }
+    override def enqueueRequest(target: StageImpl, n: Long)(implicit from: Outport): Unit =
+      runContext.impl.enqueueSyncRequest(target, n)
     override def enqueueXEvent(target: StageImpl, ev: AnyRef): Unit = target.xEvent(ev)
   }
 
