@@ -18,7 +18,7 @@ import swave.core.impl.stages.inout.NopStage
 import swave.core.impl._
 import shapeless._
 
-final class Pipe[-A, +B] private (private[core] val firstStage: Outport, private[core] val lastStage: Inport)
+final class Pipe[-A, +B] private (private val firstStage: Outport, private val lastStage: Inport)
     extends StreamOps[B @uV] {
 
   type Repr[T] = Pipe[A @uV, T]
