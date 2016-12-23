@@ -187,7 +187,7 @@ println(numberStrings.drop(41).drainToHead())
 val s: Future[String] =
   numberStrings.take(100)
     .drainToMkString(limit = 1000, &quot;, &quot;)</code></pre>
-<p>Apart from ensuring that you&rsquo;ll never see an <a href="http://swave.io/api/core/latest/#swave.core.IllegalReuseException">IllegalReuseException</a> it also has the benefit that parameterizing your higher-level stream constructs becomes trivial (as all that&rsquo;s required is giving the <code>def</code> a parameter list).</p>
+<p>Apart from ensuring that you&rsquo;ll never see an <a href="http://swave.io/api/core/latest/swave/core/IllegalReuseException.html">IllegalReuseException</a> it also has the benefit that parameterizing your higher-level stream constructs becomes trivial (as all that&rsquo;s required is giving the <code>def</code> a parameter list).</p>
                 <div class="nav-next">
                     <p><strong>Next:</strong> <a href="../../usage/domain/index.html">Domain Adapters</a></p>
                 </div>

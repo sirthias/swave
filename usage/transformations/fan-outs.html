@@ -171,7 +171,7 @@
             <div id="main-content">
                 <!-- start: page -->
 <h1><a href="#fan-outs" name="fan-outs" class="anchor"><span class="anchor-link"></span></a>Fan-Outs</h1>
-<p>Fan-Outs are <a href="../basics.html#streams-as-graphs">stream graph components</a> with one input port and several output ports.</p><p class="centered"><img src="../../assets/img/fan-out.svg" alt="Fan-Out" /></p>
+<p>Fan-Outs are <a href="../basics.html#streams-as-graphs">stream graph components</a> with one input port and several output ports.</p>
 <p>Currently these fan-out variants are available:</p>
 <ul>
   <li><a href="reference/fanOutBroadcast.html">fanOutBroadcast</a></li>
@@ -214,7 +214,7 @@ val result: Future[String] =
 result.value.get.get shouldEqual (10 to 48).mkString
 promise1.future.value.get.get shouldEqual (46 to 48).map(_.toString)
 promise2.future.value.get.get shouldEqual (42 to 48)</code></pre>
-<p>This example encodes this stream graph:</p><p class="centered"><img src="../../assets/img/basic-fan-out.svg" alt="Fan-Out Example" /></p>
+<p>This example encodes this stream graph:</p>
 <p>This graph has three <a href="../drains.html">Drains</a>, two producing a <code>Seq</code> to a <code>Promise</code> and one (the main one) producing a <code>String</code>. <br/> As you can already (partially) see from this example a fan-out definition consists of</p>
 <ol>
   <li>a call to a specific fan-out variant, in this case <a href="reference/fanOutBroadcast.html">fanOutBroadcast</a></li>
@@ -228,7 +228,7 @@ promise2.future.value.get.get shouldEqual (42 to 48)</code></pre>
 <p>After you&rsquo;ve finished defining all sub branches there are two ways to &ldquo;close&rdquo; the fan-out. If only a single sub is left open (with <code>.end</code>) you can use <code>.continue</code> to &ldquo;pick-up&rdquo; this open sub branch and simply continue appending more <a href="overview.html">transformations</a> to it. This sub then becomes the new &ldquo;main line&rdquo; of your stream graph.</p>
 <p>If several subs are left open you cannot use <code>.continue</code>, because it wouldn&rsquo;t be clear which one to pick up and what to do with the other open subs. In this case you can use one of the available <a href="fan-ins.html">fan-in</a> variants to &ldquo;join&rdquo; the open subs and continue your stream graph definition in a fluent fashion. A common use case for this is a &ldquo;diamond&rdquo; graph.</p>
 <h2><a href="#diamond-example" name="diamond-example" class="anchor"><span class="anchor-link"></span></a>Diamond Example</h2>
-<p>A common stream graph pattern is a &ldquo;diamond&rdquo; setup, where a fan-out first defines several sub branches, which each apply some specific transformations to &ldquo;their&rdquo; elements, before the ends of the sub branches are re-joined with some kind of <a href="fan-ins.html">fan-in</a> logic. For example this graph:</p><p class="centered"><img src="../../assets/img/diamond.svg" alt="Diamond Graph" /></p>
+<p>A common stream graph pattern is a &ldquo;diamond&rdquo; setup, where a fan-out first defines several sub branches, which each apply some specific transformations to &ldquo;their&rdquo; elements, before the ends of the sub branches are re-joined with some kind of <a href="fan-ins.html">fan-in</a> logic. For example this graph:</p>
 <p>can be encoded like this:</p>
 <pre><code class="scala">import scala.concurrent.Future
 import swave.core._
@@ -267,7 +267,7 @@ result.value.get.get shouldEqual Seq(
   (0.0, &quot;1&quot;, 10, 1),
   (0.5, &quot;2&quot;, 11, 2),
   (1.0, &quot;3&quot;, 12, 3))</code></pre>
-<p>It encodes this graph:</p><p class="centered"><img src="../../assets/img/mixed.svg" alt="Mixed Fan-Out/Fan-In Graph" /></p>
+<p>It encodes this graph:</p>
 <p>This graph could be drawn in a simpler way but we show it like this in order to make it easier to correlate the DSL code with the visual representation.</p>
 <p>As you can see from this example you can <code>attach</code> <a href="../spouts.html">Spouts</a> &ldquo;from the outside&rdquo; at any point in a fan-out definition, even on the left (with <code>attachLeft</code>), which allows for very flexible and yet concise definition of the large majority of common stream graphs. Some graphs, especially the ones containing cycles, cannot be constructed in a fully fluent fashion. But with only one small additional element, namely <a href="couplings.html">Couplings</a>, even these graphs, and in fact <em>all</em> graphs, can be defined.</p>
 <h2><a href="#subcontinue" name="subcontinue" class="anchor"><span class="anchor-link"></span></a>subContinue</h2>

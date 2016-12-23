@@ -171,7 +171,170 @@
             <div id="main-content">
                 <!-- start: page -->
 <h1><a href="#configuration" name="configuration" class="anchor"><span class="anchor-link"></span></a>Configuration</h1>
-<p>&hellip; TODO &hellip;</p>
+<p><em>swave</em> relies on <a href="https://github.com/typesafehub/config">Typesafe Config</a> for configuration of all aspects of the streaming environment. When you create a <a href="http://swave.io/api/core/latest/swave/core/StreamEnv.html">StreamEnv</a> instance for your application the configuration is loaded from the classpath (and/or other sources, like JVM system properties) and used for all stream runs under this <code>StreamEnv</code>.</p>
+<p>This is the content of <em>swave&rsquo;s</em> own <code>reference.conf</code> which contains the default values for all defined config settings:</p>
+<pre><code class="bash"># This is the reference config file that contains all the default settings.
+# Make your edits/overrides in your application.conf.
+
+swave.core {
+
+  # number of consecutive events that an async region will get to execute on its dispatcher
+  # increase for more throughput, decrease for more fairness
+  throughput = 5
+
+  # maximum number of request signals that can be executed synchronously as &quot;one block&quot;
+  # increase for more throughput, decrease for higher granularity and fairness
+  max-batch-size = 32
+
+  # enable to log the complete configuration at INFO level when the StreamEnv is created
+  log-config-on-start = off
+
+  # time period within which a sub-stream has to be subscribed to and started
+  # set to infinite in order to disable completely (not recommended!)
+  sub-stream-start-timeout = 5s
+
+  # dispatcher definitions
+  dispatcher {
+
+    # the default settings for all dispatcher types
+    # the actual dispatcher definitions in the `swave.core.dispatcher.definition` section
+    # may override them where required
+    default-config {
+
+      # the default config for fork-join executors
+      # the underlying thread pool implementation is `java.util.concurrent.ForkJoinPool`
+      fork-join {
+
+        # thread pool sizing mechanics:
+        # ceil(available processor count * factor) bounded by [min, max]
+        parallelism {
+          factor = 2.0
+          min = 8
+          max = 64
+        }
+
+        # &quot;FIFO&quot; for queue-like peeking mode (&quot;poll&quot;)
+        # &quot;LIFO&quot; to use stack-like peeking mode (&quot;pop&quot;)
+        task-peeking-mode = &quot;FIFO&quot;
+
+        # enable to make the threads created by this executor daemons
+        daemonic = off
+      }
+
+      # the default config for thread-pool executors
+      # the underlying thread pool implementation is
+      # `java.util.concurrent.ThreadPoolExecutor` with an unbounded LinkedBlockingQueue
+      thread-pool {
+
+        # convenience shortcut for fixed-size thread-pools
+        # set to a positive integer value `n` to disregardv core-pool-size and max-pool-size
+        # mechanics and simply define a thread pool with `n` core and `n` max threads
+        fixed-pool-size = off
+
+        # thread core pool size mechanics:
+        # ceil(available processor count * factor) bounded by [min, max]
+        # only used when fixed-pool-size = off
+        core-pool-size {
+          factor = 2.0
+          min = 8
+          max = 64
+        }
+
+        # thread max pool size mechanics:
+        # ceil(available processor count * factor) bounded by [min, max]
+        # only used when fixed-pool-size = off
+        max-pool-size {
+          factor = 2.0
+          min = 8
+          max = 64
+        }
+
+        # keep-alive time for pool threads
+        keep-alive-time = 60s
+
+        # enable to allow core threads to time out
+        allow-core-timeout = on
+
+        # set to
+        # - &quot;off&quot; to create and start threads only when new tasks arrive
+        # - &quot;first&quot; to immediately start the first thread
+        # - &quot;all&quot; to immediately start all threads
+        prestart = off
+
+        # enable to make the threads created by this executor daemons
+        daemonic = off
+      }
+    }
+
+    # defines the dispatchers that are available to pipeline definitions;
+    # each sub-section defines one dispatcher whose name is the section name;
+    # by default only the `default` and `blocking-io` dispatchers are defined
+    definition {
+
+      default {
+        # each dispatcher definition must have either a `fork-join` or a `thread-pool`
+        # section, which may contain settings specific to the respective pool type and
+        # override the default setting defined in `swave.core.dispatcher.default-config`
+        fork-join {}
+
+        # if both, a `fork-join` and a `thread-pool` section is defined for a dispatcher
+        # definition (e.g. because in a stacked config with several layers of default
+        # config providers) you can add a `type` setting to resolve the ambiguity:
+        # type = thread-pool
+      }
+
+      blocking-io {
+        thread-pool {
+          core-pool-size {
+            factor = 2.0
+            min = 2
+            max = 16
+          }
+          max-pool-size {
+            factor = 2.0
+            min = 2
+            max = 16
+          }
+        }
+      }
+
+      # my-single-thead-dispatcher {
+      #   thread-pool {
+      #     fixed-pool-size = 4
+      #     keep-alive-time = 300s
+      #     prestart = all
+      #   }
+      # }
+    }
+  }
+
+  scheduler {
+    # minimal granularity of timeout detection
+    tick-duration = 10ms
+
+    # set to a value that makes ticks-per-wheel * ticks-duration larger
+    # than the majority of scheduled timeouts! (must be a power of 2)
+    ticks-per-wheel = 512
+  }
+
+  file-io {
+    # default number of bytes to group into one chunk when streaming file content
+    default-file-reading-chunk-size = 8192
+
+    # the minimum number of bytes that a to-file drain accumulates
+    # before invoking a sys-call to write the data out to disk;
+    # increase to reduce the system call frequency,
+    # decrease to reduce the time that unsaved data spend in memory before being flushed
+    # out to disk, set to zero to always write incoming data to disk immediately
+    default-file-writing-chunk-size = 8192
+  }
+
+  extensions {
+
+    # the maximum time to wait for completion of an ongoing extension construction
+    construction-timeout = 500 ms
+  }
+}</code></pre>
                 <div class="nav-next">
                     <p><strong>Next:</strong> <a href="../../usage/further/best-practices.html">Best Practices</a></p>
                 </div>

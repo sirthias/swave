@@ -174,10 +174,10 @@
 <p>Streams, like most other abstractions, can be nested. This means that you can have a <code>Spout[Spout[T]]</code> like you can have a <code>List[List[T]]</code>. <em>swave</em> offers a number of <a href="overview.html">transformations</a> that either</p>
 <ol>
   <li>
-    <p>create a stream-of-streams from in incoming stream of &ldquo;regular&rdquo; elements (which we call <strong>injecting</strong>)</p><p class="centered"><img src="../../assets/img/injecting.svg" alt="An Injecting Transformation" /></p>
+    <p>create a stream-of-streams from in incoming stream of &ldquo;regular&rdquo; elements (which we call <strong>injecting</strong>)</p>
   </li>
   <li>
-    <p>or flatten a stream-of-streams back to an outgoing stream of &ldquo;regular&rdquo; elements (which we call <strong>flattening</strong>)</p><p class="centered"><img src="../../assets/img/flattening.svg" alt="A Flattening Transformation" /></p>
+    <p>or flatten a stream-of-streams back to an outgoing stream of &ldquo;regular&rdquo; elements (which we call <strong>flattening</strong>)</p>
   </li>
 </ol>
 <p>While the shape of these stream-of-streams transformations is the same as for <a href="simple.html">Simple Transformations</a> the internal and external complexity is significantly higher. This is because the state-space of the state-machines implementing the transformation logic increases significantly with the number of open streams that a stage has to concurrently deal with. We therefore categorize stream-of-streams transformations as a separate group.</p>
