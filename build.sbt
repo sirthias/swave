@@ -76,9 +76,9 @@ lazy val releaseSettings = {
       tagRelease,
       publishArtifacts,
       setNextVersion,
-      commitNextVersion))
-      //releaseStepCommand("sonatypeReleaseAll"),
-      //pushChanges))
+      commitNextVersion,
+      releaseStepCommand("sonatypeReleaseAll"),
+      pushChanges))
 }
 
 lazy val commonJavacOptions = Seq(
@@ -219,7 +219,7 @@ lazy val docs = project
     connectInput in (Test, run) := true,
     javaOptions in (Test, run) ++= Seq("-XX:+UnlockCommercialFeatures", "-XX:+FlightRecorder"),
     paradoxProperties in Paradox ++= Map(
-      "latest-version" -> "0.5.0",
+      "latest-version" -> "0.6.0",
       "scala.binaryVersion" -> scalaBinaryVersion.value,
       "scala.version" -> scalaVersion.value,
       "github.base_url" -> {
