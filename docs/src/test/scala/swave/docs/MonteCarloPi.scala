@@ -15,7 +15,6 @@ object MonteCarloPi extends App {
 
   val random = XorShiftRandom()
 
-  // format: OFF
   Spout.continually(random.nextDouble())
     .grouped(2)
     .map { case x +: y +: Nil => Point(x, y) }
