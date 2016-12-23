@@ -43,14 +43,18 @@ Dependencies
 
 *swave-core* has the following dependencies that it will transitively pull into your classpath:
 
-- `org.reactivestreams % reactive-streams` (non-scala, see @ref[here] for more info)
-- `org.jctools % jctools-core` (non-scala)
-- `com.typesafe % config` (non-scala)
-- `com.chuusai %% shapeless`
-- `com.typesafe.scala-logging %% scala-logging`
-
+- `org.reactivestreams % reactive-streams` (non-scala, see @ref[here][rs] for more info)
+- `org.jctools % jctools-core` (non-scala, [github project here][jctools])
+- `com.typesafe % config` (non-scala, [github project here][typesafe config])
+- `com.chuusai %% shapeless` ([github project here][shapeless])
+- `com.typesafe.scala-logging %% scala-logging` ([github project here][scala-logging])
 
   [Akka-Stream]: akka:stream/index
   [Scodec]: http://scodec.org/
   [SBT]: http://www.scala-sbt.org/
-  [here]: ../introduction/reactive-streams.md#the-artifact
+  [rs]: ../introduction/reactive-streams.md#the-artifact
+  [jctools]: https://github.com/JCTools/JCTools
+  [typesafe config]: https://github.com/typesafehub/config
+  [shapeless]: https://github.com/milessabin/shapeless
+  [scala-logging]: https://github.com/typesafehub/scala-logging
+  

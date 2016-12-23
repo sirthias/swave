@@ -230,6 +230,7 @@ lazy val docs = project
       "extref.akka.base_url" -> "http://doc.akka.io/docs/akka/2.4/scala/%s.html",
       "snip.test.base_dir" -> s"${(sourceDirectory in Test).value}/scala/swave/docs",
       "snip.core.base_dir" -> s"${(sourceDirectory in Compile in core).value}/scala/swave/core",
+      "snip.res.base_dir" -> (resourceDirectory in Compile in core).value.toString,
       "image.base_url" -> ".../assets/img",
       "scaladoc.org.reactivestreams.base_url" -> "http://www.reactive-streams.org/reactive-streams-1.0.0-javadoc/",
       "scaladoc.akka.base_url" -> "http://doc.akka.io/api/akka/2.4/",
