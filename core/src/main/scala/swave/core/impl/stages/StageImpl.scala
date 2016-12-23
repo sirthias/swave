@@ -67,15 +67,14 @@ import swave.core._
   * - ignore all signals
   */
 private[swave] abstract class StageImpl extends PortImpl {
-  import StageImpl.InportContext
+  import StageImpl.RequestBacklogList
 
   type State = Int // semantic alias
 
   // TODO: evaluate moving the boolean into the (upper) _state integer bits
   private[this] var _intercepting                        = false
   private[this] var _state: State                        = _ // current state; the STOPPED state is always encoded as zero
-  private[this] var _mbs: Int                            = _ // configured max batch size, cached
-  private[this] var _inportState: InportContext          = _
+  private[this] var _requestBacklog: RequestBacklogList  = _
   private[this] var _buffer: ResizableRingBuffer[AnyRef] = _
   private[this] var _region: Region                      = _
   protected final var interceptingStates: Int            = _ // bit mask holding a 1 bit for every state which requires interception support
@@ -87,6 +86,7 @@ private[swave] abstract class StageImpl extends PortImpl {
   protected final def setIntercepting(flag: Boolean): Unit = _intercepting = flag
 
   final def region: Region       = _region
+  final def assignTempRegion(r: Region): Unit  = _region = r
   final def resetRegion(): Unit  = _region = null
   final def stageImpl: StageImpl = this
   final def isSealed: Boolean    = region ne null
@@ -118,10 +118,11 @@ private[swave] abstract class StageImpl extends PortImpl {
   /////////////////////////////////////// REQUEST ///////////////////////////////////////
 
   final def request(n: Long)(implicit from: Outport): Unit = {
+    val mbs = region.mbs
     val count =
-      if (n > _mbs) {
-        from.stageImpl.updateInportState(this, n)
-        _mbs
+      if (n > mbs) {
+        from.stageImpl.updateRequestBacklog(this, n)
+        mbs
       } else n.toInt
 
     if (!_intercepting) {
@@ -146,7 +147,7 @@ private[swave] abstract class StageImpl extends PortImpl {
   /////////////////////////////////////// CANCEL ///////////////////////////////////////
 
   final def cancel()(implicit from: Outport): Unit = {
-    from.stageImpl.clearInportState(this)
+    from.stageImpl.clearRequestBacklog(this)
     if (!_intercepting) {
       _intercepting = interceptionNeeded
       _cancel(from)
@@ -197,8 +198,8 @@ private[swave] abstract class StageImpl extends PortImpl {
   @tailrec
   private def _onNext(elem: AnyRef,
                       from: Inport,
-                      last: InportContext = null,
-                      current: InportContext = _inportState): Unit =
+                      last: RequestBacklogList = null,
+                      current: RequestBacklogList = _requestBacklog): Unit =
     if (current.nonEmpty) {
       val currentIn = current.in
       if ((from eq null) || (currentIn eq from)) {
@@ -206,14 +207,15 @@ private[swave] abstract class StageImpl extends PortImpl {
         if (current.tail ne current) { // is `current` still valid, i.e. not cancelled? (tail eq self is special condition)
           val newPending = current.pending - 1
           if (newPending == 0) {
-            val newRemaining = current.remaining - _mbs
+            val mbs = region.mbs
+            val newRemaining = current.remaining - mbs
             val n =
               if (newRemaining > 0) {
-                current.pending = _mbs
+                current.pending = mbs
                 current.remaining = newRemaining
-                _mbs.toLong
+                mbs.toLong
               } else {
-                if (last ne null) last.tail = current.tail else _inportState = current.tail
+                if (last ne null) last.tail = current.tail else _requestBacklog = current.tail
                 current.remaining
               }
             region.impl.enqueueRequest(currentIn.stageImpl, n)
@@ -246,7 +248,7 @@ private[swave] abstract class StageImpl extends PortImpl {
     } else interceptOnComplete(from)
 
   private def _onComplete(from: Inport): Unit = {
-    clearInportState(from)
+    clearRequestBacklog(from)
     _state = _onComplete0(from)
   }
 
@@ -269,7 +271,7 @@ private[swave] abstract class StageImpl extends PortImpl {
     } else interceptOnError(error, from)
 
   private def _onError(error: Throwable, from: Inport): Unit = {
-    clearInportState(from)
+    clearRequestBacklog(from)
     _state = _onError0(error, from)
   }
 
@@ -287,7 +289,6 @@ private[swave] abstract class StageImpl extends PortImpl {
   final def xSeal(region: Region): Unit =
     if (!isSealed) {
       _region = region
-      _mbs = region.env.settings.maxBatchSize
       _state = _xSeal()
       if (_region ne null)
         _region.impl.registerStageSealed() // don't call `region.impl...` here as `_region` might now be different!
@@ -452,7 +453,7 @@ private[swave] abstract class StageImpl extends PortImpl {
 
   private def buffer = {
     if (_buffer eq null) {
-      val initialSize = roundUpToPowerOf2(_mbs)
+      val initialSize = roundUpToPowerOf2(region.mbs)
       _buffer = new ResizableRingBuffer(initialSize, initialSize << 4)
     }
     _buffer
@@ -476,24 +477,27 @@ private[swave] abstract class StageImpl extends PortImpl {
       handleInterceptions()
     } else _intercepting = false
 
-  private def updateInportState(in: Inport, requested: Long): Unit = {
-    @tailrec def rec(current: InportContext): Unit =
+  private def updateRequestBacklog(in: Inport, requested: Long): Unit = {
+    @tailrec def rec(current: RequestBacklogList): Unit =
       if (current ne null) {
         if (current.in eq in) current.remaining = current.remaining ⊹ requested
         else rec(current.tail)
-      } else _inportState = new InportContext(in, _inportState, _mbs, requested - _mbs)
-    rec(_inportState)
+      } else {
+        val mbs = region.mbs
+        _requestBacklog = new RequestBacklogList(in, _requestBacklog, mbs, requested - mbs)
+      }
+    rec(_requestBacklog)
   }
 
-  private def clearInportState(in: Inport): Unit =
-    _inportState = _inportState.remove(in)
+  private def clearRequestBacklog(in: Inport): Unit =
+    _requestBacklog = _requestBacklog.remove(in)
 }
 
 private[swave] object StageImpl {
 
-  private final class InportContext(in: Inport,
-                                    tail: InportContext,
-                                    var pending: Int, // already requested from `in` but not yet received
-                                    var remaining: Long) // already requested by us but not yet forwarded to `in`
-      extends AbstractInportList[InportContext](in, tail)
+  private final class RequestBacklogList(in: Inport,
+                                         tail: RequestBacklogList,
+                                         var pending: Int, // already requested from `in` but not yet received
+                                         var remaining: Long) // already requested by us but not yet forwarded to `in`
+      extends AbstractInportList[RequestBacklogList](in, tail)
 }

@@ -25,7 +25,9 @@ private[core] final class SubDrainStage(val out: StageImpl) extends DrainStage {
 
     onSubscribe = from ⇒ {
       _inputStages = from.stageImpl :: Nil
+      assignTempRegion(out.region) // for the interception buffer initialization
       xEvent(DoOnSubscribe) // schedule event for after the state transition
+      resetRegion() // otherwise we'd appear to be already sealed
       ready(from, cancelled, timer)
     },
 

@@ -17,6 +17,8 @@ import swave.core._
 private[swave] final class Region private[impl] (val entryPoint: StageImpl, val runContext: RunContext)
     extends Stage.Region { self =>
 
+  val mbs: Int = runContext.env.settings.maxBatchSize
+
   @volatile private var _impl: Impl = new PreStart
   def impl: Impl                    = _impl
 
