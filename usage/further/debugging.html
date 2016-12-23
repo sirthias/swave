@@ -171,7 +171,61 @@
             <div id="main-content">
                 <!-- start: page -->
 <h1><a href="#debugging" name="debugging" class="anchor"><span class="anchor-link"></span></a>Debugging</h1>
-<p>&hellip; TODO &hellip;</p>
+<p>Easy debugging is crucial for everyone writing stream-based logic, not only for users that are new to the field. Unfortunately, finding and fixing problems in <a href="../../introduction/reactive-streams.html">Reactive Streams</a>-based logic can be tricky at times, because in addition to the data channel (going downstream) there is also always the demand channel (going upstream) to pay attention to.</p>
+<p><em>swave</em> gives you several tools that help with debugging a stream setup that doesn&rsquo;t do what you expect it to, the most important ones being logging and <a href="rendering.html">rendering</a>.</p>
+<h2><a href="#basic-process" name="basic-process" class="anchor"><span class="anchor-link"></span></a>Basic Process</h2>
+<p>If you don&rsquo;t quite understand why a certain stream setup is behaving the way it is the first things you should do are probably these:</p>
+<dl>
+  <dt>Reproduce</dt>
+  <dd>If the problem only appears sporadically you&rsquo;ll have to play around with all contributing or environmental factors in order to reliably reproduce the problem.</dd>
+  <dt>Simplify</dt>
+  <dd>Try to remove all elements from the stream graph that don&rsquo;t appear to be contributing to problem. Time spent here can easily pay off multiple times later.</dd>
+  <dt>Add Logging</dt>
+  <dd>Next you should insert logging transformations at strategic points in your stream graph. Once you understand <em>what</em> exactly is happening the question <em>why</em> it happens and how you can change it often answers itself.</dd>
+</dl>
+<h2><a href="#logging-stream-execution" name="logging-stream-execution" class="anchor"><span class="anchor-link"></span></a>Logging Stream Execution</h2>
+<p>As in many cases the simplest tools are often the best ones and debugging stream-based logic is no exception. Temporarily adding logging transformations to trace stream execution can be an excellent and quite efficient way to diagnose issues.</p>
+<p><em>swave</em> gives you a number of &ldquo;identity&rdquo; transformations that perform logging of various stream execution aspects without affecting stream semantics in any way:</p>
+<ul>
+  <li><a href="../transformations/reference/logEvent.html">logEvent</a></li>
+  <li><a href="../transformations/reference/onCancel.html">onCancel</a></li>
+  <li><a href="../transformations/reference/onComplete.html">onComplete</a></li>
+  <li><a href="../transformations/reference/onElement.html">onElement</a></li>
+  <li><a href="../transformations/reference/onError.html">onError</a></li>
+  <li><a href="../transformations/reference/onRequest.html">onRequest</a></li>
+  <li><a href="../transformations/reference/onSignal.html">onSignal</a></li>
+  <li><a href="../transformations/reference/onSignalPF.html">onSignalPF</a></li>
+  <li><a href="../transformations/reference/onStart.html">onStart</a></li>
+  <li><a href="../transformations/reference/onTerminate.html">onTerminate</a></li>
+</ul>
+<p>The most frequently used one is probably <a href="../transformations/reference/logEvent.html">logEvent</a>, which outputs an informational <code>String</code> for every signal that is passing through the stage. By default these strings are <code>println</code>ed to the console but you can easily reroute them to any kind of logging facility.</p>
+<p>In order to illustrate its benefit let&rsquo;s look at this example:</p>
+<pre><code class="scala">import swave.core._
+
+implicit val env = StreamEnv()
+
+Spout.ints(from = 0)
+  .logEvent(&quot;A&quot;)
+  .map(_ * 2)
+  .take(5)
+  .fold(0)(_ + _)
+  .logEvent(&quot;B&quot;)
+  .drainToBlackHole()</code></pre>
+<p>As you can see, <a href="../transformations/reference/logEvent.html">logEvent</a> lets you specify a &ldquo;marker&rdquo; string that makes it easy to associate the output of the particular stage with its position in the graph.</p>
+<p>When we run this stream the following output is produced to the console:</p>
+<pre><code class="nohighlight">B: ⇠ Request(32)
+A: ⇠ Request(5)
+A: ⇢ OnNext(0)
+A: ⇢ OnNext(1)
+A: ⇢ OnNext(2)
+A: ⇢ OnNext(3)
+A: ⇢ OnNext(4)
+A: ⇠ Cancel
+B: ⇢ OnNext(20)
+B: ⇢ OnComplete
+</code></pre>
+<p>As you can see we can get a very good impression of how this stream runs just from this log.</p>
+<p>(You might be asking yourself, where the initial <code>Request(32)</code> comes from here, as there is nothing in the stream setup that hints towards this particular number. The <code>32</code> corresponds to the <a href="configuration.html">configured</a> <code>max-batch-size</code> that larger demand is always broken down to. In this example the <code>.drainToBlackHole()</code> at the end signals infinite demand that is &ldquo;spoon-fed&rdquo; to the stream in chunks of <code>max-batch-size</code>.)</p>
                 <div class="nav-next">
                     <p><strong>Next:</strong> <a href="../../usage/further/rendering.html">Rendering</a></p>
                 </div>
