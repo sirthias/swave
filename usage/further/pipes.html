@@ -171,7 +171,55 @@
             <div id="main-content">
                 <!-- start: page -->
 <h1><a href="#pipes" name="pipes" class="anchor"><span class="anchor-link"></span></a>Pipes</h1>
-<p>&hellip; TODO &hellip;</p>
+<p>A <a href="http://swave.io/api/core/latest/#swave.core.Pipe">Pipe</a> is a <a href="../basics.html#streams-as-graphs">stream graph component</a> with one input port and one output port, i.e. it consumes elements of type <code>A</code> and produces elements of type <code>B</code>.</p><p class="centered"><img src="../../assets/img/pipe.svg" alt="A Pipe" /></p>
+<p>As with all other stream graph components a pipe can internally consist of just one single stage or a whole graph of stages that together form a structure that, to the outside, looks like a simple stage.</p>
+<h2><a href="#creating-pipes" name="creating-pipes" class="anchor"><span class="anchor-link"></span></a>Creating Pipes</h2>
+<p>Most of the time you&rsquo;ll create pipes by appending transformations to a freshly created &ldquo;identity Pipe&rdquo;, e.g. like this:</p>
+<pre><code class="scala">def simplePipe: Pipe[Int, String] =
+  Pipe[Int].filter(_ % 2 == 0).map(_.toString)</code></pre>
+<p>Like all other streaming components pipes can be named, which is often used in <em>swave</em> itself to &ldquo;package&rdquo; several transformations for nicer <a href="rendering.html">rendering</a>. For example, here is the essence of <em>swave&rsquo;s</em> <a href="../transformations/reference/slice.html">slice</a> transformation:</p>
+<pre><code class="scala">def slice[A](startIndex: Long, length: Long): Pipe[A, A] =
+  Pipe[A] drop startIndex take length named &quot;slice&quot;</code></pre>
+<h2><a href="#using-pipes" name="using-pipes" class="anchor"><span class="anchor-link"></span></a>Using Pipes</h2>
+<p>Pipes can be attached to <a href="../spouts.html">Spouts</a> with the <code>via</code> operator: </p>
+<pre><code class="scala">def someInts: Spout[Int] =
+  Spout.ints(from = 0).via(slice(10, 42))
+
+someInts.drainToList(limit = 100)
+  .value.get.get shouldEqual (10 to 51)</code></pre>
+<p>As you can probably guess the result of appending a <code>Pipe[A, B]</code> to a <code>Spout[A]</code> is a <code>Spout[B]</code>:</p><p class="centered"><img src="../../assets/img/spout-with-pipe.svg" alt="Pipe appended to Spout" /></p>
+<p>Pipes can also be prepended to <a href="../drains.html">Drains</a> with the <code>to</code> operator: </p>
+<pre><code class="scala">def intDrain: Drain[Int, Future[String]] =
+  Pipe[Int].map(_ * 2).to(Drain.mkString(limit = 100, sep = &quot;, &quot;))
+
+Spout.ints(from = 0)
+  .take(5)
+  .drainTo(intDrain)
+  .value.get.get shouldEqual &quot;0, 2, 4, 6, 8&quot;</code></pre>
+<p>The result of prepending a <code>Pipe[A, B]</code> to a <code>Drain[B]</code> is a <code>Drain[A]</code>:</p><p class="centered"><img src="../../assets/img/pipe-with-drain.svg" alt="Pipe prepended to Drain" /></p>
+<p>And, similarly to functions, pipes can be combined with other pipes to form larger compound ones:</p>
+<pre><code class="scala">def shareOfZeroFigures: Pipe[Int, Double] =
+  Pipe[Int]
+    .map(_.toString)
+    .map { s =&gt;
+      s.foldLeft(0) {
+        case (zeroes, &#39;0&#39;) =&gt; zeroes + 1
+        case (zeroes, _) =&gt; zeroes
+      } / s.length.toDouble
+    }
+
+def stringify: Pipe[Double, String] =
+  Pipe[Double].map(&quot;%.2f&quot; format _)
+
+def compound: Pipe[Int, String] =
+  shareOfZeroFigures via stringify
+
+Spout.ints(from = 98)
+  .take(5)
+  .via(compound)
+  .drainToMkString(limit = 100, sep = &quot;, &quot;)
+  .value.get.get shouldEqual &quot;0.00, 0.00, 0.67, 0.33, 0.33&quot;</code></pre>
+<p>The result of combining a <code>Pipe[A, B]</code> and a <code>Pipe[B, C]</code> is a <code>Pipe[A, C]</code>:</p><p class="centered"><img src="../../assets/img/pipe-with-pipe.svg" alt="Pipe combined with another Pipe" /></p>
                 <div class="nav-next">
                     <p><strong>Next:</strong> <a href="../../usage/further/modules.html">Modules</a></p>
                 </div>
