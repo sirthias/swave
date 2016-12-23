@@ -171,7 +171,7 @@
             <div id="main-content">
                 <!-- start: page -->
 <h1><a href="#pipes" name="pipes" class="anchor"><span class="anchor-link"></span></a>Pipes</h1>
-<p>A <a href="http://swave.io/api/core/latest/swave/core/Pipe.html">Pipe</a> is a <a href="../basics.html#streams-as-graphs">stream graph component</a> with one input port and one output port, i.e. it consumes elements of type <code>A</code> and produces elements of type <code>B</code>.</p>
+<p>A <a href="http://swave.io/api/core/latest/#swave.core.Pipe">Pipe</a> is a <a href="../basics.html#streams-as-graphs">stream graph component</a> with one input port and one output port, i.e. it consumes elements of type <code>A</code> and produces elements of type <code>B</code>.</p><p class="centered"><img src="../../assets/img/pipe.svg" alt="A Pipe" /></p>
 <p>As with all other stream graph components a pipe can internally consist of just one single stage or a whole graph of stages that together form a structure that, to the outside, looks like a simple stage.</p>
 <h2><a href="#creating-pipes" name="creating-pipes" class="anchor"><span class="anchor-link"></span></a>Creating Pipes</h2>
 <p>Most of the time you&rsquo;ll create pipes by appending transformations to a freshly created &ldquo;identity Pipe&rdquo;, e.g. like this:</p>
@@ -187,7 +187,7 @@
 
 someInts.drainToList(limit = 100)
   .value.get.get shouldEqual (10 to 51)</code></pre>
-<p>As you can probably guess the result of appending a <code>Pipe[A, B]</code> to a <code>Spout[A]</code> is a <code>Spout[B]</code>:</p>
+<p>As you can probably guess the result of appending a <code>Pipe[A, B]</code> to a <code>Spout[A]</code> is a <code>Spout[B]</code>:</p><p class="centered"><img src="../../assets/img/spout-with-pipe.svg" alt="Pipe appended to Spout" /></p>
 <p>Pipes can also be prepended to <a href="../drains.html">Drains</a> with the <code>to</code> operator: </p>
 <pre><code class="scala">def intDrain: Drain[Int, Future[String]] =
   Pipe[Int].map(_ * 2).to(Drain.mkString(limit = 100, sep = &quot;, &quot;))
@@ -196,7 +196,7 @@ Spout.ints(from = 0)
   .take(5)
   .drainTo(intDrain)
   .value.get.get shouldEqual &quot;0, 2, 4, 6, 8&quot;</code></pre>
-<p>The result of prepending a <code>Pipe[A, B]</code> to a <code>Drain[B]</code> is a <code>Drain[A]</code>:</p>
+<p>The result of prepending a <code>Pipe[A, B]</code> to a <code>Drain[B]</code> is a <code>Drain[A]</code>:</p><p class="centered"><img src="../../assets/img/pipe-with-drain.svg" alt="Pipe prepended to Drain" /></p>
 <p>And, similarly to functions, pipes can be combined with other pipes to form larger compound ones:</p>
 <pre><code class="scala">def shareOfZeroFigures: Pipe[Int, Double] =
   Pipe[Int]
@@ -219,7 +219,7 @@ Spout.ints(from = 98)
   .via(compound)
   .drainToMkString(limit = 100, sep = &quot;, &quot;)
   .value.get.get shouldEqual &quot;0.00, 0.00, 0.67, 0.33, 0.33&quot;</code></pre>
-<p>The result of combining a <code>Pipe[A, B]</code> and a <code>Pipe[B, C]</code> is a <code>Pipe[A, C]</code>:</p>
+<p>The result of combining a <code>Pipe[A, B]</code> and a <code>Pipe[B, C]</code> is a <code>Pipe[A, C]</code>:</p><p class="centered"><img src="../../assets/img/pipe-with-pipe.svg" alt="Pipe combined with another Pipe" /></p>
                 <div class="nav-next">
                     <p><strong>Next:</strong> <a href="../../usage/further/modules.html">Modules</a></p>
                 </div>

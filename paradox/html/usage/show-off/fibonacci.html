@@ -214,7 +214,7 @@ val result: Future[List[Int]] =
     .drainToList(limit = 100)
 
 result.value.get.get shouldEqual List(0, 1, 1, 2, 3, 5, 8, 13)</code></pre>
-<p>The stream graph defined by this code can be visualized like this:</p>
+<p>The stream graph defined by this code can be visualized like this:</p><p class="centered"><img src="../../assets/img/fibobacci-graph.svg" alt="Fibonacci Example Stream Graph" /></p>
 <h2><a href="#high-level-mechanics" name="high-level-mechanics" class="anchor"><span class="anchor-link"></span></a>High-Level Mechanics</h2>
 <p>From a high-level perspective this stream setup is built around a graph cycle that only contains two semantically significant logic stages:</p>
 <ol>

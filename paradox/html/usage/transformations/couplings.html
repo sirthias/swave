@@ -171,7 +171,7 @@
             <div id="main-content">
                 <!-- start: page -->
 <h1><a href="#couplings" name="couplings" class="anchor"><span class="anchor-link"></span></a>Couplings</h1>
-<p><a href="http://swave.io/api/core/latest/swave/core/Coupling.html">Couplings</a> are <a href="../basics.html#streams-as-graphs">stream graph components</a> with one input, one output and no internal transformation logic. They are typically used to manually connect two ports of a stream graph that cannot be otherwise connected via the streaming DSL, e.g. for creating cycles.</p>
+<p><a href="http://swave.io/api/core/latest/#swave.core.Coupling">Couplings</a> are <a href="../basics.html#streams-as-graphs">stream graph components</a> with one input, one output and no internal transformation logic. They are typically used to manually connect two ports of a stream graph that cannot be otherwise connected via the streaming DSL, e.g. for creating cycles.</p><p class="centered"><img src="../../assets/img/coupling.svg" alt="A Coupling" /></p>
 <p>A <code>Coupling</code> is essentially nothing but a <a href="../drains.html">Drain</a> and <a href="../spouts.html">Spout</a> of the same element type that are directly connected to each other internally. You can use the two sides of the <code>Coupling</code> independently at arbitrary points in a stream graph definition to create connections where you need them.</p>
 <p>Here is an example of a stream that contains a cycle and therefore requires the use of a <code>Coupling</code>:</p>
 <pre><code class="scala">import scala.concurrent.Future
