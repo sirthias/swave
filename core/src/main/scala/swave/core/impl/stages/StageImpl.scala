@@ -142,7 +142,7 @@ private[swave] abstract class StageImpl extends PortImpl {
   }
 
   protected final def interceptRequest(n: Int, from: Outport): Unit =
-    storeInterception(Statics._1L, if (n <= 16) Statics.INTS(n - 1) else new java.lang.Integer(n), from)
+    storeInterception(Statics._1L, if (n <= 32) Statics.INTS(n - 1) else new java.lang.Integer(n), from)
 
   /////////////////////////////////////// CANCEL ///////////////////////////////////////
 
@@ -462,11 +462,11 @@ private[swave] abstract class StageImpl extends PortImpl {
   @tailrec private def handleInterceptions(): Unit =
     if ((_buffer ne null) && _buffer.nonEmpty) {
       def read() = _buffer.unsafeRead()
-      val signal = read().asInstanceOf[java.lang.Integer].intValue()
+      def readInt() = read().asInstanceOf[java.lang.Integer].intValue()
       def from() = if (fullInterceptions) read().asInstanceOf[StageImpl] else null
-      signal match {
+      readInt() match {
         case 0 ⇒ _subscribe(from())
-        case 1 ⇒ _request(read().asInstanceOf[java.lang.Integer].intValue(), from())
+        case 1 ⇒ _request(readInt(), from())
         case 2 ⇒ _cancel(from())
         case 3 ⇒ _onSubscribe(from())
         case 4 ⇒ _onNext(read(), from())

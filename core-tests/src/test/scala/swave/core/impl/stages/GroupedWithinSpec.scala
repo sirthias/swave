@@ -42,7 +42,7 @@ final class GroupedWithinSpec extends FreeSpec with StreamEnvShutdown {
 
       spout.expectNoSignal(100.millis)
       demand3.times { spout.rawSendNext(input.next()) }
-      drain.expectNext(Seq(33)) // the kicker
+      drain.expectNext(Seq(env.settings.maxBatchSize * 2 + 1)) // the kicker
       drain.expectNext(((demand1 + demand2 + 2) to (demand1 + demand2 + demand3)).toVector)
 
       spout.sendComplete()
