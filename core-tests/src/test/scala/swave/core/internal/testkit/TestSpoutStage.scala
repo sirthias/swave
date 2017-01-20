@@ -48,7 +48,7 @@ private[testkit] final class TestSpoutStage(val id: Int,
     xSeal = () ⇒ {
       ctx.trace("Received XSEAL in 'ready'")
       ctx.trace("⇢ XSEAL")
-      region.runContext.impl.suppressSyncUnterminatedError()
+      region.runContext.impl.enablePartialRun()
       out.xSeal(region)
       if (elems.hasNext) {
         fixtureState = TestFixture.State.Running

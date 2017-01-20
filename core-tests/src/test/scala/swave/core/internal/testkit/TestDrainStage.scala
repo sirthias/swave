@@ -53,7 +53,7 @@ private[testkit] final class TestDrainStage(val id: Int,
       testCtx.trace("⇠ XSEAL")
       region.impl.registerForXStart(this)
       region.runContext.impl.registerForSyncPostRunEvent(this)
-      region.runContext.impl.suppressSyncUnterminatedError()
+      region.runContext.impl.enablePartialRun()
       in.xSeal(region)
       awaitingXStart(in)
     })

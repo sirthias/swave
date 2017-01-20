@@ -8,6 +8,7 @@ package swave.core.internal.testkit
 
 import scala.util.control.{NoStackTrace, NonFatal}
 import org.scalacheck.{Gen, Prop}
+import org.scalacheck.rng.Seed
 import shapeless.ops.function.FnToProduct
 import shapeless.ops.hlist.{Reverse, Tupler}
 import shapeless._
@@ -180,37 +181,33 @@ object TestGeneration {
     def fixture[T](f: FixtureDef ⇒ Gen[T]) = finish.fixture(f)
 
     private def finish = {
-      val (effectiveSeed, random) =
-        XorShiftRandom.parseSeed(seed) match {
-          case Some(x) => seed -> XorShiftRandom(x)
-          case None => { val r = XorShiftRandom(); XorShiftRandom.formatSeed(r.seed) -> r}
-        }
       val contexts =
         for {
+          genSeed <- Gen.seeded(s => Gen.const(s))
           asyncRate       ← asyncRates
           asyncScheduling ← asyncSchedulings
         } yield {
           val runNr = runCounter.next()
-          new TestContext(runNr, asyncRate, asyncScheduling, random, tracing && runNr == 0)
+          new TestContext(runNr, asyncRate, asyncScheduling, genSeed, tracing && runNr == 0)
         }
-      new DefImpl[HNil](effectiveSeed, random, contexts, Nil)
+      new DefImpl[HNil](seed, contexts, Nil)
     }
   }
 
-  private class DefImpl[L <: HList](seed: String, random: XorShiftRandom, contexts: Gen[TestContext],
+  private class DefImpl[L <: HList](seed: String, contexts: Gen[TestContext],
                                     creatorsList: List[FixtureDef ⇒ Gen[Any]])
     extends MainDef[L] {
 
     def param[T](implicit gen: Gen[T]): MainDef[T :: L] = fixture(_ ⇒ gen)
 
     def fixture[T](f: FixtureDef ⇒ Gen[T]): MainDef[T :: L] =
-      new DefImpl(seed, random, contexts, f :: creatorsList)
+      new DefImpl(seed, contexts, f :: creatorsList)
 
     def gen[R <: HList, T](implicit rev: Reverse.Aux[L, R], tupler: Tupler.Aux[R, T]): Gen[T] =
       revGen map { case (_, hlist) ⇒ tupler(hlist) }
 
     def prop[R <: HList, F](implicit rev: Reverse.Aux[L, R], fn: FnToProduct.Aux[F, R ⇒ Unit]) =
-      new PropperImpl[R, F](seed, random, revGen, fn.apply)
+      new PropperImpl[R, F](seed, revGen, fn.apply)
 
     private def revGen[R <: HList](implicit rev: Reverse.Aux[L, R]): Gen[(TestContext, R)] =
       for {
@@ -247,13 +244,12 @@ object TestGeneration {
       }
   }
 
-  private class PropperImpl[L <: HList, F](seed: String, random: XorShiftRandom, gen: Gen[(TestContext, L)],
-                                           convertF: F ⇒ L ⇒ Unit)
+  private class PropperImpl[L <: HList, F](seed: String, gen: Gen[(TestContext, L)], convertF: F ⇒ L ⇒ Unit)
     extends Propper[F] {
 
     def from(f: F): Prop = Prop { params ⇒
       val prop = Prop.forAll(gen)(propFun(convertF(f)))
-      prop(params withInitialSeed random.nextLong())
+      prop(if (seed.nonEmpty) params withInitialSeed Seed.fromBase64(seed) else params)
     }
 
     private def propFun(f: L ⇒ Unit): ((TestContext, L)) ⇒ Prop = {
@@ -292,8 +288,8 @@ object TestGeneration {
               })
               .distinct
             println(s"""|Error Context
-                        |  randomSeed     : $seed
                         |  runNr          : ${ctx.runNr}
+                        |  randomSeed     : ${ctx.genSeed.toBase64}
                         |  asyncScheduling: ${ctx.asyncScheduling}
                         |  asyncRate      : ${ctx.asyncRate}
                         |  params         : [${params.mkString(", ")}]

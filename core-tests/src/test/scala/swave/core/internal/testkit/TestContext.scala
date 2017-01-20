@@ -8,6 +8,7 @@ package swave.core.internal.testkit
 
 import scala.annotation.tailrec
 import scala.collection.mutable.ArrayBuffer
+import org.scalacheck.rng.Seed
 import swave.core.macros._
 import swave.core.impl.util.ResizableRingBuffer
 import swave.core.util._
@@ -15,12 +16,13 @@ import swave.core.util._
 private[testkit] final class TestContext(val runNr: Int,
                                          val asyncRate: Double,
                                          val asyncScheduling: TestGeneration.AsyncScheduling,
-                                         random: XorShiftRandom,
+                                         val genSeed: Seed,
                                          tracing: Boolean) {
 
   import TestContext._
 
   private[this] val schedulings = ArrayBuffer.empty[ResizableRingBuffer[Task]]
+  private[this] val random = XorShiftRandom(genSeed.long._1)
 
   def lastId = schedulings.size - 1
 
