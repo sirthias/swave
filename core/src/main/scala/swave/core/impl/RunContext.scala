@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.{AtomicInteger, AtomicReference}
 import scala.annotation.tailrec
 import scala.concurrent.{Future, Promise}
 import scala.concurrent.duration.FiniteDuration
-import swave.core.impl.util.AbstractInportList
+import swave.core.impl.util.{AbstractInportList, ResizableRingBuffer}
 import swave.core.impl.stages.StageImpl
 import swave.core.macros._
 import swave.core.util._
@@ -31,7 +31,7 @@ private[swave] final class RunContext private (val env: StreamEnv) { self =>
     def registerForSealing(stage: StageImpl): Unit   = `n/a`
     def seal(): Unit                                 = `n/a`
     def markAsync(): Unit                            = `n/a`
-    def suppressSyncUnterminatedError(): Unit        = `n/a`
+    def enablePartialRun(): Unit        = `n/a`
     def becomeSubContextOf(parent: RunContext): Unit = `n/a`
     def start(): Unit                                = `n/a`
 
@@ -39,9 +39,17 @@ private[swave] final class RunContext private (val env: StreamEnv) { self =>
     def registerForSyncPostRunEvent(stage: StageImpl): Unit = `n/a`
 
     // SyncRunning
-    def enqueueSyncRequest(stage: StageImpl, n: Long)(implicit from: Outport): Unit = `n/a`
+    def enqueueSyncSubscribeInterception(stage: StageImpl, from: Outport): Unit = `n/a`
+    def enqueueSyncRequestInterception(stage: StageImpl, n: Int, from: Outport): Unit = `n/a`
+    def enqueueSyncCancelInterception(target: StageImpl, from: Outport): Unit = `n/a`
+    def enqueueSyncOnSubscribeInterception(stage: StageImpl, from: Inport): Unit = `n/a`
+    def enqueueSyncOnNextInterception(target: StageImpl, elem: AnyRef, from: Inport): Unit = `n/a`
+    def enqueueSyncOnCompleteInterception(target: StageImpl, from: Inport): Unit = `n/a`
+    def enqueueSyncOnErrorInterception(target: StageImpl, e: Throwable, from: Inport): Unit = `n/a`
+    def enqueueSyncXEventInterception(target: StageImpl, ev: AnyRef): Unit = `n/a`
 
     // running only
+    def runInterceptionLoop(): Unit                                                         = `n/a`
     def regionsActiveCount: Int                                                             = `n/a`
     def scheduleSyncSubStreamStartCleanup(stage: StageImpl, d: FiniteDuration): Cancellable = `n/a`
     def registerRegionStopped(): Unit                                                       = `n/a`
@@ -59,7 +67,7 @@ private[swave] final class RunContext private (val env: StreamEnv) { self =>
     private[this] var remainingToBeSealed                     = List.empty[StageImpl]
     private[this] var parent: RunContext                      = _
     private[this] var syncNeedPostRun                         = List.empty[StageImpl]
-    private[this] var _suppressSyncUnterminatedError: Boolean = _
+    private[this] var partialRunEnabled: Boolean = _
     private[this] var _isAsync: Boolean                       = _
     var regions                                               = List.empty[Region]
 
@@ -77,7 +85,7 @@ private[swave] final class RunContext private (val env: StreamEnv) { self =>
       }
     override def markAsync(): Unit =
       if ((parent ne null) && parent.impl.isSync) failAsyncSubInSyncParent() else _isAsync = true
-    override def suppressSyncUnterminatedError(): Unit = _suppressSyncUnterminatedError = true
+    override def enablePartialRun(): Unit = partialRunEnabled = true
     override def becomeSubContextOf(parent: RunContext): Unit =
       this.parent match {
         case null =>
@@ -102,10 +110,11 @@ private[swave] final class RunContext private (val env: StreamEnv) { self =>
         val imp = new SyncMainRunning(regions, syncNeedPostRun)
         _impl = imp
         doStart()
+        imp.doRunInterceptionLoop()
         imp.postRun()
-        if (!_suppressSyncUnterminatedError && !imp.isTerminated) {
+        if (!partialRunEnabled && !imp.isTerminated) {
           throw new UnterminatedSynchronousStreamException
-        }
+        } else imp.enableExternalRun()
       } else {
         if (syncNeedPostRun ne Nil) syncNeedPostRun.foreach(parent.impl.registerForSyncPostRunEvent)
         _impl = new SyncSubRunning(parent, regions)
@@ -147,14 +156,66 @@ private[swave] final class RunContext private (val env: StreamEnv) { self =>
       if (_regionsActiveCount == 0 && (subContexts eq Nil)) signalTermination()
   }
 
-    private[swave] final class SyncMainRunning(regs: List[Region], npr: List[StageImpl]) extends SyncRunning(regs) {
+  private[swave] final class SyncMainRunning(regs: List[Region], npr: List[StageImpl]) extends SyncRunning(regs) {
     private[this] var needPostRun: List[StageImpl]         = npr
-    private[this] var queuedRequestList: QueuedRequestList = _
     private[this] var cleanUp: List[Runnable]              = Nil
     private[this] var _termination: AnyRef                 = _ // null: unterminated, self: terminated, Promise[_]: promise
+    private[this] var externalRunEnabled: Boolean = _
+    private[this] val signalBuffer: ResizableRingBuffer[AnyRef] = {
+      val initialSize = env.settings.maxBatchSize
+      new ResizableRingBuffer(initialSize, initialSize << 4)
+    }
+    def enableExternalRun(): Unit = externalRunEnabled = true
     override def registerForSyncPostRunEvent(stage: StageImpl): Unit = needPostRun ::= stage
-    override def enqueueSyncRequest(stage: StageImpl, n: Long)(implicit from: Outport): Unit =
-      queuedRequestList = new QueuedRequestList(stage, queuedRequestList, n, from)
+    override def enqueueSyncSubscribeInterception(target: StageImpl, from: Outport): Unit =
+      if (from eq null) store(target, Statics._0) else store(target, Statics._1, from)
+    override def enqueueSyncRequestInterception(target: StageImpl, n: Int, from: Outport): Unit = {
+      val i = if (n <= 32) Statics.INTS(n) else new Integer(n)
+      if (from eq null) store(target, Statics._2, i) else store(target, Statics._3, i, from)
+    }
+    override def enqueueSyncCancelInterception(target: StageImpl, from: Outport): Unit =
+      if (from eq null) store(target, Statics._4) else store(target, Statics._5, from)
+    override def enqueueSyncOnSubscribeInterception(target: StageImpl, from: Inport): Unit =
+      if (from eq null) store(target, Statics._6) else store(target, Statics._7, from)
+    override def enqueueSyncOnNextInterception(target: StageImpl, elem: AnyRef, from: Inport): Unit =
+      if (from eq null) store(target, Statics._8, elem) else store(target, Statics._9, elem, from)
+    override def enqueueSyncOnCompleteInterception(target: StageImpl, from: Inport): Unit =
+      if (from eq null) store(target, Statics._10) else store(target, Statics._11, from)
+    override def enqueueSyncOnErrorInterception(target: StageImpl, e: Throwable, from: Inport): Unit =
+      if (from eq null) store(target, Statics._12, e) else store(target, Statics._13, e, from)
+    override def enqueueSyncXEventInterception(target: StageImpl, ev: AnyRef): Unit =
+      store(target, Statics._14, ev)
+
+    private def store(target: StageImpl, signal: java.lang.Integer): Unit = {
+      //logSignal(target, signal)
+      if (!signalBuffer.write(target, signal)) throwBufOverflow()
+    }
+    private def store(target: StageImpl, signal: java.lang.Integer, arg: AnyRef): Unit = {
+      //logSignal(target, signal, arg)
+      if (!signalBuffer.write(target, signal, arg)) throwBufOverflow()
+    }
+    private def store(target: StageImpl, signal: java.lang.Integer, arg0: AnyRef, arg1: AnyRef): Unit = {
+      //logSignal(target, signal, arg0, arg1)
+      if (!signalBuffer.write(target, signal, arg0, arg1)) throwBufOverflow()
+    }
+
+    private def throwBufOverflow() = throw new IllegalStateException(s"Interception buffer overflow")
+
+    private def logSignal(target: StageImpl, s: java.lang.Integer, args: AnyRef*): Unit = {
+      RunContext.tempCount += 1
+      val name = s.intValue() match {
+        case 0 | 1 ⇒ "SUBSCRIBE"
+        case 2 | 3 ⇒ "REQUEST"
+        case 4 | 5 ⇒ "CANCEL"
+        case 6 | 7 ⇒ "ONSUBSCRIBE"
+        case 8 | 9 ⇒ "ONNEXT"
+        case 10 | 11 ⇒ "ONCOMPLETE"
+        case 12 | 13 ⇒ "ONERROR"
+        case 14 ⇒ "XEVENT"
+      }
+      println(s"---${RunContext.tempCount}: $name(${args.mkString(", ")}) for $target")
+    }
+
     def isTerminated: Boolean =
       _termination match {
         case null          => false
@@ -185,23 +246,38 @@ private[swave] final class RunContext private (val env: StreamEnv) { self =>
       cleanUp ::= timer
       timer
     }
-    def postRun(): Unit = {
-      @tailrec def dispatchQueuedRequests(): Unit =
-        if (queuedRequestList ne null) {
-          val queued = queuedRequestList
-          queuedRequestList = null
 
-          @tailrec def rec(remaining: QueuedRequestList): Unit =
-            if (remaining ne null) {
-              val stage = remaining.in.stageImpl
-              stage.request(remaining.n)(remaining.from)
-              rec(remaining.tail)
-            }
-          rec(queued)
-          dispatchQueuedRequests()
+    override def runInterceptionLoop(): Unit =
+      if (externalRunEnabled) doRunInterceptionLoop()
+
+    @tailrec def doRunInterceptionLoop(): Unit =
+      if (signalBuffer.nonEmpty) {
+        def read() = signalBuffer.unsafeRead()
+        def readInt() = read().asInstanceOf[java.lang.Integer].intValue()
+        def readStage() = read().asInstanceOf[StageImpl]
+        val target = readStage()
+        readInt() match {
+          case 0 ⇒ target._subscribe(null)
+          case 1 ⇒ target._subscribe(readStage())
+          case 2 ⇒ target._request(readInt(), null)
+          case 3 ⇒ target._request(readInt(), readStage())
+          case 4 ⇒ target._cancel(null)
+          case 5 ⇒ target._cancel(readStage())
+          case 6 ⇒ target._onSubscribe(null)
+          case 7 ⇒ target._onSubscribe(readStage())
+          case 8 ⇒ target._onNext(read(), null)
+          case 9 ⇒ target._onNext(read(), readStage())
+          case 10 ⇒ target._onComplete(null)
+          case 11 ⇒ target._onComplete(readStage())
+          case 12 ⇒ target._onError(read().asInstanceOf[Throwable], null)
+          case 13 ⇒ target._onError(read().asInstanceOf[Throwable], readStage())
+          case 14 ⇒ target._xEvent(read())
         }
+        doRunInterceptionLoop()
+      }
 
-      @tailrec def dispatchPostRunSignal(): Unit =
+    def postRun(): Unit = {
+      @tailrec def dispatchPostRunSignals(): Unit =
         if (needPostRun ne Nil) {
           val stages = needPostRun
           needPostRun = Nil // allow for re-registration in signal handler
@@ -209,11 +285,11 @@ private[swave] final class RunContext private (val env: StreamEnv) { self =>
           @tailrec def rec(remaining: List[StageImpl]): Unit =
             if (remaining ne Nil) {
               remaining.head.xEvent(PostRun)
-              dispatchQueuedRequests()
+              doRunInterceptionLoop()
               rec(remaining.tail)
             }
           rec(stages)
-          dispatchPostRunSignal()
+          dispatchPostRunSignals()
         }
 
       @tailrec def runCleanups(remaining: List[Runnable]): Unit =
@@ -222,19 +298,34 @@ private[swave] final class RunContext private (val env: StreamEnv) { self =>
           runCleanups(remaining.tail)
         }
 
-      dispatchQueuedRequests()
-      dispatchPostRunSignal()
+      dispatchPostRunSignals()
       runCleanups(cleanUp)
     }
     override def toString: String = s"SyncMainRunning(regions:${regions.size})"
   }
 
   private[swave] final class SyncSubRunning(parent: RunContext, regs: List[Region]) extends SyncRunning(regs) {
+    override def runInterceptionLoop(): Unit = parent.impl.runInterceptionLoop()
     override def termination: Future[Unit] = parent.impl.termination
     override def registerForSyncPostRunEvent(stage: StageImpl): Unit =
       parent.impl.registerForSyncPostRunEvent(stage)
-    override def enqueueSyncRequest(stage: StageImpl, n: Long)(implicit from: Outport): Unit =
-      parent.impl.enqueueSyncRequest(stage, n)
+    override def enqueueSyncSubscribeInterception(target: StageImpl, from: Outport): Unit =
+      parent.impl.enqueueSyncSubscribeInterception(target, from)
+    override def enqueueSyncRequestInterception(stage: StageImpl, n: Int, from: Outport): Unit =
+      parent.impl.enqueueSyncRequestInterception(stage, n, from)
+    override def enqueueSyncCancelInterception(target: StageImpl, from: Outport): Unit =
+      parent.impl.enqueueSyncCancelInterception(target, from)
+    override def enqueueSyncOnSubscribeInterception(target: StageImpl, from: Inport): Unit =
+      parent.impl.enqueueSyncOnSubscribeInterception(target, from)
+    override def enqueueSyncOnNextInterception(target: StageImpl, elem: AnyRef, from: Inport): Unit =
+      parent.impl.enqueueSyncOnNextInterception(target, elem, from)
+    override def enqueueSyncOnCompleteInterception(target: StageImpl, from: Inport): Unit =
+      parent.impl.enqueueSyncOnCompleteInterception(target, from)
+    override def enqueueSyncOnErrorInterception(target: StageImpl, e: Throwable, from: Inport): Unit =
+      parent.impl.enqueueSyncOnErrorInterception(target, e, from)
+    override def enqueueSyncXEventInterception(target: StageImpl, ev: AnyRef): Unit =
+      parent.impl.enqueueSyncXEventInterception(target, ev)
+
     override def scheduleSyncSubStreamStartCleanup(stage: StageImpl, d: FiniteDuration): Cancellable =
       parent.impl.scheduleSyncSubStreamStartCleanup(stage, d)
     override def signalTermination(): Unit =
@@ -263,6 +354,8 @@ private[swave] final class RunContext private (val env: StreamEnv) { self =>
     }
     private def signalTerminationIfNecessary(activeCount: Int, subContexts: List[RunContext]): Unit =
       if (activeCount == 0 && (subContexts eq Nil)) signalTermination()
+
+    final override def runInterceptionLoop(): Unit = ()
   }
 
   private[swave] final class AsyncMainRunning(regs: List[Region]) extends AsyncRunning(regs) {
@@ -285,6 +378,8 @@ private[swave] final class RunContext private (val env: StreamEnv) { self =>
 }
 
 private[swave] object RunContext {
+
+  var tempCount = 0
 
   case object PostRun
   case object SubStreamStartTimeout

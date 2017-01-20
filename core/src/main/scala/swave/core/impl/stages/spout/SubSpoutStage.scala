@@ -18,42 +18,41 @@ private[core] class SubSpoutStage(val in: StageImpl) extends SpoutStage {
 
   def kind = Stage.Kind.Spout.Sub(in)
 
-  initialState(awaitingSubscribe(StreamTermination.None, null))
+  initialState(connecting(StreamTermination.None, null))
 
-  def awaitingSubscribe(term: StreamTermination, timer: Cancellable): State = state(
+  private var out: Outport = _
+
+  def connecting(term: StreamTermination, timer: Cancellable): State = state(
+    intercept = false,
+
     subscribe = from ⇒ {
-      _outputStages = from.stageImpl :: Nil
-      from.onSubscribe()
-      ready(from, term, timer)
+      if (out eq null) {
+        out = from
+        _outputStages = from.stageImpl :: Nil
+        from.onSubscribe()
+        stay()
+      } else throw illegalState("Double subscribe(" + from + ')')
     },
 
-    onComplete = _ => awaitingSubscribe(term transitionTo StreamTermination.Completed, timer),
-    onError = (e, _) => awaitingSubscribe(term transitionTo StreamTermination.Error(e), timer),
-
-    xEvent = {
-      case EnableSubStreamStartTimeout if timer eq null =>
-        awaitingSubscribe(term, in.region.impl.scheduleSubStreamStartTimeout(this))
-      case RunContext.SubStreamStartTimeout => stopCancel(in)
-    })
-
-  def ready(out: Outport, term: StreamTermination, timer: Cancellable): State = state(
     xSeal = () ⇒ {
-      region.impl.becomeSubRegionOf(in.region)
-      region.impl.registerForXStart(this)
-      out.xSeal(region)
-      awaitingXStart(out, term, timer)
+      if (out ne null) {
+        region.impl.becomeSubRegionOf(in.region)
+        region.impl.registerForXStart(this)
+        out.xSeal(region)
+        awaitingXStart(term, timer)
+      } else throw illegalState("Unexpected xSeal(...) (unconnected downstream)")
     },
 
-    onComplete = _ => ready(out, term transitionTo StreamTermination.Completed, timer),
-    onError = (e, _) => ready(out, term transitionTo StreamTermination.Error(e), timer),
+    onComplete = _ => connecting(term transitionTo StreamTermination.Completed, timer),
+    onError = (e, _) => connecting(term transitionTo StreamTermination.Error(e), timer),
 
     xEvent = {
       case EnableSubStreamStartTimeout if timer eq null =>
-        ready(out, term, in.region.impl.scheduleSubStreamStartTimeout(this))
+        connecting(term, in.region.impl.scheduleSubStreamStartTimeout(this))
       case RunContext.SubStreamStartTimeout => stopCancel(in)
     })
 
-  def awaitingXStart(out: Outport, term: StreamTermination, timer: Cancellable): State = state(
+  def awaitingXStart(term: StreamTermination, timer: Cancellable): State = state(
     intercept = false,
 
     request = (n, _) => { interceptRequest(n, out); stay() },
@@ -62,22 +61,22 @@ private[core] class SubSpoutStage(val in: StageImpl) extends SpoutStage {
     xStart = () => {
       if (timer ne null) timer.cancel()
       term match {
-        case StreamTermination.None => running(out)
+        case StreamTermination.None => running()
         case StreamTermination.Error(e) => stopError(e, out)
         case _ => stopComplete(out)
       }
     },
 
-    onComplete = _ => awaitingXStart(out, term transitionTo StreamTermination.Completed, timer),
-    onError = (e, _) => awaitingXStart(out, term transitionTo StreamTermination.Error(e), timer),
+    onComplete = _ => awaitingXStart(term transitionTo StreamTermination.Completed, timer),
+    onError = (e, _) => awaitingXStart(term transitionTo StreamTermination.Error(e), timer),
 
     xEvent = {
       case EnableSubStreamStartTimeout if timer eq null =>
-        awaitingXStart(out, term, in.region.impl.scheduleSubStreamStartTimeout(this))
+        awaitingXStart(term, in.region.impl.scheduleSubStreamStartTimeout(this))
       case RunContext.SubStreamStartTimeout => stopCancel(in)
     })
 
-  def running(out: Outport) = state(
+  def running() = state(
     intercept = false,
 
     request = requestF(in),

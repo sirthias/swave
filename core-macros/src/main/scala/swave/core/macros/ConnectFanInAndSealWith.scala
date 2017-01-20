@@ -16,33 +16,33 @@ private[macros] trait ConnectFanInAndSealWith { this: Util =>
     val block                     = replaceIdents(block0, out0 -> out)
 
     q"""
-      initialState(connecting(null, subs))
+      initialState(connecting(subs))
       subs.foreach(_.in.subscribe()) // TODO: avoid function allocation
 
-      def connecting(out: Outport, pendingSubs: InportList): State = state(
-        onSubscribe = from ⇒ {
-          val newPending = pendingSubs.remove_!(from)
-          if ((out ne null) && newPending.isEmpty) ready(out)
-          else connecting(out, newPending)
-        },
+      private var $out: Outport = _
 
-        subscribe = from ⇒ {
-          if (out eq null) {
-            _outputStages = from.stageImpl :: Nil
-            from.onSubscribe()
-            if (pendingSubs.isEmpty) ready(from)
-            else connecting(from, pendingSubs)
-          } else throw illegalState("Double subscribe(" + from + ')')
-        })
-
-      def ready(out: Outport) = state(
+      def connecting(pendingSubs: InportList): State = state(
         intercept = false,
 
+        onSubscribe = from ⇒ connecting(pendingSubs.remove_!(from)),
+
+        subscribe = from ⇒ {
+          if ($out eq null) {
+            $out = from
+            _outputStages = from.stageImpl :: Nil
+            from.onSubscribe()
+            stay()
+          } else throw illegalState("Double subscribe(" + from + ')')
+        },
+
         xSeal = () ⇒ {
-          out.xSeal(region)
-          subs.foreach(_.in.xSeal(region)) // TODO: avoid function allocation
-          val $out = out
-          $block
+          if ($out ne null) {
+            if (pendingSubs.isEmpty) {
+              $out.xSeal(region)
+              subs.foreach(_.in.xSeal(region)) // TODO: avoid function allocation
+              $block
+            } else throw illegalState("Unexpected xSeal(...) (unconnected upstream)")
+          } else throw illegalState("Unexpected xSeal(...) (unconnected downstream)")
         })
      """
   }

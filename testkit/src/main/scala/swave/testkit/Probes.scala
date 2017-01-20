@@ -46,7 +46,7 @@ trait Probes {
 
       connectOutAndSealWith { out ⇒
         region.impl.registerForXStart(this)
-        region.runContext.impl.suppressSyncUnterminatedError()
+        region.runContext.impl.enablePartialRun()
         awaitingXStart(out, immutable.Queue.empty)
       }
 
@@ -153,7 +153,7 @@ trait Probes {
 
       connectInAndSealWith { in ⇒
         region.impl.registerForXStart(this)
-        region.runContext.impl.suppressSyncUnterminatedError()
+        region.runContext.impl.enablePartialRun()
         awaitingXStart(in, immutable.Queue.empty)
       }
 
@@ -301,6 +301,7 @@ trait Probes {
 
     protected final def runOrEnqueue(signals: Signal*): this.type = {
       signals.foreach(stage.region.impl.enqueueXEvent(stage, _))
+      stage.region.runContext.impl.runInterceptionLoop()
       this
     }
 

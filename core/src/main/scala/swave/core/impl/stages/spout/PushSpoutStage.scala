@@ -24,6 +24,9 @@ private[core] final class PushSpoutStage(initialBufferSize: Int, maxBufferSize: 
 
   def kind = Stage.Kind.Spout.Push(initialBufferSize, maxBufferSize, notifyOnDequeued, notifyOnCancel)
 
+  def handleXEvent(ev: AnyRef): Unit =
+    if (isSealed) interceptXEvent(ev) else xEvent(ev)
+
   initialState(awaitingSubscribe(StreamTermination.None))
 
   def awaitingSubscribe(term: StreamTermination): State = state(
@@ -45,7 +48,7 @@ private[core] final class PushSpoutStage(initialBufferSize: Int, maxBufferSize: 
     intercept = false,
 
     xSeal = () ⇒ {
-      region.runContext.impl.suppressSyncUnterminatedError()
+      region.runContext.impl.enablePartialRun()
       out.xSeal(region)
       if (term != StreamTermination.None) {
         region.impl.registerForXStart(this)

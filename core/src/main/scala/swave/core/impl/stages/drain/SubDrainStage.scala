@@ -18,52 +18,47 @@ private[core] final class SubDrainStage(val out: StageImpl) extends DrainStage {
 
   def kind = Stage.Kind.Drain.Sub(out)
 
-  initialState(awaitingOnSubscribe(false, null))
+  private var in: Inport = _
 
-  def awaitingOnSubscribe(cancelled: Boolean, timer: Cancellable): State = state(
-    cancel = _ => awaitingOnSubscribe(cancelled = true, timer),
+  initialState(connecting(false, null))
+
+  def connecting(cancelled: Boolean, timer: Cancellable): State = state(
+    intercept = false,
+
+    cancel = _ => connecting(cancelled = true, timer),
 
     onSubscribe = from ⇒ {
+      in = from
       _inputStages = from.stageImpl :: Nil
-      assignTempRegion(out.region) // for the interception buffer initialization
-      xEvent(DoOnSubscribe) // schedule event for after the state transition
-      resetRegion() // otherwise we'd appear to be already sealed
-      ready(from, cancelled, timer)
+      out.onSubscribe()
+      stay()
     },
-
-    xEvent = {
-      case EnableSubStreamStartTimeout if timer eq null =>
-        awaitingOnSubscribe(cancelled, out.region.impl.scheduleSubStreamStartTimeout(this))
-      case RunContext.SubStreamStartTimeout => timeoutFail("subscribed")
-    })
-
-  def ready(in: Inport, cancelled: Boolean, timer: Cancellable): State = state(
-    cancel = _ => ready(in, cancelled = true, timer),
 
     xSeal = () ⇒ {
-      region.impl.becomeSubRegionOf(out.region)
-      region.impl.registerForXStart(this)
-      in.xSeal(region)
-      awaitingXStart(in, cancelled, timer)
+      if (in ne null) {
+        region.impl.becomeSubRegionOf(out.region)
+        region.impl.registerForXStart(this)
+        in.xSeal(region)
+        awaitingXStart(cancelled, timer)
+      } else throw illegalState("Unexpected xSeal(...) (unconnected upstream)")
     },
 
     xEvent = {
-      case DoOnSubscribe => { out.onSubscribe(); stay() }
       case EnableSubStreamStartTimeout if timer eq null =>
-        ready(in, cancelled, out.region.impl.scheduleSubStreamStartTimeout(this))
-      case RunContext.SubStreamStartTimeout => timeoutFail("sealed")
+        connecting(cancelled, out.region.impl.scheduleSubStreamStartTimeout(this))
+      case RunContext.SubStreamStartTimeout => timeoutFail(if (in eq null) "subscribed" else "sealed")
     })
 
-  def awaitingXStart(in: Inport, cancelled: Boolean, timer: Cancellable): State = state(
+  def awaitingXStart(cancelled: Boolean, timer: Cancellable): State = state(
     intercept = false,
 
     request = (n, _) => { interceptRequest(n, out); stay() },
-    cancel = _ => awaitingXStart(in, cancelled = true, timer),
+    cancel = _ => awaitingXStart(cancelled = true, timer),
 
     xStart = () => {
       if (timer ne null) timer.cancel()
       if (cancelled) stopCancel(in)
-      else running(in)
+      else running()
     },
 
     onNext = (elem, _) => { interceptOnNext(elem, out); stay() },
@@ -72,11 +67,11 @@ private[core] final class SubDrainStage(val out: StageImpl) extends DrainStage {
 
     xEvent = {
       case EnableSubStreamStartTimeout if timer eq null =>
-        awaitingXStart(in, cancelled, region.impl.scheduleSubStreamStartTimeout(this))
+        awaitingXStart(cancelled, region.impl.scheduleSubStreamStartTimeout(this))
       case RunContext.SubStreamStartTimeout => timeoutFail("started")
     })
 
-  def running(in: Inport) = state(
+  def running() = state(
     intercept = false,
 
     request = requestF(in),
@@ -99,5 +94,4 @@ private[core] final class SubDrainStage(val out: StageImpl) extends DrainStage {
 private[core] object SubDrainStage {
 
   case object EnableSubStreamStartTimeout
-  private case object DoOnSubscribe
 }

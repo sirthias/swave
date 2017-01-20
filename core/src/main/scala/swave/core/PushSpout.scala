@@ -71,7 +71,7 @@ final class PushSpout[+A] private (val initialBufferSize: Int,
     */
   def offer[B >: A](element: B): Boolean = {
     val wasAdded = stage.queue.offer(element.asInstanceOf[AnyRef])
-    if (wasAdded) stage.enqueueXEvent(PushSpoutStage.Signal.NewAvailable)
+    if (wasAdded) stage.handleXEvent(PushSpoutStage.Signal.NewAvailable)
     wasAdded
   }
 
@@ -87,7 +87,7 @@ final class PushSpout[+A] private (val initialBufferSize: Int,
       if (iter.hasNext && stage.queue.offer(iter.next().asInstanceOf[AnyRef])) {
         rec(count + 1)
       } else {
-        if (count > 0) stage.enqueueXEvent(PushSpoutStage.Signal.NewAvailable)
+        if (count > 0) stage.handleXEvent(PushSpoutStage.Signal.NewAvailable)
         count
       }
     rec(0)
@@ -96,12 +96,12 @@ final class PushSpout[+A] private (val initialBufferSize: Int,
   /**
     * Completes the stream with an `onComplete` signal.
     */
-  def complete(): Unit = stage.enqueueXEvent(PushSpoutStage.Signal.Complete)
+  def complete(): Unit = stage.handleXEvent(PushSpoutStage.Signal.Complete)
 
   /**
     * Completes the stream with an `onError` signal.
     */
-  def errorComplete(e: Throwable): Unit = stage.enqueueXEvent(PushSpoutStage.Signal.ErrorComplete(e))
+  def errorComplete(e: Throwable): Unit = stage.handleXEvent(PushSpoutStage.Signal.ErrorComplete(e))
 }
 
 object PushSpout {

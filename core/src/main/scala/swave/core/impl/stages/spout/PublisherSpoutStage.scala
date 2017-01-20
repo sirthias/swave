@@ -36,12 +36,12 @@ private[core] final class PublisherSpoutStage(publisher: Publisher[AnyRef]) exte
           }
           def onNext(elem: AnyRef) = {
             RSCompliance.verifyNonNull(elem, "Element", "2.13")
-            region.impl.enqueueOnNext(stage, elem)(stage)
+            region.impl.enqueueOnNext(stage, elem, stage)
           }
-          def onComplete() = region.impl.enqueueOnComplete(stage)(stage)
+          def onComplete() = region.impl.enqueueOnComplete(stage, stage)
           def onError(e: Throwable) = {
             RSCompliance.verifyNonNull(e, "Throwable", "2.13")
-            region.impl.enqueueOnError(stage, e)(stage)
+            region.impl.enqueueOnError(stage, e, stage)
           }
         }
       }

@@ -36,31 +36,23 @@ private[core] final class StreamRunner(_disp: Dispatcher, env: StreamEnv)
   protected def receive(msg: Message): Unit = {
     val target = msg.target
     (msg.id: @switch) match {
-      case 0 ⇒
-        val m = msg.asInstanceOf[Message.Subscribe]
-        target.subscribe()(m.from)
-      case 1 ⇒
-        val m = msg.asInstanceOf[Message.Request]
-        target.request(m.n)(m.from)
-      case 2 ⇒
-        val m = msg.asInstanceOf[Message.Cancel]
-        target.cancel()(m.from)
-      case 3 ⇒
-        val m = msg.asInstanceOf[Message.OnSubscribe]
-        target.onSubscribe()(m.from)
-      case 4 ⇒
-        val m = msg.asInstanceOf[Message.OnNext]
-        target.onNext(m.elem)(m.from)
-      case 5 ⇒
-        val m = msg.asInstanceOf[Message.OnComplete]
-        target.onComplete()(m.from)
-      case 6 ⇒
-        val m = msg.asInstanceOf[Message.OnError]
-        target.onError(m.error)(m.from)
-      case 7 ⇒
-        target.xStart()
-      case 8 ⇒
-        target.xEvent(msg.asInstanceOf[Message.XEvent].ev)
+      case 0 ⇒ target.subscribe()(msg.asInstanceOf[Message.Subscribe].from)
+      case 1 ⇒ target._subscribe(msg.asInstanceOf[Message.Subscribe].from)
+      case 2 ⇒ { val m = msg.asInstanceOf[Message.Request]; target.request(m.n)(m.from) }
+      case 3 ⇒ { val m = msg.asInstanceOf[Message.RequestInterception]; target._request(m.n, m.from) }
+      case 4 ⇒ target.cancel()(msg.asInstanceOf[Message.Cancel].from)
+      case 5 ⇒ target._cancel(msg.asInstanceOf[Message.Cancel].from)
+      case 6 ⇒ target.onSubscribe()(msg.asInstanceOf[Message.OnSubscribe].from)
+      case 7 ⇒ target._onSubscribe(msg.asInstanceOf[Message.OnSubscribe].from)
+      case 8 ⇒ { val m = msg.asInstanceOf[Message.OnNext]; target.onNext(m.elem)(m.from) }
+      case 9 ⇒ { val m = msg.asInstanceOf[Message.OnNext]; target._onNext(m.elem, m.from) }
+      case 10 ⇒ target.onComplete()(msg.asInstanceOf[Message.OnComplete].from)
+      case 11 ⇒ target._onComplete(msg.asInstanceOf[Message.OnComplete].from)
+      case 12 ⇒ { val m = msg.asInstanceOf[Message.OnError]; target.onError(m.error)(m.from) }
+      case 13 ⇒ { val m = msg.asInstanceOf[Message.OnError]; target._onError(m.error, m.from) }
+      case 14 => target.xEvent(msg.asInstanceOf[Message.XEvent].ev)
+      case 15 => target._xEvent(msg.asInstanceOf[Message.XEvent].ev)
+      case 16 ⇒ target.xStart()
     }
   }
 
@@ -91,19 +83,28 @@ private[impl] object StreamRunner {
 
   private[impl] sealed abstract class Message(val id: Int, val target: StageImpl)
   private[impl] object Message {
-    final class Subscribe(target: StageImpl, val from: Outport)                    extends Message(0, target)
-    final class Request(target: StageImpl, val n: Long, val from: Outport)         extends Message(1, target)
-    final class Cancel(target: StageImpl, val from: Outport)                       extends Message(2, target)
-    final class OnSubscribe(target: StageImpl, val from: Inport)                   extends Message(3, target)
-    final class OnNext(target: StageImpl, val elem: AnyRef, val from: Inport)      extends Message(4, target)
-    final class OnComplete(target: StageImpl, val from: Inport)                    extends Message(5, target)
-    final class OnError(target: StageImpl, val error: Throwable, val from: Inport) extends Message(6, target)
-    final class XStart(target: StageImpl)                                          extends Message(7, target)
-    final class XEvent(target: StageImpl, @volatile private[StreamRunner] var ev: AnyRef, runner: StreamRunner)
-        extends Message(8, target)
-        with Runnable {
+    private def id(i: Int, intercept: Boolean) = if (intercept) i + 1 else i
+
+    final class Subscribe(target: StageImpl, val from: Outport, intercept: Boolean = false)
+      extends Message(id(0, intercept), target)
+    final class Request(target: StageImpl, val n: Long, val from: Outport) extends Message(2, target)
+    final class RequestInterception(target: StageImpl, val n: Int, val from: Outport) extends Message(3, target)
+    final class Cancel(target: StageImpl, val from: Outport, intercept: Boolean = false)
+      extends Message(id(4, intercept), target)
+    final class OnSubscribe(target: StageImpl, val from: Inport, intercept: Boolean = false)
+      extends Message(id(6, intercept), target)
+    final class OnNext(target: StageImpl, val elem: AnyRef, val from: Inport, intercept: Boolean = false)
+      extends Message(id(8, intercept), target)
+    final class OnComplete(target: StageImpl, val from: Inport, intercept: Boolean = false)
+      extends Message(id(10, intercept), target)
+    final class OnError(target: StageImpl, val error: Throwable, val from: Inport, intercept: Boolean = false)
+      extends Message(id(12, intercept), target)
+    final class XEvent(target: StageImpl, @volatile private[StreamRunner] var ev: AnyRef, runner: StreamRunner,
+                       intercept: Boolean = false) extends Message(id(14, intercept), target)
+      with Runnable {
       def run(): Unit = runner.enqueue(this)
     }
+    final class XStart(target: StageImpl) extends Message(16, target)
   }
 
 }

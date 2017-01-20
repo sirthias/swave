@@ -24,7 +24,7 @@ final class RecoverSpec extends SyncPipeSpec {
 
   "RecoverWith" - {
 
-    "Xrecover when there is a matching handler" in {
+    "recover when there is a matching handler" in {
       Spout(1 to 4)
         .map { a ⇒ if (a == 3) throw TestError else a }
         .recoverWith(4) { case TestError ⇒ Spout(0, -1) }

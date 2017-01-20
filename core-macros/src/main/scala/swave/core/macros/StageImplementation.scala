@@ -408,7 +408,7 @@ private[swave] class StageImplementationMacro(val c: scala.reflect.macros.whiteb
             .map(sh => q"$res == ${sh.id}")
             .toList match {
             case Nil => q"()"
-            case x   => q"setIntercepting(${x.reduceLeft((a, b) => q"$a || $b")})"
+            case x   => q"if (${x.reduceLeft((a, b) => q"$a || $b")}) setInterceptionLevel(1)"
           }
         q"""final protected override def _xSeal(): State = {
               val $res = ${switch("xSeal", cases)}

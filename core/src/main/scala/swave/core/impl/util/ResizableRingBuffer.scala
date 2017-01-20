@@ -95,6 +95,21 @@ private[swave] final class ResizableRingBuffer[T](initialCap: Int, maxCap: Int) 
     } else grow() && write(v1, v2, v3)
 
   /**
+    * Tries to write the given values into the buffer thereby potentially growing the backing array.
+    * Returns `true` if the write was successful and false if the buffer is full and cannot grow anymore.
+    */
+  def write(v1: T, v2: T, v3: T, v4: T): Boolean =
+    if (count < currentCapacity - 3) { // if we have space left we can simply write and be done
+      val w = writeIx
+      UNSAFE.putObject(array, calcElementOffset((w & mask).toLong), v1)
+      UNSAFE.putObject(array, calcElementOffset(((w + 1) & mask).toLong), v2)
+      UNSAFE.putObject(array, calcElementOffset(((w + 2) & mask).toLong), v3)
+      UNSAFE.putObject(array, calcElementOffset(((w + 3) & mask).toLong), v4)
+      writeIx = w + 4
+      true
+    } else grow() && write(v1, v2, v3, v4)
+
+  /**
     * Reads the next value from the buffer.
     * Throws a NoSuchElementException if the buffer is empty.
     */

@@ -6,6 +6,7 @@
 
 package swave.core.text
 
+import scala.concurrent.duration._
 import scodec.bits.ByteVector
 import swave.compat.scodec._
 import swave.core._
@@ -71,7 +72,7 @@ class TextTransformationSpec extends SwaveSpec {
           .flatMap(_.take(random.nextLong(32)).drainToVector(32).map(ByteVector(_)))
           .utf8Decode
           .async()
-          .drainToMkString(1000).await() shouldEqual largeText
+          .drainToMkString(1000).await(3.seconds) shouldEqual largeText
       }
     }
 

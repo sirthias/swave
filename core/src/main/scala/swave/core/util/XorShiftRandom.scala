@@ -196,7 +196,12 @@ object XorShiftRandom {
   /**
     * Creates a new XorShiftRandom instance seeded with the given Long tuple.
     */
-  def apply(seed: (Long, Long)): XorShiftRandom = new XorShiftRandom(seed._1, seed._2)
+  def apply(seed: (Long, Long)): XorShiftRandom = apply(seed._1, seed._2)
+
+  /**
+    * Creates a new XorShiftRandom instance seeded with the Long.
+    */
+  def apply(shortSeed: Long): XorShiftRandom = apply(shortSeed, shortSeed)
 
   /**
     * Creates a new XorShiftRandom instance seeded either with a Long tuple or the current `System.nanoTime()`.

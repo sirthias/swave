@@ -17,13 +17,17 @@ private[macros] trait ConnectFanOutAndSealWith { this: Util =>
     val block                                = replaceIdents(block0, in0 -> in, outs0 -> outs)
 
     q"""
-      initialState(connecting(null, null))
+      initialState(connecting(null))
 
-      def connecting(in: Inport, outs: OutportCtx): State = state(
+      private var $outs: OutportCtx = _
+
+      def connecting(in: Inport): State = state(
+        intercept = false,
+
         onSubscribe = from ⇒ {
           if (in eq null) {
             _inputStages = from.stageImpl :: Nil
-            connecting(from, outs)
+            connecting(from)
           } else throw illegalState("Double onSubscribe(" + from + ')')
         },
 
@@ -33,24 +37,23 @@ private[macros] trait ConnectFanOutAndSealWith { this: Util =>
               if (current.out ne out) rec(out, current.tail)
               else throw illegalState("Double subscribe(" + out + ')')
             } else {
-              val newOuts = createOutportCtx(out, outs)
+              $outs = createOutportCtx(out, $outs)
               _outputStages = out.stageImpl :: _outputStages
               out.onSubscribe()
-              connecting(in, newOuts)
+              stay()
             }
-          rec(from, outs)
+          rec(from, $outs)
         },
 
         xSeal = () ⇒ {
           if (in ne null) {
-            if (outs.nonEmpty) {
+            if ($outs.nonEmpty) {
               _outputStages = _outputStages.reverse
               in.xSeal(region)
               @tailrec def rec(current: OutportCtx): Unit =
                 if (current ne null) { current.out.xSeal(region); rec(current.tail) }
-              rec(outs)
+              rec($outs)
               val $in = in
-              val $outs = outs
               $block
             } else throw illegalState("Unexpected xSeal(...) (unconnected downstream)")
           } else throw illegalState("Unexpected xSeal(...) (unconnected upstream)")

@@ -87,7 +87,7 @@ private[core] final class AsyncBoundaryStage(dispatcherId: String) extends InOut
     intercept = false,
 
     request = (n, _) ⇒ {
-      region.impl.enqueueRequest(inp, n.toLong)
+      region.impl.enqueueRequest(inp, n.toLong, this)
       stay()
     },
 
@@ -95,23 +95,23 @@ private[core] final class AsyncBoundaryStage(dispatcherId: String) extends InOut
       if (from ne this) {
         // if we are called directly from downstream we are not on the right thread
         // and must not mutate our state in any way
-        region.impl.enqueueCancel(this)
+        region.impl.enqueueCancel(this, this)
         stay()
       } else stopCancel(inp) // once we are on the right thread we can cancel and stop normally
     },
 
     onNext = (elem, _) ⇒ {
-      outp.region.impl.enqueueOnNext(outp, elem)
+      outp.region.impl.enqueueOnNext(outp, elem, this)
       stay()
     },
 
     onComplete = _ => {
-      outp.region.impl.enqueueOnComplete(outp)
+      outp.region.impl.enqueueOnComplete(outp, this)
       stop()
     },
 
     onError = (error, _) => {
-      outp.region.impl.enqueueOnError(outp, error)
+      outp.region.impl.enqueueOnError(outp, error, this)
       stop(error)
     })
 }

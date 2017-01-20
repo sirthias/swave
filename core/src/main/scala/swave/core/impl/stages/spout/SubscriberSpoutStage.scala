@@ -41,21 +41,21 @@ private[core] final class SubscriberSpoutStage extends SpoutStage { stage =>
       def onNext(elem: AnyRef) = {
         RSCompliance.verifyNonNull(elem, "Element", "2.13")
         get match {
-          case x: Region#Impl => x.enqueueOnNext(stage, elem)(stage)
+          case x: Region#Impl => x.enqueueOnNext(stage, elem, stage)
           case _ => // drop
         }
       }
       @tailrec def onComplete() =
         get match {
           case x: Subscription => if (!compareAndSet(x, stage)) onComplete()
-          case x: Region#Impl => x.enqueueOnComplete(stage)(stage)
+          case x: Region#Impl => x.enqueueOnComplete(stage, stage)
           case _ => // drop
         }
       @tailrec def onError(e: Throwable) = {
         RSCompliance.verifyNonNull(e, "Throwable", "2.13")
         get match {
           case x: Subscription => if (!compareAndSet(x, e)) onError(e)
-          case x: Region#Impl => x.enqueueOnError(stage, e)(stage)
+          case x: Region#Impl => x.enqueueOnError(stage, e, stage)
           case _ => // drop
         }
       }

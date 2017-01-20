@@ -41,7 +41,12 @@ private[swave] final class Region private[impl] (val entryPoint: StageImpl, val 
     def stagesTotalCount: Int
     def stagesActiveCount: Int
 
-    def enqueueRequest(target: StageImpl, n: Long)(implicit from: Outport): Unit
+    def enqueueRequest(target: StageImpl, n: Long, from: Outport): Unit
+    def enqueueCancel(target: StageImpl, from: Outport): Unit
+    def enqueueOnNext(target: StageImpl, elem: AnyRef, from: Inport): Unit
+    def enqueueOnComplete(target: StageImpl, from: Inport): Unit
+    def enqueueOnError(target: StageImpl, e: Throwable, from: Inport): Unit
+    def enqueueXEvent(target: StageImpl, ev: AnyRef): Unit
 
     // PreStart only
     def becomeSubRegionOf(parent: Region): Unit   = `n/a`
@@ -56,21 +61,20 @@ private[swave] final class Region private[impl] (val entryPoint: StageImpl, val 
     // SyncRunning + AsyncRunning
     def registerStageStopped(): Unit                                 = ()
     def scheduleSubStreamStartTimeout(stage: StageImpl): Cancellable = `n/a`
+    def enqueueSubscribeInterception(target: StageImpl, from: Outport): Unit = `n/a`
+    def enqueueRequestInterception(target: StageImpl, n: Int, from: Outport): Unit = `n/a`
+    def enqueueCancelInterception(target: StageImpl, from: Outport): Unit = `n/a`
+    def enqueueOnSubscribeInterception(target: StageImpl, from: Inport): Unit = `n/a`
+    def enqueueOnNextInterception(target: StageImpl, elem: AnyRef, from: Inport): Unit = `n/a`
+    def enqueueOnCompleteInterception(target: StageImpl, from: Inport): Unit = `n/a`
+    def enqueueOnErrorInterception(target: StageImpl, e: Throwable, from: Inport): Unit = `n/a`
+    def enqueueXEventInterception(target: StageImpl, ev: AnyRef): Unit = `n/a`
 
     // AsyncRunning only
     private[Region] def runner: StreamRunner                                   = `n/a`
     def scheduleTimeout(target: StageImpl, delay: FiniteDuration): Cancellable = `n/a`
 
-    // AsyncRunning + Stopped
-    def enqueueCancel(target: StageImpl)(implicit from: Outport): Unit               = `n/a`
-    def enqueueOnNext(target: StageImpl, elem: AnyRef)(implicit from: Inport): Unit  = `n/a`
-    def enqueueOnComplete(target: StageImpl)(implicit from: Inport): Unit            = `n/a`
-    def enqueueOnError(target: StageImpl, e: Throwable)(implicit from: Inport): Unit = `n/a`
-
-    // SyncRunning + AsyncRunning + Stopped
-    def enqueueXEvent(target: StageImpl, ev: AnyRef): Unit = `n/a`
-
-    private def `n/a` = throw new IllegalStateException(toString)
+    protected final def `n/a` = throw new IllegalStateException(toString)
   }
 
   private[swave] final class PreStart extends Impl {
@@ -82,8 +86,12 @@ private[swave] final class Region private[impl] (val entryPoint: StageImpl, val 
     var stagesTotalCount                                   = 0
     def stagesActiveCount                                  = 0
 
-    def enqueueRequest(target: StageImpl, n: Long)(implicit from: Outport): Unit =
-      _queuedRequests ::= ((target, n, from))
+    def enqueueRequest(target: StageImpl, n: Long, from: Outport): Unit = _queuedRequests ::= ((target, n, from))
+    def enqueueCancel(target: StageImpl, from: Outport): Unit = `n/a`
+    def enqueueOnNext(target: StageImpl, elem: AnyRef, from: Inport): Unit = `n/a`
+    def enqueueOnComplete(target: StageImpl, from: Inport): Unit = `n/a`
+    def enqueueOnError(target: StageImpl, e: Throwable, from: Inport): Unit = `n/a`
+    def enqueueXEvent(target: StageImpl, ev: AnyRef): Unit = `n/a`
 
     override def registerForXStart(stage: StageImpl): Unit = _needXStart ::= stage
     override def registerStageSealed(): Unit               = stagesTotalCount += 1
@@ -124,8 +132,10 @@ private[swave] final class Region private[impl] (val entryPoint: StageImpl, val 
         requireState(_dispatcherId eq null)
         startSync()
       }
-      if (_queuedRequests ne Nil)
-        _queuedRequests.foreach { case (target, n, from) => _impl.enqueueRequest(target, n)(from) }
+      if (_queuedRequests ne Nil) {
+        val imp = _impl
+        _queuedRequests.foreach { case (target, n, from) => imp.enqueueRequest(target, n, from) }
+      }
     }
     private def startSync(): Unit = {
       _impl = new SyncRunning(parent, stagesTotalCount)
@@ -162,9 +172,30 @@ private[swave] final class Region private[impl] (val entryPoint: StageImpl, val 
         case d: FiniteDuration ⇒ runContext.impl.scheduleSyncSubStreamStartCleanup(stage, d)
         case _                 ⇒ Cancellable.Inactive
       }
-    override def enqueueRequest(target: StageImpl, n: Long)(implicit from: Outport): Unit =
-      runContext.impl.enqueueSyncRequest(target, n)
-    override def enqueueXEvent(target: StageImpl, ev: AnyRef): Unit = target.xEvent(ev)
+
+    def enqueueRequest(target: StageImpl, n: Long, from: Outport): Unit = target.request(n)(from)
+    def enqueueCancel(target: StageImpl, from: Outport): Unit = target.cancel()(from)
+    def enqueueOnNext(target: StageImpl, elem: AnyRef, from: Inport): Unit = target.onNext(elem)(from)
+    def enqueueOnComplete(target: StageImpl, from: Inport): Unit = target.onComplete()(from)
+    def enqueueOnError(target: StageImpl, e: Throwable, from: Inport): Unit = target.onError(e)(from)
+    def enqueueXEvent(target: StageImpl, ev: AnyRef): Unit = target.xEvent(ev)
+
+    override def enqueueSubscribeInterception(target: StageImpl, from: Outport): Unit =
+      runContext.impl.enqueueSyncSubscribeInterception(target, from)
+    override def enqueueRequestInterception(target: StageImpl, n: Int, from: Outport): Unit =
+      runContext.impl.enqueueSyncRequestInterception(target, n, from)
+    override def enqueueCancelInterception(target: StageImpl, from: Outport): Unit =
+      runContext.impl.enqueueSyncCancelInterception(target, from)
+    override def enqueueOnSubscribeInterception(target: StageImpl, from: Inport): Unit =
+      runContext.impl.enqueueSyncOnSubscribeInterception(target, from)
+    override def enqueueOnNextInterception(target: StageImpl, elem: AnyRef, from: Inport): Unit =
+      runContext.impl.enqueueSyncOnNextInterception(target, elem, from)
+    override def enqueueOnCompleteInterception(target: StageImpl, from: Inport): Unit =
+      runContext.impl.enqueueSyncOnCompleteInterception(target, from)
+    override def enqueueOnErrorInterception(target: StageImpl, e: Throwable, from: Inport): Unit =
+      runContext.impl.enqueueSyncOnErrorInterception(target, e, from)
+    override def enqueueXEventInterception(target: StageImpl, ev: AnyRef): Unit =
+      runContext.impl.enqueueSyncXEventInterception(target, ev)
   }
 
   private[swave] final class AsyncRunning(val parent: Region,
@@ -189,29 +220,57 @@ private[swave] final class Region private[impl] (val entryPoint: StageImpl, val 
         case d: FiniteDuration ⇒ runner.scheduleEvent(stage, d, RunContext.SubStreamStartTimeout)
         case _                 ⇒ Cancellable.Inactive
       }
-    override def enqueueRequest(target: StageImpl, n: Long)(implicit from: Outport): Unit =
+
+    def enqueueRequest(target: StageImpl, n: Long, from: Outport): Unit =
       runner.enqueue(new StreamRunner.Message.Request(target, n, from))
-    override def enqueueCancel(target: StageImpl)(implicit from: Outport): Unit =
+    def enqueueCancel(target: StageImpl, from: Outport): Unit =
       runner.enqueue(new StreamRunner.Message.Cancel(target, from))
-    override def enqueueOnNext(target: StageImpl, elem: AnyRef)(implicit from: Inport): Unit =
+    def enqueueOnNext(target: StageImpl, elem: AnyRef, from: Inport): Unit =
       runner.enqueue(new StreamRunner.Message.OnNext(target, elem, from))
-    override def enqueueOnComplete(target: StageImpl)(implicit from: Inport): Unit =
+    def enqueueOnComplete(target: StageImpl, from: Inport): Unit =
       runner.enqueue(new StreamRunner.Message.OnComplete(target, from))
-    override def enqueueOnError(target: StageImpl, e: Throwable)(implicit from: Inport): Unit =
+    def enqueueOnError(target: StageImpl, e: Throwable, from: Inport): Unit =
       runner.enqueue(new StreamRunner.Message.OnError(target, e, from))
-    override def enqueueXEvent(target: StageImpl, ev: AnyRef): Unit =
+    def enqueueXEvent(target: StageImpl, ev: AnyRef): Unit =
       runner.enqueue(new StreamRunner.Message.XEvent(target, ev, runner))
+
+    override def enqueueSubscribeInterception(target: StageImpl, from: Outport): Unit =
+      runner.enqueue(new StreamRunner.Message.Subscribe(target, from, intercept = true))
+    override def enqueueRequestInterception(target: StageImpl, n: Int, from: Outport): Unit =
+      runner.enqueue(new StreamRunner.Message.RequestInterception(target, n, from))
+    override def enqueueCancelInterception(target: StageImpl, from: Outport): Unit =
+      runner.enqueue(new StreamRunner.Message.Cancel(target, from, intercept = true))
+    override def enqueueOnSubscribeInterception(target: StageImpl, from: Inport): Unit =
+      runner.enqueue(new StreamRunner.Message.OnSubscribe(target, from, intercept = true))
+    override def enqueueOnNextInterception(target: StageImpl, elem: AnyRef, from: Inport): Unit =
+      runner.enqueue(new StreamRunner.Message.OnNext(target, elem, from, intercept = true))
+    override def enqueueOnCompleteInterception(target: StageImpl, from: Inport): Unit =
+      runner.enqueue(new StreamRunner.Message.OnComplete(target, from, intercept = true))
+    override def enqueueOnErrorInterception(target: StageImpl, e: Throwable, from: Inport): Unit =
+      runner.enqueue(new StreamRunner.Message.OnError(target, e, from, intercept = true))
+    override def enqueueXEventInterception(target: StageImpl, ev: AnyRef): Unit =
+      runner.enqueue(new StreamRunner.Message.XEvent(target, ev, runner, intercept = true))
   }
 
   private[swave] final class Stopped(val parent: Region, val stagesTotalCount: Int) extends Impl {
-    def stagesActiveCount: Int                                                                = 0
-    def state                                                                                 = Stage.Region.State.Stopped
-    override def enqueueRequest(target: StageImpl, n: Long)(implicit from: Outport): Unit     = ()
-    override def enqueueCancel(target: StageImpl)(implicit from: Outport): Unit               = ()
-    override def enqueueOnNext(target: StageImpl, elem: AnyRef)(implicit from: Inport): Unit  = ()
-    override def enqueueOnComplete(target: StageImpl)(implicit from: Inport): Unit            = ()
-    override def enqueueOnError(target: StageImpl, e: Throwable)(implicit from: Inport): Unit = ()
-    override def enqueueXEvent(target: StageImpl, ev: AnyRef): Unit                           = ()
+    def stagesActiveCount: Int                                              = 0
+    def state                                                               = Stage.Region.State.Stopped
+
+    def enqueueRequest(target: StageImpl, n: Long, from: Outport): Unit = ()
+    def enqueueCancel(target: StageImpl, from: Outport): Unit = ()
+    def enqueueOnNext(target: StageImpl, elem: AnyRef, from: Inport): Unit = ()
+    def enqueueOnComplete(target: StageImpl, from: Inport): Unit = ()
+    def enqueueOnError(target: StageImpl, e: Throwable, from: Inport): Unit = ()
+    def enqueueXEvent(target: StageImpl, ev: AnyRef): Unit = ()
+
+    override def enqueueSubscribeInterception(target: StageImpl, from: Outport): Unit            = ()
+    override def enqueueRequestInterception(target: StageImpl, n: Int, from: Outport): Unit   = ()
+    override def enqueueCancelInterception(target: StageImpl, from: Outport): Unit               = ()
+    override def enqueueOnSubscribeInterception(target: StageImpl, from: Inport): Unit           = ()
+    override def enqueueOnNextInterception(target: StageImpl, elem: AnyRef, from: Inport): Unit  = ()
+    override def enqueueOnCompleteInterception(target: StageImpl, from: Inport): Unit            = ()
+    override def enqueueOnErrorInterception(target: StageImpl, e: Throwable, from: Inport): Unit = ()
+    override def enqueueXEventInterception(target: StageImpl, ev: AnyRef): Unit                  = ()
   }
 
   private def failConflictingAssignments(a: String, b: String) =

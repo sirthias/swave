@@ -7,7 +7,7 @@
 package swave.core.impl.stages
 
 import scala.annotation.{compileTimeOnly, tailrec}
-import swave.core.impl.util.{AbstractInportList, ResizableRingBuffer}
+import swave.core.impl.util.AbstractInportList
 import swave.core.util._
 import swave.core.impl._
 import swave.core._
@@ -71,11 +71,9 @@ private[swave] abstract class StageImpl extends PortImpl {
 
   type State = Int // semantic alias
 
-  // TODO: evaluate moving the boolean into the (upper) _state integer bits
-  private[this] var _intercepting                        = false
+  private[this] var _interceptionLevel                   = 0
   private[this] var _state: State                        = _ // current state; the STOPPED state is always encoded as zero
   private[this] var _requestBacklog: RequestBacklogList  = _
-  private[this] var _buffer: ResizableRingBuffer[AnyRef] = _
   private[this] var _region: Region                      = _
   protected final var interceptingStates: Int            = _ // bit mask holding a 1 bit for every state which requires interception support
 
@@ -83,10 +81,9 @@ private[swave] abstract class StageImpl extends PortImpl {
   protected final def initialState(s: State): Unit         = _state = s
   protected final def stay(): State                        = _state
   protected final def illegalState(msg: String)            = new IllegalStateException(msg + " in " + this)
-  protected final def setIntercepting(flag: Boolean): Unit = _intercepting = flag
+  protected final def setInterceptionLevel(level: Int): Unit = _interceptionLevel = level
 
   final def region: Region       = _region
-  final def assignTempRegion(r: Region): Unit  = _region = r
   final def resetRegion(): Unit  = _region = null
   final def stageImpl: StageImpl = this
   final def isSealed: Boolean    = region ne null
@@ -98,13 +95,14 @@ private[swave] abstract class StageImpl extends PortImpl {
   /////////////////////////////////////// SUBSCRIBE ///////////////////////////////////////
 
   final def subscribe()(implicit from: Outport): Unit =
-    if (!_intercepting) {
-      _intercepting = interceptionNeeded
-      _subscribe(from)
-      handleInterceptions()
-    } else storeInterception(Statics._0L, from)
+    if (notIntercepting) _subscribe(from)
+    else interceptSubscribe(from)
 
-  private def _subscribe(from: Outport): Unit = _state = _subscribe0(from)
+  final def _subscribe(from: Outport): Unit = {
+    val mark = enterInterceptionLevel()
+    _state = _subscribe0(from)
+    exitInterceptionLevel(mark)
+  }
 
   protected def _subscribe0(from: Outport): State =
     _state match {
@@ -115,47 +113,60 @@ private[swave] abstract class StageImpl extends PortImpl {
           illegalState(s"Unexpected subscribe() from out '$from'"))
     }
 
+  protected final def interceptSubscribe(from: Outport): Unit = {
+    registerInterception()
+    region.impl.enqueueSubscribeInterception(this, if (fullInterceptions) from else null)
+  }
+
   /////////////////////////////////////// REQUEST ///////////////////////////////////////
 
   final def request(n: Long)(implicit from: Outport): Unit = {
     val mbs = region.mbs
     val count =
       if (n > mbs) {
+        // if we get here then we are still running on the thread of the `from` Outport,
+        // not on the thread of `this` stage's runner, so we can directly mutate the `from` stage
         from.stageImpl.updateRequestBacklog(this, n)
         mbs
       } else n.toInt
 
-    if (!_intercepting) {
-      _intercepting = interceptionNeeded
-      _request(count, from)
-      if (_intercepting) handleInterceptions()
-    } else interceptRequest(count, from)
+    if (notIntercepting) _request(count, from)
+    else interceptRequest(count, from)
   }
 
-  private def _request(n: Int, from: Outport): Unit = _state = _request0(n, from)
+  final def _request(n: Int, from: Outport): Unit = {
+    val mark = enterInterceptionLevel()
+    _state = _request0(n, from)
+    exitInterceptionLevel(mark)
+  }
 
   protected def _request0(n: Int, from: Outport): State = stay()
+
+  protected final def interceptRequest(n: Int, from: Outport): Unit = {
+    registerInterception()
+    region.impl.enqueueRequestInterception(this, n, if (fullInterceptions) from else null)
+  }
 
   protected final def requestF(in: Inport)(n: Int, from: Outport): State = {
     in.request(n.toLong)
     stay()
   }
 
-  protected final def interceptRequest(n: Int, from: Outport): Unit =
-    storeInterception(Statics._1L, if (n <= 32) Statics.INTS(n - 1) else new java.lang.Integer(n), from)
-
   /////////////////////////////////////// CANCEL ///////////////////////////////////////
 
   final def cancel()(implicit from: Outport): Unit = {
+    // when we get here then we are still running on the thread of the `from` Outport,
+    // not on the thread of `this` stage's runner, so we can directly mutate the `from` stage
     from.stageImpl.clearRequestBacklog(this)
-    if (!_intercepting) {
-      _intercepting = interceptionNeeded
-      _cancel(from)
-      if (_intercepting) handleInterceptions()
-    } else interceptCancel(from)
+    if (notIntercepting) _cancel(from)
+    else interceptCancel(from)
   }
 
-  private def _cancel(from: Outport): Unit = _state = _cancel0(from)
+  final def _cancel(from: Outport): Unit = {
+    val mark = enterInterceptionLevel()
+    _state = _cancel0(from)
+    exitInterceptionLevel(mark)
+  }
 
   protected def _cancel0(from: Outport): State =
     _state match {
@@ -163,19 +174,22 @@ private[swave] abstract class StageImpl extends PortImpl {
       case _ ⇒ throw illegalState(s"Unexpected cancel() from out '$from'")
     }
 
-  protected final def interceptCancel(from: Outport): Unit =
-    storeInterception(Statics._2L, from)
+  protected final def interceptCancel(from: Outport): Unit = {
+    registerInterception()
+    region.impl.enqueueCancelInterception(this, if (fullInterceptions) from else null)
+  }
 
   /////////////////////////////////////// ONSUBSCRIBE ///////////////////////////////////////
 
   final def onSubscribe()(implicit from: Inport): Unit =
-    if (!_intercepting) {
-      _intercepting = interceptionNeeded
-      _onSubscribe(from)
-      if (_intercepting) handleInterceptions()
-    } else storeInterception(Statics._3L, from)
+    if (notIntercepting) _onSubscribe(from)
+    else interceptOnSubscribe(from)
 
-  private def _onSubscribe(from: Inport): Unit = _state = _onSubscribe0(from)
+  final def _onSubscribe(from: Inport): Unit = {
+    val mark = enterInterceptionLevel()
+    _state = _onSubscribe0(from)
+    exitInterceptionLevel(mark)
+  }
 
   protected def _onSubscribe0(from: Inport): State =
     _state match {
@@ -186,43 +200,47 @@ private[swave] abstract class StageImpl extends PortImpl {
           illegalState(s"Unexpected onSubscribe() from out '$from'"))
     }
 
+  protected final def interceptOnSubscribe(from: Inport): Unit = {
+    registerInterception()
+    region.impl.enqueueOnSubscribeInterception(this, if (fullInterceptions) from else null)
+  }
+
   /////////////////////////////////////// ONNEXT ///////////////////////////////////////
 
   final def onNext(elem: AnyRef)(implicit from: Inport): Unit =
-    if (!_intercepting) {
-      _intercepting = interceptionNeeded
-      _onNext(elem, from)
-      if (_intercepting) handleInterceptions()
-    } else interceptOnNext(elem, from)
+    if (notIntercepting) _onNext(elem, from)
+    else interceptOnNext(elem, from)
 
-  @tailrec
-  private def _onNext(elem: AnyRef,
-                      from: Inport,
-                      last: RequestBacklogList = null,
-                      current: RequestBacklogList = _requestBacklog): Unit =
-    if (current.nonEmpty) {
-      val currentIn = current.in
-      if ((from eq null) || (currentIn eq from)) {
-        _state = _onNext0(elem, from)
-        if (current.tail ne current) { // is `current` still valid, i.e. not cancelled? (tail eq self is special condition)
-          val newPending = current.pending - 1
-          if (newPending == 0) {
-            val mbs = region.mbs
-            val newRemaining = current.remaining - mbs
-            val n =
-              if (newRemaining > 0) {
-                current.pending = mbs
-                current.remaining = newRemaining
-                mbs.toLong
-              } else {
-                if (last ne null) last.tail = current.tail else _requestBacklog = current.tail
-                current.remaining
-              }
-            region.impl.enqueueRequest(currentIn.stageImpl, n)
-          } else current.pending = newPending
-        }
-      } else _onNext(elem, from, current, current.tail)
-    } else _state = _onNext0(elem, from)
+  final def _onNext(elem: AnyRef, from: Inport): Unit = {
+    @tailrec def rec(current: RequestBacklogList, last: RequestBacklogList): Unit =
+      if (current.nonEmpty) {
+        val currentIn = current.in
+        if ((from eq null) || (currentIn eq from)) {
+          _state = _onNext0(elem, from)
+          if (current.tail ne current) { // is `current` not cancelled? (tail eq self signals "cancelled")
+            val newPending = current.pending - 1
+            if (newPending == 0) {
+              val mbs = region.mbs
+              val newRemaining = current.remaining - mbs
+              val n =
+                if (newRemaining > 0) {
+                  current.pending = mbs
+                  current.remaining = newRemaining
+                  mbs.toLong
+                } else {
+                  if (last ne null) last.tail = current.tail else _requestBacklog = current.tail
+                  current.remaining
+                }
+              currentIn.request(n)
+            } else current.pending = newPending
+          }
+        } else rec(current.tail, current)
+      } else _state = _onNext0(elem, from)
+
+    val mark = enterInterceptionLevel()
+    rec(_requestBacklog, null)
+    exitInterceptionLevel(mark)
+  }
 
   protected def _onNext0(elem: AnyRef, from: Inport): State =
     _state match {
@@ -230,26 +248,27 @@ private[swave] abstract class StageImpl extends PortImpl {
       case _ ⇒ throw illegalState(s"Unexpected onNext($elem) from out '$from'")
     }
 
+  protected final def interceptOnNext(elem: AnyRef, from: Inport): Unit = {
+    registerInterception()
+    region.impl.enqueueOnNextInterception(this, elem, if (fullInterceptions) from else null)
+  }
+
   protected final def onNextF(out: Outport)(elem: AnyRef, from: Inport): State = {
     out.onNext(elem)
     stay()
   }
 
-  protected final def interceptOnNext(elem: AnyRef, from: Inport): Unit =
-    storeInterception(Statics._4L, elem, from)
-
   /////////////////////////////////////// ONCOMPLETE ///////////////////////////////////////
 
   final def onComplete()(implicit from: Inport): Unit =
-    if (!_intercepting) {
-      _intercepting = interceptionNeeded
-      _onComplete(from)
-      if (_intercepting) handleInterceptions()
-    } else interceptOnComplete(from)
+    if (notIntercepting) _onComplete(from)
+    else interceptOnComplete(from)
 
-  private def _onComplete(from: Inport): Unit = {
+  final def _onComplete(from: Inport): Unit = {
+    val mark = enterInterceptionLevel()
     clearRequestBacklog(from)
     _state = _onComplete0(from)
+    exitInterceptionLevel(mark)
   }
 
   protected def _onComplete0(from: Inport): State =
@@ -258,21 +277,22 @@ private[swave] abstract class StageImpl extends PortImpl {
       case _ ⇒ throw illegalState(s"Unexpected onComplete() from out '$from'")
     }
 
-  protected final def interceptOnComplete(from: Inport): Unit =
-    storeInterception(Statics._5L, from)
+  protected final def interceptOnComplete(from: Inport): Unit = {
+    registerInterception()
+    region.impl.enqueueOnCompleteInterception(this, if (fullInterceptions) from else null)
+  }
 
   /////////////////////////////////////// ONERROR ///////////////////////////////////////
 
   final def onError(error: Throwable)(implicit from: Inport): Unit =
-    if (!_intercepting) {
-      _intercepting = interceptionNeeded
-      _onError(error, from)
-      if (_intercepting) handleInterceptions()
-    } else interceptOnError(error, from)
+    if (notIntercepting) _onError(error, from)
+    else interceptOnError(error, from)
 
-  private def _onError(error: Throwable, from: Inport): Unit = {
+  final def _onError(error: Throwable, from: Inport): Unit = {
+    val mark = enterInterceptionLevel()
     clearRequestBacklog(from)
     _state = _onError0(error, from)
+    exitInterceptionLevel(mark)
   }
 
   protected def _onError0(error: Throwable, from: Inport): State =
@@ -281,8 +301,10 @@ private[swave] abstract class StageImpl extends PortImpl {
       case _ ⇒ throw illegalState(s"Unexpected onError($error) from out '$from'")
     }
 
-  protected final def interceptOnError(error: Throwable, from: Inport): Unit =
-    storeInterception(Statics._6L, error, from)
+  protected final def interceptOnError(error: Throwable, from: Inport): Unit = {
+    registerInterception()
+    region.impl.enqueueOnErrorInterception(this, error, if (fullInterceptions) from else null)
+  }
 
   /////////////////////////////////////// XSEAL ///////////////////////////////////////
 
@@ -318,8 +340,11 @@ private[swave] abstract class StageImpl extends PortImpl {
 
   final def xStart(): Unit =
     if (!isStopped) {
+      // if the current state has an xStart handler (which it must) and defines `intercept = true` (the default)
+      // then we currently have an interceptionLevel > 0
+      val mark = interceptionNeeded
       _state = _xStart()
-      handleInterceptions()
+      exitInterceptionLevel(mark)
     }
 
   protected def _xStart(): State = throw illegalState(s"Unexpected xStart()")
@@ -327,20 +352,22 @@ private[swave] abstract class StageImpl extends PortImpl {
   /////////////////////////////////////// XEVENT ///////////////////////////////////////
 
   final def xEvent(ev: AnyRef): Unit =
-    if (!_intercepting) {
-      _intercepting = interceptionNeeded
-      _xEvent(ev)
-      if (_intercepting) handleInterceptions()
-    } else storeInterception(Statics._7L, ev)
+    if (notIntercepting) _xEvent(ev)
+    else interceptXEvent(ev)
 
-  private def _xEvent(ev: AnyRef): Unit = _state = _xEvent0(ev)
+  final def _xEvent(ev: AnyRef): Unit = {
+    val mark = enterInterceptionLevel()
+    _state = _xEvent0(ev)
+    exitInterceptionLevel(mark)
+  }
 
   protected def _xEvent0(ev: AnyRef): State =
     if (isStopped) stay() else throw illegalState(s"Unexpected xEvent($ev)")
 
-  final def enqueueXEvent(ev: AnyRef): Unit =
-    if (isSealed) region.impl.enqueueXEvent(this, ev)
-    else xEvent(ev)
+  protected final def interceptXEvent(ev: AnyRef): Unit = {
+    registerInterception()
+    region.impl.enqueueXEventInterception(this, ev)
+  }
 
   /////////////////////////////////////// STATE DESIGNATOR ///////////////////////////////////////
 
@@ -361,7 +388,6 @@ private[swave] abstract class StageImpl extends PortImpl {
 
   protected final def stop(e: Throwable = null): State = {
     if (isSealed) region.impl.registerStageStopped()
-    _buffer = null // don't hang on to elements
     0 // STOPPED state encoding
   }
 
@@ -426,56 +452,16 @@ private[swave] abstract class StageImpl extends PortImpl {
 
   /////////////////////////////////////// PRIVATE ///////////////////////////////////////
 
-  private def interceptionNeeded: Boolean = ((interceptingStates >> _state) & 1) != 0
-  private def fullInterceptions: Boolean  = interceptingStates < 0
-
-  private def storeInterception(signal: java.lang.Integer, from: Port): Unit =
-    if (fullInterceptions) {
-      if (!buffer.write(signal, from))
-        throw illegalState(s"Interception buffer overflow on signal $signal($from)'")
-    } else {
-      if (!buffer.write(signal))
-        throw illegalState(s"Interception buffer overflow on signal $signal()'")
-    }
-
-  private def storeInterception(signal: java.lang.Integer, arg: AnyRef): Unit =
-    if (!buffer.write(signal, arg))
-      throw illegalState(s"Interception buffer overflow on signal $signal($arg)'")
-
-  private def storeInterception(signal: java.lang.Integer, arg0: AnyRef, from: Port): Unit =
-    if (fullInterceptions) {
-      if (!buffer.write(signal, arg0, from))
-        throw illegalState(s"Interception buffer overflow on signal $signal($arg0, $from)")
-    } else {
-      if (!buffer.write(signal, arg0))
-        throw illegalState(s"Interception buffer overflow on signal $signal($arg0)")
-    }
-
-  private def buffer = {
-    if (_buffer eq null) {
-      val initialSize = roundUpToPowerOf2(region.mbs)
-      _buffer = new ResizableRingBuffer(initialSize, initialSize << 4)
-    }
-    _buffer
+  private def fullInterceptions: Boolean = interceptingStates < 0
+  private def notIntercepting: Boolean = _interceptionLevel == 0
+  private def registerInterception(): Unit = _interceptionLevel += 1
+  private def interceptionNeeded: Int = (interceptingStates >> _state) & 1
+  private def enterInterceptionLevel(): Int = {
+    val mark = interceptionNeeded
+    _interceptionLevel = math.max(_interceptionLevel, mark)
+    mark
   }
-
-  @tailrec private def handleInterceptions(): Unit =
-    if ((_buffer ne null) && _buffer.nonEmpty) {
-      def read() = _buffer.unsafeRead()
-      def readInt() = read().asInstanceOf[java.lang.Integer].intValue()
-      def from() = if (fullInterceptions) read().asInstanceOf[StageImpl] else null
-      readInt() match {
-        case 0 ⇒ _subscribe(from())
-        case 1 ⇒ _request(readInt(), from())
-        case 2 ⇒ _cancel(from())
-        case 3 ⇒ _onSubscribe(from())
-        case 4 ⇒ _onNext(read(), from())
-        case 5 ⇒ _onComplete(from())
-        case 6 ⇒ _onError(read().asInstanceOf[Throwable], from())
-        case 7 ⇒ _xEvent(read())
-      }
-      handleInterceptions()
-    } else _intercepting = false
+  private def exitInterceptionLevel(mark: Int): Unit = _interceptionLevel -= mark
 
   private def updateRequestBacklog(in: Inport, requested: Long): Unit = {
     @tailrec def rec(current: RequestBacklogList): Unit =

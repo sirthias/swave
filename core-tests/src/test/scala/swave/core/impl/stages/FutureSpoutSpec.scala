@@ -11,7 +11,7 @@ import swave.testkit.Probes._
 import swave.core._
 import swave.core.internal.testkit.TestError
 
-class FutureSourceSpec extends SwaveSpec {
+class FutureSpoutSpec extends SwaveSpec {
 
   implicit val env = StreamEnv()
 
