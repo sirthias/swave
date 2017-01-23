@@ -30,6 +30,8 @@ private[impl] abstract class StreamActor(final val dispatcher: Dispatcher, final
     new MpscLinkedQueue8[MessageType]()
   }
 
+  protected final def mailboxEmpty: Boolean = mailbox.isEmpty
+
   /*
    * Internal object instance hiding the AtomicBoolean and Runnable interfaces.
    * We could have the StreamActor itself extend `AtomicBoolean with Runnable` and save an allocation

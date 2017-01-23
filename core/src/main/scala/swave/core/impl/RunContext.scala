@@ -7,10 +7,10 @@
 package swave.core.impl
 
 import java.util.concurrent.atomic.{AtomicInteger, AtomicReference}
-import scala.annotation.{switch, tailrec}
+import scala.annotation.tailrec
 import scala.concurrent.{Future, Promise}
 import scala.concurrent.duration.FiniteDuration
-import swave.core.impl.util.{AbstractInportList, ResizableIntRingBuffer, ResizableRingBuffer}
+import swave.core.impl.util.AbstractInportList
 import swave.core.impl.stages.StageImpl
 import swave.core.macros._
 import swave.core.util._
@@ -39,10 +39,10 @@ private[swave] final class RunContext private (val env: StreamEnv) { self =>
     def registerForSyncPostRunEvent(stage: StageImpl): Unit = `n/a`
 
     // SyncRunning
-    def enqueueSyncSubscribeInterception(stage: StageImpl, from: Outport): Unit = `n/a`
-    def enqueueSyncRequestInterception(stage: StageImpl, n: Int, from: Outport): Unit = `n/a`
+    def enqueueSyncSubscribeInterception(target: StageImpl, from: Outport): Unit = `n/a`
+    def enqueueSyncRequestInterception(target: StageImpl, n: Int, from: Outport): Unit = `n/a`
     def enqueueSyncCancelInterception(target: StageImpl, from: Outport): Unit = `n/a`
-    def enqueueSyncOnSubscribeInterception(stage: StageImpl, from: Inport): Unit = `n/a`
+    def enqueueSyncOnSubscribeInterception(target: StageImpl, from: Inport): Unit = `n/a`
     def enqueueSyncOnNextInterception(target: StageImpl, elem: AnyRef, from: Inport): Unit = `n/a`
     def enqueueSyncOnCompleteInterception(target: StageImpl, from: Inport): Unit = `n/a`
     def enqueueSyncOnErrorInterception(target: StageImpl, e: Throwable, from: Inport): Unit = `n/a`
@@ -161,79 +161,27 @@ private[swave] final class RunContext private (val env: StreamEnv) { self =>
     private[this] var cleanUp: List[Runnable]              = Nil
     private[this] var _termination: AnyRef                 = _ // null: unterminated, self: terminated, Promise[_]: promise
     private[this] var externalRunEnabled: Boolean = _
-    private[this] var stageLookup: Array[StageImpl] = new Array[StageImpl](16)
-    private[this] var stageLookupSize = 0
-    private[this] val intBuffer: ResizableIntRingBuffer = {
-      val initialSize = env.settings.maxBatchSize
-      new ResizableIntRingBuffer(initialSize, initialSize << 4)
-    }
-    private[this] val objBuffer: ResizableRingBuffer[AnyRef] = {
-      val initialSize = env.settings.maxBatchSize
-      new ResizableRingBuffer(initialSize, initialSize << 2)
-    }
+    private[this] val interceptionLoop = new InterceptionLoop(env.settings.maxBatchSize)
+
     def enableExternalRun(): Unit = externalRunEnabled = true
     override def registerForSyncPostRunEvent(stage: StageImpl): Unit = needPostRun ::= stage
-    
+
     override def enqueueSyncSubscribeInterception(target: StageImpl, from: Outport): Unit =
-      if (from eq null) store(0, target) else store(1, target, from)
+      interceptionLoop.enqueueSubscribe(target, from)
     override def enqueueSyncRequestInterception(target: StageImpl, n: Int, from: Outport): Unit =
-      if (from eq null) store(2, target, n) else store(3, target, n, from)
+      interceptionLoop.enqueueRequest(target, n, from)
     override def enqueueSyncCancelInterception(target: StageImpl, from: Outport): Unit =
-      if (from eq null) store(4, target) else store(5, target, from)
+      interceptionLoop.enqueueCancel(target, from)
     override def enqueueSyncOnSubscribeInterception(target: StageImpl, from: Inport): Unit =
-      if (from eq null) store(6, target) else store(7, target, from)
+      interceptionLoop.enqueueOnSubscribe(target, from)
     override def enqueueSyncOnNextInterception(target: StageImpl, elem: AnyRef, from: Inport): Unit =
-      if (from eq null) store(8, target, elem) else store(9, target, elem, from)
+      interceptionLoop.enqueueOnNext(target, elem, from)
     override def enqueueSyncOnCompleteInterception(target: StageImpl, from: Inport): Unit =
-      if (from eq null) store(10, target) else store(11, target, from)
+      interceptionLoop.enqueueOnComplete(target, from)
     override def enqueueSyncOnErrorInterception(target: StageImpl, e: Throwable, from: Inport): Unit =
-      if (from eq null) store(12, target, e) else store(13, target, e, from)
+      interceptionLoop.enqueueOnError(target, e, from)
     override def enqueueSyncXEventInterception(target: StageImpl, ev: AnyRef): Unit =
-      store(14, target, ev)
-
-    private def store(signal: Int, target: StageImpl): Unit =
-      if (!intBuffer.write(signal, ix(target))) throwBufOverflow()
-    private def store(signal: Int, target: StageImpl, n: Int): Unit =
-      if (!intBuffer.write(signal, ix(target), n)) throwBufOverflow()
-    private def store(signal: Int, target: StageImpl, n: Int, from: Port): Unit =
-      if (!intBuffer.write(signal, ix(target), n, ix(from.stageImpl))) throwBufOverflow()
-    private def store(signal: Int, target: StageImpl, from: Port): Unit =
-      if (!intBuffer.write(signal, ix(target), ix(from.stageImpl))) throwBufOverflow()
-    private def store(signal: Int, target: StageImpl, arg: AnyRef): Unit = {
-      if (!intBuffer.write(signal, ix(target))) throwBufOverflow()
-      if (!objBuffer.write(arg)) throwBufOverflow()
-    }
-    private def store(signal: Int, target: StageImpl, arg: AnyRef, from: Port): Unit = {
-      if (!intBuffer.write(signal, ix(target), ix(from.stageImpl))) throwBufOverflow()
-      if (!objBuffer.write(arg)) throwBufOverflow()
-    }
-
-    private def ix(stage: StageImpl): Int =
-      if (stage.interceptionHelperIndex < 0) {
-        val size = stageLookupSize
-        if (size == stageLookup.length) stageLookup = java.util.Arrays.copyOf(stageLookup, size << 1)
-        stageLookup(size) = stage
-        stageLookupSize = size + 1
-        stage.interceptionHelperIndex = size
-        size
-      } else stage.interceptionHelperIndex
-
-    private def throwBufOverflow() = throw new IllegalStateException(s"Interception buffer overflow")
-
-//    private def logSignal(target: StageImpl, s: java.lang.Integer, args: AnyRef*): Unit = {
-//      RunContext.tempCount += 1
-//      val name = s.intValue() match {
-//        case 0 | 1 ⇒ "SUBSCRIBE"
-//        case 2 | 3 ⇒ "REQUEST"
-//        case 4 | 5 ⇒ "CANCEL"
-//        case 6 | 7 ⇒ "ONSUBSCRIBE"
-//        case 8 | 9 ⇒ "ONNEXT"
-//        case 10 | 11 ⇒ "ONCOMPLETE"
-//        case 12 | 13 ⇒ "ONERROR"
-//        case 14 ⇒ "XEVENT"
-//      }
-//      println(s"---${RunContext.tempCount}: $name(${args.mkString(", ")}) for $target")
-//    }
+      interceptionLoop.enqueueXEvent(target, ev)
 
     def isTerminated: Boolean =
       _termination match {
@@ -270,27 +218,8 @@ private[swave] final class RunContext private (val env: StreamEnv) { self =>
       if (externalRunEnabled) doRunInterceptionLoop()
 
     @tailrec def doRunInterceptionLoop(): Unit =
-      if (intBuffer.nonEmpty) {
-        def readObj() = objBuffer.unsafeRead()
-        def readInt() = intBuffer.unsafeRead()
-        def readStage() = stageLookup(readInt())
-        (readInt(): @switch) match {
-          case 0 ⇒ readStage()._subscribe(null)
-          case 1 ⇒ readStage()._subscribe(readStage())
-          case 2 ⇒ readStage()._request(readInt(), null)
-          case 3 ⇒ readStage()._request(readInt(), readStage())
-          case 4 ⇒ readStage()._cancel(null)
-          case 5 ⇒ readStage()._cancel(readStage())
-          case 6 ⇒ readStage()._onSubscribe(null)
-          case 7 ⇒ readStage()._onSubscribe(readStage())
-          case 8 ⇒ readStage()._onNext(readObj(), null)
-          case 9 ⇒ readStage()._onNext(readObj(), readStage())
-          case 10 ⇒ readStage()._onComplete(null)
-          case 11 ⇒ readStage()._onComplete(readStage())
-          case 12 ⇒ readStage()._onError(readObj().asInstanceOf[Throwable], null)
-          case 13 ⇒ readStage()._onError(readObj().asInstanceOf[Throwable], readStage())
-          case 14 ⇒ readStage()._xEvent(readObj())
-        }
+      if (interceptionLoop.hasInterception) {
+        interceptionLoop.handleInterception()
         doRunInterceptionLoop()
       }
 
@@ -396,8 +325,6 @@ private[swave] final class RunContext private (val env: StreamEnv) { self =>
 }
 
 private[swave] object RunContext {
-
-  var tempCount = 0
 
   case object PostRun
   case object SubStreamStartTimeout

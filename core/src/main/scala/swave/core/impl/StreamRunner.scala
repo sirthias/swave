@@ -6,7 +6,7 @@
 
 package swave.core.impl
 
-import scala.annotation.switch
+import scala.annotation.{switch, tailrec}
 import scala.concurrent.duration._
 import com.typesafe.scalalogging.Logger
 import swave.core.impl.stages.StageImpl
@@ -17,8 +17,7 @@ import swave.core._
   * All signals destined for stages within the runners region go through the `enqueueXXX` methods of the runner.
   */
 private[core] final class StreamRunner(_disp: Dispatcher, env: StreamEnv)
-    extends StreamActor(_disp, env.settings.throughput)
-    with Stage.Runner {
+    extends StreamActor(_disp, env.settings.throughput) with Stage.Runner {
   import StreamRunner._
 
   protected type MessageType = Message
@@ -29,32 +28,38 @@ private[core] final class StreamRunner(_disp: Dispatcher, env: StreamEnv)
       case x         => x
     }
 
+  val interceptionLoop = new InterceptionLoop(env.settings.maxBatchSize)
+
   protected def log: Logger = env.log
 
   startMessageProcessing()
 
   protected def receive(msg: Message): Unit = {
-    val target = msg.target
     (msg.id: @switch) match {
-      case 0 ⇒ target.subscribe()(msg.asInstanceOf[Message.Subscribe].from)
-      case 1 ⇒ target._subscribe(msg.asInstanceOf[Message.Subscribe].from)
-      case 2 ⇒ { val m = msg.asInstanceOf[Message.Request]; target.request(m.n)(m.from) }
-      case 3 ⇒ { val m = msg.asInstanceOf[Message.RequestInterception]; target._request(m.n, m.from) }
-      case 4 ⇒ target.cancel()(msg.asInstanceOf[Message.Cancel].from)
-      case 5 ⇒ target._cancel(msg.asInstanceOf[Message.Cancel].from)
-      case 6 ⇒ target.onSubscribe()(msg.asInstanceOf[Message.OnSubscribe].from)
-      case 7 ⇒ target._onSubscribe(msg.asInstanceOf[Message.OnSubscribe].from)
-      case 8 ⇒ { val m = msg.asInstanceOf[Message.OnNext]; target.onNext(m.elem)(m.from) }
-      case 9 ⇒ { val m = msg.asInstanceOf[Message.OnNext]; target._onNext(m.elem, m.from) }
-      case 10 ⇒ target.onComplete()(msg.asInstanceOf[Message.OnComplete].from)
-      case 11 ⇒ target._onComplete(msg.asInstanceOf[Message.OnComplete].from)
-      case 12 ⇒ { val m = msg.asInstanceOf[Message.OnError]; target.onError(m.error)(m.from) }
-      case 13 ⇒ { val m = msg.asInstanceOf[Message.OnError]; target._onError(m.error, m.from) }
-      case 14 => target.xEvent(msg.asInstanceOf[Message.XEvent].ev)
-      case 15 => target._xEvent(msg.asInstanceOf[Message.XEvent].ev)
-      case 16 ⇒ target.xStart()
+      case 0 ⇒ { val m = msg.asInstanceOf[Message.Subscribe]; m.target.subscribe()(m.from) }
+      case 1 ⇒ { val m = msg.asInstanceOf[Message.Request]; m.target.request(m.n)(m.from) }
+      case 2 ⇒ { val m = msg.asInstanceOf[Message.Cancel]; m.target.cancel()(m.from) }
+      case 3 ⇒ { val m = msg.asInstanceOf[Message.OnSubscribe]; m.target.onSubscribe()(m.from) }
+      case 4 ⇒ { val m = msg.asInstanceOf[Message.OnNext]; m.target.onNext(m.elem)(m.from) }
+      case 5 ⇒ { val m = msg.asInstanceOf[Message.OnComplete]; m.target.onComplete()(m.from) }
+      case 6 ⇒ { val m = msg.asInstanceOf[Message.OnError]; m.target.onError(m.error)(m.from) }
+      case 7 => { val m = msg.asInstanceOf[Message.XEvent]; m.target.xEvent(m.ev) }
+      case 8 ⇒ startStages(msg.asInstanceOf[Message.Start].needXStart)
     }
+    @tailrec def loop(): Unit =
+      if (interceptionLoop.hasInterception) {
+        interceptionLoop.handleInterception()
+        if (mailboxEmpty) loop() // we don't want to prevent external messages from entering our loopc
+      }
+    loop()
   }
+
+  @tailrec
+  private def startStages(remaining: List[StageImpl]): Unit =
+    if (remaining ne Nil) {
+      remaining.head.xStart()
+      startStages(remaining.tail)
+    }
 
   def scheduleEvent(target: StageImpl, delay: FiniteDuration, ev: AnyRef): Cancellable =
     scheduleXEvent(delay, new Message.XEvent(target, ev, this))
@@ -81,30 +86,20 @@ private[core] final class StreamRunner(_disp: Dispatcher, env: StreamEnv)
 
 private[impl] object StreamRunner {
 
-  private[impl] sealed abstract class Message(val id: Int, val target: StageImpl)
+  private[impl] sealed abstract class Message(val id: Int)
   private[impl] object Message {
-    private def id(i: Int, intercept: Boolean) = if (intercept) i + 1 else i
-
-    final class Subscribe(target: StageImpl, val from: Outport, intercept: Boolean = false)
-      extends Message(id(0, intercept), target)
-    final class Request(target: StageImpl, val n: Long, val from: Outport) extends Message(2, target)
-    final class RequestInterception(target: StageImpl, val n: Int, val from: Outport) extends Message(3, target)
-    final class Cancel(target: StageImpl, val from: Outport, intercept: Boolean = false)
-      extends Message(id(4, intercept), target)
-    final class OnSubscribe(target: StageImpl, val from: Inport, intercept: Boolean = false)
-      extends Message(id(6, intercept), target)
-    final class OnNext(target: StageImpl, val elem: AnyRef, val from: Inport, intercept: Boolean = false)
-      extends Message(id(8, intercept), target)
-    final class OnComplete(target: StageImpl, val from: Inport, intercept: Boolean = false)
-      extends Message(id(10, intercept), target)
-    final class OnError(target: StageImpl, val error: Throwable, val from: Inport, intercept: Boolean = false)
-      extends Message(id(12, intercept), target)
-    final class XEvent(target: StageImpl, @volatile private[StreamRunner] var ev: AnyRef, runner: StreamRunner,
-                       intercept: Boolean = false) extends Message(id(14, intercept), target)
-      with Runnable {
+    final class Subscribe(val target: StageImpl, val from: Outport) extends Message(0)
+    final class Request(val target: StageImpl, val n: Long, val from: Outport) extends Message(1)
+    final class Cancel(val target: StageImpl, val from: Outport) extends Message(2)
+    final class OnSubscribe(val target: StageImpl, val from: Inport) extends Message(3)
+    final class OnNext(val target: StageImpl, val elem: AnyRef, val from: Inport) extends Message(4)
+    final class OnComplete(val target: StageImpl, val from: Inport) extends Message(5)
+    final class OnError(val target: StageImpl, val error: Throwable, val from: Inport) extends Message(6)
+    final class XEvent(val target: StageImpl, @volatile private[StreamRunner] var ev: AnyRef, runner: StreamRunner)
+      extends Message(7) with Runnable {
       def run(): Unit = runner.enqueue(this)
     }
-    final class XStart(target: StageImpl) extends Message(16, target)
+    final class Start(val needXStart: List[StageImpl]) extends Message(8)
   }
 
 }
