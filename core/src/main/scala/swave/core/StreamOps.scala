@@ -308,10 +308,10 @@ abstract class StreamOps[A] private[core] { self ⇒
     append(new MapStage(f.asInstanceOf[Any ⇒ AnyRef]))
 
   final def mapAsync[B](parallelism: Int)(f: A ⇒ Future[B]): Repr[B] =
-    map(a ⇒ () ⇒ f(a)).flattenConcat(parallelism)
+    map(a ⇒ () ⇒ f(a)).flattenConcat(parallelism).async()
 
   final def mapAsyncUnordered[B](parallelism: Int)(f: A ⇒ Future[B]): Repr[B] =
-    map(a ⇒ () ⇒ f(a)).flattenMerge(parallelism)
+    map(a ⇒ () ⇒ f(a)).flattenMerge(parallelism).async()
 
   final def merge[B >: A](other: Spout[B], eagerComplete: Boolean = false): Repr[B] =
     attach(other).fanInMerge(eagerComplete)
