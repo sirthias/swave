@@ -75,7 +75,14 @@ private[swave] abstract class StageImpl extends PortImpl {
   private[this] var _state: State                        = _ // current state; the STOPPED state is always encoded as zero
   private[this] var _requestBacklog: RequestBacklogList  = _
   private[this] var _region: Region                      = _
-  protected final var interceptingStates: Int            = _ // bit mask holding a 1 bit for every state which requires interception support
+  private[impl] var interceptionHelperIndex              = -1
+
+  // bit mask holding misc flags
+  // bits 0-29: set if respective state requires interception support
+  // bit    30: set if stage required full interceptions, i.e. including the `from` stage
+  // bit    31: set if stage `request` signals should be intercepted *before* reaching this stage
+  //            because it usually produces elements to the requesting downstream synchronously
+  protected final var flags: Int = _
 
   protected final implicit def self: this.type             = this
   protected final def initialState(s: State): Unit         = _state = s
@@ -130,7 +137,7 @@ private[swave] abstract class StageImpl extends PortImpl {
         mbs
       } else n.toInt
 
-    if (notIntercepting) _request(count, from)
+    if (!interceptAllRequests && notIntercepting) _request(count, from)
     else interceptRequest(count, from)
   }
 
@@ -452,10 +459,11 @@ private[swave] abstract class StageImpl extends PortImpl {
 
   /////////////////////////////////////// PRIVATE ///////////////////////////////////////
 
-  private def fullInterceptions: Boolean = interceptingStates < 0
+  private def interceptAllRequests: Boolean = flags < 0 // test if bit 31 is set
+  private def fullInterceptions: Boolean = (flags & 0x40000000) != 0 // test if bit 30 is set
   private def notIntercepting: Boolean = _interceptionLevel == 0
   private def registerInterception(): Unit = _interceptionLevel += 1
-  private def interceptionNeeded: Int = (interceptingStates >> _state) & 1
+  private def interceptionNeeded: Int = (flags >> _state) & 1
   private def enterInterceptionLevel(): Int = {
     val mark = interceptionNeeded
     _interceptionLevel = math.max(_interceptionLevel, mark)

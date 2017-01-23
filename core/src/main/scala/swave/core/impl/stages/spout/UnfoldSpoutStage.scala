@@ -15,7 +15,7 @@ import swave.core.Spout.Unfolding
 import swave.core.impl.stages.SpoutStage
 
 // format: OFF
-@StageImplementation
+@StageImplementation(interceptAllRequests = true)
 private[core] final class UnfoldSpoutStage(zero: AnyRef, f: AnyRef => Unfolding[AnyRef, AnyRef]) extends SpoutStage {
 
   def kind = Stage.Kind.Spout.Unfold(zero, f)

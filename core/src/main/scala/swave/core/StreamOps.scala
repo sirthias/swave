@@ -134,6 +134,21 @@ abstract class StreamOps[A] private[core] { self ⇒
   final def expand[B](extrapolate: A ⇒ Iterator[B]): Repr[B] =
     expand(Iterator.empty, extrapolate)
 
+  /**
+    * Rate-detaches the downstream from the upstream by allowing the downstream to consume elements faster than the
+    * upstream produces them. Each element coming in from upstream is passed through the given `extrapolate` function.
+    * The produced iterator is then pulled from at least once (if non-empty). Afterwards, if the downstream is ready to
+    * consume more elements but the upstream hasn't delivered any yet the iterator will be drained until it has no more
+    * elements or the next element from upstream arrives.
+    *
+    * If the upstream produces elements at a faster rate than the downstream can consume them each iterator produced by
+    * the `extrapolate` function will only ever have its first element pulled and the upstream will be backpressured,
+    * i.e. the downstream will slow down the upstream.
+    *
+    * @param zero iterator used for supplying elements to downstream before the first element arrives from upstream,
+    *             only pulled from if the first demand from downstream arrives before the first element from upstream.
+    * @param extrapolate function producing the elements that each element from upstream is expanded to
+    */
   final def expand[B](zero: Iterator[B], extrapolate: A ⇒ Iterator[B]): Repr[B] =
     append(new ExpandStage(zero.asInstanceOf[Iterator[AnyRef]], extrapolate.asInstanceOf[Any ⇒ Iterator[AnyRef]]))
 

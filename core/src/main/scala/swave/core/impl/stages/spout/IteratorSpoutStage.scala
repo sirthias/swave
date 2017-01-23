@@ -14,7 +14,7 @@ import swave.core.impl.Outport
 import swave.core.impl.stages.SpoutStage
 
 // format: OFF
-@StageImplementation
+@StageImplementation(interceptAllRequests = true)
 private[core] final class IteratorSpoutStage(iterator: Iterator[AnyRef]) extends SpoutStage {
 
   def kind = Stage.Kind.Spout.FromIterator(iterator)

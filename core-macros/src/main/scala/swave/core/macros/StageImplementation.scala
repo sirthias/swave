@@ -15,6 +15,7 @@ import scala.annotation.{compileTimeOnly, StaticAnnotation}
   */
 @compileTimeOnly("Unresolved @StageImplementation")
 private[swave] final class StageImplementation(fullInterceptions: Boolean = false,
+                                               interceptAllRequests: Boolean = false,
                                                dump: Boolean = false,
                                                trace: Boolean = false)
     extends StaticAnnotation {
@@ -96,6 +97,7 @@ private[swave] class StageImplementationMacro(val c: scala.reflect.macros.whiteb
 
   var stateHandlers              = Map.empty[String, StateHandlers]
   val fullInterceptions: Boolean = annotationFlag("fullInterceptions")
+  val interceptAllRequests: Boolean = annotationFlag("interceptAllRequests")
   val debugMode: Boolean         = annotationFlag("dump")
   val tracing: Boolean           = annotationFlag("trace")
 
@@ -458,15 +460,16 @@ private[swave] class StageImplementationMacro(val c: scala.reflect.macros.whiteb
   }
 
   def interceptingStates(stageImpl: ImplDef): Tree = {
-    if (stateHandlers.size > 31)
+    if (stateHandlers.size > 30)
       c.abort(
         stageImpl.pos,
-        s"A stage implementation must not have more than 31 states! (Here it has ${stateHandlers.size})")
+        s"A stage implementation must not have more than 30 states! (Here it has ${stateHandlers.size})")
     var bitMask = stateHandlers.valuesIterator.foldLeft(0) { (acc, sh) ⇒
       if (sh.intercept) acc | (1 << sh.id) else acc
     }
-    if (fullInterceptions) bitMask |= Int.MinValue // the highest bit signals whether we need full interceptions
-    q"interceptingStates = $bitMask"
+    if (fullInterceptions) bitMask |= 0x40000000 // bit 30
+    if (interceptAllRequests) bitMask |= 0x80000000 // bit 31 (the highest bit)
+    q"flags = $bitMask"
   }
 
   def stateNameImpl: List[DefDef] = {

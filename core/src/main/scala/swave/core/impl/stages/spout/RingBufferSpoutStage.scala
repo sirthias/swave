@@ -14,7 +14,7 @@ import swave.core.impl.util.RingBuffer
 import swave.core.macros.StageImplementation
 
 // format: OFF
-@StageImplementation
+@StageImplementation(interceptAllRequests = true)
 private[core] final class RingBufferSpoutStage(buffer: RingBuffer[AnyRef]) extends SpoutStage {
 
   def kind = Stage.Kind.Spout.FromRingBuffer(buffer)
