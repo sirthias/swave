@@ -31,7 +31,7 @@ class AsyncSpec extends SwaveSpec {
 
     "sync base example" taggedAs NotOnTravis in {
       val (1, mapThreadName) =
-        Spout(1, 2, 3).map(_ → threadName).drainTo(Drain.head).await(20.millis)
+        Spout(1, 2, 3).map(_ → threadName).drainTo(Drain.head).await()
 
       mapThreadName shouldEqual threadName
     }
@@ -39,7 +39,7 @@ class AsyncSpec extends SwaveSpec {
     "single default dispatcher" taggedAs NotOnTravis in {
       val streamGraph =
         Spout.continually(threadName).map(_ → threadName).to(Drain.head.async()).seal()
-      val (threadName0, threadName1) = streamGraph.run().result.await(20.millis)
+      val (threadName0, threadName1) = streamGraph.run().result.await()
 
       List(threadName0, threadName1).distinct shouldEqual List("swave-default-1")
     }
@@ -47,7 +47,7 @@ class AsyncSpec extends SwaveSpec {
     "single non-default dispatcher" taggedAs NotOnTravis in {
       val streamGraph =
         Spout.continually(threadName).map(_ → threadName).to(Drain.head.async("disp0")).seal()
-      val (threadName0, threadName1) = streamGraph.run().result.await(20.millis)
+      val (threadName0, threadName1) = streamGraph.run().result.await()
 
       List(threadName0, threadName1).distinct shouldEqual List("swave-disp0-1")
     }
@@ -55,7 +55,7 @@ class AsyncSpec extends SwaveSpec {
     "default async boundary with implicit default tail" taggedAs NotOnTravis in {
       val streamGraph =
         Spout.continually(threadName).asyncBoundary().map(_ → threadName).to(Drain.head).seal()
-      val (threadName0, threadName1) = streamGraph.run().result.await(20.millis)
+      val (threadName0, threadName1) = streamGraph.run().result.await()
 
       List(threadName0, threadName1).distinct shouldEqual List("swave-default-1")
     }
@@ -63,7 +63,7 @@ class AsyncSpec extends SwaveSpec {
     "default async boundary with explicit default tail" taggedAs NotOnTravis in {
       val streamGraph =
         Spout.continually(threadName).asyncBoundary().map(_ → threadName).to(Drain.head.async()).seal()
-      val (threadName0, threadName1) = streamGraph.run().result.await(20.millis)
+      val (threadName0, threadName1) = streamGraph.run().result.await()
 
       List(threadName0, threadName1).distinct shouldEqual List("swave-default-1")
     }
@@ -71,7 +71,7 @@ class AsyncSpec extends SwaveSpec {
     "non-default async boundary with implicit default tail" taggedAs NotOnTravis in {
       val streamGraph =
         Spout.continually(threadName).asyncBoundary("disp0").map(_ → threadName).to(Drain.head).seal()
-      val (threadName0, threadName1) = streamGraph.run().result.await(20.millis)
+      val (threadName0, threadName1) = streamGraph.run().result.await()
 
       threadName0 shouldEqual "swave-disp0-1"
       threadName1 shouldEqual "swave-default-1"
@@ -80,7 +80,7 @@ class AsyncSpec extends SwaveSpec {
     "non-default async boundary with non-default tail" taggedAs NotOnTravis in {
       val streamGraph =
         Spout.continually(threadName).asyncBoundary("disp0").map(_ → threadName).to(Drain.head.async("disp1")).seal()
-      val (threadName0, threadName1) = streamGraph.run().result.await(20.millis)
+      val (threadName0, threadName1) = streamGraph.run().result.await()
 
       threadName0 shouldEqual "swave-disp0-1"
       threadName1 shouldEqual "swave-disp1-1"
@@ -97,7 +97,7 @@ class AsyncSpec extends SwaveSpec {
           .to(Drain.head.async("disp2"))
           .trySeal()
           .get
-      val ((threadName0, threadName1), threadName2) = streamGraph.run().result.await(20.millis)
+      val ((threadName0, threadName1), threadName2) = streamGraph.run().result.await()
 
       threadName0 shouldEqual "swave-disp0-1"
       threadName1 shouldEqual "swave-disp1-1"
@@ -142,7 +142,7 @@ class AsyncSpec extends SwaveSpec {
         .flattenConcat()
         .take(5)
         .drainToList(limit = 5)
-        .await(50.millis) shouldEqual List(1, 3, 5, 7, 9)
+        .await() shouldEqual List(1, 3, 5, 7, 9)
     }
 
     "sync sub-stream in async parent stream" taggedAs NotOnTravis in {
@@ -153,7 +153,7 @@ class AsyncSpec extends SwaveSpec {
         .flattenConcat()
         .take(5)
         .drainTo(Drain.seq(limit = 5).async())
-        .await(50.millis) shouldEqual List(1, 3, 5, 7, 9)
+        .await() shouldEqual List(1, 3, 5, 7, 9)
     }
 
     "async sub-stream in async parent stream" taggedAs NotOnTravis in {
@@ -164,7 +164,7 @@ class AsyncSpec extends SwaveSpec {
         .flattenConcat()
         .take(5)
         .drainTo(Drain.seq(limit = 5).async())
-        .await(50.millis) shouldEqual List(1, 3, 5, 7, 9)
+        .await() shouldEqual List(1, 3, 5, 7, 9)
     }
 
     "async sub-stream in sync parent stream" taggedAs NotOnTravis in {
@@ -176,7 +176,7 @@ class AsyncSpec extends SwaveSpec {
         .take(5)
         .drainToList(5)
         .failed
-        .await(50.millis)
+        .await()
         .getMessage
         .shouldEqual("A synchronous parent stream must not contain an async sub-stream. " +
           "You can fix this by explicitly marking the parent stream as `async`.")
@@ -191,7 +191,7 @@ class AsyncSpec extends SwaveSpec {
         .take(5)
         .drainTo(Drain.seq(limit = 5).async())
         .failed
-        .await(50.millis)
+        .await()
         .getMessage
         .shouldEqual(
           "An asynchronous sub-stream with a non-default dispatcher assignment (in this case `disp0`) must be " +
@@ -206,7 +206,7 @@ class AsyncSpec extends SwaveSpec {
         .map(_.take(1).map(_ :: threadName :: Nil))
         .flattenConcat()
         .drainTo(Drain.head)
-        .await(20.millis)
+        .await()
         .distinct shouldEqual List("swave-default-1")
     }
 
@@ -217,7 +217,7 @@ class AsyncSpec extends SwaveSpec {
         .take(3)
         .async()
         .drainToList(limit = 10)
-        .await(50.millis) shouldEqual List("0,1,2,3,4", "5,6,7,8,9", "10,11,12,13,14")
+        .await() shouldEqual List("0,1,2,3,4", "5,6,7,8,9", "10,11,12,13,14")
     }
 
     "rate detach" in {
@@ -226,7 +226,7 @@ class AsyncSpec extends SwaveSpec {
         .throttle(1, per = 50.millis)
         .take(3)
         .drainToList(limit = 3)
-        .await(500.millis) shouldEqual List(42, 42, 42)
+        .await() shouldEqual List(42, 42, 42)
     }
   }
 }
