@@ -7,18 +7,18 @@
 package swave.docs
 
 import scala.util.{Failure, Success}
+import scala.concurrent.duration._
 import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.stream.scaladsl._
-import akka.stream.{ActorMaterializer, ActorMaterializerSettings, FlowShape}
+import akka.stream.{ActorMaterializer, ActorMaterializerSettings, FlowShape, ThrottleMode}
 import swave.core.util.XorShiftRandom
 
-object AkkaPi extends App {
+object AkkaPiThrottled extends App {
   implicit val system = ActorSystem("AkkaPi")
   import system.dispatcher
 
-  private val settings =
-    ActorMaterializerSettings(system).withSyncProcessingLimit(Int.MaxValue).withInputBuffer(256, 256)
+  private val settings = ActorMaterializerSettings(system)
   implicit val materializer = ActorMaterializer(settings)
 
   val random = XorShiftRandom()
@@ -29,16 +29,16 @@ object AkkaPi extends App {
     .map { case x +: y +: Nil ⇒ Point(x, y) }
     .via(broadcastFilterMerge)
     .scan(State(0, 0)) { _ withNextSample _ }
-    .splitWhen(_.totalSamples % 1000000 == 1)
-    .drop(999999)
-    .concatSubstreams
-    .map(state ⇒ f"After ${state.totalSamples}%,10d samples π is approximated as ${state.π}%.6f")
-    .take(30)
-    .runForeach(println)
+    .conflate(Keep.right)
+    .throttle(1, 1.second, 0, ThrottleMode.Shaping)
+    .map { state ⇒ println(f"After ${state.totalSamples}%,10d samples π is approximated as ${state.π}%.6f"); state }
+    .take(20)
+    .runWith(Sink.last)
     .onComplete {
-      case Success(_) =>
+      case Success(State(totalSamples, _)) =>
         val time = System.currentTimeMillis() - system.startTime
-        println(f"Done. Total time: $time%,6d ms, Throughput: ${30000.0 / time}%.3fM samples/sec\n")
+        val throughput = totalSamples / 1000.0 / time
+        println(f"Done. Total time: $time%,6d ms, Throughput: $throughput%.3fM samples/sec\n")
         system.terminate()
 
       case Failure(e) => println(e)
@@ -53,7 +53,7 @@ object AkkaPi extends App {
       import GraphDSL.Implicits._
 
       val broadcast   = b.add(Broadcast[Point](2)) // split one upstream into 2 downstreams
-      val filterInner = b.add(Flow[Point].filter(_.isInner).map(_ => InnerSample))
+    val filterInner = b.add(Flow[Point].filter(_.isInner).map(_ => InnerSample))
       val filterOuter = b.add(Flow[Point].filterNot(_.isInner).map(_ => OuterSample))
       val merge       = b.add(Merge[Sample](2)) // merge 2 upstreams into one downstream
 
