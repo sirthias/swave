@@ -7,7 +7,7 @@
 package swave.core.impl.stages
 
 import java.util.concurrent.ThreadLocalRandom
-import scala.util.Try
+import scala.concurrent.duration._
 import swave.core._
 import swave.core.internal.testkit.TestError
 import swave.core.util._
@@ -24,18 +24,13 @@ final class ExpandSpec extends SwaveSpec {
 
   "Expand must" - {
 
-    implicit class ExpandTo(underlying: SpoutProbe[Int]) extends AnyRef {
-      def expandTo(drain: Drain[Int, DrainProbe[Int]]): Try[DrainProbe[Int]] =
-        underlying.expand(Iterator(1, 2), Iterator.continually(_)).drainTo(drain)
-    }
-
     "drain the zero Iterator before working as expected" in {
       val upstream   = SpoutProbe[Int]
       val downstream = DrainProbe[Int]
-      upstream.expandTo(downstream)
+      upstream.expand(Iterator(10, 20), Iterator.continually(_)).drainTo(downstream)
 
       upstream.expectRequest(1)
-      downstream.requestExpectNext(1, 2)
+      downstream.requestExpectNext(10, 20)
       downstream.expectNoSignal()
 
       upstream.sendNext(42)
@@ -53,7 +48,7 @@ final class ExpandSpec extends SwaveSpec {
     "work properly when the zero Iterator is not pulled" in {
       val upstream   = SpoutProbe[Int]
       val downstream = DrainProbe[Int]
-      upstream.expandTo(downstream)
+      upstream.expand(Iterator(1, 2), Iterator.continually(_)).drainTo(downstream)
 
       upstream.sendNext(42)
       downstream.requestExpectNext(42, 42, 42)
@@ -70,7 +65,7 @@ final class ExpandSpec extends SwaveSpec {
     "pass-through elements unchanged when there is no rate difference" in {
       val upstream   = SpoutProbe[Int]
       val downstream = DrainProbe[Int]
-      upstream.expandTo(downstream)
+      upstream.expand(Iterator(1, 2), Iterator.continually(_)).drainTo(downstream)
 
       for (i ← 50 to 100) {
         // Order is important here: If the request comes first it will be extrapolated!
@@ -86,9 +81,10 @@ final class ExpandSpec extends SwaveSpec {
     "work on a variable rate chain" in {
       Spout(50 to 100)
         .map { i ⇒ if (ThreadLocalRandom.current().nextBoolean()) Thread.sleep(10); i }
+        .asyncBoundary()
         .expand(Iterator.continually(_))
         .drainFolding(Set.empty[Int])(_ + _)
-        .await()
+        .await(5.seconds)
         .toSeq
         .sorted shouldEqual (50 to 100)
     }
@@ -96,7 +92,7 @@ final class ExpandSpec extends SwaveSpec {
     "backpressure publisher when subscriber is slower" in {
       val upstream   = SpoutProbe[Int]
       val downstream = DrainProbe[Int]
-      upstream.expandTo(downstream)
+      upstream.expand(Iterator(1, 2), Iterator.continually(_)).drainTo(downstream)
 
       upstream.expectRequest(1)
       upstream.sendNext(1)
