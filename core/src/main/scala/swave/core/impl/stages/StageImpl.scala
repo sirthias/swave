@@ -71,11 +71,11 @@ private[swave] abstract class StageImpl extends PortImpl {
 
   type State = Int // semantic alias
 
-  private[this] var _interceptionLevel                   = 0
-  private[this] var _state: State                        = _ // current state; the STOPPED state is always encoded as zero
-  private[this] var _requestBacklog: RequestBacklogList  = _
-  private[this] var _region: Region                      = _
-  private[impl] var interceptionHelperIndex              = -1
+  private[this] var _interceptionLevel                  = 0
+  private[this] var _state: State                       = _ // current state; the STOPPED state is always encoded as zero
+  private[this] var _requestBacklog: RequestBacklogList = _
+  private[this] var _region: Region                     = _
+  private[impl] var interceptionHelperIndex             = -1
 
   // bit mask holding misc flags
   // bits 0-29: set if respective state requires interception support
@@ -84,10 +84,10 @@ private[swave] abstract class StageImpl extends PortImpl {
   //            because it usually produces elements to the requesting downstream synchronously
   protected final var flags: Int = _
 
-  protected final implicit def self: this.type             = this
-  protected final def initialState(s: State): Unit         = _state = s
-  protected final def stay(): State                        = _state
-  protected final def illegalState(msg: String)            = new IllegalStateException(msg + " in " + this)
+  protected final implicit def self: this.type               = this
+  protected final def initialState(s: State): Unit           = _state = s
+  protected final def stay(): State                          = _state
+  protected final def illegalState(msg: String)              = new IllegalStateException(msg + " in " + this)
   protected final def setInterceptionLevel(level: Int): Unit = _interceptionLevel = level
 
   final def region: Region       = _region
@@ -227,7 +227,7 @@ private[swave] abstract class StageImpl extends PortImpl {
           if (current.tail ne current) { // is `current` not cancelled? (tail eq self signals "cancelled")
             val newPending = current.pending - 1
             if (newPending == 0) {
-              val mbs = region.mbs
+              val mbs          = region.mbs
               val newRemaining = current.remaining - mbs
               val n =
                 if (newRemaining > 0) {
@@ -460,10 +460,10 @@ private[swave] abstract class StageImpl extends PortImpl {
   /////////////////////////////////////// PRIVATE ///////////////////////////////////////
 
   private def interceptAllRequests: Boolean = flags < 0 // test if bit 31 is set
-  private def fullInterceptions: Boolean = (flags & 0x40000000) != 0 // test if bit 30 is set
-  private def notIntercepting: Boolean = _interceptionLevel == 0
-  private def registerInterception(): Unit = _interceptionLevel += 1
-  private def interceptionNeeded: Int = (flags >> _state) & 1
+  private def fullInterceptions: Boolean    = (flags & 0x40000000) != 0 // test if bit 30 is set
+  private def notIntercepting: Boolean      = _interceptionLevel == 0
+  private def registerInterception(): Unit  = _interceptionLevel += 1
+  private def interceptionNeeded: Int       = (flags >> _state) & 1
   private def enterInterceptionLevel(): Int = {
     val mark = interceptionNeeded
     _interceptionLevel = math.max(_interceptionLevel, mark)

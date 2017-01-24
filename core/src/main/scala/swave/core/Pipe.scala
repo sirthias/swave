@@ -107,6 +107,7 @@ object Pipe {
       }
     fromDrainAndSpout(
       drain = Drain.lazyStart(() ⇒ innerPipe.inputAsDrain).dropResult, // TODO: remove superfluous intermediate allocations
-      spout = Spout.lazyStart(() ⇒ innerPipe.outputAsSpout))
+      spout = Spout.lazyStart(() ⇒ innerPipe.outputAsSpout)
+    )
   }
 }

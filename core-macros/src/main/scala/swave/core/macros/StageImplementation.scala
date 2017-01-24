@@ -87,19 +87,15 @@ private[swave] final class StageImplementation(fullInterceptions: Boolean = fals
 // TODO
 // - improve hygiene (e.g. naming resilience)
 private[swave] class StageImplementationMacro(val c: scala.reflect.macros.whitebox.Context)
-    extends Util
-    with ConnectFanInAndSealWith
-    with ConnectFanOutAndSealWith
-    with ConnectInAndSealWith
-    with ConnectInOutAndSealWith
-    with ConnectOutAndSealWith {
+    extends Util with ConnectFanInAndSealWith with ConnectFanOutAndSealWith with ConnectInAndSealWith
+    with ConnectInOutAndSealWith with ConnectOutAndSealWith {
   import c.universe._
 
-  var stateHandlers              = Map.empty[String, StateHandlers]
-  val fullInterceptions: Boolean = annotationFlag("fullInterceptions")
+  var stateHandlers                 = Map.empty[String, StateHandlers]
+  val fullInterceptions: Boolean    = annotationFlag("fullInterceptions")
   val interceptAllRequests: Boolean = annotationFlag("interceptAllRequests")
-  val debugMode: Boolean         = annotationFlag("dump")
-  val tracing: Boolean           = annotationFlag("trace")
+  val debugMode: Boolean            = annotationFlag("dump")
+  val tracing: Boolean              = annotationFlag("trace")
 
   private def annotationFlag(flag: String) =
     c.prefix.tree match {
@@ -146,12 +142,12 @@ private[swave] class StageImplementationMacro(val c: scala.reflect.macros.whiteb
     mapTemplate(stageImpl) {
       mapBody {
         _ flatMap {
-          case q"connectFanInAndSealWith { $f }"                   ⇒ connectFanInAndSealWith(f)
-          case q"connectFanOutAndSealWith { $f }"                  ⇒ connectFanOutAndSealWith(f)
-          case q"connectInAndSealWith { $f }"                      ⇒ connectInAndSealWith(f)
-          case q"connectInOutAndSealWith { $f }"                   ⇒ connectInOutAndSealWith(f)
-          case q"connectOutAndSealWith { $f }"                     ⇒ connectOutAndSealWith(f)
-          case x                                                   ⇒ x :: Nil
+          case q"connectFanInAndSealWith { $f }"  ⇒ connectFanInAndSealWith(f)
+          case q"connectFanOutAndSealWith { $f }" ⇒ connectFanOutAndSealWith(f)
+          case q"connectInAndSealWith { $f }"     ⇒ connectInAndSealWith(f)
+          case q"connectInOutAndSealWith { $f }"  ⇒ connectInOutAndSealWith(f)
+          case q"connectOutAndSealWith { $f }"    ⇒ connectOutAndSealWith(f)
+          case x                                  ⇒ x :: Nil
         }
       }
     }
@@ -467,7 +463,7 @@ private[swave] class StageImplementationMacro(val c: scala.reflect.macros.whiteb
     var bitMask = stateHandlers.valuesIterator.foldLeft(0) { (acc, sh) ⇒
       if (sh.intercept) acc | (1 << sh.id) else acc
     }
-    if (fullInterceptions) bitMask |= 0x40000000 // bit 30
+    if (fullInterceptions) bitMask |= 0x40000000    // bit 30
     if (interceptAllRequests) bitMask |= 0x80000000 // bit 31 (the highest bit)
     q"flags = $bitMask"
   }
@@ -594,7 +590,8 @@ private[swave] class StageImplementationMacro(val c: scala.reflect.macros.whiteb
         args.get("onError"),
         args.get("xSeal"),
         args.get("xStart"),
-        args.get("xEvent"))
+        args.get("xEvent")
+      )
     }
   }
 

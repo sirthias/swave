@@ -130,10 +130,7 @@ private[core] object PublisherDrainStage {
     var cancelled = false
     var requested = 0L
 
-    def request(n: Long) = {
-      requested ⊹= n
-    }
-
+    def request(n: Long): Unit = requested ⊹= n
     def cancel() = cancelled = true
   }
 }

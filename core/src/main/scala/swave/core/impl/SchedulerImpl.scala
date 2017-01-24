@@ -79,9 +79,7 @@ private[core] final class SchedulerImpl private (val settings: Scheduler.Setting
     }
 
   private final class Task(val deadline: Long, intervalNanos: Long, runnable: Runnable)(implicit ec: ExecutionContext)
-      extends AtomicReference[wheel.Timer]
-      with Runnable
-      with Cancellable {
+      extends AtomicReference[wheel.Timer] with Runnable with Cancellable {
 
     // executed on the TimerThread!
     def run(): Unit = {

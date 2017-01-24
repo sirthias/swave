@@ -13,9 +13,9 @@ package object hash {
 
   implicit class RichBytesStreamOpsHash[T, S[X] <: StreamOps[X]](val underlying: S[T]) extends AnyVal {
 
-    def md2(implicit ev: Bytes[T]): S[T]#Repr[T] = underlying.via(Hash.md2[T])
-    def md5(implicit ev: Bytes[T]): S[T]#Repr[T] = underlying.via(Hash.md5[T])
-    def sha1(implicit ev: Bytes[T]): S[T]#Repr[T] = underlying.via(Hash.sha1[T])
+    def md2(implicit ev: Bytes[T]): S[T]#Repr[T]    = underlying.via(Hash.md2[T])
+    def md5(implicit ev: Bytes[T]): S[T]#Repr[T]    = underlying.via(Hash.md5[T])
+    def sha1(implicit ev: Bytes[T]): S[T]#Repr[T]   = underlying.via(Hash.sha1[T])
     def sha256(implicit ev: Bytes[T]): S[T]#Repr[T] = underlying.via(Hash.sha256[T])
     def sha384(implicit ev: Bytes[T]): S[T]#Repr[T] = underlying.via(Hash.sha384[T])
     def sha512(implicit ev: Bytes[T]): S[T]#Repr[T] = underlying.via(Hash.sha512[T])

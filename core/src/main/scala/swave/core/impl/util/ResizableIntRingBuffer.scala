@@ -123,7 +123,7 @@ private[swave] final class ResizableIntRingBuffer(initialCap: Int, maxCap: Int) 
   def unsafeRead(): Int = {
     val r = readIx
     readIx = r + 1
-    val ix  = calcIntArrayElementOffset((r & mask).toLong)
+    val ix = calcIntArrayElementOffset((r & mask).toLong)
     UNSAFE.getInt(array, ix)
   }
 

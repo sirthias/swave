@@ -1,6 +1,6 @@
 scalacOptions += "-deprecation"
 
-//addSbtPlugin("com.geirsson"          % "sbt-scalafmt"   % "0.4.10")
+addSbtPlugin("com.geirsson"          % "sbt-scalafmt"   % "0.5.3")
 addSbtPlugin("com.jsuereth"          % "sbt-pgp"        % "1.0.1")
 addSbtPlugin("com.eed3si9n"          % "sbt-buildinfo"  % "0.6.1")
 addSbtPlugin("de.heikoseeberger"     % "sbt-header"     % "1.6.0")

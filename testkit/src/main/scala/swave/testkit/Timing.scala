@@ -31,6 +31,7 @@ object Timing {
       Settings(
         factor = c getDouble "factor",
         scalingChain = c.getDoubleList("scaling-chain").asScala.map(_.doubleValue)(breakOut),
-        singleExpectDefault = c getFiniteDuration "single-expect-default")
+        singleExpectDefault = c getFiniteDuration "single-expect-default"
+      )
   }
 }

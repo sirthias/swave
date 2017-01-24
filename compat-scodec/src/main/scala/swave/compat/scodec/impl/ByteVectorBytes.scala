@@ -55,10 +55,10 @@ class ByteVectorBytes extends Bytes[ByteVector] {
   def copyToArray(value: ByteVector, sourceOffset: Long, xs: Array[Byte], destOffset: Int, len: Int) =
     value.copyToArray(xs, destOffset, sourceOffset, len)
   def copyToBuffer(value: ByteVector, buffer: ByteBuffer): Int = value.copyToBuffer(buffer)
-  def copyToOutputStream(value: ByteVector, s: OutputStream) = value.copyToStream(s)
-  def toByteBuffer(value: ByteVector)                        = value.toByteBuffer
-  def toIndexedSeq(value: ByteVector): IndexedSeq[Byte]      = value.toIndexedSeq
-  def toSeq(value: ByteVector): Seq[Byte]                    = value.toSeq
+  def copyToOutputStream(value: ByteVector, s: OutputStream)   = value.copyToStream(s)
+  def toByteBuffer(value: ByteVector)                          = value.toByteBuffer
+  def toIndexedSeq(value: ByteVector): IndexedSeq[Byte]        = value.toIndexedSeq
+  def toSeq(value: ByteVector): Seq[Byte]                      = value.toSeq
   def decodeString(value: ByteVector, charset: Charset): Either[CharacterCodingException, String] =
     value.decodeString(charset)
 

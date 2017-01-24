@@ -88,15 +88,15 @@ private[impl] object StreamRunner {
 
   private[impl] sealed abstract class Message(val id: Int)
   private[impl] object Message {
-    final class Subscribe(val target: StageImpl, val from: Outport) extends Message(0)
-    final class Request(val target: StageImpl, val n: Long, val from: Outport) extends Message(1)
-    final class Cancel(val target: StageImpl, val from: Outport) extends Message(2)
-    final class OnSubscribe(val target: StageImpl, val from: Inport) extends Message(3)
-    final class OnNext(val target: StageImpl, val elem: AnyRef, val from: Inport) extends Message(4)
-    final class OnComplete(val target: StageImpl, val from: Inport) extends Message(5)
+    final class Subscribe(val target: StageImpl, val from: Outport)                    extends Message(0)
+    final class Request(val target: StageImpl, val n: Long, val from: Outport)         extends Message(1)
+    final class Cancel(val target: StageImpl, val from: Outport)                       extends Message(2)
+    final class OnSubscribe(val target: StageImpl, val from: Inport)                   extends Message(3)
+    final class OnNext(val target: StageImpl, val elem: AnyRef, val from: Inport)      extends Message(4)
+    final class OnComplete(val target: StageImpl, val from: Inport)                    extends Message(5)
     final class OnError(val target: StageImpl, val error: Throwable, val from: Inport) extends Message(6)
     final class XEvent(val target: StageImpl, @volatile private[StreamRunner] var ev: AnyRef, runner: StreamRunner)
-      extends Message(7) with Runnable {
+        extends Message(7) with Runnable {
       def run(): Unit = runner.enqueue(this)
     }
     final class Start(val needXStart: List[StageImpl]) extends Message(8)

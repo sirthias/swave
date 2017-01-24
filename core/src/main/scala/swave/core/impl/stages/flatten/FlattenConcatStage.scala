@@ -38,12 +38,12 @@ private[core] final class FlattenConcatStage(streamable: Streamable.Aux[Any, Any
       })
 
     /**
-     * Main upstream is active.
-     *
-     * @param subs        subs from which we are awaiting an onSubscribe (value == null) or to which we are already
-     *                    subscribed (value != null), may be empty
-     * @param remaining   number of elements already requested by downstream but not yet delivered, >= 0
-     */
+      * Main upstream is active.
+      *
+      * @param subs        subs from which we are awaiting an onSubscribe (value == null) or to which we are already
+      *                    subscribed (value != null), may be empty
+      * @param remaining   number of elements already requested by downstream but not yet delivered, >= 0
+      */
     def active(subs: InportAnyRefList, remaining: Long): State = {
       requireState(remaining >= 0)
       state(
@@ -111,12 +111,12 @@ private[core] final class FlattenConcatStage(streamable: Streamable.Aux[Any, Any
   }
 
   /**
-   * Main upstream completed.
-   *
-   * @param subs        subs from which we are awaiting an onSubscribe (value == null) or to which we are already
-   *                    subscribed (value != null), non-empty
-   * @param remaining   number of elements already requested by downstream but not yet delivered, >= 0
-   */
+    * Main upstream completed.
+    *
+    * @param subs        subs from which we are awaiting an onSubscribe (value == null) or to which we are already
+    *                    subscribed (value != null), non-empty
+    * @param remaining   number of elements already requested by downstream but not yet delivered, >= 0
+    */
   def activeUpstreamCompleted(out: Outport, subs: InportAnyRefList, remaining: Long): State = {
     requireState(subs.nonEmpty && remaining >= 0)
     state(

@@ -86,7 +86,8 @@ object StreamEnv {
         dispatcherSettings = Dispatchers.Settings fromSubConfig c.getConfig("dispatcher"),
         schedulerSettings = Scheduler.Settings fromSubConfig c.getConfig("scheduler"),
         fileIOSettings = FileIO.Settings fromSubConfig c.getConfig("file-io"),
-        extensionSettings = Extension.Settings fromSubConfig c.getConfig("extensions"))
+        extensionSettings = Extension.Settings fromSubConfig c.getConfig("extensions")
+      )
   }
 
   def apply(name: String = "default",

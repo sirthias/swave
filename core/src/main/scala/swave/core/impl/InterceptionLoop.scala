@@ -13,7 +13,7 @@ import swave.core.impl.util.{ResizableIntRingBuffer, ResizableRingBuffer}
 private[impl] final class InterceptionLoop(initialBufferSize: Int) {
 
   private[this] var stageLookup: Array[StageImpl] = new Array[StageImpl](16)
-  private[this] var stageLookupSize = 0
+  private[this] var stageLookupSize               = 0
   private[this] val intBuffer: ResizableIntRingBuffer =
     new ResizableIntRingBuffer(initialBufferSize, initialBufferSize << 4)
   private[this] val objBuffer: ResizableRingBuffer[AnyRef] =
@@ -83,20 +83,20 @@ private[impl] final class InterceptionLoop(initialBufferSize: Int) {
   def hasInterception: Boolean = intBuffer.nonEmpty
 
   def handleInterception(): Unit = {
-    def readObj() = objBuffer.unsafeRead()
-    def readInt() = intBuffer.unsafeRead()
+    def readObj()   = objBuffer.unsafeRead()
+    def readInt()   = intBuffer.unsafeRead()
     def readStage() = stageLookup(readInt())
     (readInt(): @switch) match {
-      case 0 ⇒ readStage()._subscribe(null)
-      case 1 ⇒ readStage()._subscribe(readStage())
-      case 2 ⇒ readStage()._request(readInt(), null)
-      case 3 ⇒ readStage()._request(readInt(), readStage())
-      case 4 ⇒ readStage()._cancel(null)
-      case 5 ⇒ readStage()._cancel(readStage())
-      case 6 ⇒ readStage()._onSubscribe(null)
-      case 7 ⇒ readStage()._onSubscribe(readStage())
-      case 8 ⇒ readStage()._onNext(readObj(), null)
-      case 9 ⇒ readStage()._onNext(readObj(), readStage())
+      case 0  ⇒ readStage()._subscribe(null)
+      case 1  ⇒ readStage()._subscribe(readStage())
+      case 2  ⇒ readStage()._request(readInt(), null)
+      case 3  ⇒ readStage()._request(readInt(), readStage())
+      case 4  ⇒ readStage()._cancel(null)
+      case 5  ⇒ readStage()._cancel(readStage())
+      case 6  ⇒ readStage()._onSubscribe(null)
+      case 7  ⇒ readStage()._onSubscribe(readStage())
+      case 8  ⇒ readStage()._onNext(readObj(), null)
+      case 9  ⇒ readStage()._onNext(readObj(), readStage())
       case 10 ⇒ readStage()._onComplete(null)
       case 11 ⇒ readStage()._onComplete(readStage())
       case 12 ⇒ readStage()._onError(readObj().asInstanceOf[Throwable], null)

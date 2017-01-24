@@ -15,8 +15,8 @@ package object text {
 
     def decode(charset: Charset,
                onMalformedInput: CodingErrorAction = CodingErrorAction.REPORT,
-               onUnmappableCharacter: CodingErrorAction = CodingErrorAction.REPLACE)
-              (implicit ev: Bytes[T]): S[T]#Repr[String] =
+               onUnmappableCharacter: CodingErrorAction = CodingErrorAction.REPLACE)(
+        implicit ev: Bytes[T]): S[T]#Repr[String] =
       underlying.via(Text.decode[T](charset, onMalformedInput, onUnmappableCharacter))
 
     def utf8Decode(implicit ev: Bytes[T]): S[T]#Repr[String] =
@@ -25,10 +25,10 @@ package object text {
 
   implicit class RichStringStreamOpsText[S <: StreamOps[String]](val underlying: S) extends AnyVal {
 
-    def encode[T :Bytes](charset: Charset): S#Repr[T] =
+    def encode[T: Bytes](charset: Charset): S#Repr[T] =
       underlying.via(Text.encode(charset))
 
-    def utf8Encode[T :Bytes]: S#Repr[T] =
+    def utf8Encode[T: Bytes]: S#Repr[T] =
       underlying.via(Text.utf8Encode)
 
     def lines: S#Repr[String] =

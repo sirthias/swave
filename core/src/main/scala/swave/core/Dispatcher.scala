@@ -66,11 +66,15 @@ object Dispatcher {
     final case class ForkJoin(parallelism: Size, asyncMode: Boolean, daemonic: Boolean) extends ThreadPoolConfig
     object ForkJoin {
       def apply(c: Config): ForkJoin =
-        ForkJoin(parallelism = Size(c getConfig "parallelism"), asyncMode = c getString "task-peeking-mode" match {
-          case "FIFO" ⇒ true
-          case "LIFO" ⇒ false
-          case x      ⇒ throw new IllegalArgumentException(s"Illegal task-peeking-mode `$x`. Must be `FIFO` or `LIFO`.")
-        }, daemonic = c getBoolean "daemonic")
+        ForkJoin(
+          parallelism = Size(c getConfig "parallelism"),
+          asyncMode = c getString "task-peeking-mode" match {
+            case "FIFO" ⇒ true
+            case "LIFO" ⇒ false
+            case x      ⇒ throw new IllegalArgumentException(s"Illegal task-peeking-mode `$x`. Must be `FIFO` or `LIFO`.")
+          },
+          daemonic = c getBoolean "daemonic"
+        )
     }
 
     final case class ThreadPool(corePoolSize: Size,
@@ -101,7 +105,8 @@ object Dispatcher {
             case "first" ⇒ Prestart.First
             case "All"   ⇒ Prestart.All
           },
-          daemonic = c getBoolean "daemonic")
+          daemonic = c getBoolean "daemonic"
+        )
 
       private def size(c: Config, section: String): Size =
         c getString "fixed-pool-size" match {

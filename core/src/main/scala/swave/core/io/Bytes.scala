@@ -97,10 +97,8 @@ object Bytes {
     def get(ix: Long)(implicit b: Bytes[T]): Byte   = apply(ix)
     def apply(ix: Long)(implicit b: Bytes[T]): Byte = b.byteAt(value, ix)
 
-    def lift(ix: Long)(implicit b: Bytes[T]): Option[Byte] = {
-      if (0 <= ix && ix < size) Some(apply(ix))
-      else None
-    }
+    def lift(ix: Long)(implicit b: Bytes[T]): Option[Byte] =
+      if (0 <= ix && ix < size) Some(apply(ix)) else None
 
     def update(ix: Long, byte: Byte)(implicit b: Bytes[T]): T = b.update(value, ix, byte)
     def insert(ix: Long, byte: Byte)(implicit b: Bytes[T]): T = (take(ix) :+ byte) ++ drop(ix)
@@ -155,7 +153,7 @@ object Bytes {
     def copyToArray(xs: Array[Byte], offset: Int)(implicit b: Bytes[T]): Unit = b.copyToArray(value, xs, offset)
     def copyToArray(sourceOffset: Long, xs: Array[Byte], destOffset: Int, len: Int)(implicit b: Bytes[T]): Unit =
       b.copyToArray(value, sourceOffset, xs, destOffset, len)
-    def copyToBuffer(buffer: ByteBuffer)(implicit b: Bytes[T]): Int = b.copyToBuffer(value, buffer)
+    def copyToBuffer(buffer: ByteBuffer)(implicit b: Bytes[T]): Int     = b.copyToBuffer(value, buffer)
     def copyToOutputStream(s: OutputStream)(implicit b: Bytes[T]): Unit = b.copyToOutputStream(value, s)
     def toByteBuffer(implicit b: Bytes[T]): ByteBuffer                  = b.toByteBuffer(value)
 

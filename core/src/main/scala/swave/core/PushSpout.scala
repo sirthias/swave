@@ -36,8 +36,8 @@ final class PushSpout[+A] private (val initialBufferSize: Int,
                                    notifyOnDequeued: (PushSpout[A], Int) ⇒ Unit,
                                    notifyOnCancel: PushSpout[A] ⇒ Unit) {
 
-  private[this] val stage = new PushSpoutStage(initialBufferSize, maxBufferSize, notifyOnDequeued(this, _),
-    () ⇒ notifyOnCancel(this))
+  private[this] val stage =
+    new PushSpoutStage(initialBufferSize, maxBufferSize, notifyOnDequeued(this, _), () ⇒ notifyOnCancel(this))
 
   /**
     * The actual spout instance.

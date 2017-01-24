@@ -19,16 +19,16 @@ object Text extends TextTransformations
 
 trait TextTransformations {
 
-  final def utf8Decode[T :Bytes]: Pipe[T, String] = decode(UTF8)
+  final def utf8Decode[T: Bytes]: Pipe[T, String] = decode(UTF8)
 
-  final def decode[T :Bytes](charset: Charset,
-                       onMalformedInput: CodingErrorAction = CodingErrorAction.REPORT,
-                       onUnmappableCharacter: CodingErrorAction = CodingErrorAction.REPLACE): Pipe[T, String] =
+  final def decode[T: Bytes](charset: Charset,
+                             onMalformedInput: CodingErrorAction = CodingErrorAction.REPORT,
+                             onUnmappableCharacter: CodingErrorAction = CodingErrorAction.REPLACE): Pipe[T, String] =
     Pipe[T].map {
       new (T => String) {
         implicit def decorator(value: T): Bytes.Decorator[T] = Bytes.decorator(value)
 
-        private[this] val decoder = charset.newDecoder
+        private[this] val decoder                = charset.newDecoder
         private[this] var byteBuffer: ByteBuffer = _
         private[this] var charBuffer: CharBuffer = _
 
@@ -39,16 +39,15 @@ trait TextTransformations {
           val size =
             bytes.size match {
               case x if x > Int.MaxValue => sys.error("Cannot decode chunk with more than `Int.MaxValue` bytes")
-              case x => x.toInt
+              case x                     => x.toInt
             }
           if ((byteBuffer eq null) || byteBuffer.remaining < size) {
-            byteBuffer =
-              if ((byteBuffer ne null) && byteBuffer.position > 0) {
-                val b = ByteBuffer.allocate(byteBuffer.position + size)
-                byteBuffer.flip()
-                b.put(byteBuffer)
-                b
-              } else ByteBuffer.allocate(size)
+            byteBuffer = if ((byteBuffer ne null) && byteBuffer.position > 0) {
+              val b = ByteBuffer.allocate(byteBuffer.position + size)
+              byteBuffer.flip()
+              b.put(byteBuffer)
+              b
+            } else ByteBuffer.allocate(size)
             charBuffer = CharBuffer.allocate((size * decoder.averageCharsPerByte).toInt)
           }
           val copied = bytes.copyToBuffer(byteBuffer)
@@ -69,20 +68,20 @@ trait TextTransformations {
               byteBuffer.compact()
               string()
             case CoderResult.OVERFLOW => decode(string())
-            case x => x.throwException().asInstanceOf[Nothing]
+            case x                    => x.throwException().asInstanceOf[Nothing]
           }
         }
       }
     } named "decode"
 
-  final def utf8Encode[T :Bytes]: Pipe[String, T] = encode(UTF8)
+  final def utf8Encode[T: Bytes]: Pipe[String, T] = encode(UTF8)
 
   final def encode[T](charset: Charset)(implicit ev: Bytes[T]): Pipe[String, T] =
     Pipe[String] map {
       new (String => T) {
         implicit def decorator(value: T): Bytes.Decorator[T] = Bytes.decorator(value)
 
-        private[this] val encoder = charset.newEncoder()
+        private[this] val encoder                = charset.newEncoder()
         private[this] var charBuffer: CharBuffer = _
         private[this] var byteBuffer: ByteBuffer = _
 
@@ -110,7 +109,7 @@ trait TextTransformations {
               charBuffer.clear()
               bytes
             case CoderResult.OVERFLOW => encode(bytes)
-            case x => x.throwException().asInstanceOf[Nothing]
+            case x                    => x.throwException().asInstanceOf[Nothing]
           }
         }
       }
@@ -136,9 +135,11 @@ trait TextTransformations {
                     sb.append(c)
                     rec(ix + 1, buf)
                 }
-              } else if (buf eq null) Nil else buf.toList
+              } else if (buf eq null) Nil
+              else buf.toList
             rec(0, null)
-          } else if (sb.length > 0) sb.toString :: Nil else Nil
+          } else if (sb.length > 0) sb.toString :: Nil
+          else Nil
       }
     } named "lines"
 }

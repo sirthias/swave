@@ -68,11 +68,13 @@ package object akka {
       val drain         = Drain.toPublisher[T]()
       val runnableGraph = Source.fromPublisher(drain.result).toMat(underlying)(Keep.right)
       val matPromise    = Promise[Mat]()
-      Pipe[T].onStart { () ⇒
-        val mat = runnableGraph.run()
-        matPromise.success(mat)
-        ()
-      }.to(new Drain(drain.outport, matPromise.future))
+      Pipe[T]
+        .onStart { () ⇒
+          val mat = runnableGraph.run()
+          matPromise.success(mat)
+          ()
+        }
+        .to(new Drain(drain.outport, matPromise.future))
     }
   }
 

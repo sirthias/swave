@@ -169,7 +169,8 @@ object Graph {
               requireArg(
                 containsAll(alreadyStored, info),
                 s"Modules [${alreadyStored.id.name}] and [${info.id.name}] overlap without one fully containing" +
-                  "the other, which is unsupported for rendering!")
+                  "the other, which is unsupported for rendering!"
+              )
         }
       }
     }

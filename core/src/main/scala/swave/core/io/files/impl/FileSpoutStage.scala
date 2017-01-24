@@ -60,10 +60,9 @@ private[core] final class FileSpoutStage[T](path: Path, _chunkSize: Int)(implici
       })
 
     /**
-     *
-     * @param channel   the open FileChannel
-     * @param nextChunk the currently buffered chunk, non-empty
-     */
+      * @param channel   the open FileChannel
+      * @param nextChunk the currently buffered chunk, non-empty
+      */
     def reading(channel: FileChannel, nextChunk: T): State = state(
       request = (n, _) ⇒ {
         @tailrec def rec(remaining: Int, chunk: T): State =

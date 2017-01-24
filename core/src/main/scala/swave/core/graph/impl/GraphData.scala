@@ -58,7 +58,8 @@ private[graph] final case class GraphData[V](vertices: Vector[V],
       rootNodes = rootNodes.map(nodeTranslation),
       edgeAttrs = edgeAttrs.foldLeft(Map.empty[Edge, Digraph.EdgeAttributes]) {
         case (map, ((from, to), attrs)) ⇒ map.updated(nodeTranslation(from) → nodeTranslation(to), attrs)
-      })
+      }
+    )
   }
 }
 

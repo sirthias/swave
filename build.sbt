@@ -22,15 +22,11 @@ lazy val commonSettings = Seq( // reformatOnCompileSettings ++ Seq(
 
   // code formatting
   headers := Map("scala" -> de.heikoseeberger.sbtheader.license.MPLv2_NoCopyright("", "")),
-  // scalafmtConfig := Some(file(".scalafmt.conf")),
-  // formatSbtFiles := false,
 
   // test coverage
   coverageMinimum := 90,
   coverageFailOnMinimum := false,
   coverageExcludedPackages := """swave\.benchmarks\..*;swave\.examples\..*""")
-
-// lazy val noScalaFmtFormatting = includeFilter in hasScalafmt := NothingFilter
 
 lazy val publishingSettings = Seq(
   useGpg := true,
@@ -189,7 +185,6 @@ lazy val `core-tests` = project
   .settings(commonSettings: _*)
   .settings(noPublishingSettings: _*)
   .settings(
-    // noScalaFmtFormatting,
     macroParadise,
     libraryDependencies ++= Seq(shapeless, scalatest, `reactive-streams-tck`, logback % "test"))
 
@@ -200,7 +195,6 @@ lazy val docs = project
   .settings(noPublishingSettings: _*)
   .settings(ghpages.settings)
   .settings(
-    // noScalaFmtFormatting,
     git.remoteRepo := scmInfo.value.get.connection.drop("scm:git:".length),
     libraryDependencies ++= Seq(shapeless, scalatest, `akka-stream`, `akka-http-core`, logback),
     apiURL := Some(url("http://swave.io/api/")),
