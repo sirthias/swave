@@ -20,6 +20,9 @@ private[testkit] final class TestSpoutStage(val id: Int,
 
   private[this] val elems: Iterator[AnyRef] = elemsIterable.iterator
 
+  // randomly set 'interceptAllRequest'
+  if (ctx.random.nextBoolean()) flags |= 0x80000000 else flags &= ~0x80000000
+
   def kind = Stage.Kind.Spout.Test(id)
 
   override def toString: String = "Input  " + id
