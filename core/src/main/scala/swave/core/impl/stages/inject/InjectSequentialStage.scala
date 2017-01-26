@@ -6,24 +6,18 @@
 
 package swave.core.impl.stages.inject
 
-import scala.annotation.tailrec
 import swave.core.impl.stages.InOutStage
 import swave.core.impl.stages.spout.SubSpoutStage
-import swave.core.impl.util.RingBuffer
 import swave.core.impl.{Inport, Outport}
 import swave.core.macros._
 import swave.core.util._
 import swave.core.{Spout, Stage}
-
-// TODO: reduce buffer to one single element, like in the SplitStage
 
 // format: OFF
 @StageImplementation(fullInterceptions = true)
 private[core] final class InjectSequentialStage extends InOutStage { stage =>
 
   def kind = Stage.Kind.Inject.Sequential
-
-  private[this] var buffer: RingBuffer[AnyRef] = _
 
   connectInOutAndSealWith { (in, out) ⇒
     region.impl.registerForXStart(this)
@@ -34,252 +28,207 @@ private[core] final class InjectSequentialStage extends InOutStage { stage =>
 
     def awaitingXStart() = state(
       xStart = () => {
-        buffer = new RingBuffer[AnyRef](roundUpToPowerOf2(region.env.settings.maxBatchSize))
-        in.request(buffer.capacity.toLong)
-        noSubAwaitingElem(buffer.capacity, mainRemaining = 0)
+        in.request(1)
+        noSubAwaitingElem(0)
       })
 
     /**
-      * Buffer non-empty, no sub-stream open.
+      * One element buffered, no sub-stream open.
       * Waiting for the next request from the main downstream.
       *
-      * @param pending number of elements already requested from upstream but not yet received (> 0)
-      *                or 0, if the buffer is full
+      * @param elem the buffered element
       */
-    def noSubAwaitingMainDemand(pending: Int): State = state(
-      request = (n, from) ⇒ if (from eq out) awaitingSubDemand(emitNewSub(), pending, (n - 1).toLong) else stay(),
-      cancel = from => if (from eq out) stopCancel(in) else stay(),
-
-      onNext = (elem, _) ⇒ {
-        requireState(buffer.write(elem))
-        noSubAwaitingMainDemand(pendingAfterReceive(pending))
+    def noSubAwaitingMainDemand(elem: AnyRef): State = state(
+      request = (n, from) ⇒ {
+        if (from eq out) awaitingSubDemand(emitNewSub(), elem, (n - 1).toLong) else stay()
       },
 
-      onComplete = _ => noSubAwaitingMainDemandUpstreamGone(),
+      cancel = from => if (from eq out) stopCancel(in) else stay(),
+      onComplete = _ => noSubAwaitingMainDemandUpstreamGone(elem),
       onError = stopErrorF(out))
 
     /**
-      * Buffer non-empty, upstream already completed, no sub-stream open.
+      * One element buffered, upstream already completed, no sub-stream open.
       * Waiting for the next request from the main downstream.
+      *
+      * @param elem the buffered element
       */
-    def noSubAwaitingMainDemandUpstreamGone(): State = state(
+    def noSubAwaitingMainDemandUpstreamGone(elem: AnyRef): State = state(
       request = (n, from) ⇒ {
         if (from eq out) {
           val s = emitNewSub()
           s.xEvent(SubSpoutStage.EnableSubStreamStartTimeout)
-          awaitingSubDemandUpstreamGone(s, (n - 1).toLong)
+          awaitingSubDemandUpstreamGone(s, elem, (n - 1).toLong)
         } else stay()
       },
 
       cancel = from => if (from eq out) stopCancel(in) else stay())
 
     /**
-      * Buffer empty, no sub-stream open, demand signalled to upstream.
+      * No element buffered, no sub-stream open, one element requested from upstream.
       * Waiting for the next element from upstream.
       *
-      * @param pending       number of elements already requested from upstream but not yet received, > 0
       * @param mainRemaining number of elements already requested by downstream but not yet delivered, >= 0
       */
-    def noSubAwaitingElem(pending: Int, mainRemaining: Long): State = state(
-      request = (n, from) ⇒ if (from eq out) noSubAwaitingElem(pending, mainRemaining ⊹ n) else stay(),
+    def noSubAwaitingElem(mainRemaining: Long): State = state(
+      request = (n, from) ⇒ if (from eq out) noSubAwaitingElem(mainRemaining ⊹ n) else stay(),
       cancel = from => if (from eq out) stopCancel(in) else stay(),
 
       onNext = (elem, _) ⇒ {
-        requireState(buffer.write(elem))
-        if (mainRemaining > 0) awaitingSubDemand(emitNewSub(), pendingAfterReceive(pending), mainRemaining - 1)
-        else noSubAwaitingMainDemand(pendingAfterReceive(pending))
+        if (mainRemaining > 0) awaitingSubDemand(emitNewSub(), elem, mainRemaining - 1)
+        else noSubAwaitingMainDemand(elem)
       },
 
       onComplete = stopCompleteF(out),
       onError = stopErrorF(out))
 
     /**
-      * Buffer non-empty, sub-stream open.
+      * One element buffered, sub-stream open.
       * Waiting for the next request from the sub-stream.
       *
       * @param sub           the currently open sub-stream
-      * @param pending       number of elements already requested from upstream but not yet received (> 0),
-      *                      or 0, if the buffer is full
+      * @param elem          the buffered element waiting to be emitted to `sub`
       * @param mainRemaining number of elements already requested by downstream but not yet delivered, >= 0
       */
-    def awaitingSubDemand(sub: SubSpoutStage, pending: Int, mainRemaining: Long): State = state(
+    def awaitingSubDemand(sub: SubSpoutStage, elem: AnyRef, mainRemaining: Long): State = state(
       request = (n, from) ⇒ {
-        @tailrec def rec(nn: Int): State =
-          if (buffer.nonEmpty) {
-            if (nn > 0) {
-              sub.onNext(buffer.unsafeRead())
-              rec(nn - 1)
-            } else awaitingSubDemand(sub, pendingAfterBufferRead(pending), mainRemaining)
-          } else awaitingElem(sub, pendingAfterBufferRead(pending), subRemaining = nn.toLong, mainRemaining)
-
-        if (from eq sub) rec(n)
-        else if (from eq out) awaitingSubDemand(sub, pending, mainRemaining ⊹ n)
+        if (from eq sub) {
+          sub.onNext(elem)
+          in.request(1)
+          awaitingElem(sub, subRemaining = n.toLong - 1, mainRemaining)
+        } else if (from eq out) awaitingSubDemand(sub, elem, mainRemaining ⊹ n)
         else stay()
       },
 
       cancel = {
         case x if x eq sub =>
-          if (mainRemaining > 0) awaitingSubDemand(emitNewSub(), pending, mainRemaining - 1)
-          else noSubAwaitingMainDemand(pending)
+          if (mainRemaining > 0) awaitingSubDemand(emitNewSub(), elem, mainRemaining - 1)
+          else noSubAwaitingMainDemand(elem)
         case x if x eq out =>
           sub.xEvent(SubSpoutStage.EnableSubStreamStartTimeout)
-          awaitingSubDemandDownstreamGone(sub, pending)
+          awaitingSubDemandDownstreamGone(sub, elem)
         case _ => stay()
-      },
-
-      onNext = (elem, _) ⇒ {
-        requireState(buffer.write(elem))
-        awaitingSubDemand(sub, pendingAfterReceive(pending), mainRemaining)
       },
 
       onComplete = _ => {
         sub.xEvent(SubSpoutStage.EnableSubStreamStartTimeout)
-        awaitingSubDemandUpstreamGone(sub, mainRemaining)
+        awaitingSubDemandUpstreamGone(sub, elem, mainRemaining)
       },
       onError = stopErrorSubAndMainF(sub))
 
     /**
-      * Buffer non-empty, sub-stream open, upstream already completed.
+      * One element buffered, sub-stream open, upstream already completed.
       * Waiting for the next request from the sub-stream.
       *
       * @param sub           the currently open sub-stream
+      * @param elem          the buffered element waiting to be emitted to `sub`
       * @param mainRemaining number of elements already requested by downstream but not yet delivered, >= 0
       */
-    def awaitingSubDemandUpstreamGone(sub: SubSpoutStage, mainRemaining: Long): State = state(
+    def awaitingSubDemandUpstreamGone(sub: SubSpoutStage, elem: AnyRef, mainRemaining: Long): State = state(
       request = (n, from) ⇒ {
-        @tailrec def rec(nn: Int): State =
-          if (buffer.nonEmpty) {
-            if (nn > 0) {
-              sub.onNext(buffer.unsafeRead())
-              rec(nn - 1)
-            } else awaitingSubDemandUpstreamGone(sub, mainRemaining)
-          } else {
-            sub.onComplete()
-            stopComplete(out)
-          }
-
-        if (from eq sub) rec(n)
-        else if (from eq out) awaitingSubDemandUpstreamGone(sub, mainRemaining ⊹ n)
+        if (from eq sub) {
+          sub.onNext(elem)
+          sub.onComplete()
+          stopComplete(out)
+        } else if (from eq out) awaitingSubDemandUpstreamGone(sub, elem, mainRemaining ⊹ n)
         else stay()
       },
 
       cancel = {
         case x if x eq sub =>
-          if (mainRemaining > 0) awaitingSubDemandUpstreamGone(emitNewSub(), mainRemaining - 1)
-          else noSubAwaitingMainDemandUpstreamGone()
-        case x if x eq out => awaitingSubDemandUpAndDownstreamGone(sub)
+          if (mainRemaining > 0) awaitingSubDemandUpstreamGone(emitNewSub(), elem, mainRemaining - 1)
+          else noSubAwaitingMainDemandUpstreamGone(elem)
+        case x if x eq out => awaitingSubDemandUpAndDownstreamGone(sub, elem)
         case _ => stay()
       })
 
     /**
-      * Buffer non-empty, sub-stream open, main downstream already cancelled.
+      * One element buffered, sub-stream open, main downstream already cancelled.
       * Waiting for the next request from the sub-stream.
       *
-      * @param sub     the currently open sub-stream
-      * @param pending number of elements already requested from upstream but not yet received (> 0),
-      *                or 0, if the buffer is full
+      * @param sub  the currently open sub-stream
+      * @param elem the buffered element waiting to be emitted to `sub`
       */
-    def awaitingSubDemandDownstreamGone(sub: SubSpoutStage, pending: Int): State = state(
+    def awaitingSubDemandDownstreamGone(sub: SubSpoutStage, elem: AnyRef): State = state(
       request = (n, from) ⇒ {
-        @tailrec def rec(nn: Int): State =
-          if (buffer.nonEmpty) {
-            if (nn > 0) {
-              sub.onNext(buffer.unsafeRead())
-              rec(nn - 1)
-            } else awaitingSubDemandDownstreamGone(sub, pendingAfterBufferRead(pending))
-          } else awaitingElemDownstreamGone(sub, pendingAfterBufferRead(pending), subRemaining = nn.toLong)
-
-        if (from eq sub) rec(n) else stay()
+        if (from eq sub) {
+          sub.onNext(elem)
+          in.request(1)
+          awaitingElemDownstreamGone(sub, subRemaining = n.toLong - 1)
+        } else stay()
       },
 
       cancel = from => if (from eq sub) stopCancel(in) else stay(),
-
-      onNext = (elem, _) ⇒ {
-        requireState(buffer.write(elem))
-        awaitingSubDemandDownstreamGone(sub, pendingAfterReceive(pending))
-      },
-
-      onComplete = _ => awaitingSubDemandUpAndDownstreamGone(sub),
+      onComplete = _ => awaitingSubDemandUpAndDownstreamGone(sub, elem),
       onError = stopErrorF(sub))
 
     /**
-      * Buffer non-empty, sub-stream open, upstream already completed, main downstream already cancelled.
+      * One element buffered, sub-stream open, upstream already completed, main downstream already cancelled.
       * Waiting for the next request from the sub-stream.
       *
       * @param sub the currently open sub-stream
       */
-    def awaitingSubDemandUpAndDownstreamGone(sub: SubSpoutStage): State = state(
-      request = (n, from) ⇒ {
-        @tailrec def rec(nn: Int): State =
-          if (buffer.nonEmpty) {
-            if (nn > 0) {
-              sub.onNext(buffer.unsafeRead())
-              rec(nn - 1)
-            } else awaitingSubDemandUpAndDownstreamGone(sub)
-          } else stopComplete(sub)
-
-        if (from eq sub) rec(n) else stay()
+    def awaitingSubDemandUpAndDownstreamGone(sub: SubSpoutStage, elem: AnyRef): State = state(
+      request = (_, from) ⇒ {
+        if (from eq sub) {
+          sub.onNext(elem)
+          stopComplete(sub)
+        } else stay()
       },
 
-      cancel = from => if (from eq sub) stopCancel(in) else stay())
+      cancel = from => if (from eq sub) stop() else stay())
 
     /**
-      * Buffer empty, sub-stream open, demand signalled to upstream.
+      * No element buffered, sub-stream open, demand signalled to upstream.
       * Waiting for the next element from upstream.
       *
       * @param sub           the currently open sub-stream
-      * @param pending       number of elements already requested from upstream but not yet received, > 0
       * @param subRemaining  number of elements already requested by sub-stream but not yet delivered, >= 0
       * @param mainRemaining number of elements already requested by downstream but not yet delivered, >= 0
       */
-    def awaitingElem(sub: SubSpoutStage, pending: Int, subRemaining: Long, mainRemaining: Long): State = state(
+    def awaitingElem(sub: SubSpoutStage, subRemaining: Long, mainRemaining: Long): State = state(
       request = (n, from) ⇒ {
-        if (from eq sub) awaitingElem(sub, pending, subRemaining ⊹ n, mainRemaining)
-        else if (from eq out) awaitingElem(sub, pending, subRemaining, mainRemaining ⊹ n)
+        if (from eq sub) awaitingElem(sub, subRemaining ⊹ n, mainRemaining)
+        else if (from eq out) awaitingElem(sub, subRemaining, mainRemaining ⊹ n)
         else stay()
       },
 
       cancel = {
-        case x if x eq sub => noSubAwaitingElem(pending, mainRemaining)
+        case x if x eq sub => noSubAwaitingElem(mainRemaining)
         case x if x eq out =>
           sub.xEvent(SubSpoutStage.EnableSubStreamStartTimeout)
-          awaitingElemDownstreamGone(sub, pending, subRemaining)
+          awaitingElemDownstreamGone(sub, subRemaining)
         case _ => stay()
       },
 
       onNext = (elem, _) ⇒ {
         if (subRemaining > 0) {
           sub.onNext(elem)
-          awaitingElem(sub, pendingAfterReceive(pending), subRemaining - 1, mainRemaining)
-        } else {
-          requireState(buffer.write(elem))
-          awaitingSubDemand(sub, pendingAfterReceive(pending), mainRemaining)
-        }
+          in.request(1)
+          awaitingElem(sub, subRemaining - 1, mainRemaining)
+        } else awaitingSubDemand(sub, elem, mainRemaining)
       },
 
       onComplete = stopCompleteSubAndMainF(sub),
       onError = stopErrorSubAndMainF(sub))
 
     /**
-      * Buffer empty, sub-stream open, main downstream cancelled, demand signalled to upstream.
+      * No element buffered, sub-stream open, main downstream cancelled, demand signalled to upstream.
       * Waiting for the next element from upstream.
       *
       * @param sub           the currently open sub-stream
-      * @param pending       number of elements already requested from upstream but not yet received, > 0
       * @param subRemaining  number of elements already requested by sub-stream but not yet delivered, >= 0
       */
-    def awaitingElemDownstreamGone(sub: SubSpoutStage, pending: Int, subRemaining: Long): State = state(
-      request = (n, from) ⇒ if (from eq sub) awaitingElemDownstreamGone(sub, pending, subRemaining ⊹ n) else stay(),
+    def awaitingElemDownstreamGone(sub: SubSpoutStage, subRemaining: Long): State = state(
+      request = (n, from) ⇒ if (from eq sub) awaitingElemDownstreamGone(sub, subRemaining ⊹ n) else stay(),
       cancel = from => if (from eq sub) stopCancel(in) else stay(),
 
       onNext = (elem, _) ⇒ {
         if (subRemaining > 0) {
           sub.onNext(elem)
-          awaitingElemDownstreamGone(sub, pendingAfterReceive(pending), subRemaining - 1)
-        } else {
-          requireState(buffer.write(elem))
-          awaitingSubDemandDownstreamGone(sub, pendingAfterReceive(pending))
-        }
+          in.request(1)
+          awaitingElemDownstreamGone(sub, subRemaining - 1)
+        } else awaitingSubDemandDownstreamGone(sub, elem)
       },
 
       onComplete = stopCompleteSubAndMainF(sub),
@@ -289,23 +238,9 @@ private[core] final class InjectSequentialStage extends InOutStage { stage =>
 
     def emitNewSub() = {
       val s = new SubSpoutStage(this)
-      out.onNext(new Spout(s).asInstanceOf[AnyRef])
+      out.onNext(new Spout(s))
       s
     }
-
-    def pendingAfterReceive(pend: Int) =
-      if (pend == 1) {
-        val avail = buffer.available
-        if (avail > 0) in.request(avail.toLong)
-        avail
-      } else pend - 1
-
-    def pendingAfterBufferRead(pend: Int) =
-      if (pend == 0) {
-        val avail = buffer.available
-        if (avail > 0) in.request(avail.toLong)
-        avail
-      } else pend
 
     def stopCompleteSubAndMainF(s: SubSpoutStage)(i: Inport): State = {
       s.onComplete()
