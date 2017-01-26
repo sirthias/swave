@@ -15,6 +15,7 @@ lazy val commonSettings = Seq( // reformatOnCompileSettings ++ Seq(
   javacOptions ++= commonJavacOptions,
   scalacOptions ++= commonScalacOptions,
   scalacOptions in Test ~= (_ filterNot (_ == "-Ywarn-value-discard")),
+  scalacOptions in (Compile, console) ~= { _ filterNot { o => o == "-Ywarn-unused-import" || o == "-Xfatal-warnings" } },
   scalacOptions in (Test, console) ~= { _ filterNot { o => o == "-Ywarn-unused-import" || o == "-Xfatal-warnings" } },
   scalacOptions in (Compile, doc) ~= { _.filterNot(o => o == "-Xlint" || o == "-Xfatal-warnings") :+ "-nowarn" },
   initialCommands in console := """import swave.core._""",
