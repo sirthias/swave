@@ -15,7 +15,7 @@ import swave.core.macros._
 import swave.core.util._
 
 // format: OFF
-@StageImplementation
+@StageImplementation(interceptAllRequests = true)
 private[core] final class BufferStage(size: Int, requestThreshold: Int) extends InOutStage {
 
   requireArg(size > 0, "`size` must be > 0")

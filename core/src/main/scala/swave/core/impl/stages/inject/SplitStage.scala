@@ -37,7 +37,7 @@ private[core] final class SplitStage(commandFor: Any ⇒ Split.Command, eagerCan
       * One element buffered, no sub-stream open.
       * Waiting for the next request from the main downstream.
       *
-      * @param elem the buffered element
+      * @param elem      the buffered element
       * @param lastInSub true if `elem` is the last element in its sub
       */
     def noSubAwaitingMainDemand(elem: AnyRef, lastInSub: Boolean): State = state(
@@ -105,8 +105,8 @@ private[core] final class SplitStage(commandFor: Any ⇒ Split.Command, eagerCan
       * Waiting for the next request from the sub-stream.
       *
       * @param sub           the currently open sub-stream
-      * @param elem the buffered element waiting to be emitted to `sub`
-      * @param lastInSub true if `elem` is the last element in `sub`
+      * @param elem          the buffered element waiting to be emitted to `sub`
+      * @param lastInSub     true if `elem` is the last element in `sub`
       * @param mainRemaining number of elements already requested by downstream but not yet delivered, >= 0
       */
     def awaitingSubDemand(sub: SubSpoutStage, elem: AnyRef, lastInSub: Boolean, mainRemaining: Long): State = state(
@@ -147,8 +147,8 @@ private[core] final class SplitStage(commandFor: Any ⇒ Split.Command, eagerCan
       * One element buffered, sub-stream open, upstream already completed.
       * Waiting for the next request from the sub-stream.
       *
-      * @param sub           the currently open sub-stream
-      * @param elem  the buffered element waiting to be emitted to `sub`
+      * @param sub  the currently open sub-stream
+      * @param elem the buffered element waiting to be emitted to `sub`
       */
     def awaitingSubDemandUpstreamGone(sub: SubSpoutStage, elem: AnyRef): State = state(
       request = (_, from) ⇒ {
@@ -207,7 +207,7 @@ private[core] final class SplitStage(commandFor: Any ⇒ Split.Command, eagerCan
         } else stay()
       },
 
-      cancel = from => if (from eq sub) stopCancel(in) else stay())
+      cancel = from => if (from eq sub) stop() else stay())
 
     /**
       * No element buffered, sub-stream open, one element requested from upstream.
@@ -320,7 +320,7 @@ private[core] final class SplitStage(commandFor: Any ⇒ Split.Command, eagerCan
 
     def emitNewSub() = {
       val s = new SubSpoutStage(this)
-      out.onNext(new Spout(s).asInstanceOf[AnyRef])
+      out.onNext(new Spout(s))
       s
     }
 
