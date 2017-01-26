@@ -7,6 +7,7 @@
 package swave.core.impl.util
 
 import org.jctools.util.UnsafeAccess.UNSAFE
+import scala.annotation.tailrec
 import swave.core.impl.util.UnsafeArrayAccess.calcRefArrayElementOffset
 import swave.core.macros._
 import swave.core.util._
@@ -127,6 +128,31 @@ private[swave] final class ResizableRingBuffer[T](initialCap: Int, maxCap: Int) 
     val res = UNSAFE.getObject(array, ix).asInstanceOf[T]
     UNSAFE.putObject(array, ix, null)
     res
+  }
+
+  /**
+    * Reads the next value from the buffer without any buffer underrun protection
+    * and without clearing the reference from the buffer!
+    */
+  def unsafeRead_NoZero(): T = {
+    val r = readIx
+    readIx = r + 1
+    val ix = calcRefArrayElementOffset((r & mask).toLong)
+    UNSAFE.getObject(array, ix).asInstanceOf[T]
+  }
+
+  /**
+    * Iterates (in FIFO order) over all elements currently in the buffer
+    * changing neither the read- nor the write cursor.
+    */
+  def foreach[U](f: T => U): Unit = {
+    @tailrec def rec(i: Int): Unit =
+      if (i < writeIx) {
+        val ix = calcRefArrayElementOffset((i & mask).toLong)
+        f(UNSAFE.getObject(array, ix).asInstanceOf[T])
+        rec(i + 1)
+      }
+    rec(readIx)
   }
 
   private def grow(): Boolean =

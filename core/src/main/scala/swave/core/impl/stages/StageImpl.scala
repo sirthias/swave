@@ -71,11 +71,10 @@ private[swave] abstract class StageImpl extends PortImpl {
 
   type State = Int // semantic alias
 
-  private[this] var _interceptionLevel                  = 0
+  private[this] var _interceptionLevel: Int             = _
   private[this] var _state: State                       = _ // current state; the STOPPED state is always encoded as zero
   private[this] var _requestBacklog: RequestBacklogList = _
   private[this] var _region: Region                     = _
-  private[impl] var interceptionHelperIndex             = -1
 
   // bit mask holding misc flags
   // bits 0-29: set if respective state requires interception support

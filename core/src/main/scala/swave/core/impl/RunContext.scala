@@ -47,18 +47,18 @@ private[swave] final class RunContext private (val env: StreamEnv) { self =>
     def enqueueSyncOnCompleteInterception(target: StageImpl, from: Inport): Unit            = `n/a`
     def enqueueSyncOnErrorInterception(target: StageImpl, e: Throwable, from: Inport): Unit = `n/a`
     def enqueueSyncXEventInterception(target: StageImpl, ev: AnyRef): Unit                  = `n/a`
+    def scheduleSyncSubStreamStartCleanup(stage: StageImpl, d: FiniteDuration): Cancellable = `n/a`
 
     // running only
-    def runInterceptionLoop(): Unit                                                         = `n/a`
-    def regionsActiveCount: Int                                                             = `n/a`
-    def scheduleSyncSubStreamStartCleanup(stage: StageImpl, d: FiniteDuration): Cancellable = `n/a`
-    def registerRegionStopped(): Unit                                                       = `n/a`
-    def termination: Future[Unit]                                                           = `n/a`
-    def isAsync: Boolean                                                                    = `n/a`
-    final def isSync: Boolean                                                               = !isAsync
-    protected[RunContext] def registerSubContext(ctx: RunContext): Unit                     = `n/a`
-    protected[RunContext] def unregisterSubContext(ctx: RunContext): Unit                   = `n/a`
-    protected[RunContext] def signalTermination(): Unit                                     = `n/a`
+    def runInterceptionLoop(): Unit                                       = `n/a`
+    def regionsActiveCount: Int                                           = `n/a`
+    def registerRegionStopped(): Unit                                     = `n/a`
+    def termination: Future[Unit]                                         = `n/a`
+    def isAsync: Boolean                                                  = `n/a`
+    final def isSync: Boolean                                             = !isAsync
+    protected[RunContext] def registerSubContext(ctx: RunContext): Unit   = `n/a`
+    protected[RunContext] def unregisterSubContext(ctx: RunContext): Unit = `n/a`
+    protected[RunContext] def signalTermination(): Unit                   = `n/a`
 
     private def `n/a` = throw new IllegalStateException(toString)
   }

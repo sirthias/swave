@@ -8,7 +8,7 @@ package swave.core.impl.util
 
 import scala.annotation.tailrec
 import org.jctools.util.UnsafeAccess.UNSAFE
-import org.jctools.util.UnsafeRefArrayAccess.calcElementOffset
+import swave.core.impl.util.UnsafeArrayAccess.calcRefArrayElementOffset
 import swave.core.macros._
 import swave.core.util._
 
@@ -74,7 +74,7 @@ private[swave] final class RingBuffer[T](cap: Int) {
     */
   def unsafeWrite(value: T): Unit = {
     val w = writeIx
-    UNSAFE.putObject(array, calcElementOffset((w & mask).toLong), value)
+    UNSAFE.putObject(array, calcRefArrayElementOffset((w & mask).toLong), value)
     writeIx = w + 1
   }
 
@@ -92,7 +92,7 @@ private[swave] final class RingBuffer[T](cap: Int) {
   def unsafeRead(): T = {
     val r = readIx
     readIx = r + 1
-    val ix  = calcElementOffset((r & mask).toLong)
+    val ix  = calcRefArrayElementOffset((r & mask).toLong)
     val res = UNSAFE.getObject(array, ix).asInstanceOf[T]
     UNSAFE.putObject(array, ix, null)
     res
@@ -104,7 +104,7 @@ private[swave] final class RingBuffer[T](cap: Int) {
     */
   def unsafeDropHead(): Unit = {
     val r = readIx
-    UNSAFE.putObject(array, calcElementOffset((r & mask).toLong), null)
+    UNSAFE.putObject(array, calcRefArrayElementOffset((r & mask).toLong), null)
     readIx = r + 1
   }
 
@@ -114,7 +114,7 @@ private[swave] final class RingBuffer[T](cap: Int) {
     */
   def unsafeDropTail(): Unit = {
     val w = writeIx - 1
-    UNSAFE.putObject(array, calcElementOffset((w & mask).toLong), null)
+    UNSAFE.putObject(array, calcRefArrayElementOffset((w & mask).toLong), null)
     writeIx = w
   }
 
@@ -139,7 +139,7 @@ private[swave] final class RingBuffer[T](cap: Int) {
   def foreach[U](f: T => U): Unit = {
     @tailrec def rec(i: Int): Unit =
       if (i < writeIx) {
-        val ix = calcElementOffset((i & mask).toLong)
+        val ix = calcRefArrayElementOffset((i & mask).toLong)
         f(UNSAFE.getObject(array, ix).asInstanceOf[T])
         rec(i + 1)
       }

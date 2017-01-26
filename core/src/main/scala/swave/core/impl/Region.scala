@@ -127,22 +127,19 @@ private[swave] final class Region private[impl] (val entryPoint: StageImpl, val 
         runner.enqueue(new StreamRunner.Message.Start(_needXStart))
       } else {
         requireState(_dispatcherId eq null)
-        startSync()
+        _impl = new SyncRunning(parent, stagesTotalCount)
+        startSyncStages(_needXStart)
       }
       if (_queuedRequests ne Nil) {
         val imp = _impl
         _queuedRequests.foreach { case (target, n, from) => imp.enqueueRequest(target, n, from) }
       }
     }
-    private def startSync(): Unit = {
-      _impl = new SyncRunning(parent, stagesTotalCount)
-      @tailrec def rec(remaining: List[StageImpl]): Unit =
-        if (remaining ne Nil) {
-          remaining.head.xStart()
-          rec(remaining.tail)
-        }
-      rec(_needXStart)
-    }
+    @tailrec private def startSyncStages(remaining: List[StageImpl]): Unit =
+      if (remaining ne Nil) {
+        remaining.head.xStart()
+        startSyncStages(remaining.tail)
+      }
     private def createStreamRunner(): StreamRunner =
       if (parent eq null) {
         val dispatcher =
