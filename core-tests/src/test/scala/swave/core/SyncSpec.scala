@@ -100,6 +100,24 @@ class SyncSpec extends SwaveSpec {
       Spout(1 to 50).takeEveryNth(10) should produce(10, 20, 30, 40, 50)
     }
 
+    "nested substreams" in {
+      Spout
+        .ints(0)
+        .injectSequential
+        .flatMap {
+          _
+            .take(8)
+            .injectSequential
+            .flatMap {
+              _
+                .take(4)
+                .injectSequential
+                .flatMap(_.take(2))
+            }
+        }
+        .take(16) should produce(0 to 15: _*)
+    }
+
 //    "external sub-stream start" in {
 //      implicit val env = StreamEnv(mapSettings = _.withSubscriptionTimeout(Duration.Undefined))
 //      val spout: Spout[Int] = Spout.ints(0).injectSequential.drainToHead().value.get.get
