@@ -23,7 +23,7 @@ class StreamOfStreamsSpec extends FreeSpec with Matchers {
       implicit class RichSpout[T](underlying: Spout[T]) {
         def takeEvery(n: Long): Spout[T] =
           underlying                  // Spout[T]
-            .injectSequential         // Spout[Spout[T]]
+            .injectSequential()       // Spout[Spout[T]]
             .map(_.drop(n-1).take(1)) // Spout[Spout[T]]
             .flattenConcat()          // Spout[T]
       }

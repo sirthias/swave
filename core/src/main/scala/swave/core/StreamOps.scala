@@ -286,8 +286,10 @@ abstract class StreamOps[A] private[core] { self ⇒
   final def injectRoundRobin(parallelism: Int): Repr[Spout[A]] =
     ???
 
-  final def injectSequential: Repr[Spout[A]] =
-    append(new InjectSequentialStage)
+  final def injectSequential(bufferSize: Int = -1): Repr[Spout[A]] = {
+    require(bufferSize != 0, "bufferSize must not be zero")
+    append(if (bufferSize == 1) new InjectSequentialStage else new InjectSequentialBufferedStage(bufferSize))
+  }
 
   final def interleave[B >: A](other: Spout[B], segmentSize: Int = 1, eagerComplete: Boolean = false): Repr[B] =
     attach(other).fanInRoundRobin(segmentSize, eagerComplete)
@@ -393,7 +395,7 @@ abstract class StreamOps[A] private[core] { self ⇒
     via(Pipe[A] drop startIndex take length named "slice")
 
   final def sliceEvery(dropLen: Long, takeLen: Long): Repr[A] =
-    via(Pipe[A].injectSequential.flatMap(_.slice(dropLen, takeLen)) named "sliceEvery")
+    via(Pipe[A].injectSequential().flatMap(_.slice(dropLen, takeLen)) named "sliceEvery")
 
   final def sliding(windowSize: Int): Repr[immutable.Seq[A]] =
     slidingTo[immutable.Seq](windowSize)
@@ -436,7 +438,7 @@ abstract class StreamOps[A] private[core] { self ⇒
 
   final def takeEveryNth(n: Long): Repr[A] = {
     requireArg(n > 0, "`count` must be > 0")
-    via(Pipe[A].injectSequential.flatMap(_.elementAt(n - 1)) named "takeEvery")
+    via(Pipe[A].injectSequential().flatMap(_.elementAt(n - 1)) named "takeEvery")
   }
 
   final def takeLast(n: Int): Repr[A] = {

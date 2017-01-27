@@ -24,7 +24,7 @@ object MonteCarloPi extends App {
     .fanInMerge()
     .scan(State(0, 0)) { _ withNextSample _ }
     .drop(1)
-    .injectSequential           // these three transformations together have
+    .injectSequential()           // these three transformations together have
     .map(_ drop 999999 take 1)  // the same effect as `.takeEveryNth(1000000)`
     .flattenConcat()            // (in fact, this is how `takeEveryNth` is implemented)
     .map(state ⇒ f"After ${state.totalSamples}%,10d samples π is approximated as ${state.π}%.6f")

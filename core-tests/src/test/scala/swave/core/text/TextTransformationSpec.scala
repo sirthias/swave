@@ -68,7 +68,7 @@ class TextTransformationSpec extends SwaveSpec {
       for (_ <- 1 to 10) {
         val random = XorShiftRandom()
         Spout(largeText.getBytes(UTF8).iterator)
-          .injectSequential
+          .injectSequential()
           .flatMap(_.take(random.nextLong(32)).drainToVector(32).map(ByteVector(_)))
           .utf8Decode
           .async()
@@ -80,7 +80,7 @@ class TextTransformationSpec extends SwaveSpec {
       for (_ <- 1 to 10) {
         val random = XorShiftRandom()
         Spout(largeText.iterator)
-          .injectSequential
+          .injectSequential()
           .flatMap(_.take(random.nextLong(32)).drainToMkString(32))
           .utf8Encode
           .async()
@@ -92,7 +92,7 @@ class TextTransformationSpec extends SwaveSpec {
       for (_ <- 1 to 1) {
         val random = XorShiftRandom()
         Spout(largeText.iterator)
-          .injectSequential
+          .injectSequential()
           .flatMap(_.take(random.nextLong(32)).drainToMkString(32))
           .lines
           .async()
