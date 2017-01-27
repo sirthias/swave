@@ -39,7 +39,7 @@ diagnose issues.
 *swave* gives you a number of "identity" transformations that perform logging of various stream execution aspects
 without affecting stream semantics in any way:
 
-- @ref[logEvent]
+- @ref[logSignal]
 - @ref[onCancel]
 - @ref[onComplete]
 - @ref[onElement]
@@ -50,7 +50,7 @@ without affecting stream semantics in any way:
 - @ref[onStart]
 - @ref[onTerminate]
 
-The most frequently used one is probably @ref[logEvent], which outputs an informational `String` for every signal
+The most frequently used one is probably @ref[logSignal], which outputs an informational `String` for every signal
 that is passing through the stage. By default these strings are `println`ed to the console but you can easily
 reroute them to any kind of logging facility.
 
@@ -58,7 +58,7 @@ In order to illustrate its benefit let's look at this example:
 
 @@snip [-]($test/Debugging.scala) { #example }
 
-As you can see, @ref[logEvent] lets you specify a "marker" string that makes it easy to associate the output of the
+As you can see, @ref[logSignal] lets you specify a "marker" string that makes it easy to associate the output of the
 particular stage with its position in the graph.
 
 When we run this stream the following output is produced to the console:
@@ -86,7 +86,7 @@ is "spoon-fed" to the stream in chunks of `max-batch-size`.)
 
   [Reactive Streams]: ../../introduction/reactive-streams.md
   [rendering]: rendering.md
-  [logEvent]: ../transformations/reference/logEvent.md
+  [logSignal]: ../transformations/reference/logSignal.md
   [onCancel]: ../transformations/reference/onCancel.md
   [onComplete]: ../transformations/reference/onComplete.md
   [onElement]: ../transformations/reference/onElement.md

@@ -300,7 +300,7 @@ abstract class StreamOps[A] private[core] { self ⇒
   final def last: Repr[A] =
     takeLast(1)
 
-  final def logEvent(marker: String, log: (String, StreamEvent[A]) ⇒ Unit = defaultLogEvent): Repr[A] =
+  final def logSignal(marker: String, log: (String, StreamEvent[A]) ⇒ Unit = defaultLogSignal): Repr[A] =
     onSignal(log(marker, _))
 
   final def map[B](f: A ⇒ B): Repr[B] =
@@ -661,7 +661,7 @@ abstract class StreamOps[A] private[core] { self ⇒
 
 object StreamOps {
 
-  val defaultLogEvent: (String, StreamEvent[Any]) ⇒ Unit = { (m, ev) ⇒
+  val defaultLogSignal: (String, StreamEvent[Any]) ⇒ Unit = { (m, ev) ⇒
     val arrow = if (ev.isInstanceOf[StreamEvent.UpEvent]) '⇠' else '⇢'
     println(s"$m: $arrow $ev")
   }

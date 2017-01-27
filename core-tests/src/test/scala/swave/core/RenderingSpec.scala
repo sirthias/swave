@@ -86,17 +86,17 @@ class RenderingSpec extends FreeSpec with Matchers {
 
     val result2 = Promise[String]()
     upperChars("Hello")
-      .logEvent("A")
+      .logSignal("A")
       .asyncBoundary("foo")
-      .logEvent("B")
+      .logSignal("B")
       .fanOutBroadcast()
-      .sub.drop(2).logEvent("C").concat(upperChars("-Friend-").asyncBoundary()).end
-        .sub.take(2).logEvent("D").asyncBoundary().multiply(2).end
+      .sub.drop(2).logSignal("C").concat(upperChars("-Friend-").asyncBoundary()).end
+        .sub.take(2).logSignal("D").asyncBoundary().multiply(2).end
       .fanInConcat()
-      .logEvent("E")
-      .tee(Pipe[Char].asyncBoundary().logEvent("F").deduplicate.to(drain(result2)))
+      .logSignal("E")
+      .tee(Pipe[Char].asyncBoundary().logSignal("F").deduplicate.to(drain(result2)))
       .map(_.toLower)
-      .logEvent("G")
+      .logSignal("G")
       .to(Drain.mkString(100))
   }
 

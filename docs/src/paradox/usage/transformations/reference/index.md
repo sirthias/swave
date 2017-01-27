@@ -62,7 +62,7 @@ This is the alphabetical list of all predefined transformation currently offered
 * [-](interleave.md)
 * [-](intersperse.md)
 * [-](last.md)
-* [-](logEvent.md)
+* [-](logSignal.md)
 * [-](map.md)
 * [-](mapAsync.md)
 * [-](mapAsyncUnordered.md)

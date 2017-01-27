@@ -13,11 +13,11 @@ object Debugging extends App {
   implicit val env = StreamEnv()
 
   Spout.ints(from = 0)
-    .logEvent("A")
+    .logSignal("A")
     .map(_ * 2)
     .take(5)
     .fold(0)(_ + _)
-    .logEvent("B")
+    .logSignal("B")
     .drainToBlackHole()
   //#example
 }

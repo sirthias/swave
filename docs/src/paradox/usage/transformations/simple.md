@@ -49,7 +49,7 @@ data elements.
 * @ref[groupedTo](reference/groupedTo.md)
 * @ref[headAndTail](reference/headAndTail.md)
 * @ref[last](reference/last.md)
-* @ref[logEvent](reference/logEvent.md)
+* @ref[logSignal](reference/logSignal.md)
 * @ref[map](reference/map.md)
 * @ref[multiply](reference/multiply.md)
 * @ref[nop](reference/nop.md)
