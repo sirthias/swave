@@ -46,12 +46,12 @@ final class FanOutSpec extends SyncPipeSpec with Inspectors {
     testSetup
       .input[Int]
       .fixtures(Gen.chooseNum(1, 3), _.output[Int])
-      .param(Gen.chooseNum(0, 16))
+      .param(Gen.chooseNum(1, 16))
       .prop.from { (in, outs, bufferSize) ⇒
       import TestFixture.State._
 
       in.spout
-        .fanOutBroadcastBuffered(bufferSize)
+        .fanOutBroadcast(bufferSize)
         .subDrains(outs.tail.map(_.drain.dropResult))
         .subContinue.drainTo(outs.head.drain)
 

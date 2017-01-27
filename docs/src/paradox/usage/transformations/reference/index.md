@@ -34,7 +34,6 @@ This is the alphabetical list of all predefined transformation currently offered
 * [-](fanInToProduct.md)
 * [-](fanInToSum.md)
 * [-](fanOutBroadcast.md)
-* [-](fanOutBroadcastBuffered.md)
 * [-](fanOutRoundRobin.md)
 * [-](fanOutSequential.md)
 * [-](fanOutSwitch.md)

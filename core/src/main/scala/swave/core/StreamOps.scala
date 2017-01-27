@@ -152,17 +152,14 @@ abstract class StreamOps[A] private[core] { self ⇒
   final def expand[B](zero: Iterator[B], extrapolate: A ⇒ Iterator[B]): Repr[B] =
     append(new ExpandStage(zero.asInstanceOf[Iterator[AnyRef]], extrapolate.asInstanceOf[Any ⇒ Iterator[AnyRef]]))
 
-  final def fanOutBroadcast(eagerCancel: Boolean = false): FanOut[HNil, Nothing] =
-    new FanOut(append(new FanOutBroadcastStage(eagerCancel)).base, InportList.empty)
-
-  final def fanOutBroadcastBuffered(bufferSize: Int,
-                                    requestStrategy: Buffer.RequestStrategy = Buffer.RequestStrategy.WhenHalfEmpty,
-                                    eagerCancel: Boolean = false): FanOut[HNil, Nothing] = {
+  final def fanOutBroadcast(bufferSize: Int = 0,
+                            requestStrategy: Buffer.RequestStrategy = Buffer.RequestStrategy.WhenHalfEmpty,
+                            eagerCancel: Boolean = false): FanOut[HNil, Nothing] = {
     requireArg(bufferSize >= 0, "`bufferSize` must be >= 0")
-    if (bufferSize > 0) {
-      val stage = new FanOutBroadcastBufferedStage(bufferSize, requestStrategy(bufferSize), eagerCancel)
-      new FanOut(append(stage).base, InportList.empty)
-    } else fanOutBroadcast(eagerCancel)
+    val stage =
+      if (bufferSize == 0) new FanOutBroadcastStage(eagerCancel)
+      else new FanOutBroadcastBufferedStage(bufferSize, requestStrategy(bufferSize), eagerCancel)
+    new FanOut(append(stage).base, InportList.empty)
   }
 
   final def fanOutRoundRobin(eagerCancel: Boolean = false): FanOut[HNil, Nothing] =
@@ -462,7 +459,7 @@ abstract class StreamOps[A] private[core] { self ⇒
     append(new TakeWithinStage(d))
 
   final def tee(drain: Drain[A, Unit], eagerCancel: Boolean = false): Repr[A] =
-    via(Pipe[A].fanOutBroadcast(eagerCancel).sub.to(drain).subContinue named "tee")
+    via(Pipe[A].fanOutBroadcast(eagerCancel = eagerCancel).sub.to(drain).subContinue named "tee")
 
   final def throttle(elements: Int, per: FiniteDuration, burst: Int = 1): Repr[A] =
     throttle(elements, per, burst, oneIntFunc)

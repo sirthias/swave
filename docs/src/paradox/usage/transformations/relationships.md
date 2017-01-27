@@ -69,8 +69,8 @@ The following table shows the relationships between all primary @ref[fan-out], @
 |                  |                               | @ref[fanInToSum]      
 |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 | all at once      | @ref[fanOutBroadcast]         | @ref[fanInToTuple]     | @ref[injectBroadcast]  | @ref[flattenToSeq]
-|                  | @ref[fanOutBroadcastBuffered] | @ref[fanInToHList]    
-|                  | @ref[fanOutUnZip]             | @ref[fanInToProduct] 
+|                  | @ref[fanOutUnZip]             | @ref[fanInToHList]    
+|                  |                               | @ref[fanInToProduct] 
 |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 | the next in      | @ref[fanOutRoundRobin]        | @ref[fanInRoundRobin]  | @ref[injectRoundRobin] | @ref[flattenRoundRobin]
 | cycling order

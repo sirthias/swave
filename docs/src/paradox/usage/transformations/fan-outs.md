@@ -10,7 +10,6 @@ Fan-Outs are @ref[stream graph components] with one input port and several outpu
 Currently these fan-out variants are available:
  
 * @ref[fanOutBroadcast]
-* @ref[fanOutBroadcastBuffered]
 * @ref[fanOutRoundRobin]
 * @ref[fanOutSequential]
 * @ref[fanOutSwitch]
