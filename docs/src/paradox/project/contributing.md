@@ -166,7 +166,7 @@ are identified with these simple 3-letter abbreviations:
 |compat-scodec|   `csc`    |
 |docs         |   `doc`    |
 |testkit      |   `tkt`    |
-|benchmarks   |   `bhm`    |
+|benchmarks   |   `bmk`    |
 |sbt project  |   `pro`    |
 
 

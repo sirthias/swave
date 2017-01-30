@@ -123,7 +123,6 @@ val scalatest              = "org.scalatest"              %%  "scalatest"       
 val `reactive-streams-tck` = "org.reactivestreams"        %   "reactive-streams-tck"  % "1.0.0"   % "test"
 
 // examples
-val `akka-http-core`       = "com.typesafe.akka"          %%  "akka-http-core"        % "10.0.1"
 val logback                = "ch.qos.logback"             %   "logback-classic"       % "1.1.9"
 
 /////////////////////// PROJECTS /////////////////////////
@@ -137,8 +136,13 @@ lazy val swave = project.in(file("."))
 lazy val benchmarks = project
   .dependsOn(core)
   .enablePlugins(AutomateHeaderPlugin)
+  .disablePlugins(BackgroundRunPlugin)
   .settings(commonSettings: _*)
   .settings(noPublishingSettings: _*)
+  .settings(
+    fork in run := true,
+    libraryDependencies ++= Seq(`akka-stream`, logback)
+  )
 
 lazy val `compat-akka` = project
   .dependsOn(core, `core-macros` % "compile-internal")
@@ -197,7 +201,7 @@ lazy val docs = project
   .settings(ghpages.settings)
   .settings(
     git.remoteRepo := scmInfo.value.get.connection.drop("scm:git:".length),
-    libraryDependencies ++= Seq(shapeless, scalatest, `akka-stream`, `akka-http-core`, logback),
+    libraryDependencies ++= Seq(shapeless, scalatest, `akka-stream`, logback),
     apiURL := Some(url("http://swave.io/api/")),
     siteSubdirName in Paradox := "",
     paradoxTheme := None,
