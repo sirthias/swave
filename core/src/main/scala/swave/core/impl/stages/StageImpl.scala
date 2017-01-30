@@ -98,6 +98,14 @@ private[swave] abstract class StageImpl extends PortImpl {
   def stateName: String = s"<unknown id ${_state}>"
   override def toString = s"${getClass.getSimpleName}@${identityHash(this)}/$stateName"
 
+  protected final def failUnclosedStreamGraph(portType: String): Nothing =
+    throw new UnclosedStreamGraphException(s"Unconnected $portType in $this", illegalState("Unexpected xSeal()"))
+
+  protected final def failAlreadyConnected(portType: String, from: Port): Nothing =
+    throw new IllegalReuseException(
+      s"$portType already connected in $this. Are you trying to reuse a stage instance?",
+      illegalState(s"Unexpected subscribe() from out '$from'"))
+
   /////////////////////////////////////// SUBSCRIBE ///////////////////////////////////////
 
   final def subscribe()(implicit from: Outport): Unit =
@@ -113,10 +121,7 @@ private[swave] abstract class StageImpl extends PortImpl {
   protected def _subscribe0(from: Outport): State =
     _state match {
       case 0 ⇒ stay()
-      case _ ⇒
-        throw new IllegalReuseException(
-          s"Port already connected in $this. Are you trying to reuse a stage instance?",
-          illegalState(s"Unexpected subscribe() from out '$from'"))
+      case _ ⇒ failAlreadyConnected("Downstream", from)
     }
 
   protected final def interceptSubscribe(from: Outport): Unit = {
@@ -200,10 +205,7 @@ private[swave] abstract class StageImpl extends PortImpl {
   protected def _onSubscribe0(from: Inport): State =
     _state match {
       case 0 ⇒ stay()
-      case _ ⇒
-        throw new IllegalReuseException(
-          s"Port already connected in $this. Are you trying to reuse a stage instance?",
-          illegalState(s"Unexpected onSubscribe() from out '$from'"))
+      case _ ⇒ failAlreadyConnected("Upstream", from)
     }
 
   protected final def interceptOnSubscribe(from: Inport): Unit = {
@@ -338,8 +340,7 @@ private[swave] abstract class StageImpl extends PortImpl {
   protected def _xSeal(): State =
     _state match {
       case 0 ⇒ stay()
-      case _ ⇒
-        throw new UnclosedStreamGraphException(s"Unconnected Port in $this", illegalState("Unexpected xSeal()"))
+      case _ ⇒ failUnclosedStreamGraph("port")
     }
 
   /////////////////////////////////////// XSTART ///////////////////////////////////////

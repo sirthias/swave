@@ -131,7 +131,7 @@ class SyncSpec extends SwaveSpec {
       val spout = Spout.one(42)
       spout.map(_.toString)
       val thrown = the[IllegalReuseException] thrownBy spout.map(_ + 1)
-      thrown.getMessage should startWith("Port already connected in IteratorSpoutStage")
+      thrown.getMessage should startWith("Downstream already connected in IteratorSpoutStage")
       thrown.getMessage should endWith("Are you trying to reuse a stage instance?")
     }
 
@@ -147,7 +147,7 @@ class SyncSpec extends SwaveSpec {
 
     "illegal open port" in {
       val thrown = the[UnclosedStreamGraphException] thrownBy Coupling[Int].out.drainToBlackHole().value.get.get
-      thrown.getMessage should startWith("Unconnected Port in CouplingStage")
+      thrown.getMessage should startWith("Unconnected upstream in CouplingStage")
     }
 
     "illegal restart" in {

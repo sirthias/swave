@@ -17,46 +17,44 @@ private[macros] trait ConnectFanOutAndSealWith { this: Util =>
     val block                                = replaceIdents(block0, in0 -> in, outs0 -> outs)
 
     q"""
-      initialState(connecting(null))
+      initialState(connecting(null, null))
 
-      private var $outs: OutportCtx = _
-
-      def connecting(in: Inport): State = state(
+      def connecting(in: Inport, outs: OutportCtx): State = state(
         intercept = false,
 
         onSubscribe = from ⇒ {
           if (in eq null) {
             _inputStages = from.stageImpl :: Nil
-            connecting(from)
-          } else throw illegalState("Double onSubscribe(" + from + ')')
+            connecting(from, outs)
+          } else failAlreadyConnected("Upstream", from)
         },
 
         subscribe = from ⇒ {
           @tailrec def rec(out: Outport, current: OutportCtx): State =
             if (current.nonEmpty) {
               if (current.out ne out) rec(out, current.tail)
-              else throw illegalState("Double subscribe(" + out + ')')
+              else failAlreadyConnected("Downstream", from)
             } else {
-              $outs = createOutportCtx(out, $outs)
               _outputStages = out.stageImpl :: _outputStages
               out.onSubscribe()
-              stay()
+              connecting(in, createOutportCtx(out, outs))
             }
-          rec(from, $outs)
+          rec(from, outs)
         },
 
         xSeal = () ⇒ {
           if (in ne null) {
-            if ($outs.nonEmpty) {
+            if (outs.nonEmpty) {
               _outputStages = _outputStages.reverse
               in.xSeal(region)
               @tailrec def rec(current: OutportCtx): Unit =
                 if (current ne null) { current.out.xSeal(region); rec(current.tail) }
-              rec($outs)
+              rec(outs)
               val $in = in
+              val $outs = outs
               $block
-            } else throw illegalState("Unexpected xSeal(...) (unconnected downstream)")
-          } else throw illegalState("Unexpected xSeal(...) (unconnected upstream)")
+            } else failUnclosedStreamGraph("downstream")
+          } else failUnclosedStreamGraph("upstream")
         })
      """
   }

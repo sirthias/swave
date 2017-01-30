@@ -17,48 +17,36 @@ private[macros] trait ConnectInOutAndSealWith { this: Util =>
     val block                               = replaceIdents(block0, in0 -> in, out0 -> out)
 
     q"""
-      initialState(awaitingSubscribeOrOnSubscribe())
+      initialState(connecting(null, null))
 
-      def awaitingSubscribeOrOnSubscribe() = state(
+      def connecting(in: Inport, out: Outport) = state(
         intercept = false,
 
         onSubscribe = from ⇒ {
-          _inputStages = from.stageImpl :: Nil
-          awaitingSubscribe(from)
+          if (in eq null) {
+            _inputStages = from.stageImpl :: Nil
+            connecting(from, out)
+          } else failAlreadyConnected("Upstream", from)
         },
 
         subscribe = from ⇒ {
-          _outputStages = from.stageImpl :: Nil
-          from.onSubscribe()
-          awaitingOnSubscribe(from)
-        })
-
-      def awaitingSubscribe(in: Inport) = state(
-        intercept = false,
-
-        subscribe = from ⇒ {
-          _outputStages = from.stageImpl :: Nil
-          from.onSubscribe()
-          ready(in, from)
-        })
-
-      def awaitingOnSubscribe(out: Outport) = state(
-        intercept = false,
-
-        onSubscribe = from ⇒ {
-          _inputStages = from.stageImpl :: Nil
-          ready(from, out)
-        })
-
-      def ready(in: Inport, out: Outport) = state(
-        intercept = false,
+          if (out eq null) {
+            _outputStages = from.stageImpl :: Nil
+            from.onSubscribe()
+            connecting(in, from)
+          } else failAlreadyConnected("Downstream", from)
+        },
 
         xSeal = () ⇒ {
-          in.xSeal(region)
-          out.xSeal(region)
-          val $in = in
-          val $out = out
-          $block
+          if (in ne null) {
+            if (out ne null) {
+              in.xSeal(region)
+              out.xSeal(region)
+              var $in = in
+              var $out = out
+              $block
+            } else failUnclosedStreamGraph("downstream")
+          } else failUnclosedStreamGraph("upstream")
         })
      """
   }

@@ -16,33 +16,31 @@ private[macros] trait ConnectFanInAndSealWith { this: Util =>
     val block                     = replaceIdents(block0, out0 -> out)
 
     q"""
-      initialState(connecting(subs))
+      initialState(connecting(null, subs))
       subs.foreach(_.in.subscribe()) // TODO: avoid function allocation
 
-      private var $out: Outport = _
-
-      def connecting(pendingSubs: InportList): State = state(
+      def connecting(out: Outport, pendingSubs: InportList): State = state(
         intercept = false,
 
-        onSubscribe = from ⇒ connecting(pendingSubs.remove_!(from)),
+        onSubscribe = from ⇒ connecting(out, pendingSubs.remove_!(from)),
 
         subscribe = from ⇒ {
-          if ($out eq null) {
-            $out = from
+          if (out eq null) {
             _outputStages = from.stageImpl :: Nil
             from.onSubscribe()
-            stay()
-          } else throw illegalState("Double subscribe(" + from + ')')
+            connecting(from, pendingSubs)
+          } else failAlreadyConnected("Downstream", from)
         },
 
         xSeal = () ⇒ {
-          if ($out ne null) {
+          if (out ne null) {
             if (pendingSubs.isEmpty) {
-              $out.xSeal(region)
+              out.xSeal(region)
               subs.foreach(_.in.xSeal(region)) // TODO: avoid function allocation
+              val $out = out
               $block
-            } else throw illegalState("Unexpected xSeal(...) (unconnected upstream)")
-          } else throw illegalState("Unexpected xSeal(...) (unconnected downstream)")
+            } else failUnclosedStreamGraph("upstream")
+          } else failUnclosedStreamGraph("downstream")
         })
      """
   }
