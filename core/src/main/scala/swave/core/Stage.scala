@@ -131,7 +131,6 @@ object Stage {
           extends InOut
       final case class GroupedWithin(maxSize: Int, duration: FiniteDuration)   extends InOut
       final case class Intersperse(start: AnyRef, inject: AnyRef, end: AnyRef) extends InOut
-      final case class Limit(max: Long, cost: _ ⇒ Long)                        extends InOut
       final case class Map(f: _ ⇒ _)                                           extends InOut
       case object Nop                                                          extends InOut
       final case class OnSignal(callback: StreamEvent[_] ⇒ Unit)               extends InOut
@@ -147,6 +146,7 @@ object Stage {
       final case class WithCompletionTimeout(timeout: FiniteDuration)                        extends InOut
       final case class WithIdleTimeout(timeout: FiniteDuration)                              extends InOut
       final case class WithInitialTimeout(timeout: FiniteDuration)                           extends InOut
+      final case class WithLimit(max: Long, cost: _ ⇒ Long)                   extends InOut
     }
 
     sealed abstract class FanIn extends Kind {

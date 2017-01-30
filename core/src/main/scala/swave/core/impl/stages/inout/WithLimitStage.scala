@@ -18,7 +18,7 @@ private[core] final class WithLimitStage(max: Long, cost: Any ⇒ Long) extends 
 
   requireArg(max >= 0, "`max` must be >= 0")
 
-  def kind = Stage.Kind.InOut.Limit(max, cost)
+  def kind = Stage.Kind.InOut.WithLimit(max, cost)
 
   connectInOutAndSealWith { (in, out) ⇒ running(in, out, max) }
 
