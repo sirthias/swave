@@ -28,7 +28,12 @@ object Graph {
     def Some(names: List[String]) = ExpandModules(id ⇒ names contains id.name)
   }
 
-  def from(stage: Stage, expandModules: ExpandModules = ExpandModules.None): Renderable =
+  def from(streamGraph: StreamGraph[_], expandModules: ExpandModules = ExpandModules.None): Renderable =
+    from(streamGraph.stage, expandModules)
+
+  def from(stage: Stage): Renderable =
+    from(stage, ExpandModules.None)
+  def from(stage: Stage, expandModules: ExpandModules): Renderable =
     Renderable(create(stage, expandModules))
 
   val DefaultStageFormat: (Stage, List[Module.ID]) => String = {
