@@ -19,6 +19,7 @@ private[core] final class AsyncDispatcherStage(dispatcherId: String) extends InO
 
   connectInOutAndSealWith { (in, out) ⇒
     region.impl.requestDispatcherAssignment(dispatcherId)
+    region.impl.requestBridging(in, this, out)
     running(in, out)
   }
 

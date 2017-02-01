@@ -11,6 +11,7 @@ import org.reactivestreams.Processor
 import scala.util.control.NonFatal
 import scala.annotation.tailrec
 import scala.annotation.unchecked.{uncheckedVariance => uV}
+import swave.core.internal.agrona.ThreadHints
 import swave.core.impl.rs.SubPubProcessor
 import swave.core.impl.util.InportList
 import swave.core.impl.stages.StageImpl
@@ -101,7 +102,7 @@ object Pipe {
             pipe
           } else innerPipe
         case `placeholder` ⇒
-          // Thread.onSpinWait() // TODO: enable once we are on JDK9
+          ThreadHints.onSpinWait()
           innerPipe
         case x ⇒ x
       }

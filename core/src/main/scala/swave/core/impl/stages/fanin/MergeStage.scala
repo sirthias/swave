@@ -15,7 +15,7 @@ import swave.core.macros._
 import swave.core.util._
 
 // format: OFF
-@StageImplementation(fullInterceptions = true)
+@StageImplementation(fullInterceptions = true, manualInportList = "subs")
 private[core] final class MergeStage(subs: InportList, eagerComplete: Boolean) extends FanInStage(subs) {
 
   requireArg(subs.nonEmpty, "Cannot `merge` an empty set of sub-streams")

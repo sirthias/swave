@@ -32,16 +32,16 @@ private[core] final class PublisherSpoutStage(publisher: Publisher[AnyRef]) exte
         new Subscriber[AnyRef] {
           def onSubscribe(s: Subscription) = {
             RSCompliance.verifyNonNull(s, "Subscription", "2.13")
-            region.impl.enqueueXEvent(stage, s)
+            region.enqueueXEvent(stage, s)
           }
           def onNext(elem: AnyRef) = {
             RSCompliance.verifyNonNull(elem, "Element", "2.13")
-            region.impl.enqueueOnNext(stage, elem, stage)
+            region.enqueueOnNext(stage, elem, stage)
           }
-          def onComplete() = region.impl.enqueueOnComplete(stage, stage)
+          def onComplete() = region.enqueueOnComplete(stage, stage)
           def onError(e: Throwable) = {
             RSCompliance.verifyNonNull(e, "Throwable", "2.13")
-            region.impl.enqueueOnError(stage, e, stage)
+            region.enqueueOnError(stage, e, stage)
           }
         }
       }

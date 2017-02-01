@@ -54,7 +54,7 @@ private[core] final class FlattenMergeStage(streamable: Streamable.Aux[Any, AnyR
         onSubscribe = sub ⇒ {
           try {
             val newSubscribing = subscribing.remove_!(sub)
-            region.sealAndStart(sub.stageImpl)
+            RunContext.sealAndStart(sub.stageImpl, region.env)
             sub.stageImpl.request(1)
             active(newSubscribing, sub +: subscribed, remaining)
           } catch {
@@ -156,7 +156,7 @@ private[core] final class FlattenMergeStage(streamable: Streamable.Aux[Any, AnyR
       onSubscribe = sub ⇒ {
         try {
           val newSubscribing = subscribing.remove_!(sub)
-          region.sealAndStart(sub.stageImpl)
+          RunContext.sealAndStart(sub.stageImpl, region.env)
           sub.stageImpl.request(1)
           activeUpstreamCompleted(out, newSubscribing, sub +: subscribed, remaining)
         } catch {

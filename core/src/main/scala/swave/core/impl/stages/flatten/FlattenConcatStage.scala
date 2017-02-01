@@ -50,7 +50,7 @@ private[core] final class FlattenConcatStage(streamable: Streamable.Aux[Any, Any
         onSubscribe = sub ⇒ {
           markAsSubscribed(subs find_! sub)
           try {
-            region.sealAndStart(sub.stageImpl)
+            RunContext.sealAndStart(sub.stageImpl, region.env)
             if ((subs.in eq sub) && remaining > 0) sub.request(remaining)
             active(subs, remaining)
           } catch {
@@ -123,7 +123,7 @@ private[core] final class FlattenConcatStage(streamable: Streamable.Aux[Any, Any
       onSubscribe = sub ⇒ {
         markAsSubscribed(subs find_! sub)
         try {
-          region.sealAndStart(sub.stageImpl)
+          RunContext.sealAndStart(sub.stageImpl, region.env)
           if ((subs.in eq sub) && remaining > 0) sub.request(remaining)
           activeUpstreamCompleted(out, subs, remaining)
         } catch {

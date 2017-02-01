@@ -29,7 +29,7 @@ private[core] final class FutureSpoutStage(future: Future[AnyRef]) extends Spout
 
     def awaitingXStart() = state(
       xStart = () => {
-        future.onComplete(region.impl.enqueueXEvent(this, _))(CallingThreadExecutionContext)
+        future.onComplete(region.enqueueXEvent(this, _))(CallingThreadExecutionContext)
         awaitingValueOrRequest()
       })
 

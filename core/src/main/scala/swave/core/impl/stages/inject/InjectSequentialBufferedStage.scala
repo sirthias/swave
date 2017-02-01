@@ -34,7 +34,7 @@ private[core] final class InjectSequentialBufferedStage(bufferSize: Int) extends
 
     def awaitingXStart() = state(
       xStart = () => {
-        if (buffer eq null) buffer = createBuffer(region.env.settings.maxBatchSize)
+        if (buffer eq null) buffer = createBuffer(region.mbs)
         in.request(buffer.capacity.toLong)
         noSubAwaitingElem(buffer.capacity, mainRemaining = 0)
       })

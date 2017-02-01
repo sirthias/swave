@@ -13,7 +13,7 @@ import swave.core.macros.StageImplementation
 import SubSpoutStage._
 
 // format: OFF
-@StageImplementation
+@StageImplementation(true, manualOutport = "out")
 private[core] class SubSpoutStage(val in: StageImpl) extends SpoutStage {
 
   def kind = Stage.Kind.Spout.Sub(in)

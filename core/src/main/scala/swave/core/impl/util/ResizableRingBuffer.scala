@@ -155,6 +155,23 @@ private[swave] final class ResizableRingBuffer[T](initialCap: Int, maxCap: Int) 
     rec(readIx)
   }
 
+  /**
+    * Iterates (in FIFO order) over all elements currently in the buffer
+    * and replaces all elements with the result of the given function (if defined).
+    */
+  def rewrite(f: T => Option[T]): Unit = {
+    @tailrec def rec(i: Int): Unit =
+      if (i < writeIx) {
+        val ix = calcRefArrayElementOffset((i & mask).toLong)
+        f(UNSAFE.getObject(array, ix).asInstanceOf[T]) match {
+          case Some(x) => UNSAFE.putObject(array, ix, x)
+          case None =>
+        }
+        rec(i + 1)
+      }
+    rec(readIx)
+  }
+
   private def grow(): Boolean =
     (array.length < maxCap) && {
       val r        = readIx & mask

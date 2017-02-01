@@ -122,13 +122,20 @@ private[swave] final class RunContext private (val env: StreamEnv) { self =>
       }
     }
     private def doStart(): Unit = {
+      @tailrec def processRequestBridgings(remaining: List[Region]): Unit =
+        if (remaining ne Nil) {
+          remaining.head.impl.processBridgingRequests()
+          processRequestBridgings(remaining.tail)
+        }
+
       @tailrec def startRegions(remaining: List[Region]): Unit =
         if (remaining ne Nil) {
-          remaining.head.impl.start()
+          remaining.head.impl.start(_isAsync)
           startRegions(remaining.tail)
         }
 
       if (parent ne null) parent.impl.registerSubContext(self)
+      processRequestBridgings(regions)
       startRegions(regions)
     }
 
@@ -332,6 +339,11 @@ private[swave] object RunContext {
 
   private final class QueuedRequestList(in: StageImpl, tail: QueuedRequestList, val n: Long, val from: Outport)
       extends AbstractInportList[QueuedRequestList](in, tail)
+
+  private[impl] def sealAndStart(stage: StageImpl, env: StreamEnv): Unit = {
+    val ctx = seal(stage, env)
+    ctx.impl.start()
+  }
 
   /**
     * Seals the stream by sending an `xSeal` signal through the stream graph starting from the given stage.

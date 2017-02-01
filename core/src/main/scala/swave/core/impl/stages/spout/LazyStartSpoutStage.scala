@@ -8,7 +8,7 @@ package swave.core.impl.stages.spout
 
 import scala.util.control.NonFatal
 import swave.core.impl.stages.drain.SubDrainStage
-import swave.core.impl.{Inport, Outport}
+import swave.core.impl.{Inport, Outport, RunContext}
 import swave.core.macros.StageImplementation
 import swave.core.util._
 import swave.core._
@@ -46,7 +46,7 @@ private[core] final class LazyStartSpoutStage(onStart: () => Spout[AnyRef]) exte
 
     onSubscribe = _ => {
       var funError: Throwable = null
-      try region.sealAndStart(in.stageImpl)
+      try RunContext.sealAndStart(in.stageImpl, region.env)
       catch { case NonFatal(e) => funError = e }
       if (funError eq null) {
         if (requested != 0) {

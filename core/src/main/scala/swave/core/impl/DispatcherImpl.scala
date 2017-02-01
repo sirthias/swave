@@ -10,8 +10,9 @@ import java.util.concurrent.atomic.{AtomicLong, AtomicReference}
 import java.util.concurrent.locks.LockSupport
 import java.util.concurrent._
 import org.slf4j.LoggerFactory
-import scala.annotation.tailrec
 import com.typesafe.scalalogging.Logger
+import scala.annotation.tailrec
+import swave.core.internal.agrona.ThreadHints
 import swave.core.Dispatcher.ThreadPoolConfig
 import swave.core.Dispatcher.ThreadPoolConfig.ThreadPool.Prestart
 import swave.core._
@@ -65,7 +66,7 @@ private[impl] final class DispatcherImpl(val settings: Dispatcher.Settings, crea
       case Terminated(result) ⇒ result
 
       case Creating ⇒
-        // Thread.onSpinWait() // TODO: enable once we are on JDK9
+        ThreadHints.onSpinWait()
         shutdown()
     }
 

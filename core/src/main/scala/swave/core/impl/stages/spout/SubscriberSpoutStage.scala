@@ -27,35 +27,35 @@ private[core] final class SubscriberSpoutStage extends SpoutStage { stage =>
   // - a `Subscription` instance, when a subscription request has been received before the stage was started
   // - the stage instance, when a subscription and completion has been received before the stage was started
   // - a `Throwable` instance, when a subscription and error has been received before the stage was started
-  // - `stage.region.impl`, when the stage was started
+  // - `stage.region`, when the stage was started
   private val refSub =
     new AtomicReference[AnyRef] with Subscriber[AnyRef] {
       @tailrec def onSubscribe(s: Subscription): Unit = {
         RSCompliance.verifyNonNull(s, "Subscription", "2.13")
         get match {
           case null => if (!compareAndSet(null, s)) onSubscribe(s)
-          case x: Region#Impl => x.enqueueXEvent(stage, s)
+          case x: Region => x.enqueueXEvent(stage, s)
           case _ => s.cancel()
         }
       }
       def onNext(elem: AnyRef) = {
         RSCompliance.verifyNonNull(elem, "Element", "2.13")
         get match {
-          case x: Region#Impl => x.enqueueOnNext(stage, elem, stage)
+          case x: Region => x.enqueueOnNext(stage, elem, stage)
           case _ => // drop
         }
       }
       @tailrec def onComplete() =
         get match {
           case x: Subscription => if (!compareAndSet(x, stage)) onComplete()
-          case x: Region#Impl => x.enqueueOnComplete(stage, stage)
+          case x: Region => x.enqueueOnComplete(stage, stage)
           case _ => // drop
         }
       @tailrec def onError(e: Throwable) = {
         RSCompliance.verifyNonNull(e, "Throwable", "2.13")
         get match {
           case x: Subscription => if (!compareAndSet(x, e)) onError(e)
-          case x: Region#Impl => x.enqueueOnError(stage, e, stage)
+          case x: Region => x.enqueueOnError(stage, e, stage)
           case _ => // drop
         }
       }
@@ -73,10 +73,10 @@ private[core] final class SubscriberSpoutStage extends SpoutStage { stage =>
     xStart = () => {
       @tailrec def rec(): State =
         refSub.get match {
-          case null => if (refSub.compareAndSet(null, region.impl)) awaitingSubscription(out, 0) else rec()
-          case sub: Subscription => { refSub.set(region.impl); running(out, sub) }
-          case `stage` => { refSub.set(region.impl); stopComplete(out) }
-          case e: Throwable => { refSub.set(region.impl); stopError(e, out) }
+          case null => if (refSub.compareAndSet(null, region)) awaitingSubscription(out, 0) else rec()
+          case sub: Subscription => { refSub.set(region); running(out, sub) }
+          case `stage` => { refSub.set(region); stopComplete(out) }
+          case e: Throwable => { refSub.set(region); stopError(e, out) }
         }
       rec()
     })

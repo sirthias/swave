@@ -8,7 +8,7 @@ package swave.core.impl.stages.drain
 
 import scala.util.control.NonFatal
 import swave.core.impl.stages.spout.SubSpoutStage
-import swave.core.impl.{Inport, Outport}
+import swave.core.impl.{Inport, Outport, RunContext}
 import swave.core.macros.StageImplementation
 import swave.core.impl.stages.DrainStage
 import swave.core._
@@ -38,7 +38,7 @@ private[core] final class LazyStartDrainStage[R](onStart: () => Drain[_, R], con
         val sub = new SubSpoutStage(this)
         sub.subscribe()(innerDrain.outport)
         try {
-          region.sealAndStart(sub)
+          RunContext.sealAndStart(sub.stageImpl, region.env)
           running(in, sub)
         } catch {
           case NonFatal(e) =>

@@ -7,7 +7,7 @@
 package swave.core.impl.stages.inout
 
 import swave.core.Stage
-import swave.core.impl.stages.{InOutStage, StageImpl}
+import swave.core.impl.stages.InOutStage
 import swave.core.impl.{Inport, Outport}
 import swave.core.macros._
 
@@ -59,7 +59,7 @@ private[core] final class AsyncBoundaryStage(dispatcherId: String) extends InOut
 
       def completeSealing() = {
         region.impl.requestDispatcherAssignment(dispatcherId)
-        running(inp, outp)
+        running(in, out)
       }
 
       if (inp.isSealed) {
@@ -83,35 +83,40 @@ private[core] final class AsyncBoundaryStage(dispatcherId: String) extends InOut
       }
     })
 
-  def running(inp: StageImpl, outp: StageImpl) = state(
+  def running(in: Inport, out: Outport) = state(
     intercept = false,
 
     request = (n, _) ⇒ {
-      region.impl.enqueueRequest(inp, n.toLong, this)
+      // usually we are on the thread of the downstream stage, not on our own,
+      // therefore we need to schedule the REQUEST to our runner
+      region.enqueueRequest(in.stageImpl, n.toLong, this)
       stay()
     },
 
     cancel = from => {
       if (from ne this) {
-        // if we are called directly from downstream we are not on the right thread
-        // and must not mutate our state in any way
-        region.impl.enqueueCancel(this, this)
+        // usually we are on the thread of the downstream stage, not on our own,
+        // therefore we need to schedule the CANCEL to our runner
+        region.enqueueCancel(this, this)
         stay()
-      } else stopCancel(inp) // once we are on the right thread we can cancel and stop normally
+      } else stopCancel(in) // once we are on the right thread we can cancel and stop normally
     },
 
     onNext = (elem, _) ⇒ {
-      outp.region.impl.enqueueOnNext(outp, elem, this)
+      val os = out.stageImpl
+      os.region.enqueueOnNext(os, elem, this)
       stay()
     },
 
     onComplete = _ => {
-      outp.region.impl.enqueueOnComplete(outp, this)
+      val os = out.stageImpl
+      os.region.enqueueOnComplete(os, this)
       stop()
     },
 
     onError = (error, _) => {
-      outp.region.impl.enqueueOnError(outp, error, this)
+      val os = out.stageImpl
+      os.region.enqueueOnError(os, error, this)
       stop(error)
     })
 }

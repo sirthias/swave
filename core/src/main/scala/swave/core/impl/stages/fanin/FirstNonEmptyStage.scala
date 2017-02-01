@@ -14,7 +14,7 @@ import swave.core.macros._
 import swave.core.util._
 
 // format: OFF
-@StageImplementation(fullInterceptions = true)
+@StageImplementation(fullInterceptions = true, manualInportList = "subs")
 private[core] final class FirstNonEmptyStage(subs: InportList) extends FanInStage(subs) {
 
   requireArg(subs.nonEmpty, "Cannot fan-in with `firstNonEmpty` when the set of sub-streams is empty")

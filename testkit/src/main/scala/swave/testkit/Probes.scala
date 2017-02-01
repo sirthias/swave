@@ -300,7 +300,7 @@ trait Probes {
     protected def stage: ProbeStage
 
     protected final def runOrEnqueue(signals: Signal*): this.type = {
-      signals.foreach(stage.region.impl.enqueueXEvent(stage, _))
+      signals.foreach(stage.region.enqueueXEvent(stage, _))
       stage.region.runContext.impl.runInterceptionLoop()
       this
     }

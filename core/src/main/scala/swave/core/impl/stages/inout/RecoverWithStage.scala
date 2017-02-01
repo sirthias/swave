@@ -9,7 +9,7 @@ package swave.core.impl.stages.inout
 import scala.util.control.NonFatal
 import swave.core.impl.stages.drain.SubDrainStage
 import swave.core.impl.stages.InOutStage
-import swave.core.impl.{Inport, Outport}
+import swave.core.impl.{Inport, Outport, RunContext}
 import swave.core.{Spout, Stage}
 import swave.core.macros._
 import swave.core.util._
@@ -69,7 +69,7 @@ private[core] final class RecoverWithStage(maxRecoveries: Long, pf: PartialFunct
     onSubscribe = from ⇒ {
       requireState(from eq sub)
       try {
-        region.sealAndStart(sub)
+        RunContext.sealAndStart(sub, region.env)
         if (remaining > 0) sub.request(remaining)
         active(sub, out, remaining, recoveriesLeft)
       } catch {

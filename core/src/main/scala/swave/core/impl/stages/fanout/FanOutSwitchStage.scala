@@ -7,7 +7,7 @@
 package swave.core.impl.stages.fanout
 
 import swave.core.Stage
-import swave.core.impl.Outport
+import swave.core.impl.{Inport, Outport}
 import swave.core.impl.stages.FanOutStage
 
 private[core] final class FanOutSwitchStage(branchCount: Int, f: AnyRef ⇒ Int, eagerCancel: Boolean)
@@ -19,4 +19,9 @@ private[core] final class FanOutSwitchStage(branchCount: Int, f: AnyRef ⇒ Int,
 
   protected def createOutportCtx(out: Outport, tail: OutportCtx): OutportCtx =
     new FanOutStage.SimpleOutportContext(out, tail)
+
+  override def hasInport(in: Inport): Boolean = ???
+  override def hasOutport(out: Outport): Boolean = ???
+  override def rewireIn(from: Inport, to: Inport): Unit = ???
+  override def rewireOut(from: Outport, to: Outport): Unit = ???
 }

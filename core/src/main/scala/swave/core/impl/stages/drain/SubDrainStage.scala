@@ -12,7 +12,7 @@ import swave.core.macros.StageImplementation
 import swave.core.{Cancellable, Stage, SubStreamStartTimeoutException}
 
 // format: OFF
-@StageImplementation(fullInterceptions = true)
+@StageImplementation(fullInterceptions = true, manualInport = "in")
 private[core] final class SubDrainStage(val out: StageImpl) extends DrainStage {
   import SubDrainStage._
 

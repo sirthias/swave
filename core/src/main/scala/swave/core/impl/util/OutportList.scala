@@ -9,11 +9,16 @@ package swave.core.impl.util
 import scala.annotation.tailrec
 import swave.core.impl.Outport
 
-private[swave] abstract class AbstractOutportList[L >: Null <: AbstractOutportList[L]](final val out: Outport, tail: L)
+private[swave] abstract class AbstractOutportList[L >: Null <: AbstractOutportList[L]](final var out: Outport, tail: L)
     extends ImsiList[L](tail)
 
 private[swave] object AbstractOutportList {
   implicit class OutportListOps[L >: Null <: AbstractOutportList[L]](private val underlying: L) extends AnyVal {
+
+    def contains(out: Outport): Boolean = {
+      @tailrec def rec(current: L): Boolean = (current ne null) && ((current.out eq out) || rec(current.tail))
+      rec(underlying)
+    }
 
     def find_!(out: Outport): L = {
       @tailrec def rec(current: L): L =
@@ -21,7 +26,7 @@ private[swave] object AbstractOutportList {
           if (current.out eq out) current
           else rec(current.tail)
         } else
-          throw new IllegalStateException(s"Element for OutPort `$out` was required but not found in " + underlying)
+          throw new IllegalStateException(s"Element for Outport `$out` was required but not found in " + underlying)
       rec(underlying)
     }
 
@@ -44,8 +49,17 @@ private[swave] object AbstractOutportList {
             } else current.tail
           } else rec(current, current.tail)
         } else
-          throw new IllegalStateException(s"Element for OutPort `$out` was required but not found in " + underlying)
+          throw new IllegalStateException(s"Element for Outport `$out` was required but not found in " + underlying)
       rec(null, underlying)
+    }
+
+    def replaceOutRef(from: Outport, to: Outport): Boolean = {
+      @tailrec def rec(current: L): Boolean =
+        if (current ne null) {
+          if (current.out eq from) { current.out = to; true }
+          else rec(current.tail)
+        } else false
+      rec(underlying)
     }
   }
 }

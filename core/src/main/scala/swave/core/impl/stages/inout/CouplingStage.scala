@@ -17,7 +17,10 @@ private[core] final class CouplingStage extends InOutStage {
 
   def kind = Stage.Kind.InOut.Coupling
 
-  connectInOutAndSealWith { (in, out) ⇒ running(in, out) }
+  connectInOutAndSealWith { (in, out) ⇒
+    region.impl.requestBridging(in, this, out)
+    running(in, out)
+  }
 
   def running(in: Inport, out: Outport) = state(
     intercept = false,

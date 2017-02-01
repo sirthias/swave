@@ -393,7 +393,7 @@ private[swave] abstract class StageImpl extends PortImpl {
 
   /////////////////////////////////////// STOPPERS ///////////////////////////////////////
 
-  protected final def stop(e: Throwable = null): State = {
+  protected[impl] final def stop(e: Throwable = null): State = {
     if (isSealed) region.impl.registerStageStopped()
     0 // STOPPED state encoding
   }
@@ -456,6 +456,13 @@ private[swave] abstract class StageImpl extends PortImpl {
     cancelAll(ins, except = in)
     stopError(e, out)
   }
+
+  /////////////////////////////////////// REWIRING ///////////////////////////////////////
+
+  def hasInport(in: Inport): Boolean
+  def hasOutport(out: Outport): Boolean
+  def rewireIn(from: Inport, to: Inport): Unit
+  def rewireOut(from: Outport, to: Outport): Unit
 
   /////////////////////////////////////// PRIVATE ///////////////////////////////////////
 

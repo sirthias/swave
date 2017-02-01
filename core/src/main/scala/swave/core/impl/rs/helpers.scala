@@ -11,11 +11,10 @@ import swave.core.impl.stages.StageImpl
 
 private[impl] class ForwardToRunnerSubscription(stage: StageImpl) extends Subscription {
   def request(n: Long) = {
-    val impl = stage.region.impl
-    if (n > 0) impl.enqueueRequest(stage, n, stage)
-    else impl.enqueueXEvent(stage, ForwardToRunnerSubscription.IllegalRequest(n))
+    if (n > 0) stage.region.enqueueRequest(stage, n, stage)
+    else stage.region.enqueueXEvent(stage, ForwardToRunnerSubscription.IllegalRequest(n))
   }
-  def cancel() = stage.region.impl.enqueueCancel(stage, stage)
+  def cancel() = stage.region.enqueueCancel(stage, stage)
 }
 
 private[impl] object ForwardToRunnerSubscription {

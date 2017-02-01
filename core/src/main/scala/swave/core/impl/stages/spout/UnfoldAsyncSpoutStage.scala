@@ -74,7 +74,7 @@ private[core] final class UnfoldAsyncSpoutStage(zero: AnyRef, f: AnyRef => Futur
     if (funError eq null) {
       // when the future completes we want to receive an XEvent,
       // since enqueueing is extremely lightweight we can do it directly on the calling thread
-      unfoldingFuture.onComplete(region.impl.enqueueXEvent(this, _))(CallingThreadExecutionContext)
+      unfoldingFuture.onComplete(region.enqueueXEvent(this, _))(CallingThreadExecutionContext)
       awaitingUnfolding(out, remaining)
     } else stopError(funError, out)
   }

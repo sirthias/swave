@@ -26,14 +26,14 @@ private[core] final class PublisherDrainStage extends DrainStage {
   // holds exactly one of these values:
   // - `null`, when the stage is unstarted and no subscription requests has been received yet
   // - a `Subscriber` instance, when a subscription request has been received before the stage was started
-  // - `stage.region.impl`, when the stage was started
+  // - `stage.region`, when the stage was started
   private[this] val refPub =
     new AtomicReference[AnyRef] with Publisher[AnyRef] {
       @tailrec def subscribe(subscriber: Subscriber[_ >: AnyRef]): Unit = {
         RSCompliance.verifyNonNull(subscriber, "Subscriber", "1.9")
         get match {
           case null => if (!compareAndSet(null, subscriber)) subscribe(subscriber)
-          case x: Region#Impl => x.enqueueXEvent(PublisherDrainStage.this, subscriber)
+          case x: Region => x.enqueueXEvent(PublisherDrainStage.this, subscriber)
           case _ => signalError(subscriber, new UnsupportedSecondSubscriptionException)
         }
       }
@@ -51,10 +51,10 @@ private[core] final class PublisherDrainStage extends DrainStage {
     xStart = () => {
       @tailrec def rec(): State =
         refPub.get match {
-          case null if refPub.compareAndSet(null, region.impl) => awaitingSubscriber(in, StreamTermination.None)
+          case null if refPub.compareAndSet(null, region) => awaitingSubscriber(in, StreamTermination.None)
           case null => rec()
           case sub: Subscriber[_] =>
-            refPub.set(region.impl)
+            refPub.set(region)
             becomeRunning(in, sub)
         }
       rec()

@@ -15,7 +15,7 @@ import swave.core.macros._
 import swave.core.util._
 
 // format: OFF
-@StageImplementation(fullInterceptions = true)
+@StageImplementation(fullInterceptions = true, manualInportList = "subs")
 private[core] final class ToProductStage(val kind: Stage.Kind.FanIn,
                                          subs: InportList, f: Array[AnyRef] ⇒ AnyRef) extends FanInStage(subs) {
 

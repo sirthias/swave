@@ -11,7 +11,7 @@ import shapeless._
 import swave.core._
 import swave.core.impl.Inport
 
-private[swave] abstract class AbstractInportList[L >: Null <: AbstractInportList[L]](final val in: Inport, tail: L)
+private[swave] abstract class AbstractInportList[L >: Null <: AbstractInportList[L]](final var in: Inport, tail: L)
     extends ImsiList[L](tail)
 
 private[swave] object AbstractInportList {
@@ -27,7 +27,7 @@ private[swave] object AbstractInportList {
         if (current ne null) {
           if (current.in eq in) current
           else rec(current.tail)
-        } else throw new IllegalStateException(s"Element for InPort `$in` was required but not found in " + underlying)
+        } else throw new IllegalStateException(s"Element for Inport `$in` was required but not found in " + underlying)
       rec(underlying)
     }
 
@@ -71,8 +71,17 @@ private[swave] object AbstractInportList {
               underlying
             } else current.tail
           } else rec(current, current.tail)
-        } else throw new IllegalStateException(s"Element for InPort `$in` was required but not found in " + underlying)
+        } else throw new IllegalStateException(s"Element for Inport `$in` was required but not found in " + underlying)
       rec(null, underlying)
+    }
+
+    def replaceInRef(from: Inport, to: Inport): Boolean = {
+      @tailrec def rec(current: L): Boolean =
+        if (current ne null) {
+          if (current.in eq from) { current.in = to; true }
+          else rec(current.tail)
+        } else false
+      rec(underlying)
     }
 
     def toReversedSpoutHList: HList = {
