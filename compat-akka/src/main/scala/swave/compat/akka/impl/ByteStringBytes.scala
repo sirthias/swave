@@ -51,12 +51,15 @@ class ByteStringBytes extends Bytes[ByteString] {
 
   ///////////////// QUERY ///////////////////
 
-  def size(value: ByteString) = value.size.toLong
-  def byteAt(value: ByteString, ix: Long) = {
+  def size(value: ByteString): Long = value.size.toLong
+  def byteAt(value: ByteString, ix: Long): Byte = {
     requireArg(0 <= ix && ix <= Int.MaxValue, "`n` must be >= 0 and <= Int.MaxValue")
     value(ix.toInt)
   }
-  def indexOfSlice(value: ByteString, slice: ByteString, startIx: Long) = ??? // TODO
+  def indexOfSlice(value: ByteString, slice: ByteString, startIx: Long): Long = {
+    requireArg(0 <= startIx && startIx <= Int.MaxValue, "`startIx` must be >= 0 and <= Int.MaxValue")
+    value.indexOfSlice(slice, startIx.toInt).toLong
+  }
 
   ///////////////// TRANSFORMATION TO ByteString ///////////////////
 
@@ -83,7 +86,10 @@ class ByteStringBytes extends Bytes[ByteString] {
   def copyToArray(value: ByteString, sourceOffset: Long, xs: Array[Byte], destOffset: Int, len: Int) =
     drop(value, sourceOffset).copyToArray(xs, destOffset, len)
   def copyToBuffer(value: ByteString, buffer: ByteBuffer): Int = value.copyToBuffer(buffer)
-  def copyToOutputStream(value: ByteString, s: OutputStream)   = ??? // TODO
+  def copyToOutputStream(value: ByteString, s: OutputStream)   = {
+    @tailrec def rec(ix: Int, size: Int): Unit = if (ix < size) { s.write(value(ix).toInt); rec(ix + 1, size) }
+    rec(0, value.size)
+  }
   def toByteBuffer(value: ByteString)                          = value.toByteBuffer
   def toIndexedSeq(value: ByteString): IndexedSeq[Byte]        = value
   def toSeq(value: ByteString): Seq[Byte]                      = value
