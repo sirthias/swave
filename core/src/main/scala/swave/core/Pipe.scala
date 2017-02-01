@@ -82,6 +82,11 @@ object Pipe {
     new Pipe(stage, stage)
   }
 
+  /**
+    * Shortcut for `Pipe[T].map(f)`
+    */
+  def fromFunction[A, B](f: A ⇒ B): Pipe[A, B] = Pipe[A].map(f)
+
   def fromDrainAndSpout[A, B](drain: Drain[A, Unit], spout: Spout[B]): Pipe[A, B] =
     new Pipe(drain.outport, spout.inport) named "Pipe.fromDrainAndSpout"
 

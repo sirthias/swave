@@ -50,6 +50,11 @@ final class Drain[-T, +R] private[swave] (private[swave] val outport: Outport, v
   def dropResult: Drain[T, Unit] = Drain(outport)
 
   /**
+    * Prepends this [[Drain]] with a [[Pipe]] that transforms all incoming elements with the given function.
+    */
+  def contramap[A](f: A ⇒ T): Drain[A, R] = Pipe.fromFunction(f).to(this)
+
+  /**
     * Turns this [[Drain]] into one with a different result by mapping over the result value.
     *
     * NOTE: The result of this call and the underlying drain share the same stage.
