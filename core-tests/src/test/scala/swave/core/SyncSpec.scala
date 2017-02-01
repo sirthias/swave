@@ -69,6 +69,17 @@ class SyncSpec extends SwaveSpec {
       promise.future.await() shouldEqual Seq(1, 2, 3)
     }
 
+    "fanout end" in {
+      val promise = Promise[Seq[Int]]()
+      Spout(1, 2, 3)
+        .fanOutBroadcast()
+          .sub.to(Drain.seq(10).captureResult(promise))
+          .sub.to(Drain.ignore.dropResult)
+        .end
+        .run()
+      promise.future.await() shouldEqual Seq(1, 2, 3)
+    }
+
     "double direct fanout" in {
       Spout(1, 2, 3)
         .fanOutBroadcast()

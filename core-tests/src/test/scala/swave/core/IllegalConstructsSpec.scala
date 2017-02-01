@@ -19,7 +19,7 @@ class IllegalConstructsSpec extends FreeSpec {
            .fanOutSwitch(2)(i => if (i > 0) 1 else 0)
            .sub.end
            .continue""",
-        "Cannot continue stream definition here! You still have at least one unconsumed fan-out sub-stream.")
+        "Cannot `continue` here! You still have at least one unconsumed fan-out sub-stream.")
     }
 
     "illegal switch fanout subContinue with too few substreams" in {

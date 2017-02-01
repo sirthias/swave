@@ -632,9 +632,11 @@ abstract class StreamOps[A] private[core] { self ⇒
 
     def sub: SubStreamOps[A, L, S, FanOut[L, S]] = new SubStreamOps(this, new Spout(attachNop(base)))
 
-    def subContinue(implicit ev0: SubContinueReq1[L]): Repr[A] = wrap(base)
+    def subContinue(implicit ev: SubContinueReq1[L]): Repr[A] = wrap(base)
 
-    def continue(implicit ev0: ContinueReq1[L]): Repr[ev0.Out] = wrap(subs.in)
+    def continue(implicit ev: ContinueReq1[L]): Repr[ev.Out] = wrap(subs.in)
+
+    def end(implicit ev: EndReq0[L]): StreamGraph[Unit] = new StreamGraph((), base.stageImpl)
 
     def subDrains(drains: List[Drain[A, Unit]]): FI[L, S] = {
       @tailrec def rec(remaining: List[Drain[A, Unit]]): Unit =
@@ -668,6 +670,8 @@ abstract class StreamOps[A] private[core] { self ⇒
     def subContinue(implicit ev0: SubContinueReq0[L], ev1: SubContinueReq1[L]): Repr[AA] = wrap(ins.in)
 
     def continue(implicit ev0: ContinueReq0[L], ev1: ContinueReq1[L]): Repr[ev1.Out] = wrap(subs.in)
+
+    def end(implicit ev0: EndReq0[L], ev1: EndReq1[L]): StreamGraph[Unit] = new StreamGraph((), subs.in.stageImpl)
 
     // private type ViaBranchOut[LL <: HList, CC <: Coproduct, S] = BranchOut[LL, HNil, CNil, Nothing, Repr]
     //    def fromBranchOutVia[P <: HList, R](joined: Module.Joined[A, P, R])(implicit ev: ViaContinueReq[L], vr: ViaResult[P, RunnablePiping[R], Repr]): vr.Out = {
@@ -737,21 +741,23 @@ object StreamOps {
   @implicitNotFound(msg = "Cannot convert `${L}` into a tuple.")
   private type Tuplable[L <: HList] = Tupler[L]
 
-  @implicitNotFound(
-    msg = "Illegal substream definition! All available fan-out sub-streams have already been consumed.")
+  @implicitNotFound(msg = "Illegal substream definition! All available fan-out sub-streams have already been consumed.")
   private type SubReq[L <: HList] = IsHCons[L]
 
   @implicitNotFound(msg = "`subContinue` is only possible with exactly one remaining fan-out sub-stream unconsumed!")
   private type SubContinueReq0[L <: HList] = IsSingle[L]
-  @implicitNotFound(
-    msg = "`subContinue` is only possible without any previous fan-in sub-streams! Here you have: ${L}.")
+  @implicitNotFound(msg = "`subContinue` is only possible w/o any previous fan-in sub-streams! Here you have: ${L}.")
   private type SubContinueReq1[L <: HList] = IsHNil[L]
 
-  @implicitNotFound(
-    msg = "Cannot continue stream definition here! You still have at least one unconsumed fan-out sub-stream.")
+  @implicitNotFound(msg = "Cannot `continue` here! You still have at least one unconsumed fan-out sub-stream.")
   private type ContinueReq0[L <: HList] = IsHNil[L]
   @implicitNotFound(msg = "Continuation is only possible with exactly one open fan-in sub-stream!")
   private type ContinueReq1[L <: HList] = IsSingle[L]
+
+  @implicitNotFound(msg = "`end` is only possible without any previous fan-in sub-streams! Here you have: ${L}.")
+  private type EndReq0[L <: HList] = IsHNil[L]
+  @implicitNotFound(msg = "Cannot `end` here! You still have at least one unconsumed fan-out sub-stream.")
+  private type EndReq1[L <: HList] = IsHNil[L]
 
   @implicitNotFound(msg = "`via` is only possible here without any previous fan-in sub-streams! Here you have: ${L}.")
   private type ViaContinueReq[L <: HList] = IsHNil[L]
