@@ -7,11 +7,13 @@
 package swave.core.impl
 
 import scala.annotation.implicitNotFound
-import scala.concurrent.Future
+import scala.concurrent.{Future, Promise}
 import scala.util.{Failure, Success, Try}
 import shapeless._
 import shapeless.ops.hlist.Comapped
 import swave.core.{Spout, StreamOps}
+
+import scala.util.control.NonFatal
 
 object TypeLogic {
 
@@ -81,6 +83,33 @@ object TypeLogic {
       new ToFuture[T] {
         type Out = T
         def apply(value: T) = Future.successful(value)
+      }
+  }
+
+  sealed abstract class FlattenFuture[T] {
+    type Out
+    def apply(promise: Promise[Out])(value: => T): Unit
+  }
+  object FlattenFuture extends FlattenFuture0 {
+    implicit def forFuture[T] =
+      new FlattenFuture[Future[T]] {
+        type Out = T
+        def apply(promise: Promise[T])(value: => Future[T]): Unit =
+          try promise.completeWith(value)
+          catch {
+            case NonFatal(e) => promise.failure(e)
+          }
+      }
+  }
+  sealed abstract class FlattenFuture0 {
+    implicit def forAny[T] =
+      new FlattenFuture[T] {
+        type Out = T
+        def apply(promise: Promise[T])(value: => T): Unit =
+          try promise.success(value)
+          catch {
+            case NonFatal(e) => promise.failure(e)
+          }
       }
   }
 
