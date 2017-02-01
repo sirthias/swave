@@ -43,7 +43,7 @@ abstract class StreamOps[A] private[core] { self ⇒
   final def async(dispatcherId: String = ""): Repr[A] =
     append(new AsyncDispatcherStage(dispatcherId))
 
-  final def asyncBoundary(dispatcherId: String = "", bufferSize: Int = 16): Repr[A] =
+  final def asyncBoundary(dispatcherId: String = "", bufferSize: Int = 32): Repr[A] =
     append(new AsyncBoundaryStage(dispatcherId)).buffer(bufferSize)
 
   final def attach[T, S, O](sub: Spout[T])(implicit ev: Lub[A, T, O]): FanIn[A :: T :: HNil, O] =
