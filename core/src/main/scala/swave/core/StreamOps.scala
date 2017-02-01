@@ -6,7 +6,7 @@
 
 package swave.core
 
-import scala.annotation.{implicitNotFound, tailrec}
+import scala.annotation.{compileTimeOnly, implicitNotFound, tailrec}
 import scala.collection.generic.CanBuildFrom
 import scala.collection.{immutable, mutable}
 import scala.concurrent.Future
@@ -162,9 +162,11 @@ abstract class StreamOps[A] private[core] { self ⇒
     new FanOut(append(stage).base, InportList.empty)
   }
 
+  @compileTimeOnly("Not yet implemented") // TODO: remove when implemented
   final def fanOutRoundRobin(eagerCancel: Boolean = false): FanOut[HNil, Nothing] =
     ???
 
+  @compileTimeOnly("Not yet implemented") // TODO: remove when implemented
   final def fanOutSequential(eagerCancel: Boolean = false): FanOut[HNil, Nothing] =
     ???
 
@@ -184,9 +186,11 @@ abstract class StreamOps[A] private[core] { self ⇒
     new BranchOut(InportList.fill(branchCount, attachNop(base)), InportList.empty)
   }
 
+  @compileTimeOnly("Not yet implemented") // TODO: remove when implemented
   final def fanOutToAny(eagerCancel: Boolean = false): FanOut[HNil, Nothing] =
     ???
 
+  @compileTimeOnly("Not yet implemented") // TODO: remove when implemented
   final def fanOutUnZip[L <: HList](eagerCancel: Boolean = false)(
       implicit ev: FromProduct[A, L]): BranchOut[L, HNil, Nothing] =
     ???
@@ -212,18 +216,22 @@ abstract class StreamOps[A] private[core] { self ⇒
   final def flattenMerge[B](parallelism: Int)(implicit ev: Streamable.Aux[A, B]): Repr[B] =
     append(new FlattenMergeStage(ev.asInstanceOf[Streamable.Aux[Any, AnyRef]], parallelism))
 
+  @compileTimeOnly("Not yet implemented") // TODO: remove when implemented
   final def flattenRoundRobin[B](parallelism: Int)(implicit ev: Streamable.Aux[A, B]): Repr[B] =
     ???
 
+  @compileTimeOnly("Not yet implemented") // TODO: remove when implemented
   final def flattenSorted[B: Ordering](parallelism: Int)(implicit ev: Streamable.Aux[A, B]): Repr[B] =
     ???
 
+  @compileTimeOnly("Not yet implemented") // TODO: remove when implemented
   final def flattenToSeq[B](parallelism: Int)(implicit ev: Streamable.Aux[A, B]): Repr[immutable.Seq[B]] =
     ???
 
   final def fold[B](zero: B)(f: (B, A) ⇒ B): Repr[B] =
     append(new FoldStage(zero.asInstanceOf[AnyRef], f.asInstanceOf[(Any, Any) ⇒ AnyRef]))
 
+  @compileTimeOnly("Not yet implemented") // TODO: remove when implemented
   final def foldAsync[B](zero: B)(f: (B, A) ⇒ Future[B]): Repr[B] =
     ???
 
@@ -274,12 +282,15 @@ abstract class StreamOps[A] private[core] { self ⇒
     */
   def identity: Repr[A] = asInstanceOf[Repr[A]]
 
+  @compileTimeOnly("Not yet implemented") // TODO: remove when implemented
   final def injectToAny(parallelism: Int): Repr[Spout[A]] =
     ???
 
+  @compileTimeOnly("Not yet implemented") // TODO: remove when implemented
   final def injectBroadcast(parallelism: Int): Repr[Spout[A]] =
     ???
 
+  @compileTimeOnly("Not yet implemented") // TODO: remove when implemented
   final def injectRoundRobin(parallelism: Int): Repr[Spout[A]] =
     ???
 
@@ -288,6 +299,7 @@ abstract class StreamOps[A] private[core] { self ⇒
     append(if (bufferSize == 1) new InjectSequentialStage else new InjectSequentialBufferedStage(bufferSize))
   }
 
+  @compileTimeOnly("Not yet implemented") // TODO: remove when `fanInRoundRobin` is implemented
   final def interleave[B >: A](other: Spout[B], segmentSize: Int = 1, eagerComplete: Boolean = false): Repr[B] =
     attach(other).fanInRoundRobin(segmentSize, eagerComplete)
 
@@ -315,9 +327,11 @@ abstract class StreamOps[A] private[core] { self ⇒
   final def merge[B >: A](other: Spout[B], eagerComplete: Boolean = false): Repr[B] =
     attach(other).fanInMerge(eagerComplete)
 
+  @compileTimeOnly("Not yet implemented") // TODO: remove when `fanInSorted` is implemented
   final def mergeSorted[B >: A: Ordering](other: Spout[B], eagerComplete: Boolean = false): Repr[B] =
     attach(other).fanInSorted(eagerComplete)
 
+  @compileTimeOnly("Not yet implemented") // TODO: remove when `fanInToCoproduct` is implemented
   final def mergeToEither[B](right: Spout[B]): Repr[Either[A, B]] =
     map(Left[A, B]).attach(right.map(Right[A, B])).fanInToSum[Either[A, B]]()
 
@@ -366,6 +380,7 @@ abstract class StreamOps[A] private[core] { self ⇒
   final def prefixAndTailTo[S[+ _]](n: Int)(implicit cbf: CanBuildFrom[S[A], A, S[A]]): Repr[(S[A], Spout[A])] =
     append(new PrefixAndTailStage(n, cbf.apply().asInstanceOf[scala.collection.mutable.Builder[Any, AnyRef]]))
 
+  @compileTimeOnly("Not yet implemented") // TODO: remove when implemented
   final def protect[B](recreate: Option[Throwable] => Pipe[A, B]): Repr[B] = ???
 
   final def recover[B >: A](pf: PartialFunction[Throwable, B]): Repr[B] =
@@ -380,11 +395,13 @@ abstract class StreamOps[A] private[core] { self ⇒
   final def reduce[B >: A](f: (B, B) ⇒ B): Repr[B] =
     via(Pipe[B].headAndTail.map { case (head, tail) ⇒ tail.fold(head)(f) }.flattenConcat() named "reduce")
 
+  @compileTimeOnly("Not yet implemented") // TODO: remove when implemented
   final def sample(d: FiniteDuration): Repr[A] = ???
 
   final def scan[B](zero: B)(f: (B, A) ⇒ B): Repr[B] =
     append(new ScanStage(zero.asInstanceOf[AnyRef], f.asInstanceOf[(Any, Any) ⇒ AnyRef]))
 
+  @compileTimeOnly("Not yet implemented") // TODO: remove when implemented
   final def scanAsync[B](zero: B)(f: (B, A) ⇒ Future[B]): Repr[B] =
     ???
 
@@ -519,9 +536,11 @@ abstract class StreamOps[A] private[core] { self ⇒
     def fanInMerge(eagerComplete: Boolean = false): Repr[S] =
       wrap(new MergeStage(subs, eagerComplete))
 
+    @compileTimeOnly("Not yet implemented") // TODO: remove when implemented
     def fanInRoundRobin(segmentSize: Int = 1, eagerComplete: Boolean = false): Repr[S] =
       ???
 
+    @compileTimeOnly("Not yet implemented") // TODO: remove when implemented
     def fanInSorted(eagerComplete: Boolean = false)(implicit ord: Ordering[S]): Repr[S] =
       ???
   }
@@ -557,13 +576,16 @@ abstract class StreamOps[A] private[core] { self ⇒
     final def fanInMerge(eagerComplete: Boolean = false)(implicit ev: FanInReq[L]): Repr[S] =
       wrap(new MergeStage(subs, eagerComplete))
 
+    @compileTimeOnly("Not yet implemented") // TODO: remove when implemented
     final def fanInRoundRobin(segmentSize: Int = 1, eagerComplete: Boolean = false)(
         implicit ev: FanInReq[L]): Repr[S] =
       ???
 
+    @compileTimeOnly("Not yet implemented") // TODO: remove when implemented
     final def fanInSorted(eagerComplete: Boolean = false)(implicit ev: FanInReq[L], ord: Ordering[S]): Repr[S] =
       ???
 
+    @compileTimeOnly("Not yet implemented") // TODO: remove when implemented
     final def fanInToCoproduct[C <: Coproduct](eagerComplete: Boolean = true)(implicit ev: FanInReq[L],
                                                                               tpc: ToCoproduct.Aux[L, C]): Repr[C] =
       ???
@@ -574,6 +596,7 @@ abstract class StreamOps[A] private[core] { self ⇒
     final def fanInToProduct[T](implicit ev: FanInReq[L], gen: ToProduct[T, L]): Repr[T] =
       fanInToHList.map(l ⇒ gen from l)
 
+    @compileTimeOnly("Not yet implemented") // TODO: remove when `fanInToCoproduct` is implemented
     final def fanInToSum[T](eagerComplete: Boolean = true)(implicit ev: FanInReq[L], s: Summable[T, L]): Repr[T] =
       fanInToCoproduct[s.CP](eagerComplete)(ev, s.tpc).map(s.gen.from)
 
