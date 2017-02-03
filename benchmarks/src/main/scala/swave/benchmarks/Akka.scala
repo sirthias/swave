@@ -10,7 +10,7 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 import akka.Done
 import akka.actor.ActorSystem
-import akka.stream.{ActorMaterializer, ActorMaterializerSettings, OverflowStrategy, SourceShape}
+import akka.stream._
 import akka.stream.scaladsl._
 import swave.core.util._
 
@@ -22,38 +22,69 @@ object Akka extends BenchmarkSuite("akka") {
   implicit val materializer = ActorMaterializer(settings)
 
   def createBenchmarks = Seq(
-    fibonacci(40 * mio),
-    simpleDrain(150 * mio),
-    substreams(10 * mio)
+    fanIn(50.mio),
+    fanOut(30.mio),
+    fibonacci(30.mio),
+    simpleDrain(100.mio),
+    substreams(6.mio)
   )
 
   implicit def startRunnableEntity[T](graph: RunnableGraph[Future[Done]]): Future[Done] =
     graph.run()
 
+  def fanIn(count: Long) =
+    benchmark("fanIn") { showProgressAndTimeFirstElement =>
+      RunnableGraph.fromGraph {
+        GraphDSL.create(Sink.ignore) { implicit builder => sink =>
+          import GraphDSL.Implicits._
+          val zeros = Source.repeat(zero)
+          val merge = builder.add(Merge[Integer](5))
+          for (ix <- 0 to 4) { zeros ~> merge.in(ix) }
+          merge.out
+            .take(count)
+            .map { elem => showProgressAndTimeFirstElement(count); elem } ~> sink
+          ClosedShape
+        }
+      }
+    }
+
+  def fanOut(count: Long) =
+    benchmark("fanOut") { showProgressAndTimeFirstElement =>
+      RunnableGraph.fromGraph {
+        GraphDSL.create(Sink.ignore) { implicit builder => sink =>
+          import GraphDSL.Implicits._
+          val fanOut = builder.add(Broadcast[Integer](5))
+          Source
+            .repeat(zero)
+            .take(count)
+            .map { elem => showProgressAndTimeFirstElement(count); elem } ~> fanOut.in
+          fanOut.out(0) ~> sink
+          for (ix <- 1 to 4) { fanOut.out(ix) ~> Sink.ignore }
+          ClosedShape
+        }
+      }
+    }
+
   def fibonacci(count: Long) =
     benchmark("fibonacci") { showProgressAndTimeFirstElement =>
-      // TODO: how can this graph creation be simplified?
-      Source.fromGraph {
-        GraphDSL.create() { implicit builder =>
+      RunnableGraph.fromGraph {
+        GraphDSL.create(Sink.ignore) { implicit builder => sink =>
           import GraphDSL.Implicits._
           val bcast = builder.add(Broadcast[Int](2, eagerCancel = true))
-          bcast
+          bcast.out(0)
             .buffer(2, OverflowStrategy.backpressure)
             .scan(0 -> 1) { case ((a, b), c) => (a + b) -> c }
-            .map(_._1) ~> bcast
-          SourceShape {
-            bcast
-              .take(count)
-              .map { elem => showProgressAndTimeFirstElement(count); elem }
-              .outlet
-          }
+            .map(_._1) ~> bcast.in
+          bcast.out(1)
+            .take(count)
+            .map { elem => showProgressAndTimeFirstElement(count); elem } ~> sink
+          ClosedShape
         }
-      }.runWith(Sink.ignore)
+      }
     }
 
   def simpleDrain(count: Long) =
     benchmark("simpleDrain") { showProgressAndTimeFirstElement =>
-      val zero = new Integer(0)
       Source
         .repeat(zero)
         .take(count)
@@ -68,18 +99,17 @@ object Akka extends BenchmarkSuite("akka") {
           private[this] var _count: Int = c
           def apply(i: Integer): Boolean = if (_count == 1) { _count = c; true } else { _count -= 1; false }
         }
-      val zero = new Integer(0)
-        Source
-          .repeat(zero)
-          .splitAfter(everyNthElement(1000000))
-          .splitAfter(everyNthElement(10000))
-          .splitAfter(everyNthElement(100))
-          .concatSubstreams
-          .concatSubstreams
-          .concatSubstreams
-          .take(count)
-          .map { elem => showProgressAndTimeFirstElement(count); elem }
-          .toMat(Sink.ignore)(Keep.right)
+      Source
+        .repeat(zero)
+        .splitAfter(everyNthElement(1000000))
+        .splitAfter(everyNthElement(10000))
+        .splitAfter(everyNthElement(100))
+        .concatSubstreams
+        .concatSubstreams
+        .concatSubstreams
+        .take(count)
+        .map { elem => showProgressAndTimeFirstElement(count); elem }
+        .toMat(Sink.ignore)(Keep.right)
     }
 
   override def cleanUp(): Unit = {

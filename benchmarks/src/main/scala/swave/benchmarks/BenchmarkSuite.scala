@@ -12,9 +12,43 @@ import swave.core.util._
 
 abstract class BenchmarkSuite(val suiteName: String) {
 
-  private final val ITERATIONS = 3
-  private final val DROPMARGIN = 0
+  // defaults
+  private final val ITERATIONS = 11
+  private final val DROPMARGIN = 2
+
+  final def main(argsArray: Array[String]): Unit =
+    try {
+      val args = argsArray.toList
+      if (args == List("-h")) println {
+        """Usage: runMain swave.benchmarks.<Akka/Swave> [iterations[/dropmargin]] [selectors...]
+          |
+          |iterations    the number of times to run the selected benchmarks
+          |dropmargin    the number of slowest and the number of fastest iterations to disregard in results
+          |selectors     one or more strings to select a subset of defined benchmarks,
+          |              only benchmarks with a name that contains at least one of the given strings will be run
+        """.stripMargin
+      } else {
+        val (iterations, dropmargin, selectors) =
+          args match {
+            case head :: tail if head.head.isDigit =>
+              head.fastSplit('/') match {
+                case iter :: Nil => (iter.toInt, 0, tail)
+                case iter :: drop :: Nil => (iter.toInt, drop.toInt, tail)
+                case _ => throw new IllegalArgumentException(s"'$head' is not valid iterations/dropmargin definition")
+              }
+            case _ => (ITERATIONS, DROPMARGIN, args)
+          }
+        runBenchmarks(iterations, dropmargin) {
+          if (selectors.nonEmpty) createBenchmarks.filter(b => selectors.exists(b.name.contains)) else createBenchmarks
+        }
+      }
+    } finally cleanUp()
+
   private final var nameWidth: Int = _
+
+  // statically boxed elements
+  final val zero = new Integer(0)
+  final val one = new Integer(0)
 
   def createBenchmarks: Seq[Benchmark[_]]
 
@@ -64,23 +98,23 @@ abstract class BenchmarkSuite(val suiteName: String) {
     val throughputInMioPerSec: Double = elements / 1000.0 / totalTime.toMillis
   }
 
-  final def main(args: Array[String]): Unit = {
-    nameWidth = createBenchmarks.map(_.name.length).max
+  private def runBenchmarks(iterations: Int, dropMargin: Int)(selectedBenchmarks: => Seq[Benchmark[_]]): Unit = {
+    nameWidth = selectedBenchmarks.map(_.name.length).max
     val random = XorShiftRandom()
 
     def medianAndRelativeError(results: Seq[Double]): (Double, Double) = {
       val effectiveResults = results.sorted
-      val min = effectiveResults(DROPMARGIN)
+      val min = effectiveResults(dropMargin)
       val median = effectiveResults(effectiveResults.size / 2)
-      val max = effectiveResults(effectiveResults.size - DROPMARGIN - 1)
+      val max = effectiveResults(effectiveResults.size - dropMargin - 1)
       val relativeError = math.max((median - min) / median, (max - median) / median) * 100
       median -> relativeError
     }
 
     val result: Seq[String] =
-      Seq.tabulate(ITERATIONS) { iteration =>
-        println(s"\n----- ITERATION ${iteration + 1}/$ITERATIONS -----")
-        val benchmarks = createBenchmarks.toArray
+      Seq.tabulate(iterations) { iteration =>
+        println(s"\n----- ITERATION ${iteration + 1}/$iterations -----")
+        val benchmarks = selectedBenchmarks.toArray
         random.shuffle_!(benchmarks)
         benchmarks.map { benchmark =>
           val result = benchmark.run()
@@ -110,8 +144,6 @@ abstract class BenchmarkSuite(val suiteName: String) {
     println()
     result.foreach(println)
     println()
-
-    cleanUp()
   }
 
   def pad(name: String, to: Int = nameWidth, c: Char = ' '): String =
@@ -122,7 +154,7 @@ abstract class BenchmarkSuite(val suiteName: String) {
       sb.toString
     } else name
 
-  final def mio = 1000000L
+  implicit class RichtInt(underlying: Int) { def mio: Long = underlying * 1000000L }
   final def now = System.nanoTime()
   final def elapsedSince(timeStamp: Long): FiniteDuration = (now - timeStamp).nanos
 }

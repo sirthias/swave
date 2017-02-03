@@ -15,13 +15,45 @@ object Swave extends BenchmarkSuite("swave") {
   implicit val env = StreamEnv()
 
   def createBenchmarks = Seq(
-    fibonacci(20 * mio),
-    simpleDrain(100 * mio),
-    substreams(20 * mio)
+    fanIn(80.mio),
+    fanOut(80.mio),
+    fibonacci(50.mio),
+    simpleDrain(120.mio),
+    substreams(30.mio)
   )
 
   implicit def startStreamGraph[T](streamGraph: StreamGraph[Future[Unit]]): Future[Unit] =
     streamGraph.run().result
+
+  def fanIn(count: Long) =
+    benchmark("fanIn") { showProgressAndTimeFirstElement =>
+      zeros
+        .attach(zeros)
+        .attach(zeros)
+        .attach(zeros)
+        .attach(zeros)
+        .fanInMerge()
+        .take(count)
+        .onElement(_ => showProgressAndTimeFirstElement(count))
+        .async()
+        .to(Drain.ignore)
+    }
+
+  def fanOut(count: Long) =
+    benchmark("fanOut") { showProgressAndTimeFirstElement =>
+      def blackhole = Drain.ignore.dropResult
+      zeros
+        .take(count)
+        .onElement(_ => showProgressAndTimeFirstElement(count))
+        .async()
+        .fanOutBroadcast()
+          .sub.to(blackhole)
+          .sub.to(blackhole)
+          .sub.to(blackhole)
+          .sub.to(blackhole)
+          .subContinue
+        .to(Drain.ignore)
+    }
 
   def fibonacci(count: Long) =
     benchmark("fibonacci") { showProgressAndTimeFirstElement =>
@@ -42,9 +74,7 @@ object Swave extends BenchmarkSuite("swave") {
 
   def simpleDrain(count: Long) =
     benchmark("simpleDrain") { showProgressAndTimeFirstElement =>
-      val zero = new Integer(0)
-      Spout
-        .repeat(zero)
+      zeros
         .take(count)
         .onElement(_ => showProgressAndTimeFirstElement(count))
         .async()
@@ -53,26 +83,26 @@ object Swave extends BenchmarkSuite("swave") {
 
   def substreams(count: Long) =
     benchmark("substreams") { showProgressAndTimeFirstElement =>
-      val zero = new Integer(0)
-        Spout
-          .repeat(zero)
-          .injectSequential()
-          .flatMap {
-            _
-              .take(1000000)
-              .injectSequential()
-              .flatMap {
-                _
-                  .take(10000)
-                  .injectSequential()
-                  .flatMap(_.take(100))
-              }
-          }
-          .take(count)
-          .onElement(_ => showProgressAndTimeFirstElement(count))
-          .async()
-          .to(Drain.ignore)
+      zeros
+        .injectSequential()
+        .flatMap {
+          _
+            .take(1000000)
+            .injectSequential()
+            .flatMap {
+              _
+                .take(10000)
+                .injectSequential()
+                .flatMap(_.take(100))
+            }
+        }
+        .take(count)
+        .onElement(_ => showProgressAndTimeFirstElement(count))
+        .async()
+        .to(Drain.ignore)
     }
+
+  private def zeros = Spout.repeat(zero)
 
   override def cleanUp(): Unit = env.shutdown().awaitTermination(1.second)
 }
