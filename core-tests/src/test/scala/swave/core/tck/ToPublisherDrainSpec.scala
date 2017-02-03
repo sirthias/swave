@@ -9,8 +9,8 @@ package swave.core.tck
 import org.reactivestreams.Publisher
 import swave.core._
 
-class ToPublisherDrainSpec(ignore: Any) // disabled by default, remove parameter to enable the test
-    extends SwavePublisherVerification[Int] {
+// due to long runtime this test is disabled by default, remove parameter to enable the test
+class ToPublisherDrainSpec(dontRun: Any) extends SwavePublisherVerification[Int] {
 
   implicit val env = StreamEnv()
 

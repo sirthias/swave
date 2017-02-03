@@ -9,8 +9,8 @@ package swave.core.tck
 import org.reactivestreams.Processor
 import swave.core.{Pipe, StreamEnv}
 
-class IdentityProcessorSpec(ignore: Any) // disabled by default, remove parameter to enable the test
-    extends SwaveIdentityProcessorVerification[Int] {
+// due to long runtime this test is disabled by default, remove parameter to enable the test
+class IdentityProcessorSpec(dontRun: Any) extends SwaveIdentityProcessorVerification[Int] {
 
   implicit val env = StreamEnv()
 
