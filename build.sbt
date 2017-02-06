@@ -195,16 +195,15 @@ lazy val `core-tests` = project
 
 lazy val docs = project
   .dependsOn(`compat-akka`, `compat-scodec`, core, testkit)
-  .enablePlugins(ParadoxSitePlugin)
+  .enablePlugins(ParadoxSitePlugin, GhpagesPlugin)
   .settings(commonSettings: _*)
   .settings(noPublishingSettings: _*)
-  .settings(ghpages.settings)
   .settings(
     git.remoteRepo := scmInfo.value.get.connection.drop("scm:git:".length),
     libraryDependencies ++= Seq(shapeless, scalatest, `akka-stream`, logback),
     apiURL := Some(url("http://swave.io/api/")),
-    siteSubdirName in Paradox := "",
     paradoxTheme := None,
+    sourceDirectory in (Paradox, paradox) := sourceDirectory.value / "paradox",
     sourceDirectory in (Paradox, paradoxTheme) := sourceDirectory.value / "paradox" / "_template",
     paradoxProcessor in Paradox := new ParadoxProcessor(writer = new CustomWriter),
     paradoxNavigationDepth := 3,

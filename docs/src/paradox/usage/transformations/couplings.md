@@ -5,7 +5,7 @@ Couplings
 They are typically used to manually connect two ports of a stream graph that cannot be otherwise connected via the
 streaming DSL, e.g. for creating cycles.
 
-@@@ p { .centered }
+@@@ div { .centered }
 ![A Coupling](.../coupling.svg)
 @@@
 
@@ -15,7 +15,7 @@ in a stream graph definition to create connections where you need them.
 
 Here is an example of a stream that contains a cycle and therefore requires the use of a `Coupling`:
  
-@@snip [-]($test/CouplingSpec.scala) { #fibonacci } 
+@@snip [-]($test$/CouplingSpec.scala) { #fibonacci } 
 
 (For an in-depth discussion of this stream setup check out the @ref[Fibonacci Example]!)
 

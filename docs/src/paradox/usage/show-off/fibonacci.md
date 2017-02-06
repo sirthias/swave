@@ -6,7 +6,7 @@ all fibonacci numbers.
 
 Here is a very simple way to create an infinite stream of all Fibonacci numbers that relies on an `unfold` @ref[Spout]:
 
-@@snip [-]($test/FibonacciSpec.scala) { #unfold }
+@@snip [-]($test$/FibonacciSpec.scala) { #unfold }
 
 Since the stream graph here does not include any stages that require asynchronous dispatch everything runs synchronously
 on the caller thread and the result future will be already completed when we get a hold of it.
@@ -17,11 +17,11 @@ by the "unfolding" feature. As such it is "built-in" and not that interesting fr
 A maybe more illustrative way to construct the same stream is the following one, which makes the recursion explicit in
 the stream graph structure:
 
-@@snip [-]($test/FibonacciSpec.scala) { #cycle }
+@@snip [-]($test$/FibonacciSpec.scala) { #cycle }
 
 The stream graph defined by this code can be visualized like this:
 
-@@@ p { .centered }
+@@@ div { .centered }
 ![Fibonacci Example Stream Graph](.../fibobacci-graph.svg)
 @@@
 

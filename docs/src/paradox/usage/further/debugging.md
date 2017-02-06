@@ -56,7 +56,7 @@ reroute them to any kind of logging facility.
 
 In order to illustrate its benefit let's look at this example:
 
-@@snip [-]($test/Debugging.scala) { #example }
+@@snip [-]($test$/Debugging.scala) { #example }
 
 As you can see, @ref[logSignal] lets you specify a "marker" string that makes it easy to associate the output of the
 particular stage with its position in the graph.

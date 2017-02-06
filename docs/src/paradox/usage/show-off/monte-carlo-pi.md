@@ -4,7 +4,7 @@ Monte Carlo Pi Example
 This example is a slightly adapted version of the one that has been shown in a few @ref[talks on swave] in the past.<br/>
 It implements a simple approximation of Pi via the Monte Carlo method, whose basic idea can be illustrated like this:
 
-@@@ p { .centered }
+@@@ div { .centered }
 ![Approximating Pi with the Monte Carlo method](.../pi.svg)
 @@@
 
@@ -14,7 +14,7 @@ area would asymptotically approach π/4 as we increase the number of shots.
 There are many ways in which a simulation of this method can be implemented in code.<br/>
 Here is a stream-based solution, which is intentionally somewhat convoluted to show off a few of *swave's* features:
 
-@@snip [-]($test/MonteCarloPi.scala) { #example }
+@@snip [-]($test$/MonteCarloPi.scala) { #example }
 
 When this code is run it generates 50 mio samples, at maximum speed, to approximate π using the Monte Carlo method.
 After each 1 mio samples one line of progress information is printed to console.  
@@ -23,7 +23,7 @@ The streams setup contains elements from all five basic groups of stream transfo
 @ref[fan-outs], @ref[fan-ins], @ref[injects] and @ref[flattenings].
 The implemented stream graph can be visualized like this. 
 
-@@@ p { .centered }
+@@@ div { .centered }
 ![Monte Carlo Pi Stream Graph](.../pi-stream.svg)
 @@@
 
@@ -43,7 +43,7 @@ machine it might end up generating too much output on really fast machines and t
 We can fix this by letting the stream produce a status update *once a second*, i.e. independently of the number of
 generated samples:
 
-@@snip [-]($test/MonteCarloPiThrottled.scala) { #example }
+@@snip [-]($test$/MonteCarloPiThrottled.scala) { #example }
 
 Up to the @ref[scan] stage everything has stayed as before. But rather than then simply filtering for every million-th
 element we use @ref[conflateToLast], which is one frequently used incarnation of the more general @ref[conflate].

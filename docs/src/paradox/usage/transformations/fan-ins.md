@@ -3,14 +3,14 @@ Fan-Ins
 
 Fan-Ins are @ref[stream graph components] with several input ports and a single output port.
  
-@@@ p { .centered }
+@@@ div { .centered }
 ![A Fan-In](.../fan-in.svg)
 @@@
 
 *swave's* streaming DSL allows you to define fan-ins in a flexible yet concise way.<br/>
 For example:
 
-@@snip [-]($test/FanInSpec.scala) { #example1 }
+@@snip [-]($test$/FanInSpec.scala) { #example1 }
 
 When you call `attach(...)` on a @ref[Spout] you get back a DSL type which represents *several* open stream ports, not
 just a single one as in the case of a simple @ref[Spout]. You can add more spouts to the mix by simply calling
@@ -53,7 +53,7 @@ of open spouts.
  
 Here is an example:
 
-@@snip [-]($test/FanInSpec.scala) { #example2 }
+@@snip [-]($test$/FanInSpec.scala) { #example2 }
  
 
 Homogeneous vs. Heterogeneous Fan-Ins
@@ -65,7 +65,7 @@ The examples above show "homogeneous" fan-ins, in which all inputs are of the sa
 However, @ref[fanInToTuple], @ref[fanInToProduct] or @ref[fanInToSum] are usually used on inputs of differing types,
 i.e. as "heterogeneous" fan-ins. Here is an example:
 
-@@snip [-]($test/FanInSpec.scala) { #example3 }
+@@snip [-]($test$/FanInSpec.scala) { #example3 }
 
 One thing you can also see in this example is that *swave* attempts to reduce all boilerplate to the absolute minimum.
 Here the creation of case class instances from sub-streams for each member is implicitly taken care of.<br/>

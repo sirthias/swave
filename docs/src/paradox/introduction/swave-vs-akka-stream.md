@@ -22,6 +22,15 @@ Fluent DSL vs. Point-to-point Graph DSL
 : While *swave* tries to keep individual transformations named similarly to @extref[Akka-Stream] the DSL for creating
   more complex stream setups, with fan-outs, fan-ins, loops, etc. is substantially different between the two.
   
+Full vs. Limited Stream-of-Streams Support
+: *swave* fully supports streams of streams, where as Akka limits stream nesting to streams that handle all nested
+  streams in the same way. The latter does have certain benefits (like inspectability of transformations on nested
+  streams) but is strictly less powerful.
+  
+Performance
+: In our latest benchmarks *swave* achieves between 1.3 and 4.8 times as much throughput as @extref[Akka-Stream] for
+  quasi-identical streaming graphs, depending on the exact mix of transformations in the "hot" parts of the setup.
+  
 Quick Evolution vs. Long-term stability
 : Being part of [Akka] Akka-Stream has much tighter requirements on long-term stability and binary compatibility than
   *swave*. This means that you can probably rely on @extref[Akka-Stream] as a more stable and mature foundation going
@@ -35,7 +44,14 @@ from one another and comparing approaches on numerous levels.
 The more users whose needs we can jointly address the more the Scala eco-system will benefit as a whole.
 
 
+Interfacing with Akka-Stream
+----------------------------
+
+Since seamless interaction between *swave* and @extref[Akka-Stream] is a frequent requirement *swave* has built-in
+support for easy interfacing between the two. See the docs for the @ref[swave-akka-compat] module for more details.  
+
+
   [Akka-Stream]: akka:stream/index
   [FS2]: https://github.com/functional-streams-for-scala/fs2
   [Akka]: http://akka.io/
- 
+  [swave-akka-compat]: ../usage/swave-akka-compat/index.md 

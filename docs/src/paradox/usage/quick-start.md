@@ -16,7 +16,7 @@ Required Imports
 After having added *swave* to your build (as described in the @ref[Setup] chapter) you bring all the key
 identifiers into scope with this single import:
 
-@@snip [-]($test/QuickStartSpec.scala) { #core-import }
+@@snip [-]($test$/QuickStartSpec.scala) { #core-import }
 
 In most cases this is all you need, but sometimes additional imports are required in order to enable certain support
 functionality (like the @ref[Domain Adapters]).
@@ -31,7 +31,7 @@ With the main import in place we can create sources of stream elements, which ar
 
 Here is a simple one:
 
-@@snip [-]($test/QuickStartSpec.scala) { #spout }
+@@snip [-]($test$/QuickStartSpec.scala) { #spout }
 
 As you can probably guess a `Spout[T]` is parameterized with the type of the elements that the spout produces.
 *swave* predefines quite a few ways to create spouts from other types, e.g. from
@@ -46,7 +46,7 @@ Attaching Transformations
 
 Once you have a `Spout` you can define @ref[transformations] on it, e.g. like this:
   
-@@snip [-]($test/QuickStartSpec.scala) { #spout-simple-ops }
+@@snip [-]($test$/QuickStartSpec.scala) { #spout-simple-ops }
 
 Most @ref[transformations] give you back another `Spout` of the same or a different type, but some, especially the
 @ref[fan-outs] and @ref[fan-ins] work a bit differently.<br/>
@@ -58,7 +58,7 @@ business logic might be encoded by combining them in the right way.
 As with most programs there are usually many ways to achieve the same thing.<br/>
 For example, here are ten ways of producing the same stream (the first 100 natural numbers) with *swave*:
 
-@@snip [-]($test/QuickStartSpec.scala) { #ten-spouts }
+@@snip [-]($test$/QuickStartSpec.scala) { #ten-spouts }
 
 Attaching Drains
 ----------------
@@ -74,7 +74,7 @@ side-effect, like the execution of a function for each element produced by the s
 
 Here is a `Drain` that collects all incoming elements into a `Vector`:
 
-@@snip [-]($test/QuickStartSpec.scala) { #seq-drain }
+@@snip [-]($test$/QuickStartSpec.scala) { #seq-drain }
 
 In addition to the type parameter for the element type (that we've already seen on `Spout`) a `Drain` has a second one,
 which defines the type of the *result* that the drain produces. For most drains this will be a
@@ -82,7 +82,7 @@ which defines the type of the *result* that the drain produces. For most drains 
 
 Here are some other frequently used drains:
 
-@@snip [-]($test/QuickStartSpec.scala) { #more-drains }
+@@snip [-]($test$/QuickStartSpec.scala) { #more-drains }
 
 As you can see, even the drains that produce "no" result, still produce one :).<br/>
 For example the `Drain.foreach`, which runs a stream to completion only for side-effects, produces a `Future[Unit]`.
@@ -93,7 +93,7 @@ Even though in the happy case the future's value isn't very interesting (the `Un
 
 Once you have a drain you can attach it to a matching (type-wise) `Spout` with `to(...)`, e.g.: 
 
-@@snip [-]($test/QuickStartSpec.scala) { #streamGraph }  
+@@snip [-]($test$/QuickStartSpec.scala) { #streamGraph }  
 
 The result of attaching a `Drain` to a `Spout` is a @scaladoc[StreamGraph], a type you'll probably use less frequently
 in your own code. A `StreamGraph` represents a complete stream pipeline or graph setup, which is ready to be run.
@@ -133,7 +133,7 @@ StreamEnv
 When you try to run a stream now, only with what we've talked about so far, you'll see that there is still one final
 thing missing. For example if we try to compile this snippet:
 
-@@snip [-]($test/QuickStartSpec.scala) { #run }
+@@snip [-]($test$/QuickStartSpec.scala) { #run }
 
 the compiler would stop us with this error message:
 
@@ -153,7 +153,7 @@ For example, the `StreamEnv` contains the thread-pool configuration(s) and gener
 
 The simplest and yet perfectly fine way to supply a `StreamEnv` instance is this:
 
-@@snip [-]($test/QuickStartSpec.scala) { #env }
+@@snip [-]($test$/QuickStartSpec.scala) { #env }
 
 This will simply load the complete @ref[Configuration] from the `reference.conf` and, potentially,
 `application.conf` files on your classpath.
@@ -165,7 +165,7 @@ thread-pools are configured with `daemonic = on`, which is not the default).
  
 This is how you trigger an orderly shutdown of a `StreamEnv` instance:
 
-@@snip [-]($test/QuickStartSpec.scala) { #env-shutdown }
+@@snip [-]($test$/QuickStartSpec.scala) { #env-shutdown }
 
 
 drainTo Shortcuts
@@ -174,7 +174,7 @@ drainTo Shortcuts
 Since attaching a `Drain` and immediately calling `.run()` on the result is such a common pattern, *swave* offers
 several shortcuts that allow you to do both in one single step. For example:
 
-@@snip [-]($test/QuickStartSpec.scala) { #shortcuts }
+@@snip [-]($test$/QuickStartSpec.scala) { #shortcuts }
 
 There are more `drain...` variants available on `Spout`, you might want to
 @scaladoc[check them out as](swave.core.Spout) well.

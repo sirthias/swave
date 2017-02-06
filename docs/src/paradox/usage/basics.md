@@ -33,7 +33,7 @@ from the neighbouring stages. Once a stream graph is running there are five core
 tick and which almost directly correspond to their counterparts in the
 @ref[Reactive Streams](../introduction/reactive-streams.md) protocol:
 
-@@@ p { .centered }
+@@@ div { .centered }
 ![The five basic Signals](.../five-signals.svg)
 @@@
  
@@ -82,18 +82,18 @@ automatically by the DSL.
 
 Let's look at this simple example:
 
-@@snip [-]($test/BasicSpec.scala) { #foo }
+@@snip [-]($test$/BasicSpec.scala) { #foo }
 
-@@@ p { .centered }
+@@@ div { .centered }
 ![Spout foo](.../foo-spout.svg)
 @@@
 
 The spout instance `foo` has no downstream attached yet, i.e. it has one open port. We can attach
 a @ref[transformation] to connect the open port to a downstream stage:
 
-@@snip [-]($test/BasicSpec.scala) { #upperFoo }
+@@snip [-]($test$/BasicSpec.scala) { #upperFoo }
 
-@@@ p { .centered }
+@@@ div { .centered }
 ![Spout upperFoo](.../upper-foo.svg)
 @@@
 
@@ -105,9 +105,9 @@ As you can see attaching @ref[transformations] to @ref[spouts] will always conne
 produce new unconnected ones. Only by attaching @ref[drains] can a graph become fully **closed**, without any ports
 left unconnected:
 
-@@snip [-]($test/BasicSpec.scala) { #streamGraph }
+@@snip [-]($test$/BasicSpec.scala) { #streamGraph }
 
-@@@ p { .centered }
+@@@ div { .centered }
 ![Simple StreamGraph](.../simple-streamgraph.svg)
 @@@
 

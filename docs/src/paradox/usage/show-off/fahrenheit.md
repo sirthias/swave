@@ -5,7 +5,7 @@ This example is a direct translation of the one shown in the [FS2 README].<br/>
 It demonstrates a simple stream pipeline that makes use of the builtin @ref[File IO] and @ref[Text Handling] support to
 perform a "practical" task:
 
-@@snip [-]($test/FahrenheitSpec.scala) { #example }
+@@snip [-]($test$/FahrenheitSpec.scala) { #example }
 
 This code constructs a @scaladoc[StreamGraph](swave.core.StreamGraph), which reads bytes from an input file (in chunks
 of @ref[configurable] size), UTF8-decodes them and re-chunks into lines. If then filters out the lines containing the

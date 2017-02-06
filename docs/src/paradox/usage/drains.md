@@ -4,7 +4,7 @@ Drains
 A @scaladoc[Drain] is a @ref[stream graph component] with one input port and a no output port. As such it serves
 as a "point of exit" from a stream setup to other destinations (e.g. to memory, disk or the network).
 
-@@@ p { .centered }
+@@@ div { .centered }
 ![A Drain](.../drain.svg)
 @@@
 
@@ -26,7 +26,7 @@ the stream is started.
 
 For example:
  
-@@snip [-]($test/DrainSpec.scala) { #examples }
+@@snip [-]($test$/DrainSpec.scala) { #examples }
  
 
 Result Types are Async

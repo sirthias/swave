@@ -4,7 +4,7 @@ MD5 Example
 This example demonstrates a small practical application of file streaming in *swave*.<br/>
 The following code shows how one could compute an MD5 hash string for files of arbitrary size:
  
-@@snip [-]($test/MD5Spec.scala) { #example-0 }
+@@snip [-]($test$/MD5Spec.scala) { #example-0 }
 
 The stream graph defined by this code is quite straight-forward (a simple pipeline), but there are still a few
 interesting points to discuss:
@@ -20,8 +20,7 @@ scenarios all file IO operations in *swave* are fenced off from the rest of the 
 excellent implementations for this, for example in [Akka] or [scodec]. Rather, *swave* defines a type class
 @github[Bytes], which abstracts over available "byte sequence" implementations and also allows you to supply your own,
 if required. *swave* comes with support for @scaladoc[akka.util.ByteString] and @scaladoc[scodec.bits.ByteVector]
-predefined, which can be activated with a single import (see @ref[swave-akka-compat] and @ref[swave-scodec-compat] for
-more details).
+predefined, which can be activated with a single import (see the @ref[File IO] chapter for more details).
    
 3. While the code above will work with files of arbitrary size the memory required during execution is "small" and fully
 bounded. All action happens in chunks of @ref[configurable] size.<br/>
@@ -33,7 +32,7 @@ that are running in parallel.
 The last point deserves some further explanations.<br/>
 Here is a visualization of the example's stream pipeline:
 
-@@@ p { .centered }
+@@@ div { .centered }
 ![MD5 Example Stream Graph](.../md5-graph.svg)
 @@@
 
@@ -57,7 +56,7 @@ Because computing hashes across streams of bytes is such a common task *swave* p
 By relying on the `md5` transformation the example above can be somewhat simplified to the following snippet,
 which will also perform slightly better:
 
-@@snip [-]($test/MD5Spec.scala) { #example-1 }
+@@snip [-]($test$/MD5Spec.scala) { #example-1 }
 
   
   [Spout]: ../spouts.md

@@ -13,7 +13,7 @@ This has interesting consequences for @ref[fan-outs] and @ref[fan-ins] as well a
 Symmetry between Fan-Outs and Fan-Ins
 -------------------------------------
 
-@@@ p { .centered }
+@@@ div { .centered }
 ![Fan-Ins mirror Fan-Outs and vice versa](.../fan-in-out-mirror.svg)
 @@@
 
@@ -51,7 +51,7 @@ as they consume a "stream of upstreams".
 
 This diagram shows the high-level relationships between the discussed transformation categories:
 
-@@@ p { .centered }
+@@@ div { .centered }
 ![Relationship Diagram](.../relationships.svg)
 @@@
 

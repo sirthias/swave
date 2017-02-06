@@ -7,7 +7,7 @@ When you create a @scaladoc[StreamEnv] instance for your application the configu
  
 This is the content of *swave's* own `reference.conf` which contains the default values for all defined config settings:
 
-@@snip [-]($res/reference.conf) { #source-quote type=bash }
+@@snip [-]($res$/reference.conf) { #source-quote type=bash }
 
   [Typesafe Config]: https://github.com/typesafehub/config
   [StreamEnv]: swave.core.StreamEnv

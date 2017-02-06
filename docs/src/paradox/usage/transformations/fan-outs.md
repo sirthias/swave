@@ -3,7 +3,7 @@ Fan-Outs
 
 Fan-Outs are @ref[stream graph components] with one input port and several output ports.
  
-@@@ p { .centered }
+@@@ div { .centered }
 ![Fan-Out](.../fan-out.svg)
 @@@
 
@@ -27,11 +27,11 @@ Basic Example
 *swave's* streaming DSL allows you to define fan-outs in a flexible yet concise way.<br/>
 Here is a basic example:
 
-@@snip [-]($test/FanOutSpec.scala) { #basic-example }  
+@@snip [-]($test$/FanOutSpec.scala) { #basic-example }  
 
 This example encodes this stream graph:
 
-@@@ p { .centered }
+@@@ div { .centered }
 ![Fan-Out Example](.../basic-fan-out.svg)
 @@@
 
@@ -66,13 +66,13 @@ A common stream graph pattern is a "diamond" setup, where a fan-out first define
 apply some specific transformations to "their" elements, before the ends of the sub branches are re-joined with some
 kind of @ref[fan-in] logic. For example this graph:
 
-@@@ p { .centered }
+@@@ div { .centered }
 ![Diamond Graph](.../diamond.svg)
 @@@
 
 can be encoded like this:
 
-@@snip [-]($test/FanOutSpec.scala) { #diamond }
+@@snip [-]($test$/FanOutSpec.scala) { #diamond }
 
 Adding one or even more sub branches that aren't left open (i.e. drain into some @ref[Drain]) wouldn't affect the
 fan-in in any way. And if you add another fan-out sub that is left open (i.e. ends with `.end`) the fan-in would work
@@ -85,11 +85,11 @@ Mixing Fan-Outs and Fan-Ins
 Mixing fan-outs and @ref[fan-ins] is possible even beyond what was shown in the examples above.<br/>
 Take this code for example:
 
-@@snip [-]($test/FanOutSpec.scala) { #mixed }
+@@snip [-]($test$/FanOutSpec.scala) { #mixed }
 
 It encodes this graph:
 
-@@@ p { .centered }
+@@@ div { .centered }
 ![Mixed Fan-Out/Fan-In Graph](.../mixed.svg)
 @@@
 
@@ -115,7 +115,7 @@ immediately used to "close" the fan-out and continue the definition of the "main
 As an example, this is a simple re-implementation of the `tee` transformation, which we call `teee` here in order to
 avoid a name clash with the existing @ref[tee]:  
 
-@@snip [-]($test/FanOutSpec.scala) { #teee }
+@@snip [-]($test$/FanOutSpec.scala) { #teee }
 
 
 captureResult and dropResult 

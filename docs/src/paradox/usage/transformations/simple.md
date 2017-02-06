@@ -4,7 +4,7 @@ Simple Transformations
 Simple @ref[transformations] are @ref[stream graph components] with one input port and one output port.
 They "simply" transform a @ref[Spout] of one type into a @ref[Spout] of another or even the same type. 
 
-@@@ p { .centered }
+@@@ div { .centered }
 ![A Simple Transformation](.../simple-transformation.svg)
 @@@
 
@@ -13,7 +13,7 @@ in the `StreamOps` trait (see also the @scaladoc[StreamOps Scaladoc] or @github[
    
 For example:
 
-@@snip [-]($test/SimpleTransformSpec.scala) { #example }
+@@snip [-]($test$/SimpleTransformSpec.scala) { #example }
 
 To reiterate the explanations from the @ref[Quick Start] and @ref[Basics] chapters: Calling a method like `.map(...)` on
 a @ref[Spout] doesn't trigger any immediate action except for the attachment of a `Map` stage to the open port of the

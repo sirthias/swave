@@ -4,7 +4,7 @@ Spouts
 A @scaladoc[Spout] is a @ref[stream graph component] with no input port and a single output port. As such it serves
 as a "point of entry" into a stream setup for data elements from other sources (e.g. from memory, disk or the network).
 
-@@@ p { .centered }
+@@@ div { .centered }
 ![A Spout](.../spout.svg)
 @@@
 
@@ -19,7 +19,7 @@ Streamable[T]
 *swave* defines a type-class @scaladoc[Streamable] which encapsulates the ability to create `Spout` instances from
 values of type `T`:
 
-@@snip [-]($core/Streamable.scala) { #source-quote }
+@@snip [-]($core$/Streamable.scala) { #source-quote }
 
 If an implicit `Streamable[T]` instance can be found (or created) for a type `T` then values of type `T`
 can be turned into spouts with a simply `Spout(value)` call:
@@ -53,7 +53,7 @@ automatically work on streams of type `T`.
 The following snippet, for example, shows, that flatmapping `Spout[Option[Int]]` to `Spout[Int]` works as expected
 without further ado:
 
-@@snip [-]($test/SpoutSpec.scala) { #option-flatmap }
+@@snip [-]($test$/SpoutSpec.scala) { #option-flatmap }
 
 
 ### Custom Streamable Example
@@ -64,7 +64,7 @@ turned into a `Spout`. The way to do this is through a custom `Streamable[T]` im
 For example, suppose we'd like to be able to flatten streams of `Either[A, B]` instances into a stream of the most
 specific common super-type of `A` and `B`. Here is how this could be done:
 
-@@snip [-]($test/SpoutSpec.scala) { #streamable-either }
+@@snip [-]($test$/SpoutSpec.scala) { #streamable-either }
 
 
   [Spout]: swave.core.Spout

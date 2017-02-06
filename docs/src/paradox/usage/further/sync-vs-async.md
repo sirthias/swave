@@ -29,7 +29,7 @@ If you need something is guaranteed to *never* throw use `tryRun()`.
 
 Here is an example of a @ref[map] stage that throws an exception when processing one particular stream element:
 
-@@snip [-]($test/SyncVsAsyncSpec.scala) { #stream-failure }
+@@snip [-]($test$/SyncVsAsyncSpec.scala) { #stream-failure }
 
 Note that "running synchronously" doesn't mean that there is blocking involved! The limits on what can run synchronously
 are established precisely because no stage is allowed to ever block. Whenever a stage might have a reason to block, e.g.
@@ -46,11 +46,11 @@ Asynchronous Execution
 To better understand how *swave* will behave by default and how you can control asynchronous execution in a fine-grained
 fashion let's look at a simple example:
  
-@@snip [-]($test/SyncVsAsyncSpec.scala) { #base-example } 
+@@snip [-]($test$/SyncVsAsyncSpec.scala) { #base-example } 
  
 Here is the stream graph of this example, which also shows which stage will run on which thread / dispatcher:
  
-@@@ p { .centered }
+@@@ div { .centered }
 ![Basic Example Stream Graph](.../async-graph0.svg)
 @@@ 
  
@@ -64,7 +64,7 @@ amount of time to finish and we'd like to use the caller thread for something el
 
 We can do so by simply adding an @ref[async] transformation to the graph at an arbitrary position:
  
-@@snip [-]($test/SyncVsAsyncSpec.scala) { #async } 
+@@snip [-]($test$/SyncVsAsyncSpec.scala) { #async } 
 
 Now the `drainToList(...)` returns immediately, likely before the produced `Future` value has been fulfilled.
 We therefore have to explicitly await the `Future` value in order to get a hold of it. <br/>
@@ -73,7 +73,7 @@ We therefore have to explicitly await the `Future` value in order to get a hold 
 The graph still looks the same but is now run on the default dispatcher. Since no asynchronous boundaries have been
 introduced it will still run as one single block:
 
-@@@ p { .centered }
+@@@ div { .centered }
 ![Basic Async Stream Graph](.../async-graph1.svg)
 @@@
 
@@ -89,12 +89,12 @@ Another way to move the execution of a stream graph off the caller thread is the
 @ref[asynchronous transformation] that cannot run synchronously. We could for example add an @ref[withCompletionTimeout]
 transformation to the graph to make sure it will never run for longer than one second:
  
-@@snip [-]($test/SyncVsAsyncSpec.scala) { #withCompletionTimeout } 
+@@snip [-]($test$/SyncVsAsyncSpec.scala) { #withCompletionTimeout } 
 
 Since @ref[withCompletionTimeout] forces *swave* to run the graph on some dispatcher the stream graph of this example
 looks like this:
 
-@@@ p { .centered }
+@@@ div { .centered }
 ![Stream Graph with Async Transformation](.../async-graph2.svg)
 @@@
 
@@ -107,12 +107,12 @@ If we wanted to we could assign a custom dispatcher by adding a `.async(dispatch
 While simply moving stream execution away from the caller thread is nice it doesn't really help with running things in
 parallel. In order to do that we need to introduce asynchronous boundaries, which can be done with @ref[asyncBoundary]:
 
-@@snip [-]($test/SyncVsAsyncSpec.scala) { #async-boundary }
+@@snip [-]($test$/SyncVsAsyncSpec.scala) { #async-boundary }
 
 @ref[asyncBoundary] splits the stream graph into two *async regions*, which are sub-graphs that run independently from
 each other on their own dispatchers:
  
-@@@ p { .centered }
+@@@ div { .centered }
 ![Stream Graph with Async Boundary](.../async-graph3.svg)
 @@@ 
 
@@ -144,7 +144,7 @@ boundary-less connection.
 
 Here is the code for this (admittedly quite contrived) example:
  
-@@snip [-]($test/SyncVsAsyncSpec.scala) { #complex-example }
+@@snip [-]($test$/SyncVsAsyncSpec.scala) { #complex-example }
 
 In stream graphs with more than one async region a graceful shutdown requires attaching to the `run.termination`
 (a `Future[Unit]`), which will only be completed when all parts of the stream graph have fully terminated.
