@@ -1,44 +1,467 @@
 <!DOCTYPE html >
 <html>
         <head>
-          <title>StreamEnv - swave.core.StreamEnv</title>
-          <meta name="description" content="StreamEnv - swave.core.StreamEnv" />
-          <meta name="keywords" content="StreamEnv swave.core.StreamEnv" />
+          <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+          <title></title>
+          <meta name="description" content="" />
+          <meta name="keywords" content="" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
+      <link href="../../lib/index.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
-      <script type="text/javascript" src="../../lib/jquery.js" id="jquery-js"></script>
-      <script type="text/javascript" src="../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../lib/jquery.panzoom.min.js"></script>
+      <script type="text/javascript" src="../../lib/jquery.mousewheel.min.js"></script>
+      <script type="text/javascript" src="../../lib/index.js"></script>
+      <script type="text/javascript" src="../../index.js"></script>
+      <script type="text/javascript" src="../../lib/scheduler.js"></script>
       <script type="text/javascript" src="../../lib/template.js"></script>
       <script type="text/javascript" src="../../lib/tools.tooltip.js"></script>
       
       <script type="text/javascript">
-         if(top === self) {
-            var url = '../../index.html';
-            var hash = 'swave.core.StreamEnv';
-            var anchor = window.location.hash;
-            var anchor_opt = '';
-            if (anchor.length >= 1)
-              anchor_opt = '@' + anchor.substring(1);
-            window.location.href = url + '#' + hash + anchor_opt;
-         }
-   	  </script>
+        /* this variable can be used by the JS to determine the path to the root document */
+        var toRoot = '../../';
+      </script>
     
         </head>
-        <body class="type">
-      <div id="definition">
-        <a href="StreamEnv$.html" title="See companion object"><img alt="Class/Object" src="../../lib/class_to_object_big.png" /></a>
-        <p id="owner"><a href="../package.html" class="extype" name="swave">swave</a>.<a href="package.html" class="extype" name="swave.core">core</a></p>
-        <h1><a href="StreamEnv$.html" title="See companion object">StreamEnv</a></h1><h3><span class="morelinks"><div>
-            Related Docs:
-            <a href="StreamEnv$.html" title="See companion object">object StreamEnv</a>
-            | <a href="package.html" class="extype" name="swave.core">package core</a>
-          </div></span></h3><span class="permalink">
-      <a href="../../index.html#swave.core.StreamEnv" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
+        <body>
+      <div id="search">
+        <span id="doc-title"><span id="doc-version"></span></span>
+        <span class="close-results"><span class="left">&lt;</span> Back</span>
+        <div id="textfilter">
+          <span class="input">
+            <input autocapitalize="none" placeholder="Search" id="index-input" type="text" accesskey="/" />
+            <i class="clear material-icons"></i>
+            <i id="search-icon" class="material-icons"></i>
+          </span>
+        </div>
+    </div>
+      <div id="search-results">
+        <div id="search-progress">
+          <div id="progress-fill"></div>
+        </div>
+        <div id="results-content">
+          <div id="entity-results"></div>
+          <div id="member-results"></div>
+        </div>
+      </div>
+      <div id="content-scroll-container" style="-webkit-overflow-scrolling: touch;">
+        <div id="content-container" style="-webkit-overflow-scrolling: touch;">
+          <div id="subpackage-spacer">
+            <div id="packages">
+              <h1>Packages</h1>
+              <ul>
+                <li name="_root_.root" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="_root_"></a><a id="root:_root_"></a>
+      <span class="permalink">
+      <a href="index.html#_root_" title="Permalink">
+        <i class="material-icons"></i>
       </a>
     </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../../index.html">
+              <span class="name">root</span>
+            </a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="_root_">root</a></dd></dl></div>
+    </li><li name="_root_.swave" visbl="pub" class="indented1 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="swave"></a><a id="swave:swave"></a>
+      <span class="permalink">
+      <a href="index.html#swave" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../index.html">
+              <span class="name">swave</span>
+            </a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="_root_">root</a></dd></dl></div>
+    </li><li name="swave.core" visbl="pub" class="indented2 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="core"></a><a id="core:core"></a>
+      <span class="permalink">
+      <a href="../swave/index.html#core" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="index.html">
+              <span class="name">core</span>
+            </a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="swave">swave</a></dd></dl></div>
+    </li><li name="swave.core.graph" visbl="pub" class="indented3 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="graph"></a><a id="graph:graph"></a>
+      <span class="permalink">
+      <a href="../../swave/core/index.html#graph" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="graph/index.html">
+              <span class="name">graph</span>
+            </a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="swave.core">core</a></dd></dl></div>
+    </li><li name="swave.core.hash" visbl="pub" class="indented3 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hash"></a><a id="hash:hash"></a>
+      <span class="permalink">
+      <a href="../../swave/core/index.html#hash" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="hash/index.html">
+              <span class="name">hash</span>
+            </a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="swave.core">core</a></dd></dl></div>
+    </li><li name="swave.core.impl" visbl="pub" class="indented3 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="impl"></a><a id="impl:impl"></a>
+      <span class="permalink">
+      <a href="../../swave/core/index.html#impl" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="impl/index.html">
+              <span class="name">impl</span>
+            </a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="swave.core">core</a></dd></dl></div>
+    </li><li name="swave.core.internal" visbl="pub" class="indented3 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="internal"></a><a id="internal:internal"></a>
+      <span class="permalink">
+      <a href="../../swave/core/index.html#internal" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="internal/index.html">
+              <span class="name">internal</span>
+            </a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="swave.core">core</a></dd></dl></div>
+    </li><li name="swave.core.io" visbl="pub" class="indented3 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="io"></a><a id="io:io"></a>
+      <span class="permalink">
+      <a href="../../swave/core/index.html#io" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="io/index.html">
+              <span class="name">io</span>
+            </a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="swave.core">core</a></dd></dl></div>
+    </li><li name="swave.core.text" visbl="pub" class="indented3 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="text"></a><a id="text:text"></a>
+      <span class="permalink">
+      <a href="../../swave/core/index.html#text" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="text/index.html">
+              <span class="name">text</span>
+            </a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="swave.core">core</a></dd></dl></div>
+    </li><li name="swave.core.util" visbl="pub" class="indented3 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="util"></a><a id="util:util"></a>
+      <span class="permalink">
+      <a href="../../swave/core/index.html#util" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="util/index.html">
+              <span class="name">util</span>
+            </a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="swave.core">core</a></dd></dl></div>
+    </li><li class="current-entities indented2">
+                        <span class="separator"></span>
+                        <a class="object" href="Buffer$.html" title=""></a>
+                        <a href="Buffer$.html" title="">
+                          Buffer
+                        </a>
+                      </li><li class="current-entities indented2">
+                        <span class="separator"></span>
+                        <a class="class" href="BufferOverflowFailure.html" title="The exception instance thrown by the swave.core.Buffer.OverflowStrategy.Fail
+when the buffer is full and a new element arrives."></a>
+                        <a href="BufferOverflowFailure.html" title="The exception instance thrown by the swave.core.Buffer.OverflowStrategy.Fail
+when the buffer is full and a new element arrives.">
+                          BufferOverflowFailure
+                        </a>
+                      </li><li class="current-entities indented2">
+                        <a class="object" href="Cancellable$.html" title=""></a>
+                        <a class="trait" href="Cancellable.html" title=""></a>
+                        <a href="Cancellable.html" title="">
+                          Cancellable
+                        </a>
+                      </li><li class="current-entities indented2">
+                        <span class="separator"></span>
+                        <a class="class" href="ConfigurationException.html" title=""></a>
+                        <a href="ConfigurationException.html" title="">
+                          ConfigurationException
+                        </a>
+                      </li><li class="current-entities indented2">
+                        <a class="object" href="Coupling$.html" title=""></a>
+                        <a class="class" href="Coupling.html" title="A simple streaming component with one input, one output port and no internal transformation logic."></a>
+                        <a href="Coupling.html" title="A simple streaming component with one input, one output port and no internal transformation logic.">
+                          Coupling
+                        </a>
+                      </li><li class="current-entities indented2">
+                        <a class="object" href="Dispatcher$.html" title=""></a>
+                        <a class="class" href="Dispatcher.html" title=""></a>
+                        <a href="Dispatcher.html" title="">
+                          Dispatcher
+                        </a>
+                      </li><li class="current-entities indented2">
+                        <a class="object" href="Dispatchers$.html" title=""></a>
+                        <a class="class" href="Dispatchers.html" title=""></a>
+                        <a href="Dispatchers.html" title="">
+                          Dispatchers
+                        </a>
+                      </li><li class="current-entities indented2">
+                        <a class="object" href="Drain$.html" title=""></a>
+                        <a class="class" href="Drain.html" title="A Drain is a streaming component] with one input port and no output port."></a>
+                        <a href="Drain.html" title="A Drain is a streaming component] with one input port and no output port.">
+                          Drain
+                        </a>
+                      </li><li class="current-entities indented2">
+                        <a class="object" href="Extension$.html" title=""></a>
+                        <a class="trait" href="Extension.html" title=""></a>
+                        <a href="Extension.html" title="">
+                          Extension
+                        </a>
+                      </li><li class="current-entities indented2">
+                        <span class="separator"></span>
+                        <a class="trait" href="ExtensionId.html" title=""></a>
+                        <a href="ExtensionId.html" title="">
+                          ExtensionId
+                        </a>
+                      </li><li class="current-entities indented2">
+                        <span class="separator"></span>
+                        <a class="object" href="Graph$.html" title=""></a>
+                        <a href="Graph$.html" title="">
+                          Graph
+                        </a>
+                      </li><li class="current-entities indented2">
+                        <span class="separator"></span>
+                        <a class="class" href="IllegalAsyncBoundaryException.html" title=""></a>
+                        <a href="IllegalAsyncBoundaryException.html" title="">
+                          IllegalAsyncBoundaryException
+                        </a>
+                      </li><li class="current-entities indented2">
+                        <span class="separator"></span>
+                        <a class="class" href="IllegalReuseException.html" title=""></a>
+                        <a href="IllegalReuseException.html" title="">
+                          IllegalReuseException
+                        </a>
+                      </li><li class="current-entities indented2">
+                        <span class="separator"></span>
+                        <a class="class" href="IllegalStreamSetupException.html" title=""></a>
+                        <a href="IllegalStreamSetupException.html" title="">
+                          IllegalStreamSetupException
+                        </a>
+                      </li><li class="current-entities indented2">
+                        <a class="object" href="Module$.html" title=""></a>
+                        <a class="class" href="Module.html" title=" A Streaming Component with up to four interfaces:"></a>
+                        <a href="Module.html" title=" A Streaming Component with up to four interfaces:">
+                          Module
+                        </a>
+                      </li><li class="current-entities indented2">
+                        <a class="object" href="Pipe$.html" title=""></a>
+                        <a class="class" href="Pipe.html" title=""></a>
+                        <a href="Pipe.html" title="">
+                          Pipe
+                        </a>
+                      </li><li class="current-entities indented2">
+                        <a class="object" href="PushSpout$.html" title=""></a>
+                        <a class="class" href="PushSpout.html" title="A PushSpout provides a Spout that can be &quot;manually&quot; pushed into from the outside,
+potentially by several threads concurrently."></a>
+                        <a href="PushSpout.html" title="A PushSpout provides a Spout that can be &quot;manually&quot; pushed into from the outside,
+potentially by several threads concurrently.">
+                          PushSpout
+                        </a>
+                      </li><li class="current-entities indented2">
+                        <span class="separator"></span>
+                        <a class="class" href="RunnableStreamGraph.html" title="R RunnableStreamGraph represents a stream graph that has already been sealed and that is ready to be run."></a>
+                        <a href="RunnableStreamGraph.html" title="R RunnableStreamGraph represents a stream graph that has already been sealed and that is ready to be run.">
+                          RunnableStreamGraph
+                        </a>
+                      </li><li class="current-entities indented2">
+                        <a class="object" href="Scheduler$.html" title=""></a>
+                        <a class="trait" href="Scheduler.html" title=""></a>
+                        <a href="Scheduler.html" title="">
+                          Scheduler
+                        </a>
+                      </li><li class="current-entities indented2">
+                        <a class="object" href="Split$.html" title=""></a>
+                        <a class="class" href="Split.html" title=""></a>
+                        <a href="Split.html" title="">
+                          Split
+                        </a>
+                      </li><li class="current-entities indented2">
+                        <a class="object" href="Spout$.html" title=""></a>
+                        <a class="class" href="Spout.html" title="A Spout is a streaming component with no input port and a single output port."></a>
+                        <a href="Spout.html" title="A Spout is a streaming component with no input port and a single output port.">
+                          Spout
+                        </a>
+                      </li><li class="current-entities indented2">
+                        <a class="object" href="Stage$.html" title=""></a>
+                        <a class="class" href="Stage.html" title=""></a>
+                        <a href="Stage.html" title="">
+                          Stage
+                        </a>
+                      </li><li class="current-entities indented2">
+                        <a class="object" href="StreamEnv$.html" title=""></a>
+                        <a class="class" href="" title=""></a>
+                        <a href="" title="">
+                          StreamEnv
+                        </a>
+                      </li><li class="current-entities indented2">
+                        <a class="object" href="StreamEvent$.html" title=""></a>
+                        <a class="class" href="StreamEvent.html" title=""></a>
+                        <a href="StreamEvent.html" title="">
+                          StreamEvent
+                        </a>
+                      </li><li class="current-entities indented2">
+                        <span class="separator"></span>
+                        <a class="class" href="StreamGraph.html" title="A StreamGraph represents a stream graph in which the ports of all stages
+have been properly connected and which is therefore ready to be started."></a>
+                        <a href="StreamGraph.html" title="A StreamGraph represents a stream graph in which the ports of all stages
+have been properly connected and which is therefore ready to be started.">
+                          StreamGraph
+                        </a>
+                      </li><li class="current-entities indented2">
+                        <span class="separator"></span>
+                        <a class="class" href="StreamLimitExceeded.html" title="The RuntimeException thrown by the limit operation."></a>
+                        <a href="StreamLimitExceeded.html" title="The RuntimeException thrown by the limit operation.">
+                          StreamLimitExceeded
+                        </a>
+                      </li><li class="current-entities indented2">
+                        <a class="object" href="StreamOps$.html" title=""></a>
+                        <a class="class" href="StreamOps.html" title="Defines all the transformations that are available on Spout, Pipe and fan-out sub-streams."></a>
+                        <a href="StreamOps.html" title="Defines all the transformations that are available on Spout, Pipe and fan-out sub-streams.">
+                          StreamOps
+                        </a>
+                      </li><li class="current-entities indented2">
+                        <span class="separator"></span>
+                        <a class="class" href="StreamRun.html" title="A StreamRun represents a stream graph that has already been started and thus is either running or
+has already terminated."></a>
+                        <a href="StreamRun.html" title="A StreamRun represents a stream graph that has already been started and thus is either running or
+has already terminated.">
+                          StreamRun
+                        </a>
+                      </li><li class="current-entities indented2">
+                        <span class="separator"></span>
+                        <a class="class" href="StreamTimeoutException.html" title=""></a>
+                        <a href="StreamTimeoutException.html" title="">
+                          StreamTimeoutException
+                        </a>
+                      </li><li class="current-entities indented2">
+                        <a class="object" href="Streamable$.html" title=""></a>
+                        <a class="class" href="Streamable.html" title=""></a>
+                        <a href="Streamable.html" title="">
+                          Streamable
+                        </a>
+                      </li><li class="current-entities indented2">
+                        <span class="separator"></span>
+                        <a class="class" href="SubStreamStartTimeoutException.html" title=""></a>
+                        <a href="SubStreamStartTimeoutException.html" title="">
+                          SubStreamStartTimeoutException
+                        </a>
+                      </li><li class="current-entities indented2">
+                        <span class="separator"></span>
+                        <a class="class" href="UnclosedStreamGraphException.html" title=""></a>
+                        <a href="UnclosedStreamGraphException.html" title="">
+                          UnclosedStreamGraphException
+                        </a>
+                      </li><li class="current-entities indented2">
+                        <span class="separator"></span>
+                        <a class="class" href="UnsupportedSecondSubscriptionException.html" title=""></a>
+                        <a href="UnsupportedSecondSubscriptionException.html" title="">
+                          UnsupportedSecondSubscriptionException
+                        </a>
+                      </li><li class="current-entities indented2">
+                        <span class="separator"></span>
+                        <a class="class" href="UnterminatedSynchronousStreamException.html" title="The Exception that is thrown when a synchronous stream stops running without having been properly terminated."></a>
+                        <a href="UnterminatedSynchronousStreamException.html" title="The Exception that is thrown when a synchronous stream stops running without having been properly terminated.">
+                          UnterminatedSynchronousStreamException
+                        </a>
+                      </li>
+              </ul>
+            </div>
+          </div>
+          <div id="content">
+            <body class="class type">
+      <div id="definition">
+        <a href="StreamEnv$.html" title="See companion object"><div class="big-circle class-companion-object">c</div></a>
+        <p id="owner"><a href="../index.html" class="extype" name="swave">swave</a>.<a href="index.html" class="extype" name="swave.core">core</a></p>
+        <h1><a href="StreamEnv$.html" title="See companion object">StreamEnv</a><span class="permalink">
+      <a href="../../swave/core/StreamEnv.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span></h1>
+        <h3><span class="morelinks"><div>
+            Companion <a href="StreamEnv$.html" title="See companion object">object StreamEnv</a>
+          </div></span></h3>
       </div>
 
       <h4 id="signature" class="signature">
@@ -50,40 +473,52 @@
         <span class="name">StreamEnv</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
+
       
           <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
-          <span class="toggle">Linear Supertypes</span>
+          <span class="toggle">
+            Linear Supertypes
+          </span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
         
 
       <div id="mbrsel">
-        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
-        <div id="order">
-              <span class="filtertype">Ordering</span>
-              <ol>
-                
-                <li class="alpha in"><span>Alphabetic</span></li>
-                <li class="inherit out"><span>By Inheritance</span></li>
-              </ol>
-            </div>
-        <div id="ancestors">
-                <span class="filtertype">Inherited<br />
-                </span>
-                <ol id="linearization">
-                  <li class="in" name="swave.core.StreamEnv"><span>StreamEnv</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
-                </ol>
-              </div><div id="ancestors">
-            <span class="filtertype"></span>
+        <div class="toggle"></div>
+        <div id="memberfilter">
+          <i class="material-icons arrow"></i>
+          <span class="input">
+            <input id="mbrsel-input" placeholder="Filter all members" type="text" accesskey="/" />
+          </span>
+          <i class="clear material-icons"></i>
+        </div>
+        <div id="filterby">
+          <div id="order">
+            <span class="filtertype">Ordering</span>
             <ol>
-              <li class="hideall out"><span>Hide All</span></li>
-              <li class="showall in"><span>Show All</span></li>
+              
+              <li class="alpha in"><span>Alphabetic</span></li>
+              <li class="inherit out"><span>By Inheritance</span></li>
             </ol>
           </div>
-        <div id="visbl">
-            <span class="filtertype">Visibility</span>
-            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
-          </div>
+          <div class="ancestors">
+                  <span class="filtertype">Inherited<br />
+                  </span>
+                  <ol id="linearization">
+                    <li class="in" name="swave.core.StreamEnv"><span>StreamEnv</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  </ol>
+                </div><div class="ancestors">
+              <span class="filtertype"></span>
+              <ol>
+                <li class="hideall out"><span>Hide All</span></li>
+                <li class="showall in"><span>Show All</span></li>
+              </ol>
+            </div>
+          <div id="visbl">
+              <span class="filtertype">Visibility</span>
+              <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+            </div>
+        </div>
       </div>
 
       <div id="template">
@@ -92,12 +527,15 @@
 
         
 
-        <div id="values" class="values members">
+        <div class="values members">
               <h3>Abstract Value Members</h3>
-              <ol><li name="swave.core.StreamEnv#classLoader" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+              <ol><li name="swave.core.StreamEnv#classLoader" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="classLoader:ClassLoader"></a>
-      <a id="classLoader:ClassLoader"></a>
-      <h4 class="signature">
+      <span class="permalink">
+      <a href="../../swave/core/StreamEnv.html#classLoader:ClassLoader" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
       <span class="modifier_kind">
         <span class="modifier">abstract </span>
         <span class="kind">def</span>
@@ -105,16 +543,15 @@
       <span class="symbol">
         <span class="name">classLoader</span><span class="result">: <span class="extype" name="java.lang.ClassLoader">ClassLoader</span></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.StreamEnv@classLoader:ClassLoader" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
+      
+      
+    </li><li name="swave.core.StreamEnv#config" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="config:com.typesafe.config.Config"></a><a id="config:Config"></a>
+      <span class="permalink">
+      <a href="../../swave/core/StreamEnv.html#config:com.typesafe.config.Config" title="Permalink">
+        <i class="material-icons"></i>
       </a>
     </span>
-      
-    </li><li name="swave.core.StreamEnv#config" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="config:com.typesafe.config.Config"></a>
-      <a id="config:Config"></a>
-      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">abstract </span>
         <span class="kind">def</span>
@@ -122,16 +559,15 @@
       <span class="symbol">
         <span class="name">config</span><span class="result">: <span class="extype" name="com.typesafe.config.Config">Config</span></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.StreamEnv@config:com.typesafe.config.Config" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
+      
+      
+    </li><li name="swave.core.StreamEnv#defaultDispatcher" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="defaultDispatcher:swave.core.Dispatcher"></a><a id="defaultDispatcher:Dispatcher"></a>
+      <span class="permalink">
+      <a href="../../swave/core/StreamEnv.html#defaultDispatcher:swave.core.Dispatcher" title="Permalink">
+        <i class="material-icons"></i>
       </a>
     </span>
-      
-    </li><li name="swave.core.StreamEnv#defaultDispatcher" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="defaultDispatcher:swave.core.Dispatcher"></a>
-      <a id="defaultDispatcher:Dispatcher"></a>
-      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">implicit abstract </span>
         <span class="kind">def</span>
@@ -139,16 +575,15 @@
       <span class="symbol">
         <span class="name">defaultDispatcher</span><span class="result">: <a href="Dispatcher.html" class="extype" name="swave.core.Dispatcher">Dispatcher</a></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.StreamEnv@defaultDispatcher:swave.core.Dispatcher" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
+      
+      
+    </li><li name="swave.core.StreamEnv#dispatchers" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="dispatchers:swave.core.Dispatchers"></a><a id="dispatchers:Dispatchers"></a>
+      <span class="permalink">
+      <a href="../../swave/core/StreamEnv.html#dispatchers:swave.core.Dispatchers" title="Permalink">
+        <i class="material-icons"></i>
       </a>
     </span>
-      
-    </li><li name="swave.core.StreamEnv#dispatchers" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="dispatchers:swave.core.Dispatchers"></a>
-      <a id="dispatchers:Dispatchers"></a>
-      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">abstract </span>
         <span class="kind">def</span>
@@ -156,16 +591,15 @@
       <span class="symbol">
         <span class="name">dispatchers</span><span class="result">: <a href="Dispatchers.html" class="extype" name="swave.core.Dispatchers">Dispatchers</a></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.StreamEnv@dispatchers:swave.core.Dispatchers" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
+      
+      
+    </li><li name="swave.core.StreamEnv#getOrLoadExtension" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="getOrLoadExtension[T&lt;:swave.core.Extension](ext:swave.core.ExtensionId[T]):scala.concurrent.Future[T]"></a><a id="getOrLoadExtension[T&lt;:Extension](ExtensionId[T]):Future[T]"></a>
+      <span class="permalink">
+      <a href="../../swave/core/StreamEnv.html#getOrLoadExtension[T&lt;:swave.core.Extension](ext:swave.core.ExtensionId[T]):scala.concurrent.Future[T]" title="Permalink">
+        <i class="material-icons"></i>
       </a>
     </span>
-      
-    </li><li name="swave.core.StreamEnv#getOrLoadExtension" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="getOrLoadExtension[T&lt;:swave.core.Extension](ext:swave.core.ExtensionId[T]):scala.concurrent.Future[T]"></a>
-      <a id="getOrLoadExtension[T&lt;:Extension](ExtensionId[T]):Future[T]"></a>
-      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">abstract </span>
         <span class="kind">def</span>
@@ -173,16 +607,15 @@
       <span class="symbol">
         <span class="name">getOrLoadExtension</span><span class="tparams">[<span name="T">T &lt;: <a href="Extension.html" class="extype" name="swave.core.Extension">Extension</a></span>]</span><span class="params">(<span name="ext">ext: <a href="ExtensionId.html" class="extype" name="swave.core.ExtensionId">ExtensionId</a>[<span class="extype" name="swave.core.StreamEnv.getOrLoadExtension.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="swave.core.StreamEnv.getOrLoadExtension.T">T</span>]</span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.StreamEnv@getOrLoadExtension[T&lt;:swave.core.Extension](ext:swave.core.ExtensionId[T]):scala.concurrent.Future[T]" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
+      
+      
+    </li><li name="swave.core.StreamEnv#log" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="log:com.typesafe.scalalogging.Logger"></a><a id="log:Logger"></a>
+      <span class="permalink">
+      <a href="../../swave/core/StreamEnv.html#log:com.typesafe.scalalogging.Logger" title="Permalink">
+        <i class="material-icons"></i>
       </a>
     </span>
-      
-    </li><li name="swave.core.StreamEnv#log" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="log:com.typesafe.scalalogging.Logger"></a>
-      <a id="log:Logger"></a>
-      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">abstract </span>
         <span class="kind">def</span>
@@ -190,16 +623,15 @@
       <span class="symbol">
         <span class="name">log</span><span class="result">: <span class="extype" name="com.typesafe.scalalogging.Logger">Logger</span></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.StreamEnv@log:com.typesafe.scalalogging.Logger" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
+      
+      
+    </li><li name="swave.core.StreamEnv#name" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="name:String"></a>
+      <span class="permalink">
+      <a href="../../swave/core/StreamEnv.html#name:String" title="Permalink">
+        <i class="material-icons"></i>
       </a>
     </span>
-      
-    </li><li name="swave.core.StreamEnv#name" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="name:String"></a>
-      <a id="name:String"></a>
-      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">abstract </span>
         <span class="kind">def</span>
@@ -207,16 +639,15 @@
       <span class="symbol">
         <span class="name">name</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.StreamEnv@name:String" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
+      
+      
+    </li><li name="swave.core.StreamEnv#scheduler" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="scheduler:swave.core.Scheduler"></a><a id="scheduler:Scheduler"></a>
+      <span class="permalink">
+      <a href="../../swave/core/StreamEnv.html#scheduler:swave.core.Scheduler" title="Permalink">
+        <i class="material-icons"></i>
       </a>
     </span>
-      
-    </li><li name="swave.core.StreamEnv#scheduler" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="scheduler:swave.core.Scheduler"></a>
-      <a id="scheduler:Scheduler"></a>
-      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">abstract </span>
         <span class="kind">def</span>
@@ -224,16 +655,15 @@
       <span class="symbol">
         <span class="name">scheduler</span><span class="result">: <a href="Scheduler.html" class="extype" name="swave.core.Scheduler">Scheduler</a></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.StreamEnv@scheduler:swave.core.Scheduler" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
+      
+      
+    </li><li name="swave.core.StreamEnv#settings" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="settings:swave.core.StreamEnv.Settings"></a><a id="settings:Settings"></a>
+      <span class="permalink">
+      <a href="../../swave/core/StreamEnv.html#settings:swave.core.StreamEnv.Settings" title="Permalink">
+        <i class="material-icons"></i>
       </a>
     </span>
-      
-    </li><li name="swave.core.StreamEnv#settings" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="settings:swave.core.StreamEnv.Settings"></a>
-      <a id="settings:Settings"></a>
-      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">abstract </span>
         <span class="kind">def</span>
@@ -241,16 +671,15 @@
       <span class="symbol">
         <span class="name">settings</span><span class="result">: <a href="StreamEnv$$Settings.html" class="extype" name="swave.core.StreamEnv.Settings">Settings</a></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.StreamEnv@settings:swave.core.StreamEnv.Settings" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
+      
+      
+    </li><li name="swave.core.StreamEnv#shutdown" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="shutdown():swave.core.StreamEnv.Termination"></a><a id="shutdown():Termination"></a>
+      <span class="permalink">
+      <a href="../../swave/core/StreamEnv.html#shutdown():swave.core.StreamEnv.Termination" title="Permalink">
+        <i class="material-icons"></i>
       </a>
     </span>
-      
-    </li><li name="swave.core.StreamEnv#shutdown" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="shutdown():swave.core.StreamEnv.Termination"></a>
-      <a id="shutdown():Termination"></a>
-      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">abstract </span>
         <span class="kind">def</span>
@@ -258,16 +687,15 @@
       <span class="symbol">
         <span class="name">shutdown</span><span class="params">()</span><span class="result">: <a href="StreamEnv$$Termination.html" class="extype" name="swave.core.StreamEnv.Termination">Termination</a></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.StreamEnv@shutdown():swave.core.StreamEnv.Termination" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
+      
+      
+    </li><li name="swave.core.StreamEnv#startTime" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="startTime:Long"></a>
+      <span class="permalink">
+      <a href="../../swave/core/StreamEnv.html#startTime:Long" title="Permalink">
+        <i class="material-icons"></i>
       </a>
     </span>
-      
-    </li><li name="swave.core.StreamEnv#startTime" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="startTime:Long"></a>
-      <a id="startTime:Long"></a>
-      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">abstract </span>
         <span class="kind">def</span>
@@ -275,21 +703,21 @@
       <span class="symbol">
         <span class="name">startTime</span><span class="result">: <span class="extype" name="scala.Long">Long</span></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.StreamEnv@startTime:Long" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
+      
       
     </li></ol>
             </div>
 
-        <div id="values" class="values members">
+        <div class="values members">
               <h3>Concrete Value Members</h3>
-              <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="!=(x$1:Any):Boolean"></a>
-      <a id="!=(Any):Boolean"></a>
-      <h4 class="signature">
+              <ol>
+                <li name="scala.AnyRef#!=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="!=(x$1:Any):Boolean"></a><a id="!=(Any):Boolean"></a>
+      <span class="permalink">
+      <a href="../../swave/core/StreamEnv.html#!=(x$1:Any):Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -297,16 +725,15 @@
       <span class="symbol">
         <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.StreamEnv@!=(x$1:Any):Boolean" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef###" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="##():Int"></a>
+      <span class="permalink">
+      <a href="../../swave/core/StreamEnv.html###():Int" title="Permalink">
+        <i class="material-icons"></i>
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="scala.AnyRef###" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="##():Int"></a>
-      <a id="##():Int"></a>
-      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -314,16 +741,15 @@
       <span class="symbol">
         <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.StreamEnv@##():Int" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#==" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="==(x$1:Any):Boolean"></a><a id="==(Any):Boolean"></a>
+      <span class="permalink">
+      <a href="../../swave/core/StreamEnv.html#==(x$1:Any):Boolean" title="Permalink">
+        <i class="material-icons"></i>
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="scala.AnyRef#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="==(x$1:Any):Boolean"></a>
-      <a id="==(Any):Boolean"></a>
-      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -331,16 +757,15 @@
       <span class="symbol">
         <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.StreamEnv@==(x$1:Any):Boolean" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="asInstanceOf[T0]:T0"></a>
+      <span class="permalink">
+      <a href="../../swave/core/StreamEnv.html#asInstanceOf[T0]:T0" title="Permalink">
+        <i class="material-icons"></i>
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="asInstanceOf[T0]:T0"></a>
-      <a id="asInstanceOf[T0]:T0"></a>
-      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -348,16 +773,15 @@
       <span class="symbol">
         <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.StreamEnv@asInstanceOf[T0]:T0" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="clone():Object"></a><a id="clone():AnyRef"></a>
+      <span class="permalink">
+      <a href="../../swave/core/StreamEnv.html#clone():Object" title="Permalink">
+        <i class="material-icons"></i>
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="clone():Object"></a>
-      <a id="clone():AnyRef"></a>
-      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
@@ -365,11 +789,7 @@
       <span class="symbol">
         <span class="name">clone</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.StreamEnv@clone():Object" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
+      
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -377,10 +797,13 @@
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="eq(x$1:AnyRef):Boolean"></a>
-      <a id="eq(AnyRef):Boolean"></a>
-      <h4 class="signature">
+    </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
+      <span class="permalink">
+      <a href="../../swave/core/StreamEnv.html#eq(x$1:AnyRef):Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -388,16 +811,15 @@
       <span class="symbol">
         <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.StreamEnv@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#equals" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="equals(x$1:Any):Boolean"></a><a id="equals(Any):Boolean"></a>
+      <span class="permalink">
+      <a href="../../swave/core/StreamEnv.html#equals(x$1:Any):Boolean" title="Permalink">
+        <i class="material-icons"></i>
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.AnyRef#equals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="equals(x$1:Any):Boolean"></a>
-      <a id="equals(Any):Boolean"></a>
-      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
@@ -405,16 +827,15 @@
       <span class="symbol">
         <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.StreamEnv@equals(x$1:Any):Boolean" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="finalize():Unit"></a>
+      <span class="permalink">
+      <a href="../../swave/core/StreamEnv.html#finalize():Unit" title="Permalink">
+        <i class="material-icons"></i>
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="finalize():Unit"></a>
-      <a id="finalize():Unit"></a>
-      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
@@ -422,11 +843,7 @@
       <span class="symbol">
         <span class="name">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.StreamEnv@finalize():Unit" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
+      
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -434,10 +851,13 @@
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
-      <a id="getClass():Class[_]"></a>
-      <h4 class="signature">
+      <span class="permalink">
+      <a href="../../swave/core/StreamEnv.html#getClass():Class[_]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -445,16 +865,15 @@
       <span class="symbol">
         <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.StreamEnv@getClass():Class[_]" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hashCode():Int"></a>
+      <span class="permalink">
+      <a href="../../swave/core/StreamEnv.html#hashCode():Int" title="Permalink">
+        <i class="material-icons"></i>
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="hashCode():Int"></a>
-      <a id="hashCode():Int"></a>
-      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
@@ -462,16 +881,15 @@
       <span class="symbol">
         <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.StreamEnv@hashCode():Int" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <span class="permalink">
+      <a href="../../swave/core/StreamEnv.html#isInstanceOf[T0]:Boolean" title="Permalink">
+        <i class="material-icons"></i>
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="isInstanceOf[T0]:Boolean"></a>
-      <a id="isInstanceOf[T0]:Boolean"></a>
-      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -479,16 +897,15 @@
       <span class="symbol">
         <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.StreamEnv@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
+      <span class="permalink">
+      <a href="../../swave/core/StreamEnv.html#ne(x$1:AnyRef):Boolean" title="Permalink">
+        <i class="material-icons"></i>
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ne(x$1:AnyRef):Boolean"></a>
-      <a id="ne(AnyRef):Boolean"></a>
-      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -496,16 +913,15 @@
       <span class="symbol">
         <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.StreamEnv@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notify():Unit"></a>
+      <span class="permalink">
+      <a href="../../swave/core/StreamEnv.html#notify():Unit" title="Permalink">
+        <i class="material-icons"></i>
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="notify():Unit"></a>
-      <a id="notify():Unit"></a>
-      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -513,16 +929,15 @@
       <span class="symbol">
         <span class="name">notify</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.StreamEnv@notify():Unit" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#notifyAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notifyAll():Unit"></a>
+      <span class="permalink">
+      <a href="../../swave/core/StreamEnv.html#notifyAll():Unit" title="Permalink">
+        <i class="material-icons"></i>
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.AnyRef#notifyAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="notifyAll():Unit"></a>
-      <a id="notifyAll():Unit"></a>
-      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -530,16 +945,15 @@
       <span class="symbol">
         <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.StreamEnv@notifyAll():Unit" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="swave.core.StreamEnv#shutdownOn" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="shutdownOn(future:scala.concurrent.Future[_]):scala.concurrent.Future[swave.core.StreamEnv.Termination]"></a><a id="shutdownOn(Future[_]):Future[Termination]"></a>
+      <span class="permalink">
+      <a href="../../swave/core/StreamEnv.html#shutdownOn(future:scala.concurrent.Future[_]):scala.concurrent.Future[swave.core.StreamEnv.Termination]" title="Permalink">
+        <i class="material-icons"></i>
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="swave.core.StreamEnv#shutdownOn" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="shutdownOn(future:scala.concurrent.Future[_]):scala.concurrent.Future[swave.core.StreamEnv.Termination]"></a>
-      <a id="shutdownOn(Future[_]):Future[Termination]"></a>
-      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -547,16 +961,15 @@
       <span class="symbol">
         <span class="name">shutdownOn</span><span class="params">(<span name="future">future: <span class="extype" name="scala.concurrent.Future">Future</span>[_]</span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="StreamEnv$$Termination.html" class="extype" name="swave.core.StreamEnv.Termination">Termination</a>]</span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.StreamEnv@shutdownOn(future:scala.concurrent.Future[_]):scala.concurrent.Future[swave.core.StreamEnv.Termination]" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
+      
+      
+    </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
+      <span class="permalink">
+      <a href="../../swave/core/StreamEnv.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
+        <i class="material-icons"></i>
       </a>
     </span>
-      
-    </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
-      <a id="synchronized[T0](⇒T0):T0"></a>
-      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -564,16 +977,15 @@
       <span class="symbol">
         <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.StreamEnv@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="toString():String"></a>
+      <span class="permalink">
+      <a href="../../swave/core/StreamEnv.html#toString():String" title="Permalink">
+        <i class="material-icons"></i>
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.AnyRef#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="toString():String"></a>
-      <a id="toString():String"></a>
-      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
@@ -581,16 +993,15 @@
       <span class="symbol">
         <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.StreamEnv@toString():String" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait():Unit"></a>
+      <span class="permalink">
+      <a href="../../swave/core/StreamEnv.html#wait():Unit" title="Permalink">
+        <i class="material-icons"></i>
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="wait():Unit"></a>
-      <a id="wait():Unit"></a>
-      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -598,11 +1009,7 @@
       <span class="symbol">
         <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.StreamEnv@wait():Unit" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
+      
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -610,10 +1017,13 @@
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="wait(x$1:Long,x$2:Int):Unit"></a>
-      <a id="wait(Long,Int):Unit"></a>
-      <h4 class="signature">
+    </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long,x$2:Int):Unit"></a><a id="wait(Long,Int):Unit"></a>
+      <span class="permalink">
+      <a href="../../swave/core/StreamEnv.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -621,11 +1031,7 @@
       <span class="symbol">
         <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.StreamEnv@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
+      
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -633,10 +1039,13 @@
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="wait(x$1:Long):Unit"></a>
-      <a id="wait(Long):Unit"></a>
-      <h4 class="signature">
+    </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long):Unit"></a><a id="wait(Long):Unit"></a>
+      <span class="permalink">
+      <a href="../../swave/core/StreamEnv.html#wait(x$1:Long):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -644,11 +1053,7 @@
       <span class="symbol">
         <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#swave.core.StreamEnv@wait(x$1:Long):Unit" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
+      
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -656,7 +1061,8 @@
     </span>)</span>
               
         </dd></dl></div>
-    </li></ol>
+    </li>
+              </ol>
             </div>
 
         
@@ -685,7 +1091,9 @@
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-
-
+    </body>
+          </div>
+        </div>
+      </div>
     </body>
       </html>
