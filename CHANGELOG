@@ -1,3 +1,25 @@
+Version 0.7.0 (2017-02-06)
+--------------------------
+
+- Significantly improved internal interception mechanics for much better throughput overall
+- Fixed problem with `expand` being unfair
+- Fixed and improve numerous issues with akka compat layer (also #24)
+- Renamed `logEvent` to `logSignal`
+- Renamed `Stage.Limit` to `Stage.WithLimit`
+- Merged `fanOutBroadcastBuffered` into `fanOutBroadcast`
+- Added `bufferSize` parameter to `injectSequential`
+- Added `Graph.render(StreamGraph[_])` convenience overload
+- Added `.async()` marker to `mapAsync` transformation (#23)
+- Added 3rd `Byte[T]` implementation: `ByteArrayBytes`
+- Added missing implementations in `ByteStringBytes`
+- Added `end` operation to fanout DSL
+- Added `Pipe.fromFunction` and `Drain::contramap` convenience helpers
+- Added @compileTimeOnly to all not yet implemented transformation stubs (#25)
+- Increased default `max-batch-size` to 32
+- Increased default bufferSize for asyncBoundaries to 32
+- Many other internal refactorings for improved performance, fairness and correctness
+
+
 Version 0.6.0 (2016-12-22)
 --------------------------
 
