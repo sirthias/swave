@@ -22,24 +22,26 @@ final class FanOutSpec extends SyncPipeSpec with Inspectors {
     testSetup
       .input[Int]
       .fixtures(Gen.chooseNum(1, 3), _.output[Int])
-      .prop.from { (in, outs) ⇒
-      import TestFixture.State._
+      .prop
+      .from { (in, outs) ⇒
+        import TestFixture.State._
 
-      in.spout
-        .fanOutBroadcast()
-        .subDrains(outs.tail.map(_.drain.dropResult))
-        .subContinue.drainTo(outs.head.drain)
+        in.spout
+          .fanOutBroadcast()
+          .subDrains(outs.tail.map(_.drain.dropResult))
+          .subContinue
+          .drainTo(outs.head.drain)
 
-      in.terminalState match {
-        case Cancelled ⇒ forAll(outs) { _.terminalState shouldBe Cancelled }
-        case Completed ⇒ forAll(outs) { _.terminalState should (be(Cancelled) or be(Completed)) }
-        case error     ⇒ forAll(outs) { _.terminalState should (be(error) or be(Cancelled)) }
+        in.terminalState match {
+          case Cancelled ⇒ forAll(outs) { _.terminalState shouldBe Cancelled }
+          case Completed ⇒ forAll(outs) { _.terminalState should (be(Cancelled) or be(Completed)) }
+          case error     ⇒ forAll(outs) { _.terminalState should (be(error) or be(Cancelled)) }
+        }
+
+        forAll(outs) { out ⇒
+          out.received shouldEqual in.produced.take(out.scriptedSize)
+        }
       }
-
-      forAll(outs) { out ⇒
-        out.received shouldEqual in.produced.take(out.scriptedSize)
-      }
-    }
   }
 
   "BroadcastBuffered" in check {
@@ -47,23 +49,25 @@ final class FanOutSpec extends SyncPipeSpec with Inspectors {
       .input[Int]
       .fixtures(Gen.chooseNum(1, 3), _.output[Int])
       .param(Gen.chooseNum(1, 16))
-      .prop.from { (in, outs, bufferSize) ⇒
-      import TestFixture.State._
+      .prop
+      .from { (in, outs, bufferSize) ⇒
+        import TestFixture.State._
 
-      in.spout
-        .fanOutBroadcast(bufferSize)
-        .subDrains(outs.tail.map(_.drain.dropResult))
-        .subContinue.drainTo(outs.head.drain)
+        in.spout
+          .fanOutBroadcast(bufferSize)
+          .subDrains(outs.tail.map(_.drain.dropResult))
+          .subContinue
+          .drainTo(outs.head.drain)
 
-      in.terminalState match {
-        case Cancelled ⇒ forAll(outs) { _.terminalState shouldBe Cancelled }
-        case Completed ⇒ forAll(outs) { _.terminalState should (be(Cancelled) or be(Completed)) }
-        case error     ⇒ forAll(outs) { _.terminalState should (be(error) or be(Cancelled)) }
+        in.terminalState match {
+          case Cancelled ⇒ forAll(outs) { _.terminalState shouldBe Cancelled }
+          case Completed ⇒ forAll(outs) { _.terminalState should (be(Cancelled) or be(Completed)) }
+          case error     ⇒ forAll(outs) { _.terminalState should (be(error) or be(Cancelled)) }
+        }
+
+        forAll(outs) { out ⇒
+          out.received shouldEqual in.produced.take(out.size)
+        }
       }
-
-      forAll(outs) { out ⇒
-        out.received shouldEqual in.produced.take(out.size)
-      }
-    }
   }
 }

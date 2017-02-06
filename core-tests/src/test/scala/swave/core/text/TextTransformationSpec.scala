@@ -72,7 +72,8 @@ class TextTransformationSpec extends SwaveSpec {
           .flatMap(_.take(random.nextLong(32)).drainToVector(32).map(ByteVector(_)))
           .utf8Decode
           .async()
-          .drainToMkString(1000).await(3.seconds) shouldEqual largeText
+          .drainToMkString(1000)
+          .await(3.seconds) shouldEqual largeText
       }
     }
 
@@ -84,7 +85,8 @@ class TextTransformationSpec extends SwaveSpec {
           .flatMap(_.take(random.nextLong(32)).drainToMkString(32))
           .utf8Encode
           .async()
-          .drainFolding(ByteVector.empty)(_ ++ _).await() shouldEqual ByteVector(largeText getBytes UTF8)
+          .drainFolding(ByteVector.empty)(_ ++ _)
+          .await() shouldEqual ByteVector(largeText getBytes UTF8)
       }
     }
 
@@ -96,7 +98,8 @@ class TextTransformationSpec extends SwaveSpec {
           .flatMap(_.take(random.nextLong(32)).drainToMkString(32))
           .lines
           .async()
-          .drainToVector(1000).await() shouldEqual largeText.split('\n')
+          .drainToVector(1000)
+          .await() shouldEqual largeText.split('\n')
       }
     }
   }

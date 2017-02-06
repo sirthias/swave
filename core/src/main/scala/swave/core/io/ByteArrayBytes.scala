@@ -21,7 +21,7 @@ class ByteArrayBytes extends Bytes[Array[Byte]] {
   def empty = ByteArrayBytes.Empty
   def fill[A: Integral](size: Long)(byte: A) = {
     requireArg(0 <= size && size <= Int.MaxValue, "`size` must be >= 0 and <= Int.MaxValue")
-    val b = implicitly[Integral[A]].toInt(byte).toByte
+    val b     = implicitly[Integral[A]].toInt(byte).toByte
     val array = new Array[Byte](size.toInt)
     util.Arrays.fill(array, b)
     array
@@ -118,7 +118,7 @@ class ByteArrayBytes extends Bytes[Array[Byte]] {
 
   ///////////////// TRANSFORMATION TO OTHER TYPES ///////////////////
 
-  def toArray(value: Array[Byte])                                   = value
+  def toArray(value: Array[Byte]) = value
   def copyToArray(value: Array[Byte], xs: Array[Byte], offset: Int) =
     System.arraycopy(value, 0, xs, offset, math.max(0, math.min(value.length, xs.length - offset)))
   def copyToArray(value: Array[Byte], sourceOffset: Long, xs: Array[Byte], destOffset: Int, len: Int) = {
@@ -130,10 +130,10 @@ class ByteArrayBytes extends Bytes[Array[Byte]] {
     buffer.put(value)
     len
   }
-  def copyToOutputStream(value: Array[Byte], s: OutputStream)   = s.write(value)
-  def toByteBuffer(value: Array[Byte])                          = ByteBuffer.wrap(value)
-  def toIndexedSeq(value: Array[Byte]): IndexedSeq[Byte]        = value
-  def toSeq(value: Array[Byte]): Seq[Byte]                      = value
+  def copyToOutputStream(value: Array[Byte], s: OutputStream) = s.write(value)
+  def toByteBuffer(value: Array[Byte])                        = ByteBuffer.wrap(value)
+  def toIndexedSeq(value: Array[Byte]): IndexedSeq[Byte]      = value
+  def toSeq(value: Array[Byte]): Seq[Byte]                    = value
   def decodeString(value: Array[Byte], charset: Charset): Either[CharacterCodingException, String] =
     try Right(charset.newDecoder.decode(toByteBuffer(value)).toString)
     catch { case e: CharacterCodingException ⇒ Left(e) }

@@ -80,7 +80,9 @@ final class ExpandSpec extends SwaveSpec {
 
     "work on a variable rate chain" in {
       Spout(50 to 100)
-        .map { i ⇒ if (ThreadLocalRandom.current().nextBoolean()) Thread.sleep(10); i }
+        .map { i ⇒
+          if (ThreadLocalRandom.current().nextBoolean()) Thread.sleep(10); i
+        }
         .asyncBoundary()
         .expand(Iterator.continually(_))
         .drainFolding(Set.empty[Int])(_ + _)
@@ -118,7 +120,8 @@ final class ExpandSpec extends SwaveSpec {
       val upstream   = SpoutProbe[Int]
       val downstream = DrainProbe[Int]
 
-      upstream.expand(Iterator(1, 2) ++ Iterator.continually(throw TestError), Iterator.continually(_))
+      upstream
+        .expand(Iterator(1, 2) ++ Iterator.continually(throw TestError), Iterator.continually(_))
         .drainTo(downstream)
 
       upstream.expectRequest(1)

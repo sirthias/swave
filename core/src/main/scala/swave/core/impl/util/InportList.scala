@@ -78,8 +78,7 @@ private[swave] object AbstractInportList {
     def replaceInRef(from: Inport, to: Inport): Boolean = {
       @tailrec def rec(current: L): Boolean =
         if (current ne null) {
-          if (current.in eq from) { current.in = to; true }
-          else rec(current.tail)
+          if (current.in eq from) { current.in = to; true } else rec(current.tail)
         } else false
       rec(underlying)
     }

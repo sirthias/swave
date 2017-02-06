@@ -10,10 +10,9 @@ import org.reactivestreams._
 import swave.core.impl.stages.StageImpl
 
 private[impl] class ForwardToRunnerSubscription(stage: StageImpl) extends Subscription {
-  def request(n: Long) = {
+  def request(n: Long) =
     if (n > 0) stage.region.enqueueRequest(stage, n, stage)
     else stage.region.enqueueXEvent(stage, ForwardToRunnerSubscription.IllegalRequest(n))
-  }
   def cancel() = stage.region.enqueueCancel(stage, stage)
 }
 

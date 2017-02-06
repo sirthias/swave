@@ -22,7 +22,7 @@ private[swave] final class StageImplementation(fullInterceptions: Boolean = fals
                                                manualInportList: String = null,
                                                manualOutport: String = null,
                                                manualOutportList: String = null)
-  extends StaticAnnotation {
+    extends StaticAnnotation {
 
   def macroTransform(annottees: Any*): Any = macro StageImplementationMacro.generateStage
 }
@@ -89,15 +89,15 @@ private[swave] final class StageImplementation(fullInterceptions: Boolean = fals
   * 7. Generate `interceptingStates`, `stateName` and signal handler implementations
   */
 private[swave] class StageImplementationMacro(val c: scala.reflect.macros.whitebox.Context)
-  extends Util with ConnectFanInAndSealWith with ConnectFanOutAndSealWith with ConnectInAndSealWith
+    extends Util with ConnectFanInAndSealWith with ConnectFanOutAndSealWith with ConnectInAndSealWith
     with ConnectInOutAndSealWith with ConnectOutAndSealWith {
   import c.universe._
 
-  var stateHandlers                   = Map.empty[String, StateHandlers]
-  val fullInterceptions: Boolean      = annotationFlag("fullInterceptions")
-  val interceptAllRequests: Boolean   = annotationFlag("interceptAllRequests")
-  val debugMode: Boolean              = annotationFlag("dump")
-  val tracing: Boolean                = annotationFlag("trace")
+  var stateHandlers                     = Map.empty[String, StateHandlers]
+  val fullInterceptions: Boolean        = annotationFlag("fullInterceptions")
+  val interceptAllRequests: Boolean     = annotationFlag("interceptAllRequests")
+  val debugMode: Boolean                = annotationFlag("dump")
+  val tracing: Boolean                  = annotationFlag("trace")
   val manualInport: List[TermName]      = annotationString("manualInport")
   val manualInportList: List[TermName]  = annotationString("manualInportList")
   val manualOutport: List[TermName]     = annotationString("manualOutport")
@@ -114,9 +114,9 @@ private[swave] class StageImplementationMacro(val c: scala.reflect.macros.whiteb
     c.prefix.tree match {
       case q"new StageImplementation(..$params)" ⇒
         params.collectFirst { case AssignOrNamedArg(Ident(TermName(`flag`)), x) ⇒ x } match {
-          case None => Nil
-          case Some(Literal(Constant(x :String))) => TermName(x) :: Nil
-          case _ => c.abort(c.prefix.tree.pos, "Illegal annotation member value, expected literal string!")
+          case None                               => Nil
+          case Some(Literal(Constant(x: String))) => TermName(x) :: Nil
+          case _                                  => c.abort(c.prefix.tree.pos, "Illegal annotation member value, expected literal string!")
         }
       case _ ⇒ Nil
     }
@@ -138,7 +138,9 @@ private[swave] class StageImplementationMacro(val c: scala.reflect.macros.whiteb
     val parameterSet    = determineParameterSet(stateParentDefs, stateDefs(sc1))
     val sc2             = stateParentDefs.foldLeft(sc1: Tree)(removeStateParentDef(parameterSet))
     val sc3             = stateDefs(sc2).foldLeft(sc2)(transformStateDef(parameterSet))
-    val sc4 = addMembers(sc3, varMembers(parameterSet),
+    val sc4 = addMembers(
+      sc3,
+      varMembers(parameterSet),
       setFlags(stageImpl) :: rewireImpls(parameterSet, stageImpl) ::: stateNameImpl ::: signalHandlersImpl)
     val sc5 = transformStateCallSites(sc4)
 
@@ -242,8 +244,7 @@ private[swave] class StageImplementationMacro(val c: scala.reflect.macros.whiteb
     }
 
   def varMembers(parameterSet: ParameterSet): List[ValDef] =
-    parameterSet.map { case (name, tpt) ⇒ q"private[this] var ${varName(name)}: $tpt = _" }(
-      collection.breakOut)
+    parameterSet.map { case (name, tpt) ⇒ q"private[this] var ${varName(name)}: $tpt = _" }(collection.breakOut)
 
   def varName(paramName: TermName) = TermName("__" + paramName.decodedName)
 
@@ -261,28 +262,28 @@ private[swave] class StageImplementationMacro(val c: scala.reflect.macros.whiteb
     def fail(portType: String) =
       q"""throw illegalState("No " + $portType + " `" + from + "` to rewire to `" + to + '`')"""
 
-    val params = parameterSet.toList
-    val inports = params.collect { case (name, tq"Inport") => varName(name) } ::: manualInport
-    val inportLists = params.collect { case (name, tq"InportList" | tq"InportAnyRefList") => varName(name) } ::: manualInportList
-    val outports = params.collect { case (name, tq"Outport") => varName(name) } ::: manualOutport
+    val params       = parameterSet.toList
+    val inports      = params.collect { case (name, tq"Inport") => varName(name) } ::: manualInport
+    val inportLists  = params.collect { case (name, tq"InportList" | tq"InportAnyRefList") => varName(name) } ::: manualInportList
+    val outports     = params.collect { case (name, tq"Outport") => varName(name) } ::: manualOutport
     val outportLists = params.collect { case (name, tq"OutportCtx") => varName(name) } ::: manualOutportList
-    
+
     val hasInportDef =
       q"final override def hasInport(in: swave.core.impl.Inport) = ${inUse(TermName("in"), inports, inportLists)}"
     val hasOutportDef =
       q"final override def hasOutport(out: swave.core.impl.Outport) = ${inUse(TermName("out"), outports, outportLists)}"
 
     val rewireInDef = {
-      val rewireInports = inports.map(in => q"($in eq from) && { $in = to; true }")
+      val rewireInports     = inports.map(in => q"($in eq from) && { $in = to; true }")
       val rewireInportLists = inportLists.map(ins => q"$ins.replaceInRef(from, to)")
-      val rewire = (rewireInports ::: rewireInportLists).reduceLeftOption(strictOr) getOrElse q"false"
+      val rewire            = (rewireInports ::: rewireInportLists).reduceLeftOption(strictOr) getOrElse q"false"
       q"""final override def rewireIn(from: swave.core.impl.Inport, to: swave.core.impl.Inport): Unit =
             if (!$rewire) ${fail("Inport")}"""
     }
     val rewireOutDef = {
-      val rewireOutports = outports.map(out => q"($out eq from) && { $out = to; true }")
+      val rewireOutports     = outports.map(out => q"($out eq from) && { $out = to; true }")
       val rewireOutportLists = outportLists.map(outs => q"$outs.replaceOutRef(from, to)")
-      val rewire = (rewireOutports ::: rewireOutportLists).reduceLeftOption(strictOr) getOrElse q"false"
+      val rewire             = (rewireOutports ::: rewireOutportLists).reduceLeftOption(strictOr) getOrElse q"false"
       q"""final override def rewireOut(from: swave.core.impl.Outport, to: swave.core.impl.Outport): Unit =
             if (!$rewire) ${fail("Outport")}"""
     }
@@ -532,7 +533,7 @@ private[swave] class StageImplementationMacro(val c: scala.reflect.macros.whiteb
 
   def stateNameImpl: List[DefDef] = {
     val cases = cq"_ => super.stateName" ::
-      stateHandlers.foldLeft(cq"""0 => "STOPPED"""" :: Nil) { case (acc, (name, sh)) ⇒ cq"${sh.id} => $name" :: acc }
+        stateHandlers.foldLeft(cq"""0 => "STOPPED"""" :: Nil) { case (acc, (name, sh)) ⇒ cq"${sh.id} => $name" :: acc }
 
     q"final override def stateName: String = stateName(stay())" ::
       q"private def stateName(id: Int): String = id match { case ..${cases.reverse} }" :: Nil

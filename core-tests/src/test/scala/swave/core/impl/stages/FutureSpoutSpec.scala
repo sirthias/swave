@@ -18,7 +18,8 @@ class FutureSpoutSpec extends SwaveSpec {
   "Spout.fromFuture" - {
 
     "already completed success" in {
-      Spout(Future.successful(42)).drainTo(DrainProbe[Int])
+      Spout(Future.successful(42))
+        .drainTo(DrainProbe[Int])
         .get
         .sendRequest(5)
         .expectNext(42)
@@ -27,7 +28,8 @@ class FutureSpoutSpec extends SwaveSpec {
     }
 
     "already completed failure" in {
-      Spout(Future.failed(TestError)).drainTo(DrainProbe[Int])
+      Spout(Future.failed(TestError))
+        .drainTo(DrainProbe[Int])
         .get
         .expectError(TestError)
         .verifyCleanStop()

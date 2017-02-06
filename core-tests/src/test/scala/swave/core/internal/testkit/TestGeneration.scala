@@ -164,9 +164,11 @@ object TestGeneration {
 
   ////////////////////////////////// DSL IMPLEMENTATION ///////////////////////////////////////////
 
-  private class TestSetupDefImpl(seed: String, asyncRates: Gen[Double], asyncSchedulings: Gen[AsyncScheduling],
+  private class TestSetupDefImpl(seed: String,
+                                 asyncRates: Gen[Double],
+                                 asyncSchedulings: Gen[AsyncScheduling],
                                  tracing: Boolean)
-    extends TestSetupDef {
+      extends TestSetupDef {
     private[this] val runCounter = Iterator from 0
 
     def withRandomSeed(seed: String): TestSetupDef =
@@ -183,7 +185,7 @@ object TestGeneration {
     private def finish = {
       val contexts =
         for {
-          genSeed <- Gen.seeded(s => Gen.const(s))
+          genSeed         <- Gen.seeded(s => Gen.const(s))
           asyncRate       ← asyncRates
           asyncScheduling ← asyncSchedulings
         } yield {
@@ -194,9 +196,10 @@ object TestGeneration {
     }
   }
 
-  private class DefImpl[L <: HList](seed: String, contexts: Gen[TestContext],
+  private class DefImpl[L <: HList](seed: String,
+                                    contexts: Gen[TestContext],
                                     creatorsList: List[FixtureDef ⇒ Gen[Any]])
-    extends MainDef[L] {
+      extends MainDef[L] {
 
     def param[T](implicit gen: Gen[T]): MainDef[T :: L] = fixture(_ ⇒ gen)
 
@@ -245,7 +248,7 @@ object TestGeneration {
   }
 
   private class PropperImpl[L <: HList, F](seed: String, gen: Gen[(TestContext, L)], convertF: F ⇒ L ⇒ Unit)
-    extends Propper[F] {
+      extends Propper[F] {
 
     def from(f: F): Prop = Prop { params ⇒
       val prop = Prop.forAll(gen)(propFun(convertF(f)))

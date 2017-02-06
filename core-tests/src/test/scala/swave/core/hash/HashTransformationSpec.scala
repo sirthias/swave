@@ -18,11 +18,14 @@ class HashTransformationSpec extends SwaveSpec {
   "HashTransformations" - {
 
     "md5" in {
-      Spout.one("swave rocks!")
+      Spout
+        .one("swave rocks!")
         .utf8Encode
         .md5
         .drainToHead()
-        .value.get.get shouldEqual ByteVector.fromHex("e1b2b603f9cca4a909c07d42a5788fe3").get
+        .value
+        .get
+        .get shouldEqual ByteVector.fromHex("e1b2b603f9cca4a909c07d42a5788fe3").get
     }
   }
 }

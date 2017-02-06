@@ -99,7 +99,7 @@ private[swave] final class RunContext private (val env: StreamEnv) { self =>
         case _        => throw new IllegalStateException()
       }
     override def registerForSyncPostRunEvent(stage: StageImpl): Unit = {
-      requireState(!_isAsync)
+      requireState(! _isAsync)
       syncNeedPostRun ::= stage
     }
     override def start(): Unit = {
@@ -297,7 +297,7 @@ private[swave] final class RunContext private (val env: StreamEnv) { self =>
     @tailrec final override def registerSubContext(ctx: RunContext): Unit = {
       val current = _subContexts.get()
       val updated = ctx :: current
-      if (!_subContexts.compareAndSet(current, updated)) registerSubContext(ctx) // another thread interfered, so retry
+      if (! _subContexts.compareAndSet(current, updated)) registerSubContext(ctx) // another thread interfered, so retry
     }
     @tailrec final override def unregisterSubContext(ctx: RunContext): Unit = {
       val current = _subContexts.get

@@ -86,13 +86,13 @@ class ByteStringBytes extends Bytes[ByteString] {
   def copyToArray(value: ByteString, sourceOffset: Long, xs: Array[Byte], destOffset: Int, len: Int) =
     drop(value, sourceOffset).copyToArray(xs, destOffset, len)
   def copyToBuffer(value: ByteString, buffer: ByteBuffer): Int = value.copyToBuffer(buffer)
-  def copyToOutputStream(value: ByteString, s: OutputStream)   = {
+  def copyToOutputStream(value: ByteString, s: OutputStream) = {
     @tailrec def rec(ix: Int, size: Int): Unit = if (ix < size) { s.write(value(ix).toInt); rec(ix + 1, size) }
     rec(0, value.size)
   }
-  def toByteBuffer(value: ByteString)                          = value.toByteBuffer
-  def toIndexedSeq(value: ByteString): IndexedSeq[Byte]        = value
-  def toSeq(value: ByteString): Seq[Byte]                      = value
+  def toByteBuffer(value: ByteString)                   = value.toByteBuffer
+  def toIndexedSeq(value: ByteString): IndexedSeq[Byte] = value
+  def toSeq(value: ByteString): Seq[Byte]               = value
   def decodeString(value: ByteString, charset: Charset): Either[CharacterCodingException, String] =
     try Right(charset.newDecoder.decode(toByteBuffer(value)).toString)
     catch { case e: CharacterCodingException ⇒ Left(e) }

@@ -108,30 +108,34 @@ class AsyncSpec extends SwaveSpec {
       Spout
         .continually(threadName)
         .fanOutBroadcast()
-          .sub.asyncBoundary("disp0").end
-          .sub.asyncBoundary("disp1").end
+        .sub
+        .asyncBoundary("disp0")
+        .end
+        .sub
+        .asyncBoundary("disp1")
+        .end
         .fanInMerge()
         .to(Drain.head)
         .trySeal()
         .failed
         .get
         .getMessage
-        .shouldEqual(
-          "Conflicting dispatcher assignment to async region: [disp0] vs. [disp1]")
+        .shouldEqual("Conflicting dispatcher assignment to async region: [disp0] vs. [disp1]")
     }
 
     "conflicting async markers" taggedAs NotOnTravis in {
       Spout
         .continually(threadName)
         .fanOutBroadcast()
-          .sub.to(Drain.cancelling.async("disp0"))
-          .subContinue.to(Drain.head.async("disp1"))
+        .sub
+        .to(Drain.cancelling.async("disp0"))
+        .subContinue
+        .to(Drain.head.async("disp1"))
         .trySeal()
         .failed
         .get
         .getMessage
-        .shouldEqual(
-          "Conflicting dispatcher assignment to async region: [disp1] vs. [disp0]")
+        .shouldEqual("Conflicting dispatcher assignment to async region: [disp1] vs. [disp0]")
     }
 
     "sync sub-stream in sync parent stream" in {
@@ -211,7 +215,8 @@ class AsyncSpec extends SwaveSpec {
     }
 
     "external sub-stream starts" taggedAs NotOnTravis in {
-      Spout.ints(0)
+      Spout
+        .ints(0)
         .splitWhen(_ % 5 == 0)
         .flatMap(_.drainToMkString(limit = 5, ","))
         .take(3)
@@ -221,7 +226,8 @@ class AsyncSpec extends SwaveSpec {
     }
 
     "rate detach" in {
-      Spout.repeat(42)
+      Spout
+        .repeat(42)
         .conflateToLast
         .throttle(1, per = 50.millis)
         .take(3)

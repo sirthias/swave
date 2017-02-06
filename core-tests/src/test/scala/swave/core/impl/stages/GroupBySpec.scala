@@ -27,7 +27,8 @@ final class GroupBySpec extends SyncPipeSpec with Inspectors {
       .fixture(fd ⇒ Gen.listOfN(16, fd.output[Int](TestGeneration.Default.nonDroppingOutputScripts)))
       .param(Gen.oneOf(false, true))
       .param(Gen.oneOf(false, true))
-      .prop.from { (in, out, allSubOuts, reopenCancelledSubs, eagerCancel) ⇒
+      .prop
+      .from { (in, out, allSubOuts, reopenCancelledSubs, eagerCancel) ⇒
         import TestFixture.State._
 
         val iter    = allSubOuts.iterator

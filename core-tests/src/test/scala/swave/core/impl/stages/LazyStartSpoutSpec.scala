@@ -21,12 +21,14 @@ final class LazyStartSpoutSpec extends SyncPipeSpec with Inspectors {
     testSetup
       .input[Int]
       .output[String]
-      .prop.from { (in, out) ⇒
-      Spout.lazyStart(() ⇒ in.spout)
-        .map(_.toString)
-        .drainTo(out.drain) shouldTerminate asScripted(in)
+      .prop
+      .from { (in, out) ⇒
+        Spout
+          .lazyStart(() ⇒ in.spout)
+          .map(_.toString)
+          .drainTo(out.drain) shouldTerminate asScripted(in)
 
-      out.received shouldEqual in.produced.take(out.scriptedSize).map(_.toString)
-    }
+        out.received shouldEqual in.produced.take(out.scriptedSize).map(_.toString)
+      }
   }
 }

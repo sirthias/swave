@@ -24,83 +24,86 @@ final class FanInSpec extends SyncPipeSpec with Inspectors {
     testSetup
       .fixtures(Gen.chooseNum(2, 4), _.input[Int])
       .output[Int]
-      .prop.from { (ins, out) ⇒
-      import TestFixture.State._
+      .prop
+      .from { (ins, out) ⇒
+        import TestFixture.State._
 
-      val spouts             = ins.map(_.spout)
-      var expectedResultSize = out.scriptedSize
+        val spouts             = ins.map(_.spout)
+        var expectedResultSize = out.scriptedSize
 
-      spouts.head
-        .attachAll(spouts.tail)
-        .fanInConcat()
-        .drainTo(out.drain) shouldTerminate likeThis {
-        case Cancelled ⇒ // inputs can be in any state
-        case Completed ⇒ forAll(ins) { _.terminalState shouldBe Completed }
-        case error @ Error(TestError) ⇒
-          forAtLeast(1, ins) { _.terminalState shouldBe error }
-          expectedResultSize = out.size
+        spouts.head
+          .attachAll(spouts.tail)
+          .fanInConcat()
+          .drainTo(out.drain) shouldTerminate likeThis {
+          case Cancelled ⇒ // inputs can be in any state
+          case Completed ⇒ forAll(ins) { _.terminalState shouldBe Completed }
+          case error @ Error(TestError) ⇒
+            forAtLeast(1, ins) { _.terminalState shouldBe error }
+            expectedResultSize = out.size
+        }
+
+        out.received shouldEqual ins.flatMap(_.produced).take(expectedResultSize)
       }
-
-      out.received shouldEqual ins.flatMap(_.produced).take(expectedResultSize)
-    }
   }
 
   "FirstNonEmpty" in check {
     testSetup
       .fixtures(Gen.chooseNum(2, 4), _.input[Int])
       .output[Int]
-      .prop.from { (ins, out) ⇒
-      import TestFixture.State._
+      .prop
+      .from { (ins, out) ⇒
+        import TestFixture.State._
 
-      val spouts             = ins.map(_.spout)
-      var expectedResultSize = out.scriptedSize
+        val spouts             = ins.map(_.spout)
+        var expectedResultSize = out.scriptedSize
 
-      spouts.head
-        .attachAll(spouts.tail)
-        .fanInConcat(stopAfterFirstNonEmpty = true)
-        .drainTo(out.drain) shouldTerminate likeThis {
-        case Cancelled ⇒ // inputs can be in any state
-        case Completed ⇒
-          forAll(ins.dropWhile(_.terminalState == Completed)) { in ⇒
-            if (in.terminalState != Cancelled && in.scriptedSize > 0) fail()
-          }
-        case error @ Error(TestError) ⇒
-          forAtLeast(1, ins) { _.terminalState shouldBe error }
-          expectedResultSize = out.size
+        spouts.head
+          .attachAll(spouts.tail)
+          .fanInConcat(stopAfterFirstNonEmpty = true)
+          .drainTo(out.drain) shouldTerminate likeThis {
+          case Cancelled ⇒ // inputs can be in any state
+          case Completed ⇒
+            forAll(ins.dropWhile(_.terminalState == Completed)) { in ⇒
+              if (in.terminalState != Cancelled && in.scriptedSize > 0) fail()
+            }
+          case error @ Error(TestError) ⇒
+            forAtLeast(1, ins) { _.terminalState shouldBe error }
+            expectedResultSize = out.size
+        }
+
+        out.received shouldEqual ins.map(_.produced).find(_.nonEmpty).getOrElse(Nil).take(expectedResultSize)
       }
-
-      out.received shouldEqual ins.map(_.produced).find(_.nonEmpty).getOrElse(Nil).take(expectedResultSize)
-    }
   }
 
   "Merge" in check {
     testSetup
       .fixture(fd ⇒ nonOverlappingIntTestInputs(fd, 2, 4))
       .output[Int]
-      .prop.from { (ins, out) ⇒
-      import TestFixture.State._
+      .prop
+      .from { (ins, out) ⇒
+        import TestFixture.State._
 
-      val spouts             = ins.map(_.spout)
-      var expectedResultSize = out.scriptedSize
+        val spouts             = ins.map(_.spout)
+        var expectedResultSize = out.scriptedSize
 
-      spouts.head
-        .attachAll(spouts.tail)
-        .fanInMerge()
-        .drainTo(out.drain) shouldTerminate likeThis {
-        case Cancelled ⇒ // inputs can be in any state
-        case Completed ⇒ forAll(ins) { _.terminalState shouldBe Completed }
-        case error @ Error(TestError) ⇒
-          forAtLeast(1, ins) { _.terminalState shouldBe error }
-          expectedResultSize = out.size
+        spouts.head
+          .attachAll(spouts.tail)
+          .fanInMerge()
+          .drainTo(out.drain) shouldTerminate likeThis {
+          case Cancelled ⇒ // inputs can be in any state
+          case Completed ⇒ forAll(ins) { _.terminalState shouldBe Completed }
+          case error @ Error(TestError) ⇒
+            forAtLeast(1, ins) { _.terminalState shouldBe error }
+            expectedResultSize = out.size
+        }
+
+        // verify that we received the elements in the right order
+        val received = out.received
+        for (in ← ins) {
+          val produced = in.produced.filter(received.contains).distinct
+          received.filter(produced.contains).distinct shouldEqual produced
+        }
       }
-
-      // verify that we received the elements in the right order
-      val received = out.received
-      for (in ← ins) {
-        val produced = in.produced.filter(received.contains).distinct
-        received.filter(produced.contains).distinct shouldEqual produced
-      }
-    }
   }
 
   "ToTuple" in check {
@@ -109,8 +112,8 @@ final class FanInSpec extends SyncPipeSpec with Inspectors {
       .input[Char]
       .input[Double]
       .output[(Int, Char, Double)]
-      .prop.from {
-      (inInt, inChar, inDouble, out) ⇒
+      .prop
+      .from { (inInt, inChar, inDouble, out) ⇒
         import TestFixture.State._
 
         val inputs             = inInt :: inChar :: inDouble :: Nil
@@ -132,6 +135,6 @@ final class FanInSpec extends SyncPipeSpec with Inspectors {
           .zip(inDouble.produced)
           .map({ case ((i, c), d) ⇒ (i, c, d) })
           .take(expectedResultSize)
-    }
+      }
   }
 }

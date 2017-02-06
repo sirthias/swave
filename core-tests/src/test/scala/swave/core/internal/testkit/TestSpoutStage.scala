@@ -16,7 +16,8 @@ import swave.core.impl.stages.SpoutStage
 private[testkit] final class TestSpoutStage(val id: Int,
                                             val elemsIterable: Iterable[AnyRef],
                                             val termination: Option[Throwable],
-                                            ctx: TestContext) extends SpoutStage with TestStage {
+                                            ctx: TestContext)
+    extends SpoutStage with TestStage {
 
   private[this] val elems: Iterator[AnyRef] = elemsIterable.iterator
 

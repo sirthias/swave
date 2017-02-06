@@ -17,8 +17,8 @@ import swave.core.util._
 
 class AkkaCompatSpec extends FreeSpec with Matchers with Inside with BeforeAndAfterAll {
 
-  implicit val env = StreamEnv()
-  implicit val system = ActorSystem()
+  implicit val env          = StreamEnv()
+  implicit val system       = ActorSystem()
   implicit val materializer = ActorMaterializer()
 
   "Akka compatibility should work as expected" - {
@@ -60,4 +60,3 @@ class AkkaCompatSpec extends FreeSpec with Matchers with Inside with BeforeAndAf
     envTermination.awaitTermination(2.seconds)
   }
 }
-

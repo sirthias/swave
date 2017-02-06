@@ -226,7 +226,7 @@ object Module {
       this
     }
 
-    private[core] def markSealed(): Boolean = !_sealed && { _sealed = true; true }
+    private[core] def markSealed(): Boolean = ! _sealed && { _sealed = true; true }
 
     override def toString = s"""Module.ID(name="$name", boundaries=$boundaries)"""
   }

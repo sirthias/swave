@@ -22,7 +22,7 @@ private[testkit] final class TestContext(val runNr: Int,
   import TestContext._
 
   private[this] val schedulings = ArrayBuffer.empty[ResizableRingBuffer[Task]]
-  val random = XorShiftRandom(genSeed.long._1)
+  val random                    = XorShiftRandom(genSeed.long._1)
 
   def lastId = schedulings.size - 1
 

@@ -8,7 +8,7 @@ package swave.core.impl.stages
 
 import org.scalacheck.Gen
 import org.scalatest.Inspectors
-import swave.core.internal.testkit.{ TestError, TestFixture }
+import swave.core.internal.testkit.{TestError, TestFixture}
 import swave.core._
 
 final class FlattenSpec extends SyncPipeSpec with Inspectors {
@@ -23,13 +23,15 @@ final class FlattenSpec extends SyncPipeSpec with Inspectors {
       .fixture(fd ⇒ fd.inputFromIterables(Gen.chooseNum(0, 3).flatMap(Gen.listOfN(_, fd.input[Int]))))
       .output[Int]
       .param(Gen.chooseNum(1, 3))
-      .prop.from { (in, out, parallelism) ⇒
+      .prop
+      .from { (in, out, parallelism) ⇒
         import TestFixture.State._
 
         val allInputs          = in :: in.elements.toList
         var expectedResultSize = out.scriptedSize
 
-        in.spout.map(_.spout)
+        in.spout
+          .map(_.spout)
           .flattenConcat(parallelism)
           .drainTo(out.drain) shouldTerminate likeThis {
           case Cancelled ⇒ // inputs can be in any state
@@ -48,13 +50,15 @@ final class FlattenSpec extends SyncPipeSpec with Inspectors {
       .fixture(fd ⇒ fd.inputFromIterables(nonOverlappingIntTestInputs(fd, 0, 3)))
       .output[Int]
       .param(Gen.chooseNum(1, 3))
-      .prop.from { (in, out, parallelism) ⇒
+      .prop
+      .from { (in, out, parallelism) ⇒
         import TestFixture.State._
 
         val allInputs          = in :: in.elements.toList
         var expectedResultSize = out.scriptedSize
 
-        in.spout.map(_.spout)
+        in.spout
+          .map(_.spout)
           .flattenMerge(parallelism)
           .drainTo(out.drain) shouldTerminate likeThis {
           case Cancelled ⇒ // inputs can be in any state

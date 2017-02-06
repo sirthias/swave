@@ -165,7 +165,7 @@ private[swave] final class ResizableRingBuffer[T](initialCap: Int, maxCap: Int) 
         val ix = calcRefArrayElementOffset((i & mask).toLong)
         f(UNSAFE.getObject(array, ix).asInstanceOf[T]) match {
           case Some(x) => UNSAFE.putObject(array, ix, x)
-          case None =>
+          case None    =>
         }
         rec(i + 1)
       }

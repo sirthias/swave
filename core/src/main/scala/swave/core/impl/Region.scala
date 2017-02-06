@@ -34,73 +34,73 @@ private[swave] final class Region private[impl] (val entryPoint: StageImpl, val 
   /////////////////////////// potentially called from other threads /////////////////////////
   @tailrec def enqueueRequest(target: StageImpl, n: Long, from: Outport): Unit =
     ref.get match {
-      case null => { ref.compareAndSet(null, new SignalQueue(mbs)); enqueueRequest(target, n, from) }
+      case null           => { ref.compareAndSet(null, new SignalQueue(mbs)); enqueueRequest(target, n, from) }
       case x: SignalQueue => x.enqueueRequest(target, n, from)
-      case Busy => { ThreadHints.onSpinWait(); enqueueRequest(target, n, from) }
-      case x => dispatchRequest(x, target, n, from)
+      case Busy           => { ThreadHints.onSpinWait(); enqueueRequest(target, n, from) }
+      case x              => dispatchRequest(x, target, n, from)
     }
   private[Region] def dispatchRequest(channel: AnyRef, target: StageImpl, n: Long, from: Outport): Unit =
     channel match {
-      case Sync => target.request(n)(from)
+      case Sync            => target.request(n)(from)
       case x: StreamRunner => x.enqueue(new StreamRunner.Message.Request(target, n, from))
     }
 
   def enqueueCancel(target: StageImpl, from: Outport): Unit =
     ref.get match {
-      case null => { ref.compareAndSet(null, new SignalQueue(mbs)); enqueueCancel(target, from) }
+      case null           => { ref.compareAndSet(null, new SignalQueue(mbs)); enqueueCancel(target, from) }
       case x: SignalQueue => x.enqueueCancel(target, from)
-      case Busy => { ThreadHints.onSpinWait(); enqueueCancel(target, from) }
-      case x => dispatchCancel(x, target, from)
+      case Busy           => { ThreadHints.onSpinWait(); enqueueCancel(target, from) }
+      case x              => dispatchCancel(x, target, from)
     }
   private[Region] def dispatchCancel(channel: AnyRef, target: StageImpl, from: Outport): Unit =
     channel match {
-      case Sync => target.cancel()(from)
+      case Sync            => target.cancel()(from)
       case x: StreamRunner => x.enqueue(new StreamRunner.Message.Cancel(target, from))
     }
 
   def enqueueOnNext(target: StageImpl, elem: AnyRef, from: Inport): Unit =
     ref.get match {
       case x: StreamRunner => x.enqueue(new StreamRunner.Message.OnNext(target, elem, from))
-      case Busy => { ThreadHints.onSpinWait(); enqueueOnNext(target, elem, from) }
-      case x => throw new IllegalStateException(s"Unexpected ref state `$x`")
+      case Busy            => { ThreadHints.onSpinWait(); enqueueOnNext(target, elem, from) }
+      case x               => throw new IllegalStateException(s"Unexpected ref state `$x`")
     }
 
   def enqueueOnComplete(target: StageImpl, from: Inport): Unit =
     ref.get match {
-      case null => { ref.compareAndSet(null, new SignalQueue(mbs)); enqueueOnComplete(target, from) }
+      case null           => { ref.compareAndSet(null, new SignalQueue(mbs)); enqueueOnComplete(target, from) }
       case x: SignalQueue => x.enqueueOnComplete(target, from)
-      case Busy => { ThreadHints.onSpinWait(); enqueueOnComplete(target, from) }
-      case x => dispatchOnComplete(x, target, from)
+      case Busy           => { ThreadHints.onSpinWait(); enqueueOnComplete(target, from) }
+      case x              => dispatchOnComplete(x, target, from)
     }
   private[Region] def dispatchOnComplete(channel: AnyRef, target: StageImpl, from: Inport): Unit =
     channel match {
-      case Sync => target.onComplete()(from)
+      case Sync            => target.onComplete()(from)
       case x: StreamRunner => x.enqueue(new StreamRunner.Message.OnComplete(target, from))
     }
 
   def enqueueOnError(target: StageImpl, e: Throwable, from: Inport): Unit =
     ref.get match {
-      case null => { ref.compareAndSet(null, new SignalQueue(mbs)); enqueueOnError(target, e, from) }
+      case null           => { ref.compareAndSet(null, new SignalQueue(mbs)); enqueueOnError(target, e, from) }
       case x: SignalQueue => x.enqueueOnError(target, e, from)
-      case Busy => { ThreadHints.onSpinWait(); enqueueOnError(target, e, from) }
-      case x => dispatchOnError(x, target, e, from)
+      case Busy           => { ThreadHints.onSpinWait(); enqueueOnError(target, e, from) }
+      case x              => dispatchOnError(x, target, e, from)
     }
   private[Region] def dispatchOnError(channel: AnyRef, target: StageImpl, e: Throwable, from: Inport): Unit =
     channel match {
-      case Sync => target.onError(e)(from)
+      case Sync            => target.onError(e)(from)
       case x: StreamRunner => x.enqueue(new StreamRunner.Message.OnError(target, e, from))
     }
 
   def enqueueXEvent(target: StageImpl, ev: AnyRef): Unit =
     ref.get match {
-      case null => { ref.compareAndSet(null, new SignalQueue(mbs)); enqueueXEvent(target, ev) }
+      case null           => { ref.compareAndSet(null, new SignalQueue(mbs)); enqueueXEvent(target, ev) }
       case x: SignalQueue => x.enqueueXEvent(target, ev)
-      case Busy => { ThreadHints.onSpinWait(); enqueueXEvent(target, ev) }
-      case x => dispatchXEvent(x, target, ev)
+      case Busy           => { ThreadHints.onSpinWait(); enqueueXEvent(target, ev) }
+      case x              => dispatchXEvent(x, target, ev)
     }
   private[Region] def dispatchXEvent(channel: AnyRef, target: StageImpl, ev: AnyRef): Unit =
     channel match {
-      case Sync => target.xEvent(ev)
+      case Sync            => target.xEvent(ev)
       case x: StreamRunner => x.enqueue(new StreamRunner.Message.XEvent(target, ev, x))
 
     }
@@ -118,7 +118,7 @@ private[swave] final class Region private[impl] (val entryPoint: StageImpl, val 
   /////////////////////////// called from the region's thread /////////////////////////
 
   private var _impl: Impl = new PreStart
-  def impl: Impl = _impl
+  def impl: Impl          = _impl
 
   private[swave] sealed abstract class Impl {
     def state: Stage.Region.State
@@ -129,12 +129,12 @@ private[swave] final class Region private[impl] (val entryPoint: StageImpl, val 
     private[impl] def registerStageStopped(): Unit
 
     // PreStart only
-    def registerForXStart(stage: StageImpl): Unit = `n/a`
-    private[impl] def becomeSubRegionOf(parent: Region): Unit   = `n/a`
-    private[impl] def registerStageSealed(): Unit               = `n/a`
+    def registerForXStart(stage: StageImpl): Unit                                       = `n/a`
+    private[impl] def becomeSubRegionOf(parent: Region): Unit                           = `n/a`
+    private[impl] def registerStageSealed(): Unit                                       = `n/a`
     private[impl] def requestBridging(in: Inport, stage: StageImpl, out: Outport): Unit = `n/a`
-    private[impl] def processBridgingRequests(): Unit = `n/a`
-    private[impl] def start(async: Boolean): Unit = `n/a`
+    private[impl] def processBridgingRequests(): Unit                                   = `n/a`
+    private[impl] def start(async: Boolean): Unit                                       = `n/a`
 
     // PreStart + AsyncRunning
     private[Region] def assignedDispatcherId: String                               = `n/a` // none (null), default (empty) or named (non-empty)
@@ -162,12 +162,12 @@ private[swave] final class Region private[impl] (val entryPoint: StageImpl, val 
     private[this] var _dispatcherId: String                = _
     private[this] var _needXStart: List[StageImpl]         = Nil
     private[this] var _bridgingRequests: BridgeRequestList = _
-    def state                                                           = Stage.Region.State.PreStart
-    var parent: Region                                                  = _
-    var stagesTotalCount                                                = 0
-    def stagesActiveCount                                               = 0
+    def state                                              = Stage.Region.State.PreStart
+    var parent: Region                                     = _
+    var stagesTotalCount                                   = 0
+    def stagesActiveCount                                  = 0
 
-    override def registerStageStopped(): Unit = stagesTotalCount -= 1
+    override def registerStageStopped(): Unit              = stagesTotalCount -= 1
     override def registerForXStart(stage: StageImpl): Unit = _needXStart ::= stage
     override def registerStageSealed(): Unit               = stagesTotalCount += 1
     override def requestBridging(in: Inport, stage: StageImpl, out: Outport): Unit =
@@ -178,7 +178,7 @@ private[swave] final class Region private[impl] (val entryPoint: StageImpl, val 
         case null =>
           runContext.impl.becomeSubContextOf(parent.runContext)
           this.parent = parent
-          if (!_dispatcherId.isNullOrEmpty) verifyDispatcherAlignmentWithParent()
+          if (! _dispatcherId.isNullOrEmpty) verifyDispatcherAlignmentWithParent()
         case `parent` => // nothing to do
         case _        => throw new IllegalStreamSetupException("A sub-stream must not have more than one parent")
       }
@@ -201,8 +201,8 @@ private[swave] final class Region private[impl] (val entryPoint: StageImpl, val 
     override def processBridgingRequests(): Unit = {
       @tailrec def rec(remaining: BridgeRequestList): Unit =
         if (remaining ne null) {
-          val stage = remaining.stage
-          val inStage = remaining.in.stageImpl
+          val stage    = remaining.stage
+          val inStage  = remaining.in.stageImpl
           val outStage = remaining.out.stageImpl
           if (!inStage.hasOutport(outStage) && !outStage.hasInport(inStage)) {
             inStage.rewireOut(stage, outStage)
@@ -355,8 +355,11 @@ private[impl] object Region {
   private val Busy = new AnyRef
   private val Sync = new AnyRef
 
-  private final class BridgeRequestList(var in: Inport, var stage: StageImpl, var out: Outport, tail: BridgeRequestList)
-    extends ImsiList[BridgeRequestList](tail)
+  private final class BridgeRequestList(var in: Inport,
+                                        var stage: StageImpl,
+                                        var out: Outport,
+                                        tail: BridgeRequestList)
+      extends ImsiList[BridgeRequestList](tail)
 
   private final class SignalQueue(initialBufferSize: Int) {
 
@@ -388,11 +391,11 @@ private[impl] object Region {
 
     @tailrec def dispatch(region: Region, channel: AnyRef): Unit =
       if (signalBuffer.nonEmpty) {
-        def read()       = signalBuffer.unsafeRead_NoZero()
-        def readInt()    = read().asInstanceOf[java.lang.Integer].intValue()
-        def readLong()   = read().asInstanceOf[java.lang.Long].longValue()
-        def readStage()  = read().asInstanceOf[StageImpl]
-        val target = readStage()
+        def read()      = signalBuffer.unsafeRead_NoZero()
+        def readInt()   = read().asInstanceOf[java.lang.Integer].intValue()
+        def readLong()  = read().asInstanceOf[java.lang.Long].longValue()
+        def readStage() = read().asInstanceOf[StageImpl]
+        val target      = readStage()
         (readInt(): @switch) match {
           case 0 ⇒ region.dispatchRequest(channel, target, readLong(), readStage())
           case 1 ⇒ region.dispatchCancel(channel, target, readStage())

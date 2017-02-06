@@ -95,8 +95,7 @@ object TypeLogic {
       new FlattenFuture[Future[T]] {
         type Out = T
         def apply(promise: Promise[T])(value: => Future[T]): Unit =
-          try { promise.completeWith(value); () }
-          catch {
+          try { promise.completeWith(value); () } catch {
             case NonFatal(e) => { promise.failure(e); () }
           }
       }
@@ -106,8 +105,7 @@ object TypeLogic {
       new FlattenFuture[T] {
         type Out = T
         def apply(promise: Promise[T])(value: => T): Unit =
-          try { promise.success(value); () }
-          catch {
+          try { promise.success(value); () } catch {
             case NonFatal(e) => { promise.failure(e); () }
           }
       }

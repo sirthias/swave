@@ -56,8 +56,7 @@ private[swave] object AbstractOutportList {
     def replaceOutRef(from: Outport, to: Outport): Boolean = {
       @tailrec def rec(current: L): Boolean =
         if (current ne null) {
-          if (current.out eq from) { current.out = to; true }
-          else rec(current.tail)
+          if (current.out eq from) { current.out = to; true } else rec(current.tail)
         } else false
       rec(underlying)
     }

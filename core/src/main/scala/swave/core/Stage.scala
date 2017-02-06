@@ -146,7 +146,7 @@ object Stage {
       final case class WithCompletionTimeout(timeout: FiniteDuration)                        extends InOut
       final case class WithIdleTimeout(timeout: FiniteDuration)                              extends InOut
       final case class WithInitialTimeout(timeout: FiniteDuration)                           extends InOut
-      final case class WithLimit(max: Long, cost: _ ⇒ Long)                   extends InOut
+      final case class WithLimit(max: Long, cost: _ ⇒ Long)                                  extends InOut
     }
 
     sealed abstract class FanIn extends Kind {

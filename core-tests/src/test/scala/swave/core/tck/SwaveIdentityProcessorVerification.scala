@@ -15,8 +15,7 @@ import org.testng.annotations.AfterClass
 import swave.core._
 
 abstract class SwaveIdentityProcessorVerification[T](val testEnv: TestEnvironment, publisherShutdownTimeout: Long)
-    extends IdentityProcessorVerification[T](testEnv, publisherShutdownTimeout)
-    with TestNGSuiteLike
+    extends IdentityProcessorVerification[T](testEnv, publisherShutdownTimeout) with TestNGSuiteLike
     with StreamEnvShutdown {
 
   def this(printlnDebug: Boolean) =

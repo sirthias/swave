@@ -741,7 +741,8 @@ object StreamOps {
   @implicitNotFound(msg = "Cannot convert `${L}` into a tuple.")
   private type Tuplable[L <: HList] = Tupler[L]
 
-  @implicitNotFound(msg = "Illegal substream definition! All available fan-out sub-streams have already been consumed.")
+  @implicitNotFound(
+    msg = "Illegal substream definition! All available fan-out sub-streams have already been consumed.")
   private type SubReq[L <: HList] = IsHCons[L]
 
   @implicitNotFound(msg = "`subContinue` is only possible with exactly one remaining fan-out sub-stream unconsumed!")

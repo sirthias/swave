@@ -31,7 +31,9 @@ final class SplitSpec extends SyncPipeSpec with Inspectors {
         .map(_.map(_.toString).reduce(_ + _))
         .flattenConcat()
         .drainToMkString(100, ",")
-        .value.get.get shouldEqual "123,4567,89"
+        .value
+        .get
+        .get shouldEqual "123,4567,89"
     }
   }
 
@@ -45,7 +47,9 @@ final class SplitSpec extends SyncPipeSpec with Inspectors {
         .map(_.map(_.toString).reduce(_ + _))
         .flattenConcat()
         .drainToMkString(100, ",")
-        .value.get.get shouldEqual "1234,5678,9"
+        .value
+        .get
+        .get shouldEqual "1234,5678,9"
     }
   }
 
@@ -55,7 +59,8 @@ final class SplitSpec extends SyncPipeSpec with Inspectors {
       .output[Spout[Int]]
       .fixture(fd ⇒ Gen.listOfN(10, fd.output[Int]))
       .param[Boolean]
-      .prop.from { (in, out, allSubOuts, eagerCancel) ⇒
+      .prop
+      .from { (in, out, allSubOuts, eagerCancel) ⇒
         import TestFixture.State._
 
         val iter    = allSubOuts.iterator
@@ -89,6 +94,6 @@ final class SplitSpec extends SyncPipeSpec with Inspectors {
             }
             in.terminalState should (be(Cancelled) or be(error))
         }
-    }
+      }
   }
 }

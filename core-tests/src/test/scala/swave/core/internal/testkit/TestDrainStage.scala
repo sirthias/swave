@@ -16,7 +16,8 @@ import swave.core.macros._
 private[testkit] final class TestDrainStage(val id: Int,
                                             val requestsIterable: Iterable[Long],
                                             val cancelAfterOpt: Option[Int],
-                                            testCtx: TestContext) extends DrainStage with TestStage {
+                                            testCtx: TestContext)
+    extends DrainStage with TestStage {
 
   def kind = Stage.Kind.Drain.Test(id)
 

@@ -13,9 +13,7 @@ import org.testng.SkipException
 import swave.core._
 
 abstract class SwavePublisherVerification[T](val testEnv: TestEnvironment, publisherShutdownTimeout: Long)
-    extends PublisherVerification[T](testEnv, publisherShutdownTimeout)
-    with TestNGSuiteLike
-    with StreamEnvShutdown {
+    extends PublisherVerification[T](testEnv, publisherShutdownTimeout) with TestNGSuiteLike with StreamEnvShutdown {
 
   def this(printlnDebug: Boolean) =
     this(
