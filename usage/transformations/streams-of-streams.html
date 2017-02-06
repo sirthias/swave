@@ -174,10 +174,12 @@
 <p>Streams, like most other abstractions, can be nested. This means that you can have a <code>Spout[Spout[T]]</code> like you can have a <code>List[List[T]]</code>. <em>swave</em> offers a number of <a href="overview.html">transformations</a> that either</p>
 <ol>
   <li>
-    <p>create a stream-of-streams from in incoming stream of &ldquo;regular&rdquo; elements (which we call <strong>injecting</strong>)</p><p class="centered"><img src="../../assets/img/injecting.svg" alt="An Injecting Transformation" /></p>
+    <p>create a stream-of-streams from in incoming stream of &ldquo;regular&rdquo; elements (which we call <strong>injecting</strong>)</p><div class="centered">
+    <p><img src="../../assets/img/injecting.svg" alt="An Injecting Transformation" /></p></div>
   </li>
   <li>
-    <p>or flatten a stream-of-streams back to an outgoing stream of &ldquo;regular&rdquo; elements (which we call <strong>flattening</strong>)</p><p class="centered"><img src="../../assets/img/flattening.svg" alt="A Flattening Transformation" /></p>
+    <p>or flatten a stream-of-streams back to an outgoing stream of &ldquo;regular&rdquo; elements (which we call <strong>flattening</strong>)</p><div class="centered">
+    <p><img src="../../assets/img/flattening.svg" alt="A Flattening Transformation" /></p></div>
   </li>
 </ol>
 <p>While the shape of these stream-of-streams transformations is the same as for <a href="simple.html">Simple Transformations</a> the internal and external complexity is significantly higher. This is because the state-space of the state-machines implementing the transformation logic increases significantly with the number of open streams that a stage has to concurrently deal with. We therefore categorize stream-of-streams transformations as a separate group.</p>
@@ -214,7 +216,7 @@ implicit val env = StreamEnv()
 implicit class RichSpout[T](underlying: Spout[T]) {
   def takeEvery(n: Long): Spout[T] =
     underlying                  // Spout[T]
-      .injectSequential         // Spout[Spout[T]]
+      .injectSequential()       // Spout[Spout[T]]
       .map(_.drop(n-1).take(1)) // Spout[Spout[T]]
       .flattenConcat()          // Spout[T]
 }

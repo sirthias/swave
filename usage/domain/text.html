@@ -171,7 +171,35 @@
             <div id="main-content">
                 <!-- start: page -->
 <h1><a href="#text-transformations" name="text-transformations" class="anchor"><span class="anchor-link"></span></a>Text Transformations</h1>
-<p>&hellip; TODO &hellip;</p>
+<p>A very common need in stream-based applications is efficiently working with text content. The most frequently required stream transformations are thereby:</p>
+<ol>
+  <li>
+  <p>Decoding text, i.e. converting a stream of bytes into a stream of characters with the help of some decoder for a  particular charset, e.g. UTF-8.</p></li>
+  <li>
+  <p>Encoding text, i.e. converting a stream of characters into stream of bytes with the help of some encoder for a  particular charset, e.g. UTF-8.</p></li>
+  <li>
+  <p>Line splitting, i.e. the &ldquo;re-chunking&rdquo; of an incoming stream of character groups (Strings) into a stream of lines,  where each stream element corresponds to one line of text.</p></li>
+</ol>
+<p><em>swave</em> comes with efficient built-in support for these three main tasks.</p>
+<h2><a href="#usage" name="usage" class="anchor"><span class="anchor-link"></span></a>Usage</h2>
+<p>The easiest way to get access to the pre-defined text transformations is this import:</p>
+<pre><code class="scala">import swave.core.text._
+</code></pre>
+<p>as well as <em>one</em> of these imports (see the <a href="file-io.html#the-bytes-t-type-class">section on the <code>Bytes</code> type class</a> for more details):</p>
+<pre><code class="scala">import swave.compat.akka.byteStringBytes // for packaging raw bytes as an `akka.util.ByteString`
+import swave.compat.scodec.byteVectorBytes // for packaging raw bytes as an `scodec.bits.ByteVector`
+import swave.core.io.byteArrayBytes // for packaging raw bytes as a plain `Array[Byte]` 
+</code></pre>
+<p>With this in place you have the following two additional transformations available on streams of <code>ByteString</code>, <code>ByteVector</code> or <code>Array[Byte]</code> (depending on what import you chose above):</p>
+<pre><code class="scala">byteStream.utf8Decode // transforms into a stream of strings
+byteStream.decode(charset: Charset) // transforms into a stream of strings
+</code></pre>
+<p>as well as these tree additional transformations available on streams of <code>String</code>:</p>
+<pre><code class="scala">stringStream.utf8Encode // transforms into a stream of `ByteString`, `ByteVector` or `Array[Byte]`
+stringStream.encode(charset: Charset) // transforms into a stream of strings
+stringStream.lines // transforms into a stream of lines-as-strings 
+</code></pre>
+<p>If you prefer, all of these transformations are also defines as <a href="../further/pipes.html">Pipes</a> in the <a href="http://swave.io/api/core/latest/#swave.core.text.TextTransformations">swave.core.text.TextTransformations</a> trait and the <a href="http://swave.io/api/core/latest/#swave.core.text.Text$">swave.core.text.Text</a> object.</p>
                 <div class="nav-next">
                     <p><strong>Next:</strong> <a href="../../usage/domain/hash.html">Hashing Support</a></p>
                 </div>

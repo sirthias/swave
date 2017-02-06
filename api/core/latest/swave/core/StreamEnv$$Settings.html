@@ -1,159 +1,44 @@
 <!DOCTYPE html >
 <html>
         <head>
-          <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-          <title></title>
-          <meta name="description" content="" />
-          <meta name="keywords" content="" />
+          <title>Settings - swave.core.StreamEnv.Settings</title>
+          <meta name="description" content="Settings - swave.core.StreamEnv.Settings" />
+          <meta name="keywords" content="Settings swave.core.StreamEnv.Settings" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link href="../../lib/index.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
-      <script type="text/javascript" src="../../lib/jquery.js"></script>
-      <script type="text/javascript" src="../../lib/jquery.panzoom.min.js"></script>
-      <script type="text/javascript" src="../../lib/jquery.mousewheel.min.js"></script>
-      <script type="text/javascript" src="../../lib/index.js"></script>
-      <script type="text/javascript" src="../../index.js"></script>
-      <script type="text/javascript" src="../../lib/scheduler.js"></script>
+      <script type="text/javascript" src="../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../lib/jquery-ui.js"></script>
       <script type="text/javascript" src="../../lib/template.js"></script>
       <script type="text/javascript" src="../../lib/tools.tooltip.js"></script>
       
       <script type="text/javascript">
-        /* this variable can be used by the JS to determine the path to the root document */
-        var toRoot = '../../';
-      </script>
+         if(top === self) {
+            var url = '../../index.html';
+            var hash = 'swave.core.StreamEnv$$Settings';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
     
         </head>
-        <body>
-      <div id="search">
-        <span id="doc-title"><span id="doc-version"></span></span>
-        <span class="close-results"><span class="left">&lt;</span> Back</span>
-        <div id="textfilter">
-          <span class="input">
-            <input autocapitalize="none" placeholder="Search" id="index-input" type="text" accesskey="/" />
-            <i class="clear material-icons"></i>
-            <i id="search-icon" class="material-icons"></i>
-          </span>
-        </div>
-    </div>
-      <div id="search-results">
-        <div id="search-progress">
-          <div id="progress-fill"></div>
-        </div>
-        <div id="results-content">
-          <div id="entity-results"></div>
-          <div id="member-results"></div>
-        </div>
-      </div>
-      <div id="content-scroll-container" style="-webkit-overflow-scrolling: touch;">
-        <div id="content-container" style="-webkit-overflow-scrolling: touch;">
-          <div id="subpackage-spacer">
-            <div id="packages">
-              <h1>Packages</h1>
-              <ul>
-                <li name="_root_.root" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="_root_"></a><a id="root:_root_"></a>
-      <span class="permalink">
-      <a href="index.html#_root_" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../../index.html">
-              <span class="name">root</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="_root_">root</a></dd></dl></div>
-    </li><li name="_root_.swave" visbl="pub" class="indented1 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="swave"></a><a id="swave:swave"></a>
-      <span class="permalink">
-      <a href="index.html#swave" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../index.html">
-              <span class="name">swave</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="_root_">root</a></dd></dl></div>
-    </li><li name="swave.core" visbl="pub" class="indented2 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="core"></a><a id="core:core"></a>
-      <span class="permalink">
-      <a href="../swave/index.html#core" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="index.html">
-              <span class="name">core</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="swave">swave</a></dd></dl></div>
-    </li><li name="swave.core.StreamEnv" visbl="pub" class="indented3 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="StreamEnv"></a><a id="StreamEnv:StreamEnv"></a>
-      <span class="permalink">
-      <a href="../../swave/core/index.html#StreamEnv" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="StreamEnv$.html">
-              <span class="name">StreamEnv</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="swave.core">core</a></dd></dl></div>
-    </li><li class="current-entities indented3">
-                        <a class="object" href="StreamEnv$$Settings$.html" title=""></a>
-                        <a class="class" href="" title=""></a>
-                        <a href="" title="">
-                          Settings
-                        </a>
-                      </li><li class="current-entities indented3">
-                        <span class="separator"></span>
-                        <a class="class" href="StreamEnv$$Termination.html" title=""></a>
-                        <a href="StreamEnv$$Termination.html" title="">
-                          Termination
-                        </a>
-                      </li>
-              </ul>
-            </div>
-          </div>
-          <div id="content">
-            <body class="class type">
+        <body class="type">
       <div id="definition">
-        <a href="StreamEnv$$Settings$.html" title="See companion object"><div class="big-circle class-companion-object">c</div></a>
-        <p id="owner"><a href="../index.html" class="extype" name="swave">swave</a>.<a href="index.html" class="extype" name="swave.core">core</a>.<a href="StreamEnv$.html" class="extype" name="swave.core.StreamEnv">StreamEnv</a></p>
-        <h1><a href="StreamEnv$$Settings$.html" title="See companion object">Settings</a><span class="permalink">
-      <a href="../../swave/core/StreamEnv$$Settings.html" title="Permalink">
-        <i class="material-icons"></i>
+        <a href="StreamEnv$$Settings$.html" title="See companion object"><img alt="Class/Object" src="../../lib/class_to_object_big.png" /></a>
+        <p id="owner"><a href="../package.html" class="extype" name="swave">swave</a>.<a href="package.html" class="extype" name="swave.core">core</a>.<a href="StreamEnv$.html" class="extype" name="swave.core.StreamEnv">StreamEnv</a></p>
+        <h1><a href="StreamEnv$$Settings$.html" title="See companion object">Settings</a></h1><h3><span class="morelinks"><div>
+            Related Docs:
+            <a href="StreamEnv$$Settings$.html" title="See companion object">object Settings</a>
+            | <a href="StreamEnv$.html" class="extype" name="swave.core.StreamEnv">package StreamEnv</a>
+          </div></span></h3><span class="permalink">
+      <a href="../../index.html#swave.core.StreamEnv$$Settings" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
-    </span></h1>
-        <h3><span class="morelinks"><div>
-            Companion <a href="StreamEnv$$Settings$.html" title="See companion object">object Settings</a>
-          </div></span></h3>
+    </span>
       </div>
 
       <h4 id="signature" class="signature">
@@ -165,65 +50,50 @@
         <span class="name">Settings</span><span class="params">(<span name="throughput">throughput: <span class="extype" name="scala.Int">Int</span></span>, <span name="maxBatchSize">maxBatchSize: <span class="extype" name="scala.Int">Int</span></span>, <span name="logConfigOnStart">logConfigOnStart: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="subStreamStartTimeout">subStreamStartTimeout: <span class="extype" name="scala.concurrent.duration.Duration">Duration</span></span>, <span name="dispatcherSettings">dispatcherSettings: <a href="Dispatchers$$Settings.html" class="extype" name="swave.core.Dispatchers.Settings">Dispatchers.Settings</a></span>, <span name="schedulerSettings">schedulerSettings: <a href="Scheduler$$Settings.html" class="extype" name="swave.core.Scheduler.Settings">Scheduler.Settings</a></span>, <span name="fileIOSettings">fileIOSettings: <a href="io/files/FileIO$$Settings.html" class="extype" name="swave.core.io.files.FileIO.Settings">io.files.FileIO.Settings</a></span>, <span name="extensionSettings">extensionSettings: <a href="Extension$$Settings.html" class="extype" name="swave.core.Extension.Settings">Extension.Settings</a></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
-
       
           <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
-          <span class="toggle">
-            Linear Supertypes
-          </span>
+          <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.Serializable">Serializable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="scala.Product">Product</span>, <span class="extype" name="scala.Equals">Equals</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
         
 
       <div id="mbrsel">
-        <div class="toggle"></div>
-        <div id="memberfilter">
-          <i class="material-icons arrow"></i>
-          <span class="input">
-            <input id="mbrsel-input" placeholder="Filter all members" type="text" accesskey="/" />
-          </span>
-          <i class="clear material-icons"></i>
-        </div>
-        <div id="filterby">
-          <div id="order">
-            <span class="filtertype">Ordering</span>
-            <ol>
-              
-              <li class="alpha in"><span>Alphabetic</span></li>
-              <li class="inherit out"><span>By Inheritance</span></li>
-            </ol>
-          </div>
-          <div class="ancestors">
-                  <span class="filtertype">Inherited<br />
-                  </span>
-                  <ol id="linearization">
-                    <li class="in" name="swave.core.StreamEnv.Settings"><span>Settings</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
-                  </ol>
-                </div><div class="ancestors">
-              <span class="filtertype"></span>
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        <div id="order">
+              <span class="filtertype">Ordering</span>
               <ol>
-                <li class="hideall out"><span>Hide All</span></li>
-                <li class="showall in"><span>Show All</span></li>
+                
+                <li class="alpha in"><span>Alphabetic</span></li>
+                <li class="inherit out"><span>By Inheritance</span></li>
               </ol>
             </div>
-          <div id="visbl">
-              <span class="filtertype">Visibility</span>
-              <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
-            </div>
-        </div>
+        <div id="ancestors">
+                <span class="filtertype">Inherited<br />
+                </span>
+                <ol id="linearization">
+                  <li class="in" name="swave.core.StreamEnv.Settings"><span>Settings</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                </ol>
+              </div><div id="ancestors">
+            <span class="filtertype"></span>
+            <ol>
+              <li class="hideall out"><span>Hide All</span></li>
+              <li class="showall in"><span>Show All</span></li>
+            </ol>
+          </div>
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
       </div>
 
       <div id="template">
         <div id="allMembers">
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
-              <ol><li name="swave.core.StreamEnv.Settings#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(throughput:Int,maxBatchSize:Int,logConfigOnStart:Boolean,subStreamStartTimeout:scala.concurrent.duration.Duration,dispatcherSettings:swave.core.Dispatchers.Settings,schedulerSettings:swave.core.Scheduler.Settings,fileIOSettings:swave.core.io.files.FileIO.Settings,extensionSettings:swave.core.Extension.Settings):swave.core.StreamEnv.Settings"></a><a id="&lt;init&gt;:Settings"></a>
-      <span class="permalink">
-      <a href="../../swave/core/StreamEnv$$Settings.html#&lt;init&gt;(throughput:Int,maxBatchSize:Int,logConfigOnStart:Boolean,subStreamStartTimeout:scala.concurrent.duration.Duration,dispatcherSettings:swave.core.Dispatchers.Settings,schedulerSettings:swave.core.Scheduler.Settings,fileIOSettings:swave.core.io.files.FileIO.Settings,extensionSettings:swave.core.Extension.Settings):swave.core.StreamEnv.Settings" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
+              <ol><li name="swave.core.StreamEnv.Settings#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="&lt;init&gt;(throughput:Int,maxBatchSize:Int,logConfigOnStart:Boolean,subStreamStartTimeout:scala.concurrent.duration.Duration,dispatcherSettings:swave.core.Dispatchers.Settings,schedulerSettings:swave.core.Scheduler.Settings,fileIOSettings:swave.core.io.files.FileIO.Settings,extensionSettings:swave.core.Extension.Settings):swave.core.StreamEnv.Settings"></a>
+      <a id="&lt;init&gt;:Settings"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">new</span>
@@ -231,7 +101,11 @@
       <span class="symbol">
         <span class="name">Settings</span><span class="params">(<span name="throughput">throughput: <span class="extype" name="scala.Int">Int</span></span>, <span name="maxBatchSize">maxBatchSize: <span class="extype" name="scala.Int">Int</span></span>, <span name="logConfigOnStart">logConfigOnStart: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="subStreamStartTimeout">subStreamStartTimeout: <span class="extype" name="scala.concurrent.duration.Duration">Duration</span></span>, <span name="dispatcherSettings">dispatcherSettings: <a href="Dispatchers$$Settings.html" class="extype" name="swave.core.Dispatchers.Settings">Dispatchers.Settings</a></span>, <span name="schedulerSettings">schedulerSettings: <a href="Scheduler$$Settings.html" class="extype" name="swave.core.Scheduler.Settings">Scheduler.Settings</a></span>, <span name="fileIOSettings">fileIOSettings: <a href="io/files/FileIO$$Settings.html" class="extype" name="swave.core.io.files.FileIO.Settings">io.files.FileIO.Settings</a></span>, <span name="extensionSettings">extensionSettings: <a href="Extension$$Settings.html" class="extype" name="swave.core.Extension.Settings">Extension.Settings</a></span>)</span>
       </span>
-      
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamEnv$$Settings@&lt;init&gt;(throughput:Int,maxBatchSize:Int,logConfigOnStart:Boolean,subStreamStartTimeout:scala.concurrent.duration.Duration,dispatcherSettings:swave.core.Dispatchers.Settings,schedulerSettings:swave.core.Scheduler.Settings,fileIOSettings:swave.core.io.files.FileIO.Settings,extensionSettings:swave.core.Extension.Settings):swave.core.StreamEnv.Settings" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li></ol>
             </div>
@@ -240,16 +114,12 @@
 
         
 
-        <div class="values members">
+        <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol>
-                <li name="scala.AnyRef#!=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="!=(x$1:Any):Boolean"></a><a id="!=(Any):Boolean"></a>
-      <span class="permalink">
-      <a href="../../swave/core/StreamEnv$$Settings.html#!=(x$1:Any):Boolean" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
+              <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="!=(x$1:Any):Boolean"></a>
+      <a id="!=(Any):Boolean"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -257,15 +127,16 @@
       <span class="symbol">
         <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="scala.AnyRef###" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="##():Int"></a>
-      <span class="permalink">
-      <a href="../../swave/core/StreamEnv$$Settings.html###():Int" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamEnv$$Settings@!=(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef###" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="##():Int"></a>
+      <a id="##():Int"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -273,15 +144,16 @@
       <span class="symbol">
         <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="scala.AnyRef#==" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="==(x$1:Any):Boolean"></a><a id="==(Any):Boolean"></a>
-      <span class="permalink">
-      <a href="../../swave/core/StreamEnv$$Settings.html#==(x$1:Any):Boolean" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamEnv$$Settings@##():Int" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="==(x$1:Any):Boolean"></a>
+      <a id="==(Any):Boolean"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -289,15 +161,16 @@
       <span class="symbol">
         <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="asInstanceOf[T0]:T0"></a>
-      <span class="permalink">
-      <a href="../../swave/core/StreamEnv$$Settings.html#asInstanceOf[T0]:T0" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamEnv$$Settings@==(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="asInstanceOf[T0]:T0"></a>
+      <a id="asInstanceOf[T0]:T0"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -305,15 +178,16 @@
       <span class="symbol">
         <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
       </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="clone():Object"></a><a id="clone():AnyRef"></a>
-      <span class="permalink">
-      <a href="../../swave/core/StreamEnv$$Settings.html#clone():Object" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamEnv$$Settings@asInstanceOf[T0]:T0" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="clone():Object"></a>
+      <a id="clone():AnyRef"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
@@ -321,7 +195,11 @@
       <span class="symbol">
         <span class="name">clone</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
-      
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamEnv$$Settings@clone():Object" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -329,13 +207,10 @@
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="swave.core.StreamEnv.Settings#dispatcherSettings" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="dispatcherSettings:swave.core.Dispatchers.Settings"></a><a id="dispatcherSettings:Dispatchers.Settings"></a>
-      <span class="permalink">
-      <a href="../../swave/core/StreamEnv$$Settings.html#dispatcherSettings:swave.core.Dispatchers.Settings" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
+    </li><li name="swave.core.StreamEnv.Settings#dispatcherSettings" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="dispatcherSettings:swave.core.Dispatchers.Settings"></a>
+      <a id="dispatcherSettings:Dispatchers.Settings"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
@@ -343,15 +218,16 @@
       <span class="symbol">
         <span class="name">dispatcherSettings</span><span class="result">: <a href="Dispatchers$$Settings.html" class="extype" name="swave.core.Dispatchers.Settings">Dispatchers.Settings</a></span>
       </span>
-      
-      
-    </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
-      <span class="permalink">
-      <a href="../../swave/core/StreamEnv$$Settings.html#eq(x$1:AnyRef):Boolean" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamEnv$$Settings@dispatcherSettings:swave.core.Dispatchers.Settings" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      
+    </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="eq(x$1:AnyRef):Boolean"></a>
+      <a id="eq(AnyRef):Boolean"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -359,15 +235,16 @@
       <span class="symbol">
         <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="swave.core.StreamEnv.Settings#extensionSettings" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="extensionSettings:swave.core.Extension.Settings"></a><a id="extensionSettings:Extension.Settings"></a>
-      <span class="permalink">
-      <a href="../../swave/core/StreamEnv$$Settings.html#extensionSettings:swave.core.Extension.Settings" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamEnv$$Settings@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="swave.core.StreamEnv.Settings#extensionSettings" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="extensionSettings:swave.core.Extension.Settings"></a>
+      <a id="extensionSettings:Extension.Settings"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
@@ -375,15 +252,16 @@
       <span class="symbol">
         <span class="name">extensionSettings</span><span class="result">: <a href="Extension$$Settings.html" class="extype" name="swave.core.Extension.Settings">Extension.Settings</a></span>
       </span>
-      
-      
-    </li><li name="swave.core.StreamEnv.Settings#fileIOSettings" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="fileIOSettings:swave.core.io.files.FileIO.Settings"></a><a id="fileIOSettings:io.files.FileIO.Settings"></a>
-      <span class="permalink">
-      <a href="../../swave/core/StreamEnv$$Settings.html#fileIOSettings:swave.core.io.files.FileIO.Settings" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamEnv$$Settings@extensionSettings:swave.core.Extension.Settings" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      
+    </li><li name="swave.core.StreamEnv.Settings#fileIOSettings" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="fileIOSettings:swave.core.io.files.FileIO.Settings"></a>
+      <a id="fileIOSettings:io.files.FileIO.Settings"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
@@ -391,15 +269,16 @@
       <span class="symbol">
         <span class="name">fileIOSettings</span><span class="result">: <a href="io/files/FileIO$$Settings.html" class="extype" name="swave.core.io.files.FileIO.Settings">io.files.FileIO.Settings</a></span>
       </span>
-      
-      
-    </li><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="finalize():Unit"></a>
-      <span class="permalink">
-      <a href="../../swave/core/StreamEnv$$Settings.html#finalize():Unit" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamEnv$$Settings@fileIOSettings:swave.core.io.files.FileIO.Settings" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      
+    </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="finalize():Unit"></a>
+      <a id="finalize():Unit"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
@@ -407,7 +286,11 @@
       <span class="symbol">
         <span class="name">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
-      
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamEnv$$Settings@finalize():Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -415,13 +298,10 @@
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
-      <span class="permalink">
-      <a href="../../swave/core/StreamEnv$$Settings.html#getClass():Class[_]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
+      <a id="getClass():Class[_]"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -429,15 +309,16 @@
       <span class="symbol">
         <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
       </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="isInstanceOf[T0]:Boolean"></a>
-      <span class="permalink">
-      <a href="../../swave/core/StreamEnv$$Settings.html#isInstanceOf[T0]:Boolean" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamEnv$$Settings@getClass():Class[_]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -445,15 +326,16 @@
       <span class="symbol">
         <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="swave.core.StreamEnv.Settings#logConfigOnStart" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="logConfigOnStart:Boolean"></a>
-      <span class="permalink">
-      <a href="../../swave/core/StreamEnv$$Settings.html#logConfigOnStart:Boolean" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamEnv$$Settings@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="swave.core.StreamEnv.Settings#logConfigOnStart" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="logConfigOnStart:Boolean"></a>
+      <a id="logConfigOnStart:Boolean"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
@@ -461,15 +343,16 @@
       <span class="symbol">
         <span class="name">logConfigOnStart</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
-      
-      
-    </li><li name="swave.core.StreamEnv.Settings#maxBatchSize" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="maxBatchSize:Int"></a>
-      <span class="permalink">
-      <a href="../../swave/core/StreamEnv$$Settings.html#maxBatchSize:Int" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamEnv$$Settings@logConfigOnStart:Boolean" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      
+    </li><li name="swave.core.StreamEnv.Settings#maxBatchSize" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="maxBatchSize:Int"></a>
+      <a id="maxBatchSize:Int"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
@@ -477,15 +360,16 @@
       <span class="symbol">
         <span class="name">maxBatchSize</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
-      
-      
-    </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
-      <span class="permalink">
-      <a href="../../swave/core/StreamEnv$$Settings.html#ne(x$1:AnyRef):Boolean" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamEnv$$Settings@maxBatchSize:Int" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      
+    </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ne(x$1:AnyRef):Boolean"></a>
+      <a id="ne(AnyRef):Boolean"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -493,15 +377,16 @@
       <span class="symbol">
         <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="notify():Unit"></a>
-      <span class="permalink">
-      <a href="../../swave/core/StreamEnv$$Settings.html#notify():Unit" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamEnv$$Settings@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notify():Unit"></a>
+      <a id="notify():Unit"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -509,15 +394,16 @@
       <span class="symbol">
         <span class="name">notify</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.AnyRef#notifyAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="notifyAll():Unit"></a>
-      <span class="permalink">
-      <a href="../../swave/core/StreamEnv$$Settings.html#notifyAll():Unit" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamEnv$$Settings@notify():Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#notifyAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notifyAll():Unit"></a>
+      <a id="notifyAll():Unit"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -525,15 +411,16 @@
       <span class="symbol">
         <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="swave.core.StreamEnv.Settings#schedulerSettings" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="schedulerSettings:swave.core.Scheduler.Settings"></a><a id="schedulerSettings:Scheduler.Settings"></a>
-      <span class="permalink">
-      <a href="../../swave/core/StreamEnv$$Settings.html#schedulerSettings:swave.core.Scheduler.Settings" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamEnv$$Settings@notifyAll():Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="swave.core.StreamEnv.Settings#schedulerSettings" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="schedulerSettings:swave.core.Scheduler.Settings"></a>
+      <a id="schedulerSettings:Scheduler.Settings"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
@@ -541,15 +428,16 @@
       <span class="symbol">
         <span class="name">schedulerSettings</span><span class="result">: <a href="Scheduler$$Settings.html" class="extype" name="swave.core.Scheduler.Settings">Scheduler.Settings</a></span>
       </span>
-      
-      
-    </li><li name="swave.core.StreamEnv.Settings#subStreamStartTimeout" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="subStreamStartTimeout:scala.concurrent.duration.Duration"></a><a id="subStreamStartTimeout:Duration"></a>
-      <span class="permalink">
-      <a href="../../swave/core/StreamEnv$$Settings.html#subStreamStartTimeout:scala.concurrent.duration.Duration" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamEnv$$Settings@schedulerSettings:swave.core.Scheduler.Settings" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      
+    </li><li name="swave.core.StreamEnv.Settings#subStreamStartTimeout" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="subStreamStartTimeout:scala.concurrent.duration.Duration"></a>
+      <a id="subStreamStartTimeout:Duration"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
@@ -557,15 +445,16 @@
       <span class="symbol">
         <span class="name">subStreamStartTimeout</span><span class="result">: <span class="extype" name="scala.concurrent.duration.Duration">Duration</span></span>
       </span>
-      
-      
-    </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
-      <span class="permalink">
-      <a href="../../swave/core/StreamEnv$$Settings.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamEnv$$Settings@subStreamStartTimeout:scala.concurrent.duration.Duration" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      
+    </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
+      <a id="synchronized[T0](⇒T0):T0"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -573,15 +462,16 @@
       <span class="symbol">
         <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
       </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="swave.core.StreamEnv.Settings#throughput" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="throughput:Int"></a>
-      <span class="permalink">
-      <a href="../../swave/core/StreamEnv$$Settings.html#throughput:Int" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamEnv$$Settings@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="swave.core.StreamEnv.Settings#throughput" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="throughput:Int"></a>
+      <a id="throughput:Int"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
@@ -589,15 +479,16 @@
       <span class="symbol">
         <span class="name">throughput</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
-      
-      
-    </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="wait():Unit"></a>
-      <span class="permalink">
-      <a href="../../swave/core/StreamEnv$$Settings.html#wait():Unit" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamEnv$$Settings@throughput:Int" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait():Unit"></a>
+      <a id="wait():Unit"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -605,7 +496,11 @@
       <span class="symbol">
         <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
-      
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamEnv$$Settings@wait():Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -613,13 +508,10 @@
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="wait(x$1:Long,x$2:Int):Unit"></a><a id="wait(Long,Int):Unit"></a>
-      <span class="permalink">
-      <a href="../../swave/core/StreamEnv$$Settings.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long,x$2:Int):Unit"></a>
+      <a id="wait(Long,Int):Unit"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -627,7 +519,11 @@
       <span class="symbol">
         <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
-      
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamEnv$$Settings@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -635,13 +531,10 @@
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="wait(x$1:Long):Unit"></a><a id="wait(Long):Unit"></a>
-      <span class="permalink">
-      <a href="../../swave/core/StreamEnv$$Settings.html#wait(x$1:Long):Unit" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long):Unit"></a>
+      <a id="wait(Long):Unit"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -649,7 +542,11 @@
       <span class="symbol">
         <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
-      
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamEnv$$Settings@wait(x$1:Long):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -657,13 +554,10 @@
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="swave.core.StreamEnv.Settings#withDispatcherSettingsMapped" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="withDispatcherSettingsMapped(f:swave.core.Dispatchers.Settings=&gt;swave.core.Dispatchers.Settings):swave.core.StreamEnv.Settings"></a><a id="withDispatcherSettingsMapped((Dispatchers.Settings)⇒Dispatchers.Settings):Settings"></a>
-      <span class="permalink">
-      <a href="../../swave/core/StreamEnv$$Settings.html#withDispatcherSettingsMapped(f:swave.core.Dispatchers.Settings=&gt;swave.core.Dispatchers.Settings):swave.core.StreamEnv.Settings" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
+    </li><li name="swave.core.StreamEnv.Settings#withDispatcherSettingsMapped" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="withDispatcherSettingsMapped(f:swave.core.Dispatchers.Settings=&gt;swave.core.Dispatchers.Settings):swave.core.StreamEnv.Settings"></a>
+      <a id="withDispatcherSettingsMapped((Dispatchers.Settings)⇒Dispatchers.Settings):Settings"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
@@ -671,15 +565,16 @@
       <span class="symbol">
         <span class="name">withDispatcherSettingsMapped</span><span class="params">(<span name="f">f: (<a href="Dispatchers$$Settings.html" class="extype" name="swave.core.Dispatchers.Settings">Dispatchers.Settings</a>) ⇒ <a href="Dispatchers$$Settings.html" class="extype" name="swave.core.Dispatchers.Settings">Dispatchers.Settings</a></span>)</span><span class="result">: <a href="" class="extype" name="swave.core.StreamEnv.Settings">Settings</a></span>
       </span>
-      
-      
-    </li><li name="swave.core.StreamEnv.Settings#withExtensionSettingsMapped" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="withExtensionSettingsMapped(f:swave.core.Extension.Settings=&gt;swave.core.Extension.Settings):swave.core.StreamEnv.Settings"></a><a id="withExtensionSettingsMapped((Extension.Settings)⇒Extension.Settings):Settings"></a>
-      <span class="permalink">
-      <a href="../../swave/core/StreamEnv$$Settings.html#withExtensionSettingsMapped(f:swave.core.Extension.Settings=&gt;swave.core.Extension.Settings):swave.core.StreamEnv.Settings" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamEnv$$Settings@withDispatcherSettingsMapped(f:swave.core.Dispatchers.Settings=&gt;swave.core.Dispatchers.Settings):swave.core.StreamEnv.Settings" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      
+    </li><li name="swave.core.StreamEnv.Settings#withExtensionSettingsMapped" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="withExtensionSettingsMapped(f:swave.core.Extension.Settings=&gt;swave.core.Extension.Settings):swave.core.StreamEnv.Settings"></a>
+      <a id="withExtensionSettingsMapped((Extension.Settings)⇒Extension.Settings):Settings"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
@@ -687,15 +582,16 @@
       <span class="symbol">
         <span class="name">withExtensionSettingsMapped</span><span class="params">(<span name="f">f: (<a href="Extension$$Settings.html" class="extype" name="swave.core.Extension.Settings">Extension.Settings</a>) ⇒ <a href="Extension$$Settings.html" class="extype" name="swave.core.Extension.Settings">Extension.Settings</a></span>)</span><span class="result">: <a href="" class="extype" name="swave.core.StreamEnv.Settings">Settings</a></span>
       </span>
-      
-      
-    </li><li name="swave.core.StreamEnv.Settings#withFileIOSettingsMapped" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="withFileIOSettingsMapped(f:swave.core.io.files.FileIO.Settings=&gt;swave.core.io.files.FileIO.Settings):swave.core.StreamEnv.Settings"></a><a id="withFileIOSettingsMapped((io.files.FileIO.Settings)⇒io.files.FileIO.Settings):Settings"></a>
-      <span class="permalink">
-      <a href="../../swave/core/StreamEnv$$Settings.html#withFileIOSettingsMapped(f:swave.core.io.files.FileIO.Settings=&gt;swave.core.io.files.FileIO.Settings):swave.core.StreamEnv.Settings" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamEnv$$Settings@withExtensionSettingsMapped(f:swave.core.Extension.Settings=&gt;swave.core.Extension.Settings):swave.core.StreamEnv.Settings" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      
+    </li><li name="swave.core.StreamEnv.Settings#withFileIOSettingsMapped" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="withFileIOSettingsMapped(f:swave.core.io.files.FileIO.Settings=&gt;swave.core.io.files.FileIO.Settings):swave.core.StreamEnv.Settings"></a>
+      <a id="withFileIOSettingsMapped((io.files.FileIO.Settings)⇒io.files.FileIO.Settings):Settings"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
@@ -703,15 +599,16 @@
       <span class="symbol">
         <span class="name">withFileIOSettingsMapped</span><span class="params">(<span name="f">f: (<a href="io/files/FileIO$$Settings.html" class="extype" name="swave.core.io.files.FileIO.Settings">io.files.FileIO.Settings</a>) ⇒ <a href="io/files/FileIO$$Settings.html" class="extype" name="swave.core.io.files.FileIO.Settings">io.files.FileIO.Settings</a></span>)</span><span class="result">: <a href="" class="extype" name="swave.core.StreamEnv.Settings">Settings</a></span>
       </span>
-      
-      
-    </li><li name="swave.core.StreamEnv.Settings#withLogConfigOnStart" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="withLogConfigOnStart(logConfigOnStart:Boolean):swave.core.StreamEnv.Settings"></a><a id="withLogConfigOnStart(Boolean):Settings"></a>
-      <span class="permalink">
-      <a href="../../swave/core/StreamEnv$$Settings.html#withLogConfigOnStart(logConfigOnStart:Boolean):swave.core.StreamEnv.Settings" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamEnv$$Settings@withFileIOSettingsMapped(f:swave.core.io.files.FileIO.Settings=&gt;swave.core.io.files.FileIO.Settings):swave.core.StreamEnv.Settings" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      
+    </li><li name="swave.core.StreamEnv.Settings#withLogConfigOnStart" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="withLogConfigOnStart(logConfigOnStart:Boolean):swave.core.StreamEnv.Settings"></a>
+      <a id="withLogConfigOnStart(Boolean):Settings"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
@@ -719,15 +616,16 @@
       <span class="symbol">
         <span class="name">withLogConfigOnStart</span><span class="params">(<span name="logConfigOnStart">logConfigOnStart: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">true</span></span>)</span><span class="result">: <a href="" class="extype" name="swave.core.StreamEnv.Settings">Settings</a></span>
       </span>
-      
-      
-    </li><li name="swave.core.StreamEnv.Settings#withMaxBatchSize" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="withMaxBatchSize(maxBatchSize:Int):swave.core.StreamEnv.Settings"></a><a id="withMaxBatchSize(Int):Settings"></a>
-      <span class="permalink">
-      <a href="../../swave/core/StreamEnv$$Settings.html#withMaxBatchSize(maxBatchSize:Int):swave.core.StreamEnv.Settings" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamEnv$$Settings@withLogConfigOnStart(logConfigOnStart:Boolean):swave.core.StreamEnv.Settings" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      
+    </li><li name="swave.core.StreamEnv.Settings#withMaxBatchSize" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="withMaxBatchSize(maxBatchSize:Int):swave.core.StreamEnv.Settings"></a>
+      <a id="withMaxBatchSize(Int):Settings"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
@@ -735,15 +633,16 @@
       <span class="symbol">
         <span class="name">withMaxBatchSize</span><span class="params">(<span name="maxBatchSize">maxBatchSize: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <a href="" class="extype" name="swave.core.StreamEnv.Settings">Settings</a></span>
       </span>
-      
-      
-    </li><li name="swave.core.StreamEnv.Settings#withSchedulerSettingsMapped" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="withSchedulerSettingsMapped(f:swave.core.Scheduler.Settings=&gt;swave.core.Scheduler.Settings):swave.core.StreamEnv.Settings"></a><a id="withSchedulerSettingsMapped((Scheduler.Settings)⇒Scheduler.Settings):Settings"></a>
-      <span class="permalink">
-      <a href="../../swave/core/StreamEnv$$Settings.html#withSchedulerSettingsMapped(f:swave.core.Scheduler.Settings=&gt;swave.core.Scheduler.Settings):swave.core.StreamEnv.Settings" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamEnv$$Settings@withMaxBatchSize(maxBatchSize:Int):swave.core.StreamEnv.Settings" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      
+    </li><li name="swave.core.StreamEnv.Settings#withSchedulerSettingsMapped" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="withSchedulerSettingsMapped(f:swave.core.Scheduler.Settings=&gt;swave.core.Scheduler.Settings):swave.core.StreamEnv.Settings"></a>
+      <a id="withSchedulerSettingsMapped((Scheduler.Settings)⇒Scheduler.Settings):Settings"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
@@ -751,15 +650,16 @@
       <span class="symbol">
         <span class="name">withSchedulerSettingsMapped</span><span class="params">(<span name="f">f: (<a href="Scheduler$$Settings.html" class="extype" name="swave.core.Scheduler.Settings">Scheduler.Settings</a>) ⇒ <a href="Scheduler$$Settings.html" class="extype" name="swave.core.Scheduler.Settings">Scheduler.Settings</a></span>)</span><span class="result">: <a href="" class="extype" name="swave.core.StreamEnv.Settings">Settings</a></span>
       </span>
-      
-      
-    </li><li name="swave.core.StreamEnv.Settings#withSubStreamStartTimeout" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="withSubStreamStartTimeout(subStreamStartTimeout:scala.concurrent.duration.Duration):swave.core.StreamEnv.Settings"></a><a id="withSubStreamStartTimeout(Duration):Settings"></a>
-      <span class="permalink">
-      <a href="../../swave/core/StreamEnv$$Settings.html#withSubStreamStartTimeout(subStreamStartTimeout:scala.concurrent.duration.Duration):swave.core.StreamEnv.Settings" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamEnv$$Settings@withSchedulerSettingsMapped(f:swave.core.Scheduler.Settings=&gt;swave.core.Scheduler.Settings):swave.core.StreamEnv.Settings" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      
+    </li><li name="swave.core.StreamEnv.Settings#withSubStreamStartTimeout" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="withSubStreamStartTimeout(subStreamStartTimeout:scala.concurrent.duration.Duration):swave.core.StreamEnv.Settings"></a>
+      <a id="withSubStreamStartTimeout(Duration):Settings"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
@@ -767,15 +667,16 @@
       <span class="symbol">
         <span class="name">withSubStreamStartTimeout</span><span class="params">(<span name="subStreamStartTimeout">subStreamStartTimeout: <span class="extype" name="scala.concurrent.duration.Duration">Duration</span></span>)</span><span class="result">: <a href="" class="extype" name="swave.core.StreamEnv.Settings">Settings</a></span>
       </span>
-      
-      
-    </li><li name="swave.core.StreamEnv.Settings#withThroughput" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="withThroughput(throughput:Int):swave.core.StreamEnv.Settings"></a><a id="withThroughput(Int):Settings"></a>
-      <span class="permalink">
-      <a href="../../swave/core/StreamEnv$$Settings.html#withThroughput(throughput:Int):swave.core.StreamEnv.Settings" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamEnv$$Settings@withSubStreamStartTimeout(subStreamStartTimeout:scala.concurrent.duration.Duration):swave.core.StreamEnv.Settings" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      
+    </li><li name="swave.core.StreamEnv.Settings#withThroughput" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="withThroughput(throughput:Int):swave.core.StreamEnv.Settings"></a>
+      <a id="withThroughput(Int):Settings"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
@@ -783,10 +684,13 @@
       <span class="symbol">
         <span class="name">withThroughput</span><span class="params">(<span name="throughput">throughput: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <a href="" class="extype" name="swave.core.StreamEnv.Settings">Settings</a></span>
       </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#swave.core.StreamEnv$$Settings@withThroughput(throughput:Int):swave.core.StreamEnv.Settings" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
-      
-    </li>
-              </ol>
+    </li></ol>
             </div>
 
         
@@ -823,9 +727,7 @@
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-    </body>
-          </div>
-        </div>
-      </div>
+
+
     </body>
       </html>

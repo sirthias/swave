@@ -187,7 +187,7 @@
 <p>As in many cases the simplest tools are often the best ones and debugging stream-based logic is no exception. Temporarily adding logging transformations to trace stream execution can be an excellent and quite efficient way to diagnose issues.</p>
 <p><em>swave</em> gives you a number of &ldquo;identity&rdquo; transformations that perform logging of various stream execution aspects without affecting stream semantics in any way:</p>
 <ul>
-  <li><a href="../transformations/reference/logEvent.html">logEvent</a></li>
+  <li><a href="../transformations/reference/logSignal.html">logSignal</a></li>
   <li><a href="../transformations/reference/onCancel.html">onCancel</a></li>
   <li><a href="../transformations/reference/onComplete.html">onComplete</a></li>
   <li><a href="../transformations/reference/onElement.html">onElement</a></li>
@@ -198,20 +198,20 @@
   <li><a href="../transformations/reference/onStart.html">onStart</a></li>
   <li><a href="../transformations/reference/onTerminate.html">onTerminate</a></li>
 </ul>
-<p>The most frequently used one is probably <a href="../transformations/reference/logEvent.html">logEvent</a>, which outputs an informational <code>String</code> for every signal that is passing through the stage. By default these strings are <code>println</code>ed to the console but you can easily reroute them to any kind of logging facility.</p>
+<p>The most frequently used one is probably <a href="../transformations/reference/logSignal.html">logSignal</a>, which outputs an informational <code>String</code> for every signal that is passing through the stage. By default these strings are <code>println</code>ed to the console but you can easily reroute them to any kind of logging facility.</p>
 <p>In order to illustrate its benefit let&rsquo;s look at this example:</p>
 <pre><code class="scala">import swave.core._
 
 implicit val env = StreamEnv()
 
 Spout.ints(from = 0)
-  .logEvent(&quot;A&quot;)
+  .logSignal(&quot;A&quot;)
   .map(_ * 2)
   .take(5)
   .fold(0)(_ + _)
-  .logEvent(&quot;B&quot;)
+  .logSignal(&quot;B&quot;)
   .drainToBlackHole()</code></pre>
-<p>As you can see, <a href="../transformations/reference/logEvent.html">logEvent</a> lets you specify a &ldquo;marker&rdquo; string that makes it easy to associate the output of the particular stage with its position in the graph.</p>
+<p>As you can see, <a href="../transformations/reference/logSignal.html">logSignal</a> lets you specify a &ldquo;marker&rdquo; string that makes it easy to associate the output of the particular stage with its position in the graph.</p>
 <p>When we run this stream the following output is produced to the console:</p>
 <pre><code class="nohighlight">B: ⇠ Request(32)
 A: ⇠ Request(5)

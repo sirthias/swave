@@ -171,7 +171,43 @@
             <div id="main-content">
                 <!-- start: page -->
 <h1><a href="#file-io" name="file-io" class="anchor"><span class="anchor-link"></span></a>File IO</h1>
-<p>&hellip; TODO &hellip;</p>
+<p><em>swave</em> comes with built-in support for stream-based file IO.</p>
+<h2><a href="#usage" name="usage" class="anchor"><span class="anchor-link"></span></a>Usage</h2>
+<p>You enable built-in support for stream-based file IO with this single import: </p>
+<pre><code class="scala">import swave.core.io.files._
+</code></pre>
+<p>This gives you the following three additional methods on the <code>Spout</code> companion object, which create <a href="../spouts.html">Spout</a> instances for reading arbitrarily large files from the file system in a stream-based fashion (signatures slightly simplified):</p>
+<pre><code class="scala">Spout.fromFileName[T: Bytes](fileName: String): Spout[T]
+Spout.fromFile[T: Bytes](file: File): Spout[T]
+Spout.fromPath[T: Bytes](path: Path): Spout[T]
+</code></pre>
+<p>The import also gives you the following three additional methods on the <code>Drain</code> companion object, which create <a href="../drains.html">Drain</a> instances for writing arbitrarily large files to the file system in a stream-based fashion (signatures slightly simplified): </p>
+<pre><code class="scala">Drain.toFileName[T: Bytes](fileName: String): Drain[T, Future[Long]]
+Drain.toFile[T: Bytes](file: File): Drain[T, Future[Long]]
+Drain.toPath[T: Bytes](path: Path): Drain[T, Future[Long]]
+</code></pre>
+<p>Apart from one thing these signatures are probably quite self-explanatory. Still, you might want to take a look at the <a href="http://swave.io/api/core/latest/#swave.core.io.files.SpoutFromFiles">ScalaDoc of the <code>SpoutFromFiles</code> trait</a> and the <a href="http://swave.io/api/core/latest/#swave.core.io.files.DrainToFiles">ScalaDoc of the <code>DrainToFiles</code> trait</a> for more details. Probably also interesting are the <a href="https://github.com/sirthias/swave/tree/master/core/src/main/scala/swave/core/io/files/SpoutFromFiles.scala">sources of the <code>SpoutFromFiles</code> trait</a> and the <a href="https://github.com/sirthias/swave/tree/master/core/src/main/scala/swave/core/io/files/DrainToFiles.scala">sources of the <code>DrainToFiles</code> trait</a>.</p>
+<p>The one thing that deserves more explanation here is the type parameter with the <code>Bytes</code> context bound.</p>
+<h2><a href="#the-bytes-t-type-class" name="the-bytes-t-type-class" class="anchor"><span class="anchor-link"></span></a>The <code>Bytes[T]</code> Type Class</h2>
+<p>As you can see all of the methods shown above take a type parameter <code>T</code>, which (if not explicitly specified) will be inferred from the (single) context bound instance of the type class <code>Bytes[T]</code> that is in scope at the call site.</p>
+<p>The purpose of this type parameter is to allow <em>swave</em> to abstract over the concrete data type that represents a chunk of raw bytes, which all lower-level IO operations typically work with. <em>swave</em>&rsquo;s approach here is not to duplicate the excellent work that other projects have invested in this area, but leave the decision of which type to use to the user.</p>
+<p>Currently <em>swave</em> pre-defines three <code>Bytes[T]</code> implementations, for these types:</p>
+<ol>
+  <li>
+    <p><code>akka.util.ByteString</code> (as part of the <a href="../swave-akka-compat/index.html">swave-akka-compat</a> module)</p>
+    <p>Enabled with <code>import swave.compat.akka.byteStringBytes</code>.</p>
+  </li>
+  <li>
+    <p><code>scodec.bits.ByteVector</code> (as part of the <a href="../swave-scodec-compat/index.html">swave-scodec-compat</a> module)</p>
+    <p>Enabled with <code>import swave.compat.scodec.byteVectorBytes</code>.</p>
+  </li>
+  <li>
+    <p><code>Array[Byte]</code> (as part of the <code>core</code> module)</p>
+    <p>Enabled with <code>import swave.core.io.byteArrayBytes</code>.</p>
+  </li>
+</ol>
+<p><em>swave</em> intentionally doesn&rsquo;t pick any of these as a &ldquo;preferred default&rdquo;, so you&rsquo;ll have to make a conscious choice as to what you&rsquo;d like to use. If you have no clear preference we&rsquo;d recommend you rely on <a href="http://scodec.org/api/scodec-bits/1.1.2/#scodec.bits.ByteVector">scodec.bits.ByteVector</a> as it appears to be the most flexible implementation with the broadest API offering.</p>
+<p>If you rely on the <code>byteArrayBytes</code> implementation (which has the advantage of not requiring any module dependency in addition to <code>swave-core</code>) be aware that <em>swave</em> treats instances of <code>Array[Byte]</code> as immutable, even though they this is not and cannot be enforced. So, if you violate this convension in your own code by mutating byte array instances in place you should be sure to know what you are doing.</p>
                 <div class="nav-next">
                     <p><strong>Next:</strong> <a href="../../usage/domain/tcp.html">Network IO (TCP)</a></p>
                 </div>

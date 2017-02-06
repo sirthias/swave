@@ -184,11 +184,18 @@
   <dt>Fluent DSL vs. Point-to-point Graph DSL
   </dt>
   <dd>While <em>swave</em> tries to keep individual transformations named similarly to <a href="http://doc.akka.io/docs/akka/2.4/scala/stream/index.html">Akka-Stream</a> the DSL for creating  more complex stream setups, with fan-outs, fan-ins, loops, etc. is substantially different between the two.</dd>
+  <dt>Full vs. Limited Stream-of-Streams Support
+  </dt>
+  <dd><em>swave</em> fully supports streams of streams, where as Akka limits stream nesting to streams that handle all nested  streams in the same way. The latter does have certain benefits (like inspectability of transformations on nested  streams) but is strictly less powerful.</dd>
+  <dt>Performance</dt>
+  <dd>In our latest benchmarks <em>swave</em> achieves between 1.3 and 4.8 times as much throughput as <a href="http://doc.akka.io/docs/akka/2.4/scala/stream/index.html">Akka-Stream</a> for  quasi-identical streaming graphs, depending on the exact mix of transformations in the &ldquo;hot&rdquo; parts of the setup.</dd>
   <dt>Quick Evolution vs. Long-term stability
   </dt>
   <dd>Being part of <a href="http://akka.io/">Akka</a> Akka-Stream has much tighter requirements on long-term stability and binary compatibility than  <em>swave</em>. This means that you can probably rely on <a href="http://doc.akka.io/docs/akka/2.4/scala/stream/index.html">Akka-Stream</a> as a more stable and mature foundation going  forward. However, the less stringent stability requirements allow us to evolve <em>swave</em> faster and incorporate new  learnings more freely.</dd>
 </dl>
 <p>Non-blocking, backpressured stream processing in Scala is an exciting and promising arena, with most of its potential still untapped. Therefore we don&rsquo;t see <em>swave</em> as a head-on competitor to <a href="http://doc.akka.io/docs/akka/2.4/scala/stream/index.html">Akka-Stream</a>, trying to steal away from its user base. Rather we regards ourselves as two teams that are exploring this still new field together, learning from one another and comparing approaches on numerous levels. The more users whose needs we can jointly address the more the Scala eco-system will benefit as a whole.</p>
+<h2><a href="#interfacing-with-akka-stream" name="interfacing-with-akka-stream" class="anchor"><span class="anchor-link"></span></a>Interfacing with Akka-Stream</h2>
+<p>Since seamless interaction between <em>swave</em> and <a href="http://doc.akka.io/docs/akka/2.4/scala/stream/index.html">Akka-Stream</a> is a frequent requirement <em>swave</em> has built-in support for easy interfacing between the two. See the docs for the <a href="../usage/swave-akka-compat/index.html">swave-akka-compat</a> module for more details. </p>
                 <div class="nav-next">
                     <p><strong>Next:</strong> <a href="../introduction/talks-on-swave.html">Talks on <em>swave</em></a></p>
                 </div>

@@ -171,7 +171,8 @@
             <div id="main-content">
                 <!-- start: page -->
 <h1><a href="#monte-carlo-pi-example" name="monte-carlo-pi-example" class="anchor"><span class="anchor-link"></span></a>Monte Carlo Pi Example</h1>
-<p>This example is a slightly adapted version of the one that has been shown in a few <a href="../../introduction/talks-on-swave.html">talks on swave</a> in the past.<br/> It implements a simple approximation of Pi via the Monte Carlo method, whose basic idea can be illustrated like this:</p><p class="centered"><img src="../../assets/img/pi.svg" alt="Approximating Pi with the Monte Carlo method" /></p>
+<p>This example is a slightly adapted version of the one that has been shown in a few <a href="../../introduction/talks-on-swave.html">talks on swave</a> in the past.<br/> It implements a simple approximation of Pi via the Monte Carlo method, whose basic idea can be illustrated like this:</p><div class="centered">
+<p><img src="../../assets/img/pi.svg" alt="Approximating Pi with the Monte Carlo method" /></p></div>
 <p>If we&rsquo;d shoot holes through this unit square at random points the share of the holes that are located in the grey area would asymptotically approach π/4 as we increase the number of shots.</p>
 <p>There are many ways in which a simulation of this method can be implemented in code.<br/> Here is a stream-based solution, which is intentionally somewhat convoluted to show off a few of <em>swave&rsquo;s</em> features:</p>
 <pre><code class="scala">import swave.core.util.XorShiftRandom
@@ -190,7 +191,7 @@ Spout.continually(random.nextDouble())
   .fanInMerge()
   .scan(State(0, 0)) { _ withNextSample _ }
   .drop(1)
-  .injectSequential           // these three transformations together have
+  .injectSequential()           // these three transformations together have
   .map(_ drop 999999 take 1)  // the same effect as `.takeEveryNth(1000000)`
   .flattenConcat()            // (in fact, this is how `takeEveryNth` is implemented)
   .map(state ⇒ f&quot;After ${state.totalSamples}%,10d samples π is approximated as ${state.π}%.6f&quot;)
@@ -216,7 +217,8 @@ case class State(totalSamples: Long, inCircle: Long) {
     State(totalSamples + 1, if (sample == InnerSample) inCircle + 1 else inCircle)
 }</code></pre>
 <p>When this code is run it generates 50 mio samples, at maximum speed, to approximate π using the Monte Carlo method. After each 1 mio samples one line of progress information is printed to console. </p>
-<p>The streams setup contains elements from all five basic groups of stream transformations: <a href="../transformations/simple.html">simple transformations</a>, <a href="../transformations/fan-outs.html">fan-outs</a>, <a href="../transformations/fan-ins.html">fan-ins</a>, <a href="../transformations/streams-of-streams.html#injecting-transformations">injects</a> and <a href="../transformations/streams-of-streams.html#flattening-transformations">flattenings</a>. The implemented stream graph can be visualized like this. </p><p class="centered"><img src="../../assets/img/pi-stream.svg" alt="Monte Carlo Pi Stream Graph" /></p>
+<p>The streams setup contains elements from all five basic groups of stream transformations: <a href="../transformations/simple.html">simple transformations</a>, <a href="../transformations/fan-outs.html">fan-outs</a>, <a href="../transformations/fan-ins.html">fan-ins</a>, <a href="../transformations/streams-of-streams.html#injecting-transformations">injects</a> and <a href="../transformations/streams-of-streams.html#flattening-transformations">flattenings</a>. The implemented stream graph can be visualized like this. </p><div class="centered">
+<p><img src="../../assets/img/pi-stream.svg" alt="Monte Carlo Pi Stream Graph" /></p></div>
 <p>One thing that&rsquo;s interesting about this example is that everything is running synchronously (yet without any blocking) on the caller thread. There are no stages in the graph that require asynchronous dispatch and thus <em>swave</em> will run it entirely without moving execution to another thread, which, in simple and &ldquo;small&rdquo; cases like this one, is often the fastest way to run a stream.</p>
 <h2><a href="#rate-detaching" name="rate-detaching" class="anchor"><span class="anchor-link"></span></a>Rate Detaching</h2>
 <p>To demonstrate another feature called &ldquo;rate detaching&rdquo; let&rsquo;s transform the example slightly. So far we&rsquo;ve printed a line of status information after every 1 mio samples. While this probably works ok on your machine it might end up generating too much output on really fast machines and too little if the machine is really slow.</p>

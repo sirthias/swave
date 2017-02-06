@@ -1,169 +1,42 @@
 <!DOCTYPE html >
 <html>
         <head>
-          <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-          <title></title>
-          <meta name="description" content="" />
-          <meta name="keywords" content="" />
+          <title>TimerWheel - swave.core.internal.agrona.TimerWheel</title>
+          <meta name="description" content="TimerWheel - swave.core.internal.agrona.TimerWheel" />
+          <meta name="keywords" content="TimerWheel swave.core.internal.agrona.TimerWheel" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
-      <link href="../../../../lib/index.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
-      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
-      <script type="text/javascript" src="../../../../lib/jquery.panzoom.min.js"></script>
-      <script type="text/javascript" src="../../../../lib/jquery.mousewheel.min.js"></script>
-      <script type="text/javascript" src="../../../../lib/index.js"></script>
-      <script type="text/javascript" src="../../../../index.js"></script>
-      <script type="text/javascript" src="../../../../lib/scheduler.js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
       <script type="text/javascript" src="../../../../lib/template.js"></script>
       <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
       
       <script type="text/javascript">
-        /* this variable can be used by the JS to determine the path to the root document */
-        var toRoot = '../../../../';
-      </script>
+         if(top === self) {
+            var url = '../../../../index.html';
+            var hash = 'swave.core.internal.agrona.TimerWheel';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
     
         </head>
-        <body>
-      <div id="search">
-        <span id="doc-title"><span id="doc-version"></span></span>
-        <span class="close-results"><span class="left">&lt;</span> Back</span>
-        <div id="textfilter">
-          <span class="input">
-            <input autocapitalize="none" placeholder="Search" id="index-input" type="text" accesskey="/" />
-            <i class="clear material-icons"></i>
-            <i id="search-icon" class="material-icons"></i>
-          </span>
-        </div>
-    </div>
-      <div id="search-results">
-        <div id="search-progress">
-          <div id="progress-fill"></div>
-        </div>
-        <div id="results-content">
-          <div id="entity-results"></div>
-          <div id="member-results"></div>
-        </div>
-      </div>
-      <div id="content-scroll-container" style="-webkit-overflow-scrolling: touch;">
-        <div id="content-container" style="-webkit-overflow-scrolling: touch;">
-          <div id="subpackage-spacer">
-            <div id="packages">
-              <h1>Packages</h1>
-              <ul>
-                <li name="_root_.root" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="_root_"></a><a id="root:_root_"></a>
-      <span class="permalink">
-      <a href="index.html#_root_" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../../../../index.html">
-              <span class="name">root</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../../index.html" class="extype" name="_root_">root</a></dd></dl></div>
-    </li><li name="_root_.swave" visbl="pub" class="indented1 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="swave"></a><a id="swave:swave"></a>
-      <span class="permalink">
-      <a href="index.html#swave" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../../../index.html">
-              <span class="name">swave</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../../index.html" class="extype" name="_root_">root</a></dd></dl></div>
-    </li><li name="swave.core" visbl="pub" class="indented2 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="core"></a><a id="core:core"></a>
-      <span class="permalink">
-      <a href="../swave/index.html#core" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../../index.html">
-              <span class="name">core</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../index.html" class="extype" name="swave">swave</a></dd></dl></div>
-    </li><li name="swave.core.internal" visbl="pub" class="indented3 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="internal"></a><a id="internal:internal"></a>
-      <span class="permalink">
-      <a href="../../swave/core/index.html#internal" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../index.html">
-              <span class="name">internal</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="swave.core">core</a></dd></dl></div>
-    </li><li name="swave.core.internal.agrona" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="agrona"></a><a id="agrona:agrona"></a>
-      <span class="permalink">
-      <a href="../../../swave/core/internal/index.html#agrona" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="index.html">
-              <span class="name">agrona</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="swave.core.internal">internal</a></dd></dl></div>
-    </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="" title="Timer Wheel (NOT thread safe)"></a>
-                        <a href="" title="Timer Wheel (NOT thread safe)">
-                          TimerWheel
-                        </a>
-                      </li>
-              </ul>
-            </div>
-          </div>
-          <div id="content">
-            <body class="class type">
+        <body class="type">
       <div id="definition">
-        <div class="big-circle class">c</div>
-        <p id="owner"><a href="../../../index.html" class="extype" name="swave">swave</a>.<a href="../../index.html" class="extype" name="swave.core">core</a>.<a href="../index.html" class="extype" name="swave.core.internal">internal</a>.<a href="index.html" class="extype" name="swave.core.internal.agrona">agrona</a></p>
-        <h1>TimerWheel<span class="permalink">
-      <a href="../../../../swave/core/internal/agrona/TimerWheel.html" title="Permalink">
-        <i class="material-icons"></i>
+        <img alt="Class" src="../../../../lib/class_big.png" />
+        <p id="owner"><a href="../../../package.html" class="extype" name="swave">swave</a>.<a href="../../package.html" class="extype" name="swave.core">core</a>.<a href="../package.html" class="extype" name="swave.core.internal">internal</a>.<a href="package.html" class="extype" name="swave.core.internal.agrona">agrona</a></p>
+        <h1>TimerWheel</h1><h3><span class="morelinks"><div>Related Doc:
+            <a href="package.html" class="extype" name="swave.core.internal.agrona">package agrona</a>
+          </div></span></h3><span class="permalink">
+      <a href="../../../../index.html#swave.core.internal.agrona.TimerWheel" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
-    </span></h1>
-        <h3><span class="morelinks"></span></h3>
+    </span>
       </div>
 
       <h4 id="signature" class="signature">
@@ -175,77 +48,50 @@
         <span class="name">TimerWheel</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
-
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Timer Wheel (NOT thread safe)</p><p>Assumes single-writer principle and timers firing on processing thread.
-Low (or NO) garbage.</p><h5> Implementation Details </h5><p>Based on netty's HashedTimerWheel, which is based on
-<a href="http://cseweb.ucsd.edu/users/varghese/">George Varghese</a> and
-Tony Lauck's paper,
-<a href="http://cseweb.ucsd.edu/users/varghese/PAPERS/twheel.ps.Z">'Hashed
-and Hierarchical Timing Wheels: data structures to efficiently implement a
-timer facility'</a>.  More comprehensive slides are located
-<a href="http://www.cse.wustl.edu/~cdgill/courses/cs6874/TimingWheels.ppt">here</a>.</p><p>Wheel is backed by arrays. Timer cancellation is O(1). Timer scheduling might be slightly
-longer if a lot of timers are in the same tick. The underlying tick contains an array. That
-array grows when needed, but does not currently shrink.</p><p>Timer objects may be reused if desired, but all reuse must be done with timer cancellation, expiration,
-and timeouts in consideration.</p><p>Caveats</p><p>Timers that expire in the same tick will not be ordered with one another. As ticks are
-fairly large normally, this means that some timers may expire out of order.
-</p></div><div class="toggleContainer block">
-          <span class="toggle">
-            Linear Supertypes
-          </span>
+          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
         
 
       <div id="mbrsel">
-        <div class="toggle"></div>
-        <div id="memberfilter">
-          <i class="material-icons arrow"></i>
-          <span class="input">
-            <input id="mbrsel-input" placeholder="Filter all members" type="text" accesskey="/" />
-          </span>
-          <i class="clear material-icons"></i>
-        </div>
-        <div id="filterby">
-          <div id="order">
-            <span class="filtertype">Ordering</span>
-            <ol>
-              
-              <li class="alpha in"><span>Alphabetic</span></li>
-              <li class="inherit out"><span>By Inheritance</span></li>
-            </ol>
-          </div>
-          <div class="ancestors">
-                  <span class="filtertype">Inherited<br />
-                  </span>
-                  <ol id="linearization">
-                    <li class="in" name="swave.core.internal.agrona.TimerWheel"><span>TimerWheel</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
-                  </ol>
-                </div><div class="ancestors">
-              <span class="filtertype"></span>
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        <div id="order">
+              <span class="filtertype">Ordering</span>
               <ol>
-                <li class="hideall out"><span>Hide All</span></li>
-                <li class="showall in"><span>Show All</span></li>
+                
+                <li class="alpha in"><span>Alphabetic</span></li>
+                <li class="inherit out"><span>By Inheritance</span></li>
               </ol>
             </div>
-          <div id="visbl">
-              <span class="filtertype">Visibility</span>
-              <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
-            </div>
-        </div>
+        <div id="ancestors">
+                <span class="filtertype">Inherited<br />
+                </span>
+                <ol id="linearization">
+                  <li class="in" name="swave.core.internal.agrona.TimerWheel"><span>TimerWheel</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                </ol>
+              </div><div id="ancestors">
+            <span class="filtertype"></span>
+            <ol>
+              <li class="hideall out"><span>Hide All</span></li>
+              <li class="showall in"><span>Show All</span></li>
+            </ol>
+          </div>
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
       </div>
 
       <div id="template">
         <div id="allMembers">
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
-              <ol><li name="swave.core.internal.agrona.TimerWheel#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(tickDurationNanos:Long,ticksPerWheel:Int):swave.core.internal.agrona.TimerWheel"></a><a id="&lt;init&gt;:TimerWheel"></a>
-      <span class="permalink">
-      <a href="../../../../swave/core/internal/agrona/TimerWheel.html#&lt;init&gt;(tickDurationNanos:Long,ticksPerWheel:Int):swave.core.internal.agrona.TimerWheel" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
+              <ol><li name="swave.core.internal.agrona.TimerWheel#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="&lt;init&gt;(tickDurationNanos:Long,ticksPerWheel:Int):swave.core.internal.agrona.TimerWheel"></a>
+      <a id="&lt;init&gt;:TimerWheel"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">new</span>
@@ -253,46 +99,45 @@ fairly large normally, this means that some timers may expire out of order.
       <span class="symbol">
         <span class="name">TimerWheel</span><span class="params">(<span name="tickDurationNanos">tickDurationNanos: <span class="extype" name="scala.Long">Long</span></span>, <span name="ticksPerWheel">ticksPerWheel: <span class="extype" name="scala.Int">Int</span></span>)</span>
       </span>
-      
+      </h4><span class="permalink">
+      <a href="../../../../index.html#swave.core.internal.agrona.TimerWheel@&lt;init&gt;(tickDurationNanos:Long,ticksPerWheel:Int):swave.core.internal.agrona.TimerWheel" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li></ol>
             </div>
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="swave.core.internal.agrona.TimerWheel.Timer" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="TimerextendsObject"></a><a id="Timer:Timer"></a>
-      <span class="permalink">
-      <a href="../../../../swave/core/internal/agrona/TimerWheel.html#TimerextendsObject" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
+              <ol><li name="swave.core.internal.agrona.TimerWheel.Timer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TimerextendsObject"></a>
+      <a id="Timer:Timer"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="" href="TimerWheel$Timer.html">
-              <span class="name">Timer</span>
-            </a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="TimerWheel$Timer.html"><span class="name">Timer</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
-      
+      </h4><span class="permalink">
+      <a href="../../../../index.html#swave.core.internal.agrona.TimerWheel@TimerextendsObject" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li></ol>
             </div>
 
         
 
-        <div class="values members">
+        <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol>
-                <li name="scala.AnyRef#!=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="!=(x$1:Any):Boolean"></a><a id="!=(Any):Boolean"></a>
-      <span class="permalink">
-      <a href="../../../../swave/core/internal/agrona/TimerWheel.html#!=(x$1:Any):Boolean" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
+              <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="!=(x$1:Any):Boolean"></a>
+      <a id="!=(Any):Boolean"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -300,15 +145,16 @@ fairly large normally, this means that some timers may expire out of order.
       <span class="symbol">
         <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="scala.AnyRef###" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="##():Int"></a>
-      <span class="permalink">
-      <a href="../../../../swave/core/internal/agrona/TimerWheel.html###():Int" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#swave.core.internal.agrona.TimerWheel@!=(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef###" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="##():Int"></a>
+      <a id="##():Int"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -316,15 +162,16 @@ fairly large normally, this means that some timers may expire out of order.
       <span class="symbol">
         <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="scala.AnyRef#==" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="==(x$1:Any):Boolean"></a><a id="==(Any):Boolean"></a>
-      <span class="permalink">
-      <a href="../../../../swave/core/internal/agrona/TimerWheel.html#==(x$1:Any):Boolean" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#swave.core.internal.agrona.TimerWheel@##():Int" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="==(x$1:Any):Boolean"></a>
+      <a id="==(Any):Boolean"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -332,15 +179,16 @@ fairly large normally, this means that some timers may expire out of order.
       <span class="symbol">
         <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="asInstanceOf[T0]:T0"></a>
-      <span class="permalink">
-      <a href="../../../../swave/core/internal/agrona/TimerWheel.html#asInstanceOf[T0]:T0" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#swave.core.internal.agrona.TimerWheel@==(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="asInstanceOf[T0]:T0"></a>
+      <a id="asInstanceOf[T0]:T0"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -348,15 +196,16 @@ fairly large normally, this means that some timers may expire out of order.
       <span class="symbol">
         <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
       </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="clone():Object"></a><a id="clone():AnyRef"></a>
-      <span class="permalink">
-      <a href="../../../../swave/core/internal/agrona/TimerWheel.html#clone():Object" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#swave.core.internal.agrona.TimerWheel@asInstanceOf[T0]:T0" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="clone():Object"></a>
+      <a id="clone():AnyRef"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
@@ -364,7 +213,11 @@ fairly large normally, this means that some timers may expire out of order.
       <span class="symbol">
         <span class="name">clone</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
-      
+      </h4><span class="permalink">
+      <a href="../../../../index.html#swave.core.internal.agrona.TimerWheel@clone():Object" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -372,13 +225,10 @@ fairly large normally, this means that some timers may expire out of order.
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="swave.core.internal.agrona.TimerWheel#computeDelayInMs" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="swave.core.internal.agrona.TimerWheel#computeDelayInMs" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="computeDelayInMs():Long"></a>
-      <span class="permalink">
-      <a href="../../../../swave/core/internal/agrona/TimerWheel.html#computeDelayInMs():Long" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
+      <a id="computeDelayInMs():Long"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
@@ -386,16 +236,16 @@ fairly large normally, this means that some timers may expire out of order.
       <span class="symbol">
         <span class="name">computeDelayInMs</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Long">Long</span></span>
       </span>
-      
-      <p class="shortcomment cmt">Compute delay in milliseconds until next tick.</p><div class="fullcomment"><div class="comment cmt"><p>Compute delay in milliseconds until next tick.
-</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>number of milliseconds to next tick of the wheel.</p></dd></dl></div>
-    </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
-      <span class="permalink">
-      <a href="../../../../swave/core/internal/agrona/TimerWheel.html#eq(x$1:AnyRef):Boolean" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#swave.core.internal.agrona.TimerWheel@computeDelayInMs():Long" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      
+    </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="eq(x$1:AnyRef):Boolean"></a>
+      <a id="eq(AnyRef):Boolean"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -403,15 +253,16 @@ fairly large normally, this means that some timers may expire out of order.
       <span class="symbol">
         <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.AnyRef#equals" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="equals(x$1:Any):Boolean"></a><a id="equals(Any):Boolean"></a>
-      <span class="permalink">
-      <a href="../../../../swave/core/internal/agrona/TimerWheel.html#equals(x$1:Any):Boolean" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#swave.core.internal.agrona.TimerWheel@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#equals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="equals(x$1:Any):Boolean"></a>
+      <a id="equals(Any):Boolean"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
@@ -419,15 +270,16 @@ fairly large normally, this means that some timers may expire out of order.
       <span class="symbol">
         <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="swave.core.internal.agrona.TimerWheel#expireTimers" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="expireTimers():Int"></a>
-      <span class="permalink">
-      <a href="../../../../swave/core/internal/agrona/TimerWheel.html#expireTimers():Int" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#swave.core.internal.agrona.TimerWheel@equals(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="swave.core.internal.agrona.TimerWheel#expireTimers" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="expireTimers():Int"></a>
+      <a id="expireTimers():Int"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
@@ -435,16 +287,16 @@ fairly large normally, this means that some timers may expire out of order.
       <span class="symbol">
         <span class="name">expireTimers</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
-      
-      <p class="shortcomment cmt">Process timers and execute any expired timers.</p><div class="fullcomment"><div class="comment cmt"><p>Process timers and execute any expired timers.
-</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>number of timers expired.</p></dd></dl></div>
-    </li><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="finalize():Unit"></a>
-      <span class="permalink">
-      <a href="../../../../swave/core/internal/agrona/TimerWheel.html#finalize():Unit" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#swave.core.internal.agrona.TimerWheel@expireTimers():Int" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      
+    </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="finalize():Unit"></a>
+      <a id="finalize():Unit"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
@@ -452,7 +304,11 @@ fairly large normally, this means that some timers may expire out of order.
       <span class="symbol">
         <span class="name">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
-      
+      </h4><span class="permalink">
+      <a href="../../../../index.html#swave.core.internal.agrona.TimerWheel@finalize():Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -460,13 +316,10 @@ fairly large normally, this means that some timers may expire out of order.
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
-      <span class="permalink">
-      <a href="../../../../swave/core/internal/agrona/TimerWheel.html#getClass():Class[_]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
+      <a id="getClass():Class[_]"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -474,15 +327,16 @@ fairly large normally, this means that some timers may expire out of order.
       <span class="symbol">
         <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
       </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="scala.AnyRef#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="hashCode():Int"></a>
-      <span class="permalink">
-      <a href="../../../../swave/core/internal/agrona/TimerWheel.html#hashCode():Int" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#swave.core.internal.agrona.TimerWheel@getClass():Class[_]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hashCode():Int"></a>
+      <a id="hashCode():Int"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
@@ -490,15 +344,16 @@ fairly large normally, this means that some timers may expire out of order.
       <span class="symbol">
         <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="isInstanceOf[T0]:Boolean"></a>
-      <span class="permalink">
-      <a href="../../../../swave/core/internal/agrona/TimerWheel.html#isInstanceOf[T0]:Boolean" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#swave.core.internal.agrona.TimerWheel@hashCode():Int" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -506,15 +361,16 @@ fairly large normally, this means that some timers may expire out of order.
       <span class="symbol">
         <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
-      <span class="permalink">
-      <a href="../../../../swave/core/internal/agrona/TimerWheel.html#ne(x$1:AnyRef):Boolean" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#swave.core.internal.agrona.TimerWheel@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ne(x$1:AnyRef):Boolean"></a>
+      <a id="ne(AnyRef):Boolean"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -522,15 +378,16 @@ fairly large normally, this means that some timers may expire out of order.
       <span class="symbol">
         <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="swave.core.internal.agrona.TimerWheel#newBlankTimer" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="newBlankTimer():TimerWheel.this.Timer"></a><a id="newBlankTimer():Timer"></a>
-      <span class="permalink">
-      <a href="../../../../swave/core/internal/agrona/TimerWheel.html#newBlankTimer():TimerWheel.this.Timer" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#swave.core.internal.agrona.TimerWheel@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="swave.core.internal.agrona.TimerWheel#newBlankTimer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="newBlankTimer():TimerWheel.this.Timer"></a>
+      <a id="newBlankTimer():Timer"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
@@ -538,16 +395,16 @@ fairly large normally, this means that some timers may expire out of order.
       <span class="symbol">
         <span class="name">newBlankTimer</span><span class="params">()</span><span class="result">: <a href="TimerWheel$Timer.html" class="extype" name="swave.core.internal.agrona.TimerWheel.Timer">Timer</a></span>
       </span>
-      
-      <p class="shortcomment cmt">Return a blank <code><a href="TimerWheel$Timer.html" class="extype" name="swave.core.internal.agrona.TimerWheel.Timer">Timer</a></code> suitable for rescheduling.</p><div class="fullcomment"><div class="comment cmt"><p>Return a blank <code><a href="TimerWheel$Timer.html" class="extype" name="swave.core.internal.agrona.TimerWheel.Timer">Timer</a></code> suitable for rescheduling.</p><p>NOTE: Appears to be a cancelled timer
-</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>new blank timer</p></dd></dl></div>
-    </li><li name="swave.core.internal.agrona.TimerWheel#newTimeout" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="newTimeout(deadline:Long,task:Runnable):TimerWheel.this.Timer"></a><a id="newTimeout(Long,Runnable):Timer"></a>
-      <span class="permalink">
-      <a href="../../../../swave/core/internal/agrona/TimerWheel.html#newTimeout(deadline:Long,task:Runnable):TimerWheel.this.Timer" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#swave.core.internal.agrona.TimerWheel@newBlankTimer():TimerWheel.this.Timer" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      
+    </li><li name="swave.core.internal.agrona.TimerWheel#newTimeout" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="newTimeout(deadline:Long,task:Runnable):TimerWheel.this.Timer"></a>
+      <a id="newTimeout(Long,Runnable):Timer"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
@@ -555,16 +412,16 @@ fairly large normally, this means that some timers may expire out of order.
       <span class="symbol">
         <span class="name">newTimeout</span><span class="params">(<span name="deadline">deadline: <span class="extype" name="scala.Long">Long</span></span>, <span name="task">task: <span class="extype" name="java.lang.Runnable">Runnable</span></span>)</span><span class="result">: <a href="TimerWheel$Timer.html" class="extype" name="swave.core.internal.agrona.TimerWheel.Timer">Timer</a></span>
       </span>
-      
-      <p class="shortcomment cmt">Schedule a new timer that runs <code>task</code> when it expires.</code></p><div class="fullcomment"><div class="comment cmt"><p>Schedule a new timer that runs <code>task</code> when it expires.
-</p></div><dl class="paramcmts block"><dt class="param">task</dt><dd class="cmt"><p>to execute when timer expires</p></dd><dt>returns</dt><dd class="cmt"><p><code><a href="TimerWheel$Timer.html" class="extype" name="swave.core.internal.agrona.TimerWheel.Timer">Timer</a></code> for timer</p></dd></dl></div>
-    </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="notify():Unit"></a>
-      <span class="permalink">
-      <a href="../../../../swave/core/internal/agrona/TimerWheel.html#notify():Unit" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#swave.core.internal.agrona.TimerWheel@newTimeout(deadline:Long,task:Runnable):TimerWheel.this.Timer" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      
+    </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notify():Unit"></a>
+      <a id="notify():Unit"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -572,15 +429,16 @@ fairly large normally, this means that some timers may expire out of order.
       <span class="symbol">
         <span class="name">notify</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.AnyRef#notifyAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="notifyAll():Unit"></a>
-      <span class="permalink">
-      <a href="../../../../swave/core/internal/agrona/TimerWheel.html#notifyAll():Unit" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#swave.core.internal.agrona.TimerWheel@notify():Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#notifyAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notifyAll():Unit"></a>
+      <a id="notifyAll():Unit"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -588,15 +446,16 @@ fairly large normally, this means that some timers may expire out of order.
       <span class="symbol">
         <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="swave.core.internal.agrona.TimerWheel#rescheduleTimeout" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="rescheduleTimeout(delayNanos:Long,timer:TimerWheel.this.Timer,task:Runnable):Unit"></a><a id="rescheduleTimeout(Long,Timer,Runnable):Unit"></a>
-      <span class="permalink">
-      <a href="../../../../swave/core/internal/agrona/TimerWheel.html#rescheduleTimeout(delayNanos:Long,timer:TimerWheel.this.Timer,task:Runnable):Unit" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#swave.core.internal.agrona.TimerWheel@notifyAll():Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="swave.core.internal.agrona.TimerWheel#rescheduleTimeout" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="rescheduleTimeout(delayNanos:Long,timer:TimerWheel.this.Timer,task:Runnable):Unit"></a>
+      <a id="rescheduleTimeout(Long,Timer,Runnable):Unit"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
@@ -604,16 +463,16 @@ fairly large normally, this means that some timers may expire out of order.
       <span class="symbol">
         <span class="name">rescheduleTimeout</span><span class="params">(<span name="delayNanos">delayNanos: <span class="extype" name="scala.Long">Long</span></span>, <span name="timer">timer: <a href="TimerWheel$Timer.html" class="extype" name="swave.core.internal.agrona.TimerWheel.Timer">Timer</a></span>, <span name="task">task: <span class="extype" name="java.lang.Runnable">Runnable</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
-      
-      <p class="shortcomment cmt">Reschedule an expired timer, reusing the <code><a href="TimerWheel$Timer.html" class="extype" name="swave.core.internal.agrona.TimerWheel.Timer">Timer</a></code> object.</p><div class="fullcomment"><div class="comment cmt"><p>Reschedule an expired timer, reusing the <code><a href="TimerWheel$Timer.html" class="extype" name="swave.core.internal.agrona.TimerWheel.Timer">Timer</a></code> object.
-</p></div><dl class="paramcmts block"><dt class="param">delayNanos</dt><dd class="cmt"><p>until timer should expire</p></dd><dt class="param">timer</dt><dd class="cmt"><p>to reschedule</p></dd><dt class="param">task</dt><dd class="cmt"><p>to execute when timer expires</p></dd></dl><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt"><p><span class="extype" name="IllegalArgumentException"><code>IllegalArgumentException</code></span> if timer is active</p></span></dd></dl></div>
-    </li><li name="swave.core.internal.agrona.TimerWheel#rescheduleTimeout" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="rescheduleTimeout(delayNanos:Long,timer:TimerWheel.this.Timer):Unit"></a><a id="rescheduleTimeout(Long,Timer):Unit"></a>
-      <span class="permalink">
-      <a href="../../../../swave/core/internal/agrona/TimerWheel.html#rescheduleTimeout(delayNanos:Long,timer:TimerWheel.this.Timer):Unit" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#swave.core.internal.agrona.TimerWheel@rescheduleTimeout(delayNanos:Long,timer:TimerWheel.this.Timer,task:Runnable):Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      
+    </li><li name="swave.core.internal.agrona.TimerWheel#rescheduleTimeout" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="rescheduleTimeout(delayNanos:Long,timer:TimerWheel.this.Timer):Unit"></a>
+      <a id="rescheduleTimeout(Long,Timer):Unit"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
@@ -621,16 +480,16 @@ fairly large normally, this means that some timers may expire out of order.
       <span class="symbol">
         <span class="name">rescheduleTimeout</span><span class="params">(<span name="delayNanos">delayNanos: <span class="extype" name="scala.Long">Long</span></span>, <span name="timer">timer: <a href="TimerWheel$Timer.html" class="extype" name="swave.core.internal.agrona.TimerWheel.Timer">Timer</a></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
-      
-      <p class="shortcomment cmt">Reschedule an expired timer, reusing the <code><a href="TimerWheel$Timer.html" class="extype" name="swave.core.internal.agrona.TimerWheel.Timer">Timer</a></code> object.</p><div class="fullcomment"><div class="comment cmt"><p>Reschedule an expired timer, reusing the <code><a href="TimerWheel$Timer.html" class="extype" name="swave.core.internal.agrona.TimerWheel.Timer">Timer</a></code> object.
-</p></div><dl class="paramcmts block"><dt class="param">delayNanos</dt><dd class="cmt"><p>until timer should expire</p></dd><dt class="param">timer</dt><dd class="cmt"><p>to reschedule</p></dd></dl><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt"><p><span class="extype" name="IllegalArgumentException"><code>IllegalArgumentException</code></span> if timer is active</p></span></dd></dl></div>
-    </li><li name="swave.core.internal.agrona.TimerWheel#rescheduleTimeoutDeadline" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="rescheduleTimeoutDeadline(deadline:Long,timer:TimerWheel.this.Timer,task:Runnable):Unit"></a><a id="rescheduleTimeoutDeadline(Long,Timer,Runnable):Unit"></a>
-      <span class="permalink">
-      <a href="../../../../swave/core/internal/agrona/TimerWheel.html#rescheduleTimeoutDeadline(deadline:Long,timer:TimerWheel.this.Timer,task:Runnable):Unit" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#swave.core.internal.agrona.TimerWheel@rescheduleTimeout(delayNanos:Long,timer:TimerWheel.this.Timer):Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      
+    </li><li name="swave.core.internal.agrona.TimerWheel#rescheduleTimeoutDeadline" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="rescheduleTimeoutDeadline(deadline:Long,timer:TimerWheel.this.Timer,task:Runnable):Unit"></a>
+      <a id="rescheduleTimeoutDeadline(Long,Timer,Runnable):Unit"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
@@ -638,16 +497,16 @@ fairly large normally, this means that some timers may expire out of order.
       <span class="symbol">
         <span class="name">rescheduleTimeoutDeadline</span><span class="params">(<span name="deadline">deadline: <span class="extype" name="scala.Long">Long</span></span>, <span name="timer">timer: <a href="TimerWheel$Timer.html" class="extype" name="swave.core.internal.agrona.TimerWheel.Timer">Timer</a></span>, <span name="task">task: <span class="extype" name="java.lang.Runnable">Runnable</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
-      
-      <p class="shortcomment cmt">Reschedule an expired timer, reusing the <code><a href="TimerWheel$Timer.html" class="extype" name="swave.core.internal.agrona.TimerWheel.Timer">Timer</a></code> object.</p><div class="fullcomment"><div class="comment cmt"><p>Reschedule an expired timer, reusing the <code><a href="TimerWheel$Timer.html" class="extype" name="swave.core.internal.agrona.TimerWheel.Timer">Timer</a></code> object.
-</p></div><dl class="paramcmts block"><dt class="param">timer</dt><dd class="cmt"><p>to reschedule</p></dd><dt class="param">task</dt><dd class="cmt"><p>to execute when timer expires</p></dd></dl><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt"><p><span class="extype" name="IllegalArgumentException"><code>IllegalArgumentException</code></span> if timer is active</p></span></dd></dl></div>
-    </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
-      <span class="permalink">
-      <a href="../../../../swave/core/internal/agrona/TimerWheel.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#swave.core.internal.agrona.TimerWheel@rescheduleTimeoutDeadline(deadline:Long,timer:TimerWheel.this.Timer,task:Runnable):Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      
+    </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
+      <a id="synchronized[T0](⇒T0):T0"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -655,15 +514,16 @@ fairly large normally, this means that some timers may expire out of order.
       <span class="symbol">
         <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
       </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="swave.core.internal.agrona.TimerWheel#ticks" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ticks():Long"></a>
-      <span class="permalink">
-      <a href="../../../../swave/core/internal/agrona/TimerWheel.html#ticks():Long" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#swave.core.internal.agrona.TimerWheel@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="swave.core.internal.agrona.TimerWheel#ticks" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ticks():Long"></a>
+      <a id="ticks():Long"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
@@ -671,16 +531,16 @@ fairly large normally, this means that some timers may expire out of order.
       <span class="symbol">
         <span class="name">ticks</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Long">Long</span></span>
       </span>
-      
-      <p class="shortcomment cmt">Return the current time as number of nanoseconds since start of the wheel.</p><div class="fullcomment"><div class="comment cmt"><p>Return the current time as number of nanoseconds since start of the wheel.
-</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>number of nanoseconds since start of the wheel</p></dd></dl></div>
-    </li><li name="scala.AnyRef#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="toString():String"></a>
-      <span class="permalink">
-      <a href="../../../../swave/core/internal/agrona/TimerWheel.html#toString():String" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#swave.core.internal.agrona.TimerWheel@ticks():Long" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      
+    </li><li name="scala.AnyRef#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="toString():String"></a>
+      <a id="toString():String"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
@@ -688,15 +548,16 @@ fairly large normally, this means that some timers may expire out of order.
       <span class="symbol">
         <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
       </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="wait():Unit"></a>
-      <span class="permalink">
-      <a href="../../../../swave/core/internal/agrona/TimerWheel.html#wait():Unit" title="Permalink">
-        <i class="material-icons"></i>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#swave.core.internal.agrona.TimerWheel@toString():String" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait():Unit"></a>
+      <a id="wait():Unit"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -704,7 +565,11 @@ fairly large normally, this means that some timers may expire out of order.
       <span class="symbol">
         <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
-      
+      </h4><span class="permalink">
+      <a href="../../../../index.html#swave.core.internal.agrona.TimerWheel@wait():Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -712,13 +577,10 @@ fairly large normally, this means that some timers may expire out of order.
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="wait(x$1:Long,x$2:Int):Unit"></a><a id="wait(Long,Int):Unit"></a>
-      <span class="permalink">
-      <a href="../../../../swave/core/internal/agrona/TimerWheel.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long,x$2:Int):Unit"></a>
+      <a id="wait(Long,Int):Unit"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -726,7 +588,11 @@ fairly large normally, this means that some timers may expire out of order.
       <span class="symbol">
         <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
-      
+      </h4><span class="permalink">
+      <a href="../../../../index.html#swave.core.internal.agrona.TimerWheel@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -734,13 +600,10 @@ fairly large normally, this means that some timers may expire out of order.
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="wait(x$1:Long):Unit"></a><a id="wait(Long):Unit"></a>
-      <span class="permalink">
-      <a href="../../../../swave/core/internal/agrona/TimerWheel.html#wait(x$1:Long):Unit" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long):Unit"></a>
+      <a id="wait(Long):Unit"></a>
+      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -748,7 +611,11 @@ fairly large normally, this means that some timers may expire out of order.
       <span class="symbol">
         <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
-      
+      </h4><span class="permalink">
+      <a href="../../../../index.html#swave.core.internal.agrona.TimerWheel@wait(x$1:Long):Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -756,8 +623,7 @@ fairly large normally, this means that some timers may expire out of order.
     </span>)</span>
               
         </dd></dl></div>
-    </li>
-              </ol>
+    </li></ol>
             </div>
 
         
@@ -786,9 +652,7 @@ fairly large normally, this means that some timers may expire out of order.
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-    </body>
-          </div>
-        </div>
-      </div>
+
+
     </body>
       </html>

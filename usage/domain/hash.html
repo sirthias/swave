@@ -171,7 +171,27 @@
             <div id="main-content">
                 <!-- start: page -->
 <h1><a href="#hashing-support" name="hashing-support" class="anchor"><span class="anchor-link"></span></a>Hashing Support</h1>
-<p>&hellip; TODO &hellip;</p>
+<p>When working with raw bytes in a stream-based fashion, e.g. when <a href="file-io.html">reading data from a file</a>, a common task is computing hashes across some or all parts of a stream of raw bytes. <em>swave</em> comes with efficient built-in support for the most important hash algorithms. </p>
+<h2><a href="#usage" name="usage" class="anchor"><span class="anchor-link"></span></a>Usage</h2>
+<p>The easiest way to get access to the pre-defined hashing transformations is this import:</p>
+<pre><code class="scala">import swave.core.hash._
+</code></pre>
+<p>as well as <em>one</em> of these imports (see the <a href="file-io.html#the-bytes-t-type-class">section on the <code>Bytes</code> type class</a> for more details):</p>
+<pre><code class="scala">import swave.compat.akka.byteStringBytes // for packaging raw bytes as an `akka.util.ByteString`
+import swave.compat.scodec.byteVectorBytes // for packaging raw bytes as an `scodec.bits.ByteVector`
+import swave.core.io.byteArrayBytes // for packaging raw bytes as a plain `Array[Byte]` 
+</code></pre>
+<p>With this in place you have the following two additional transformations available on streams of <code>ByteString</code>, <code>ByteVector</code> or <code>Array[Byte]</code> (depending on what import you chose above):</p>
+<pre><code class="scala">byteStream.md2 // transforms into a stream of 16 bytes
+byteStream.md5 // transforms into a stream of 16 bytes
+byteStream.sha1 // transforms into a stream of 20 bytes
+byteStream.sha256 // transforms into a stream of 32 bytes 
+byteStream.sha384 // transforms into a stream of 48 bytes
+byteStream.sha512 // transforms into a stream of 64 bytes
+byteStream.digest(md: MessageDigest) // transforms into a stream of n bytes 
+</code></pre>
+<p>All of these transformations turn a stream of an arbitrary number of bytes into a stream of a well-defined number of bytes, which represent the hash value.</p>
+<p>If you prefer, all of these transformations are also defines as <a href="../further/pipes.html">Pipes</a> in the <a href="http://swave.io/api/core/latest/#swave.core.hash.HashTransformations">swave.core.hash.HashTransformations</a> trait and the <a href="http://swave.io/api/core/latest/#swave.core.hash.Hash$">swave.core.hash.Hash</a> object.</p>
                 <div class="nav-next">
                     <p><strong>Next:</strong> <a href="../../usage/swave-core-api.html">API Docs (ScalaDoc)</a></p>
                 </div>

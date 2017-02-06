@@ -170,9 +170,26 @@
             <div id="main-content">
                 <!-- start: page -->
 <h1><a href="#swave-akka-compat" name="swave-akka-compat" class="anchor"><span class="anchor-link"></span></a>swave-akka-compat</h1>
-<p>&hellip; TODO &hellip;</p>
+<p>The <code>swave-akka-compat</code> modules provides for very easy interconnectivity between <em>swave</em> and <a href="http://doc.akka.io/docs/akka/2.4/scala/stream/index.html">Akka-Stream</a>.</p>
+<h2><a href="#installation" name="installation" class="anchor"><span class="anchor-link"></span></a>Installation</h2>
+<p>See the <a href="../setup.html">Setup</a> chapter for details on how to pull <code>swave-akka-compat</code> into your build.</p>
+<h2><a href="#usage" name="usage" class="anchor"><span class="anchor-link"></span></a>Usage</h2>
+<p>Once you have <code>swave-akka-compat</code> on your classpath this import: </p>
+<pre><code class="scala">import swave.compat.akka._
+</code></pre>
+<p>gives you six &ldquo;decorators&rdquo; that allow for almost seamless conversion of all major stream graph components between both worlds. You can convert <em>swave</em> components into <em>akka</em> ones like this:</p>
+<pre><code class="scala">val akkaSource = spout.toAkkaSource
+val akkaFlow = pipe.toAkkaFlow
+val akkaSink = drain.toAkkaSink
+</code></pre>
+<p>as well as the other way around:</p>
+<pre><code class="scala">val spout = akkaSource.toSpout
+val pipe = akkaFlow.toPipe 
+val drain = akkaSink.toDrain
+</code></pre>
+<p>Additionally the import brings a <code>Bytes[T]</code> type class instance in scope that allows <a href="../domain/file-io.html">File IO</a> to seamlessly work with <code>akka.util.ByteString</code> as the main vehicle for raw bytes. See the section on the <a href="../domain/file-io.html#the-bytes-t-type-class">Bytes</a> type class for more info on this. </p>
 <h2><a href="#api-docs-scaladoc-" name="api-docs-scaladoc-" class="anchor"><span class="anchor-link"></span></a>API Docs (ScalaDoc)</h2>
-<p>The ScalaDoc for <em>swave-scodec-compat</em> can be found <a href="http://swave.io/api/compat-akka/latest/#swave.compat.akka.package">&gt;&gt;&gt; HERE &lt;&lt;&lt;</a>.</p>
+<p>The ScalaDoc for <em>swave-scodec-compat</em> can be found <a href="http://swave.io/api/compat-akka/latest/#swave.compat.akka.index">&gt;&gt;&gt; HERE &lt;&lt;&lt;</a>.</p>
                 <div class="nav-next">
                     <p><strong>Next:</strong> <a href="../../usage/swave-scodec-compat/index.html">swave-scodec-compat</a></p>
                 </div>
