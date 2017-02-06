@@ -22,7 +22,7 @@ class ByteStringBytes extends Bytes[ByteString] {
 
   def empty = ByteString.empty
   def fill[A: Integral](size: Long)(byte: A) = {
-    requireArg(0 <= size && size <= Int.MaxValue, "`n` must be >= 0 and <= Int.MaxValue")
+    requireArg(0 <= size && size <= Int.MaxValue, "`size` must be >= 0 and <= Int.MaxValue")
     val b = implicitly[Integral[A]].toInt(byte).toByte
     apply(Array.fill(size.toInt)(b))
   }
@@ -53,7 +53,7 @@ class ByteStringBytes extends Bytes[ByteString] {
 
   def size(value: ByteString): Long = value.size.toLong
   def byteAt(value: ByteString, ix: Long): Byte = {
-    requireArg(0 <= ix && ix <= Int.MaxValue, "`n` must be >= 0 and <= Int.MaxValue")
+    requireArg(0 <= ix && ix <= Int.MaxValue, "`ix` must be >= 0 and <= Int.MaxValue")
     value(ix.toInt)
   }
   def indexOfSlice(value: ByteString, slice: ByteString, startIx: Long): Long = {
