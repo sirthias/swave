@@ -226,7 +226,17 @@ object Drain {
     * CAUTION: The given callback might be called from several threads concurrently!
     */
   def parallelForeach[T](parallelism: Int)(f: T ⇒ Unit)(implicit ec: ExecutionContext): Drain[T, Future[Unit]] =
-    Pipe[T].mapAsyncUnordered(parallelism)(x ⇒ Future(f(x))).to(Drain.ignore)
+    asyncParallelForeach(parallelism)(x => Future(f(x)))
+
+  /**
+    * Same as `parallelForeach` but for longer-running callbacks, which signal callback completion not by simply
+    * returning from the callback function (as in the case of `parallelForeach`) but rather via completion of the
+    * returned future.
+    *
+    * CAUTION: The given callback might be called from several threads concurrently!
+    */
+  def asyncParallelForeach[T](parallelism: Int)(f: T ⇒ Future[Unit])(implicit ec: ExecutionContext): Drain[T, Future[Unit]] =
+    Pipe[T].mapAsyncUnordered(parallelism)(f).to(Drain.ignore)
 
   /**
     * A [[Drain]] which signals demand of `Integer.MAX_VALUE` and buffers incoming elements in an
