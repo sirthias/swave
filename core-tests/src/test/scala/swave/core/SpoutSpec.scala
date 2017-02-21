@@ -6,10 +6,10 @@
 
 package swave.core
 
-import swave.core.internal.testkit.TestError
-
-import scala.concurrent.Future
+import scala.concurrent.{Future, Promise}
 import scala.concurrent.duration._
+import swave.core.internal.testkit.TestError
+import swave.core.util._
 
 class SpoutSpec extends SwaveSpec {
 
@@ -37,6 +37,18 @@ class SpoutSpec extends SwaveSpec {
         spout.offer(iter.next())
         spout take 20 should produce(0 to 19: _*)
         cancelNotified shouldBe true
+      }
+
+      "Late push" in {
+        val cancelled = Promise[Unit]()
+        val spout = Spout.push[Int](4, 16, notifyOnCancel = _ => cancelled.success(()))
+        val future = spout.take(3).drainToMkString(limit = 3, sep = ", ")
+        spout.offer(1) shouldBe true
+        spout.offer(2) shouldBe true
+        cancelled.isCompleted shouldBe false
+        spout.offer(3) shouldBe true
+        future.await() shouldEqual "1, 2, 3"
+        cancelled.future.await() shouldEqual (())
       }
     }
 

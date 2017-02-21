@@ -49,7 +49,7 @@ private[core] final class StreamRunner(_disp: Dispatcher, env: StreamEnv)
     @tailrec def loop(): Unit =
       if (interceptionLoop.hasInterception) {
         interceptionLoop.handleInterception()
-        if (mailboxEmpty) loop() // we don't want to prevent external messages from entering our loopc
+        if (mailboxEmpty) loop() // don't loop here if there are external messages that we need to handle as well
       }
     loop()
   }

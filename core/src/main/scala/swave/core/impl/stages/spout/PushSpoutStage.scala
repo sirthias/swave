@@ -25,7 +25,10 @@ private[core] final class PushSpoutStage(initialBufferSize: Int, maxBufferSize: 
   def kind = Stage.Kind.Spout.Push(initialBufferSize, maxBufferSize, notifyOnDequeued, notifyOnCancel)
 
   def handleXEvent(ev: AnyRef): Unit =
-    if (isSealed) interceptXEvent(ev) else xEvent(ev)
+    if (isSealed) {
+      region.enqueueXEvent(this, ev)
+      region.runContext.impl.runInterceptionLoop()
+    } else xEvent(ev)
 
   initialState(awaitingSubscribe(StreamTermination.None))
 

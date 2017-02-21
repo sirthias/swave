@@ -102,7 +102,6 @@ private[swave] final class Region private[impl] (val entryPoint: StageImpl, val 
     channel match {
       case Sync            => target.xEvent(ev)
       case x: StreamRunner => x.enqueue(new StreamRunner.Message.XEvent(target, ev, x))
-
     }
 
   def env: StreamEnv            = runContext.env
