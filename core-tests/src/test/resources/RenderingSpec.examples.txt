@@ -185,6 +185,9 @@ Example 9:
  o  | OnSignal
  |  |
  |  |
+ o  | WithLimit
+ |  |
+ |  |
  o  | Fold
  |  |
  |  |
@@ -207,6 +210,9 @@ Example 9:
  |
  |
  o AsyncDispatcher
+ |
+ |
+ o WithLimit
  |
  |
  o Fold

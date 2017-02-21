@@ -72,6 +72,8 @@ o-+ FanOut.Broadcast: 0
 | |
 | o Map: 0
 | |
+| o WithLimit: 0
+| |
 | o Fold: 0
 | |
 | o Map: 0
@@ -85,6 +87,8 @@ o BufferWithBackpressure: 1
 o Deduplicate: 1
 |
 o AsyncDispatcher: 1
+|
+o WithLimit: 1
 |
 o Fold: 1
 |

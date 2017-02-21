@@ -209,6 +209,7 @@ object Drain {
   def mkString[T](limit: Int, start: String, sep: String, end: String): Drain[T, Future[String]] = {
     var first = true
     val pipe = Pipe[T]
+      .withLimit(limit.toLong)
       .fold(new java.lang.StringBuilder(start)) { (sb, elem) =>
         if (first) first = false else sb.append(sep)
         sb.append(elem)
