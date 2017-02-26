@@ -9,12 +9,12 @@ Fan-Outs are @ref[stream graph components] with one input port and several outpu
 
 Currently these fan-out variants are available:
  
-* @ref[fanOutBroadcast]
-* @ref[fanOutRoundRobin]
-* @ref[fanOutSequential]
-* @ref[fanOutSwitch]
-* @ref[fanOutToAny]
-* @ref[fanOutUnZip]
+* @ref[fanOutBroadcast] emits upstream elements to all downstreams
+* @ref[fanOutRoundRobin] emits upstream elements alternatingly. The first element to the 1st downstream, the next to the 2nd ...
+* @ref[fanOutSequential] ??
+* @ref[fanOutSwitch] takes a function that determines based on an element value which of the downstreams the element should be emitted to.
+* @ref[fanOutToAny] ??
+* @ref[fanOutUnZip] upstream tuples are broken up into constituent values and those are each emitted to the matching downstream
 
 Additionally these fan-out shortcut transformations are defined:
 
