@@ -39,8 +39,12 @@ class ByteArrayBytes extends Bytes[Array[Byte]] {
       } else buf
     rec(0)
   }
-  def apply(bytes: Vector[Byte])                  = bytes.toArray
-  def apply(buffer: ByteBuffer)                   = buffer.array()
+  def apply(bytes: Vector[Byte]) = bytes.toArray
+  def apply(buffer: ByteBuffer) = {
+    val array = new Array[Byte](buffer.remaining)
+    buffer.get(array)
+    array
+  }
   def apply(bs: GenTraversableOnce[Byte])         = bs.toArray
   def view(bytes: Array[Byte])                    = apply(bytes) // no view-like constructor available for byte arrays
   def view(bytes: ByteBuffer)                     = apply(bytes) // no view-like constructor available for byte arrays

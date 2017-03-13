@@ -8,9 +8,7 @@ package swave.core.io.files
 
 import java.nio.charset.StandardCharsets._
 import java.nio.file.Files
-import scodec.bits.ByteVector
 import swave.testkit.Probes._
-import swave.compat.scodec._
 import swave.core._
 
 class FileSpoutSpec extends SwaveSpec {
@@ -44,7 +42,9 @@ class FileSpoutSpec extends SwaveSpec {
 
   "Spout.fromPath must" - {
 
-    "read contents from a file" in {
+    "read contents from a file (ByteVector)" in {
+      import swave.compat.scodec._
+
       val chunkSize = 512
       Spout
         .fromPath(testFile, chunkSize)
@@ -57,8 +57,25 @@ class FileSpoutSpec extends SwaveSpec {
         .verifyCleanStop()
     }
 
+    "read contents from a file (Array[Byte])" in {
+      import swave.core.io.byteArrayBytes
+
+      val chunkSize = 512
+      Spout
+        .fromPath(testFile, chunkSize)
+        .map(array => new String(array, UTF_8))
+        .drainTo(DrainProbe[String])
+        .get
+        .sendRequest(100)
+        .expectNext(TestText.grouped(chunkSize).toList: _*)
+        .expectComplete()
+        .verifyCleanStop()
+    }
+
     "produce an Error when the file doesn't exist" in {
-      val drain = Spout.fromPath(notExistingFile).drainTo(DrainProbe[ByteVector]).get
+      import swave.core.io.byteArrayBytes
+
+      val drain = Spout.fromPath(notExistingFile).drainTo(DrainProbe[Array[Byte]]).get
       drain.expectError() shouldBe an[java.nio.file.NoSuchFileException]
       drain.verifyCleanStop()
     }
