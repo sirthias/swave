@@ -115,7 +115,7 @@ val shapeless              = "com.chuusai"                %%  "shapeless"       
 val `scala-logging`        = "com.typesafe.scala-logging" %%  "scala-logging"         % "3.5.0"
 
 // *-compat
-val `akka-stream`          = "com.typesafe.akka"          %%  "akka-stream"           % "2.4.16"
+val `akka-stream`          = "com.typesafe.akka"          %%  "akka-stream"           % "2.4.17"
 val `scodec-bits`          = "org.scodec"                 %%  "scodec-bits"           % "1.1.4"
 
 // test
@@ -123,7 +123,7 @@ val scalatest              = "org.scalatest"              %%  "scalatest"       
 val `reactive-streams-tck` = "org.reactivestreams"        %   "reactive-streams-tck"  % "1.0.0"   % "test"
 
 // examples
-val logback                = "ch.qos.logback"             %   "logback-classic"       % "1.1.9"
+val logback                = "ch.qos.logback"             %   "logback-classic"       % "1.2.3"
 
 /////////////////////// PROJECTS /////////////////////////
 
