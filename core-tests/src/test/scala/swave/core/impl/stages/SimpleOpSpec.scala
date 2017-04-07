@@ -50,6 +50,8 @@ final class SimpleOpSpec extends SyncPipeSpec with Inspectors {
 
   "Collect" in check {
     testSetup
+      .withRandomSeed("Xw9gIjtLfZXVQ4QxpuK_cCFGm7aSSdWYxn_xQyIaXSB=")
+      .withTracing()
       .input[Int]
       .output[Int]
       .prop

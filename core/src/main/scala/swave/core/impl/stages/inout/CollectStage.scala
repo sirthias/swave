@@ -19,10 +19,8 @@ private[core] final class CollectStage(pf: PartialFunction[AnyRef, AnyRef]) exte
   def kind = Stage.Kind.InOut.Collect(pf)
 
   connectInOutAndSealWith { (in, out) ⇒
-    val mismatchF: AnyRef => this.type = { elem =>
-      in.request(1)
-      this // we use `this` as a special result instance signalling the mismatch of a single collect
-    }
+    val mismatchF: AnyRef => this.type =
+      _ => this // we use `this` as a special result instance signalling the mismatch of a single collect
     running(in, out, mismatchF)
   }
 
@@ -37,6 +35,7 @@ private[core] final class CollectStage(pf: PartialFunction[AnyRef, AnyRef]) exte
       val collected = try pf.applyOrElse(elem, mismatchFun) catch { case NonFatal(e) => { funError = e; null } }
       if (funError eq null) {
         if (collected ne this) out.onNext(collected)
+        else in.request(1)
         stay()
       } else {
         in.cancel()

@@ -29,6 +29,15 @@ class SyncSpec extends SwaveSpec {
       Spout(1, 2, 3).concat(Spout(4, 5, 6)) should produce(1, 2, 3, 4, 5, 6)
     }
 
+    "filter & collect" in {
+      val elems = Seq.fill(32)(1) ++ Seq.fill(32)(2.0)
+      Spout.fromIterable(elems)
+        .fanOutBroadcast()
+          .sub.collect { case x if x.isInstanceOf[Int] => x }.end
+          .sub.filter(_.isInstanceOf[Double]).end
+        .fanInMerge() should produce(elems: _*)
+    }
+
     "cycles" in {
       val c = Coupling[Int]
       Spout(1, 2, 3)
