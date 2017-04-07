@@ -217,7 +217,7 @@ lazy val docs = project
     connectInput in (Test, run) := true,
     javaOptions in (Test, run) ++= Seq("-XX:+UnlockCommercialFeatures", "-XX:+FlightRecorder"),
     paradoxProperties in Paradox ++= Map(
-      "latest-version" -> "0.7.0",
+      "latest-version" -> "0.7.1",
       "scala.binaryVersion" -> scalaBinaryVersion.value,
       "scala.version" -> scalaVersion.value,
       "github.base_url" -> {
