@@ -635,6 +635,27 @@ has already terminated.">
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="swave.core.Drain#asyncParallelForeach" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="asyncParallelForeach[T](parallelism:Int)(f:T=&gt;scala.concurrent.Future[Unit])(implicitec:scala.concurrent.ExecutionContext):swave.core.Drain[T,scala.concurrent.Future[Unit]]"></a><a id="asyncParallelForeach[T](Int)((T)⇒Future[Unit])(ExecutionContext):Drain[T,Future[Unit]]"></a>
+      <span class="permalink">
+      <a href="../../swave/core/Drain$.html#asyncParallelForeach[T](parallelism:Int)(f:T=&gt;scala.concurrent.Future[Unit])(implicitec:scala.concurrent.ExecutionContext):swave.core.Drain[T,scala.concurrent.Future[Unit]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">asyncParallelForeach</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="parallelism">parallelism: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="params">(<span name="f">f: (<span class="extype" name="swave.core.Drain.asyncParallelForeach.T">T</span>) ⇒ <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="scala.Unit">Unit</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="ec">ec: <span class="extype" name="scala.concurrent.ExecutionContext">ExecutionContext</span></span>)</span><span class="result">: <a href="Drain.html" class="extype" name="swave.core.Drain">Drain</a>[<span class="extype" name="swave.core.Drain.asyncParallelForeach.T">T</span>, <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="scala.Unit">Unit</span>]]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Same as <code>parallelForeach</code> but for longer-running callbacks, which signal callback completion not by simply
+returning from the callback function (as in the case of <code>parallelForeach</code>) but rather via completion of the
+returned future.</p><div class="fullcomment"><div class="comment cmt"><p>Same as <code>parallelForeach</code> but for longer-running callbacks, which signal callback completion not by simply
+returning from the callback function (as in the case of <code>parallelForeach</code>) but rather via completion of the
+returned future.</p><p>CAUTION: The given callback might be called from several threads concurrently!
+</p></div></div>
     </li><li name="swave.core.Drain#cancelling" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="cancelling[T]:swave.core.Drain[T,Unit]"></a><a id="cancelling[T]:Drain[T,Unit]"></a>
       <span class="permalink">
