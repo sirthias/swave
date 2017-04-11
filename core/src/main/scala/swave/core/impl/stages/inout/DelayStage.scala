@@ -66,7 +66,6 @@ private[core] final class DelayStage(delayFor: AnyRef => FiniteDuration) extends
     }
 
     /**
-      *
       * @param elem the currently delayed element
       * @param timer the currently active timer for `elem`
       * @param remaining number of elements already requested by downstream but not yet delivered, > 0
@@ -81,10 +80,7 @@ private[core] final class DelayStage(delayFor: AnyRef => FiniteDuration) extends
           stopCancel(in)
         },
 
-        onComplete = _ => {
-          timer.cancel()
-          stopComplete(out)
-        },
+        onComplete = _ => awaitingTimeoutUpstreamCompleted(elem, timer),
 
         onError = (e, _) => {
           timer.cancel()
@@ -93,6 +89,26 @@ private[core] final class DelayStage(delayFor: AnyRef => FiniteDuration) extends
 
         xEvent = { case RunContext.Timeout(t) => if (t eq timer) dispatch(elem, remaining) else stay() })
     }
+
+    /**
+      * @param elem the currently delayed final element
+      * @param timer the currently active timer for `elem`
+      */
+    def awaitingTimeoutUpstreamCompleted(elem: AnyRef, timer: Cancellable): State = state(
+      request = (_, _) => stay(),
+
+      cancel = _ => {
+        timer.cancel()
+        stop()
+      },
+
+      xEvent = {
+        case RunContext.Timeout(t) =>
+          if (t eq timer) {
+            out.onNext(elem)
+            stopComplete(out)
+          } else stay()
+      })
 
     def dispatch(elem: AnyRef, remaining: Long) = {
       out.onNext(elem)
