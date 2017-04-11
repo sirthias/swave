@@ -11,6 +11,9 @@ import shapeless._
 
 final class RichRefArray[T <: AnyRef](val underlying: Array[T]) extends AnyVal {
 
+  /**
+    * Like `indexOf` but based on reference equality.
+    */
   @tailrec def fastIndexOf(elem: AnyRef, from: Int = 0): Int =
     if (from < underlying.length) {
       if (elem eq underlying(from)) from

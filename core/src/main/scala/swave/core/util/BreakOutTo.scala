@@ -8,6 +8,13 @@ package swave.core.util
 
 import scala.collection.generic.CanBuildFrom
 
+/**
+  * Enables fluent (inline) type breakout in chains of collection transformations, e.g.
+  * {{{
+  *   scala> Vector(1, 2, 3).map(_ + 10)(BreakOutTo[List].here).reverse
+  *   res0: List[Int] = List(13, 12, 11)
+  * }}}
+  */
 final class BreakOutTo[M[_]] private {
   def here[From, T](implicit b: CanBuildFrom[Nothing, T, M[T]]): CanBuildFrom[From, T, M[T]] = collection.breakOut
 }

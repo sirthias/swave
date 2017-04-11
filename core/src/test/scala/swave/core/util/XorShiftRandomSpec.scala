@@ -37,10 +37,10 @@ class XorShiftRandomSpec extends FreeSpec with Matchers with GeneratorDrivenProp
 
     "shuffle" in {
       val random = XorShiftRandom()
-      val array  = Array("1", "2", "3", "4", "5", "6", "7", "8")
-      val array2 = array.drop(0)
+      val array  = Array("0", "1", "2", "3", "4", "5", "6", "7", "8", "9")
+      val array2 = java.util.Arrays.copyOf(array, array.length)
       random.shuffle_!(array2)
-      array2 should not equal array
+      array2 should not equal array // will fail once every approx. 10! = 3.628.800 test runs
       array2.sorted shouldEqual array
     }
   }

@@ -146,7 +146,7 @@ final class XorShiftRandom(seed0: Long, seed1: Long) {
     * `seq` must be non-empty.
     */
   def pick[T](seq: Seq[T]): T = {
-    requireArg(seq.nonEmpty, "`seq` must be > 0")
+    requireArg(seq.nonEmpty, "`seq` must be non-empty")
     seq(nextInt(seq.size))
   }
 
