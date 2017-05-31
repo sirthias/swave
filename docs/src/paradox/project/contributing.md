@@ -62,7 +62,7 @@ Here is how:
 Contributing/Fixing Documentation
 ---------------------------------
 
-The site, i.e. what you see here at http://swave.io, is built with [paradox], a static site generator.
+The site, i.e. what you see here at http://swave.cc, is built with [paradox], a static site generator.
 It converts the markdown documentation living in the @github[docs sub-project](/docs/) into static HTML.
 If you want to contribute documentation (which we always welcome very much!) try this process for quickly seeing
 how your changes affect the look of the site: 

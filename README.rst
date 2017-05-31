@@ -27,4 +27,4 @@ swave
    :target: http://shields.io/
    :alt: uses badges
 
-Please see http://swave.io for all documentation.
+Please see http://swave.cc for all documentation.

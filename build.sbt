@@ -8,7 +8,7 @@ lazy val commonSettings = Seq( // reformatOnCompileSettings ++ Seq(
   organization := "io.swave",
   scalaVersion := "2.12.1",
   crossScalaVersions := Seq("2.12.1", "2.11.8"),
-  homepage := Some(url("http://swave.io")),
+  homepage := Some(url("http://swave.cc")),
   description := "A Reactive Streams infrastructure implementation in Scala",
   startYear := Some(2016),
   licenses := Seq("MPL 2.0" -> new URL("https://www.mozilla.org/en-US/MPL/2.0/")),
@@ -201,7 +201,7 @@ lazy val docs = project
   .settings(
     git.remoteRepo := scmInfo.value.get.connection.drop("scm:git:".length),
     libraryDependencies ++= Seq(shapeless, scalatest, `akka-stream`, logback),
-    apiURL := Some(url("http://swave.io/api/")),
+    apiURL := Some(url("http://swave.cc/api/")),
     paradoxTheme := None,
     sourceDirectory in (Paradox, paradox) := sourceDirectory.value / "paradox",
     sourceDirectory in (Paradox, paradoxTheme) := sourceDirectory.value / "paradox" / "_template",
@@ -233,10 +233,10 @@ lazy val docs = project
       "scaladoc.org.reactivestreams.base_url" -> "http://www.reactive-streams.org/reactive-streams-1.0.0-javadoc/",
       "scaladoc.akka.base_url" -> "http://doc.akka.io/api/akka/2.4/",
       "scaladoc.scodec.bits.base_url" -> "http://scodec.org/api/scodec-bits/1.1.2/",
-      "scaladoc.swave.compat.akka.base_url" -> "http://swave.io/api/compat-akka/latest/",
-      "scaladoc.swave.compat.scodec.base_url" -> "http://swave.io/api/compat-scodec/latest/",
-      "scaladoc.swave.core.base_url" -> "http://swave.io/api/core/latest/",
-      "scaladoc.swave.testkit.base_url" -> "http://swave.io/api/testkit/latest/"))
+      "scaladoc.swave.compat.akka.base_url" -> "http://swave.cc/api/compat-akka/latest/",
+      "scaladoc.swave.compat.scodec.base_url" -> "http://swave.cc/api/compat-scodec/latest/",
+      "scaladoc.swave.core.base_url" -> "http://swave.cc/api/core/latest/",
+      "scaladoc.swave.testkit.base_url" -> "http://swave.cc/api/testkit/latest/"))
   .settings({
     def apiDocs(p: Project) =
       siteMappings ++= {
