@@ -23,8 +23,8 @@
     <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
     <link rel="manifest" href="/manifest.json">
     <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
-    <meta name="apple-mobile-web-app-title" content="swave.io">
-    <meta name="application-name" content="swave.io">
+    <meta name="apple-mobile-web-app-title" content="swave.cc">
+    <meta name="application-name" content="swave.cc">
     <meta name="theme-color" content="#ffffff">
 
     <script src="../assets/vendor/modernizr/modernizr.js"></script>
@@ -170,11 +170,11 @@
             <div id="main-content">
                 <!-- start: page -->
 <h1><a href="#spouts" name="spouts" class="anchor"><span class="anchor-link"></span></a>Spouts</h1>
-<p>A <a href="http://swave.io/api/core/latest/swave/core/Spout.html">Spout</a> is a <a href="basics.html#streams-as-graphs">stream graph component</a> with no input port and a single output port. As such it serves as a &ldquo;point of entry&rdquo; into a stream setup for data elements from other sources (e.g. from memory, disk or the network).</p><div class="centered">
+<p>A <a href="http://swave.cc/api/core/latest/swave/core/Spout.html">Spout</a> is a <a href="basics.html#streams-as-graphs">stream graph component</a> with no input port and a single output port. As such it serves as a &ldquo;point of entry&rdquo; into a stream setup for data elements from other sources (e.g. from memory, disk or the network).</p><div class="centered">
 <p><img src="../assets/img/spout.svg" alt="A Spout" /></p></div>
-<p><em>swave</em> predefines quite a few ways to create <a href="http://swave.io/api/core/latest/swave/core/Spout.html">Spouts</a> from other types and constructs.<br/> Check out the <a href="http://swave.io/api/core/latest/swave/core/Spout$.html">API docs of the Spout companion object</a> or its <a href="https://github.com/sirthias/swave/tree/master/core/src/main/scala/swave/core/Spout.scala">Source Code</a> for the complete reference.</p>
+<p><em>swave</em> predefines quite a few ways to create <a href="http://swave.cc/api/core/latest/swave/core/Spout.html">Spouts</a> from other types and constructs.<br/> Check out the <a href="http://swave.cc/api/core/latest/swave/core/Spout$.html">API docs of the Spout companion object</a> or its <a href="https://github.com/sirthias/swave/tree/master/core/src/main/scala/swave/core/Spout.scala">Source Code</a> for the complete reference.</p>
 <h2><a href="#streamable" name="streamable" class="anchor"><span class="anchor-link"></span></a>Streamable[T]</h2>
-<p><em>swave</em> defines a type-class <a href="http://swave.io/api/core/latest/swave/core/Streamable.html">Streamable</a> which encapsulates the ability to create <code>Spout</code> instances from values of type <code>T</code>:</p>
+<p><em>swave</em> defines a type-class <a href="http://swave.cc/api/core/latest/swave/core/Streamable.html">Streamable</a> which encapsulates the ability to create <code>Spout</code> instances from values of type <code>T</code>:</p>
 <pre><code class="scala">abstract class Streamable[-T] {
   type Out
   def apply(value: T): Spout[Out]

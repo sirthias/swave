@@ -23,8 +23,8 @@
     <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
     <link rel="manifest" href="/manifest.json">
     <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
-    <meta name="apple-mobile-web-app-title" content="swave.io">
-    <meta name="application-name" content="swave.io">
+    <meta name="apple-mobile-web-app-title" content="swave.cc">
+    <meta name="application-name" content="swave.cc">
     <meta name="theme-color" content="#ffffff">
 
     <script src="../../assets/vendor/modernizr/modernizr.js"></script>
@@ -171,7 +171,7 @@
             <div id="main-content">
                 <!-- start: page -->
 <h1><a href="#couplings" name="couplings" class="anchor"><span class="anchor-link"></span></a>Couplings</h1>
-<p><a href="http://swave.io/api/core/latest/swave/core/Coupling.html">Couplings</a> are <a href="../basics.html#streams-as-graphs">stream graph components</a> with one input, one output and no internal transformation logic. They are typically used to manually connect two ports of a stream graph that cannot be otherwise connected via the streaming DSL, e.g. for creating cycles.</p><div class="centered">
+<p><a href="http://swave.cc/api/core/latest/swave/core/Coupling.html">Couplings</a> are <a href="../basics.html#streams-as-graphs">stream graph components</a> with one input, one output and no internal transformation logic. They are typically used to manually connect two ports of a stream graph that cannot be otherwise connected via the streaming DSL, e.g. for creating cycles.</p><div class="centered">
 <p><img src="../../assets/img/coupling.svg" alt="A Coupling" /></p></div>
 <p>A <code>Coupling</code> is essentially nothing but a <a href="../drains.html">Drain</a> and <a href="../spouts.html">Spout</a> of the same element type that are directly connected to each other internally. You can use the two sides of the <code>Coupling</code> independently at arbitrary points in a stream graph definition to create connections where you need them.</p>
 <p>Here is an example of a stream that contains a cycle and therefore requires the use of a <code>Coupling</code>:</p>

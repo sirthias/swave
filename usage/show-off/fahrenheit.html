@@ -23,8 +23,8 @@
     <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
     <link rel="manifest" href="/manifest.json">
     <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
-    <meta name="apple-mobile-web-app-title" content="swave.io">
-    <meta name="application-name" content="swave.io">
+    <meta name="apple-mobile-web-app-title" content="swave.cc">
+    <meta name="application-name" content="swave.cc">
     <meta name="theme-color" content="#ffffff">
 
     <script src="../../assets/vendor/modernizr/modernizr.js"></script>
@@ -213,10 +213,10 @@ run.result.onComplete {
 
 // shut down when everything has terminated
 env.shutdownOn(run.termination)</code></pre>
-<p>This code constructs a <a href="http://swave.io/api/core/latest/swave/core/StreamGraph.html">StreamGraph</a>, which reads bytes from an input file (in chunks of <a href="../further/configuration.html">configurable</a> size), UTF8-decodes them and re-chunks into lines. If then filters out the lines containing the actual data (i.e. skips blank lines and comment lines), parses the temperatur readings in degrees Fahrenheit, converts them to Celsius, re-inserts newlines, UTF-8 encodes the output, and writes the resulting bytes to the output file.</p>
+<p>This code constructs a <a href="http://swave.cc/api/core/latest/swave/core/StreamGraph.html">StreamGraph</a>, which reads bytes from an input file (in chunks of <a href="../further/configuration.html">configurable</a> size), UTF8-decodes them and re-chunks into lines. If then filters out the lines containing the actual data (i.e. skips blank lines and comment lines), parses the temperatur readings in degrees Fahrenheit, converts them to Celsius, re-inserts newlines, UTF-8 encodes the output, and writes the resulting bytes to the output file.</p>
 <p>All of this happens in constant memory and, because <code>Spout.fromFile</code> and <code>Drain.toFile</code> come with implicit asynchronous boundaries, potentially parallelized across three cores. (The explanations in from the <a href="md5.html">MD5 Example</a> also apply here, with one more asynchronous boundary before the <code>Drain.toFile</code>.) </p>
 <p>The input and output files will be always and automatically be properly closed, upon normal termination as well as in the case of errors.</p>
-<p>Since the stream graph has three asynchronous regions it might be that parts of the graph are still running when the result future is completed. Therefore we should not shut down the <a href="http://swave.io/api/core/latest/swave/core/StreamEnv.html">StreamEnv</a> immediately afterwards but hook into the <code>run.termination</code> <a href="http://www.scala-lang.org/api/2.12.1/scala/concurrent/Future.html">Future</a> to trigger a graceful shutdown.</p>
+<p>Since the stream graph has three asynchronous regions it might be that parts of the graph are still running when the result future is completed. Therefore we should not shut down the <a href="http://swave.cc/api/core/latest/swave/core/StreamEnv.html">StreamEnv</a> immediately afterwards but hook into the <code>run.termination</code> <a href="http://www.scala-lang.org/api/2.12.1/scala/concurrent/Future.html">Future</a> to trigger a graceful shutdown.</p>
                 <div class="nav-next">
                     <p><strong>Next:</strong> <a href="../../usage/show-off/monte-carlo-pi.html">Monte Carlo Pi Example</a></p>
                 </div>

@@ -23,8 +23,8 @@
     <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
     <link rel="manifest" href="/manifest.json">
     <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
-    <meta name="apple-mobile-web-app-title" content="swave.io">
-    <meta name="application-name" content="swave.io">
+    <meta name="apple-mobile-web-app-title" content="swave.cc">
+    <meta name="application-name" content="swave.cc">
     <meta name="theme-color" content="#ffffff">
 
     <script src="../../assets/vendor/modernizr/modernizr.js"></script>
@@ -186,7 +186,7 @@ Spout.fromPath[T: Bytes](path: Path): Spout[T]
 Drain.toFile[T: Bytes](file: File): Drain[T, Future[Long]]
 Drain.toPath[T: Bytes](path: Path): Drain[T, Future[Long]]
 </code></pre>
-<p>Apart from one thing these signatures are probably quite self-explanatory. Still, you might want to take a look at the <a href="http://swave.io/api/core/latest/swave/core/io/files/SpoutFromFiles.html">ScalaDoc of the <code>SpoutFromFiles</code> trait</a> and the <a href="http://swave.io/api/core/latest/swave/core/io/files/DrainToFiles.html">ScalaDoc of the <code>DrainToFiles</code> trait</a> for more details. Probably also interesting are the <a href="https://github.com/sirthias/swave/tree/master/core/src/main/scala/swave/core/io/files/SpoutFromFiles.scala">sources of the <code>SpoutFromFiles</code> trait</a> and the <a href="https://github.com/sirthias/swave/tree/master/core/src/main/scala/swave/core/io/files/DrainToFiles.scala">sources of the <code>DrainToFiles</code> trait</a>.</p>
+<p>Apart from one thing these signatures are probably quite self-explanatory. Still, you might want to take a look at the <a href="http://swave.cc/api/core/latest/swave/core/io/files/SpoutFromFiles.html">ScalaDoc of the <code>SpoutFromFiles</code> trait</a> and the <a href="http://swave.cc/api/core/latest/swave/core/io/files/DrainToFiles.html">ScalaDoc of the <code>DrainToFiles</code> trait</a> for more details. Probably also interesting are the <a href="https://github.com/sirthias/swave/tree/master/core/src/main/scala/swave/core/io/files/SpoutFromFiles.scala">sources of the <code>SpoutFromFiles</code> trait</a> and the <a href="https://github.com/sirthias/swave/tree/master/core/src/main/scala/swave/core/io/files/DrainToFiles.scala">sources of the <code>DrainToFiles</code> trait</a>.</p>
 <p>The one thing that deserves more explanation here is the type parameter with the <code>Bytes</code> context bound.</p>
 <h2><a href="#the-bytes-t-type-class" name="the-bytes-t-type-class" class="anchor"><span class="anchor-link"></span></a>The <code>Bytes[T]</code> Type Class</h2>
 <p>As you can see all of the methods shown above take a type parameter <code>T</code>, which (if not explicitly specified) will be inferred from the (single) context bound instance of the type class <code>Bytes[T]</code> that is in scope at the call site.</p>

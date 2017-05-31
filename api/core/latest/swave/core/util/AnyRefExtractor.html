@@ -127,14 +127,14 @@
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="swave.core">core</a></dd></dl></div>
     </li><li class="current-entities indented3">
                         <a class="object" href="AnyRefExtractor$.html" title=""></a>
-                        <a class="class" href="" title=""></a>
-                        <a href="" title="">
+                        <a class="class" href="" title="Enables zero-overhead custom extractors for extractions that are reference types, e.g."></a>
+                        <a href="" title="Enables zero-overhead custom extractors for extractions that are reference types, e.g.">
                           AnyRefExtractor
                         </a>
                       </li><li class="current-entities indented3">
                         <a class="object" href="BreakOutTo$.html" title=""></a>
-                        <a class="class" href="BreakOutTo.html" title=""></a>
-                        <a href="BreakOutTo.html" title="">
+                        <a class="class" href="BreakOutTo.html" title="Enables fluent (inline) type breakout in chains of collection transformations, e.g."></a>
+                        <a href="BreakOutTo.html" title="Enables fluent (inline) type breakout in chains of collection transformations, e.g.">
                           BreakOutTo
                         </a>
                       </li><li class="current-entities indented3">
@@ -255,7 +255,18 @@ http://vigna.di.unimi.it/ftp/papers/xorshiftplus.pdf">
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Enables zero-overhead custom extractors for extractions that are reference types, e.g.</p><pre>scala&gt; <span class="kw">case</span> <span class="kw">class</span> Person(age: <span class="std">Int</span>, name: <span class="std">String</span>)
+defined <span class="kw">class</span> Person
+
+scala&gt; <span class="kw">val</span> Child = AnyRefExtractor[Person, Person](person <span class="kw">=&gt;</span> <span class="kw">if</span> (person.age &lt; <span class="num">18</span>) person <span class="kw">else</span> <span class="kw">null</span>)
+Child: AnyRefExtractor[Person,Person] = AnyRefExtractor@<span class="num">1</span>e592ef2
+
+scala&gt; <span class="kw">val</span> Child(x) = Person(<span class="num">9</span>, <span class="lit">"Alice"</span>)
+x: Person = Person(<span class="num">9</span>,Bob)
+
+scala&gt; <span class="kw">val</span> Child(x) = Person(<span class="num">21</span>, <span class="lit">"Bob"</span>)
+scala.MatchError: Person(<span class="num">21</span>,Alice) (of <span class="kw">class</span> Person)
+... <span class="num">29</span> elided</pre></div><dl class="paramcmts block"><dt class="tparam">A</dt><dd class="cmt"><p>the type to extract from</p></dd><dt class="tparam">B</dt><dd class="cmt"><p>the type of the extraction (must be a reference type)</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
@@ -305,7 +316,7 @@ http://vigna.di.unimi.it/ftp/papers/xorshiftplus.pdf">
         <div id="allMembers">
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
-              <ol><li name="swave.core.util.AnyRefExtractor#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="swave.core.util.AnyRefExtractor#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="&lt;init&gt;(f:A=&gt;B):swave.core.util.AnyRefExtractor[A,B]"></a><a id="&lt;init&gt;:AnyRefExtractor[A,B]"></a>
       <span class="permalink">
       <a href="../../../swave/core/util/AnyRefExtractor.html#&lt;init&gt;(f:A=&gt;B):swave.core.util.AnyRefExtractor[A,B]" title="Permalink">
@@ -320,7 +331,7 @@ http://vigna.di.unimi.it/ftp/papers/xorshiftplus.pdf">
         <span class="name">AnyRefExtractor</span><span class="params">(<span name="f">f: (<span class="extype" name="swave.core.util.AnyRefExtractor.A">A</span>) ⇒ <span class="extype" name="swave.core.util.AnyRefExtractor.B">B</span></span>)</span>
       </span>
       
-      
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">f</dt><dd class="cmt"><p>the function performing the extraction; must return the extraction or null if no extraction is available</p></dd></dl></div>
     </li></ol>
             </div>
 

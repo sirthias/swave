@@ -233,14 +233,14 @@
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="swave.core">core</a></dd></dl></div>
     </li><li class="current-entities indented3">
                         <a class="object" href="AnyRefExtractor$.html" title=""></a>
-                        <a class="class" href="AnyRefExtractor.html" title=""></a>
-                        <a href="AnyRefExtractor.html" title="">
+                        <a class="class" href="AnyRefExtractor.html" title="Enables zero-overhead custom extractors for extractions that are reference types, e.g."></a>
+                        <a href="AnyRefExtractor.html" title="Enables zero-overhead custom extractors for extractions that are reference types, e.g.">
                           AnyRefExtractor
                         </a>
                       </li><li class="current-entities indented3">
                         <a class="object" href="BreakOutTo$.html" title=""></a>
-                        <a class="class" href="BreakOutTo.html" title=""></a>
-                        <a href="BreakOutTo.html" title="">
+                        <a class="class" href="BreakOutTo.html" title="Enables fluent (inline) type breakout in chains of collection transformations, e.g."></a>
+                        <a href="BreakOutTo.html" title="Enables fluent (inline) type breakout in chains of collection transformations, e.g.">
                           BreakOutTo
                         </a>
                       </li><li class="current-entities indented3">
@@ -411,7 +411,7 @@ http://vigna.di.unimi.it/ftp/papers/xorshiftplus.pdf">
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="swave.core.util.AnyRefExtractor" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="swave.core.util.AnyRefExtractor" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="AnyRefExtractor[A,B&lt;:AnyRef]extendsAnyRef"></a><a id="AnyRefExtractor[A,B&lt;:AnyRef]:AnyRefExtractor[A,B]"></a>
       <span class="permalink">
       <a href="../../../swave/core/util/index.html#AnyRefExtractor[A,B&lt;:AnyRef]extendsAnyRef" title="Permalink">
@@ -423,13 +423,24 @@ http://vigna.di.unimi.it/ftp/papers/xorshiftplus.pdf">
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="" href="AnyRefExtractor.html">
+        <a title="Enables zero-overhead custom extractors for extractions that are reference types, e.g." href="AnyRefExtractor.html">
               <span class="name">AnyRefExtractor</span>
             </a><span class="tparams">[<span name="A">A</span>, <span name="B">B &lt;: <span class="extype" name="scala.AnyRef">AnyRef</span></span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       
-      
-    </li><li name="swave.core.util.BreakOutTo" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Enables zero-overhead custom extractors for extractions that are reference types, e.g.</p><div class="fullcomment"><div class="comment cmt"><p>Enables zero-overhead custom extractors for extractions that are reference types, e.g.</p><pre>scala&gt; <span class="kw">case</span> <span class="kw">class</span> Person(age: <span class="std">Int</span>, name: <span class="std">String</span>)
+defined <span class="kw">class</span> Person
+
+scala&gt; <span class="kw">val</span> Child = AnyRefExtractor[Person, Person](person <span class="kw">=&gt;</span> <span class="kw">if</span> (person.age &lt; <span class="num">18</span>) person <span class="kw">else</span> <span class="kw">null</span>)
+Child: AnyRefExtractor[Person,Person] = AnyRefExtractor@<span class="num">1</span>e592ef2
+
+scala&gt; <span class="kw">val</span> Child(x) = Person(<span class="num">9</span>, <span class="lit">"Alice"</span>)
+x: Person = Person(<span class="num">9</span>,Bob)
+
+scala&gt; <span class="kw">val</span> Child(x) = Person(<span class="num">21</span>, <span class="lit">"Bob"</span>)
+scala.MatchError: Person(<span class="num">21</span>,Alice) (of <span class="kw">class</span> Person)
+... <span class="num">29</span> elided</pre></div><dl class="paramcmts block"><dt class="tparam">A</dt><dd class="cmt"><p>the type to extract from</p></dd><dt class="tparam">B</dt><dd class="cmt"><p>the type of the extraction (must be a reference type)</p></dd></dl></div>
+    </li><li name="swave.core.util.BreakOutTo" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="BreakOutTo[M[_]]extendsAnyRef"></a><a id="BreakOutTo[M[_]]:BreakOutTo[M]"></a>
       <span class="permalink">
       <a href="../../../swave/core/util/index.html#BreakOutTo[M[_]]extendsAnyRef" title="Permalink">
@@ -441,12 +452,13 @@ http://vigna.di.unimi.it/ftp/papers/xorshiftplus.pdf">
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="" href="BreakOutTo.html">
+        <a title="Enables fluent (inline) type breakout in chains of collection transformations, e.g." href="BreakOutTo.html">
               <span class="name">BreakOutTo</span>
             </a><span class="tparams">[<span name="M">M<span class="tparams">[<span name="_">_</span>]</span></span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       
-      
+      <p class="shortcomment cmt">Enables fluent (inline) type breakout in chains of collection transformations, e.g.</p><div class="fullcomment"><div class="comment cmt"><p>Enables fluent (inline) type breakout in chains of collection transformations, e.g.</p><pre>scala&gt; Vector(<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>).map(_ + <span class="num">10</span>)(BreakOutTo[<span class="std">List</span>].here).reverse
+res0: <span class="std">List</span>[<span class="std">Int</span>] = <span class="std">List</span>(<span class="num">13</span>, <span class="num">12</span>, <span class="num">11</span>)</pre></div></div>
     </li><li name="swave.core.util.IntInt" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="IntIntextendsAnyVal"></a><a id="IntInt:IntInt"></a>
       <span class="permalink">
