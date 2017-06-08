@@ -19,17 +19,17 @@ just a single one as in the case of a simple @ref[Spout]. You can add more spout
 Once you have assembled all the spouts for the fan-in in this way simply call one of the defined `fanIn...` variants
 to "close" the fan-in with the respective logic. Currently these fan-in variants are available:
 
-* @ref[fanInConcat]
-* @ref[fanInMerge]
-* @ref[fanInRoundRobin]
-* @ref[fanInSorted]
-* @ref[fanInToTuple]
-* @ref[fanInToHList]
-* @ref[fanInToCoproduct]
-* @ref[fanInToProduct]
-* @ref[fanInToSum]
+* @ref[fanInConcat] drains all its upstreams in sequential order and emits their elements to downstream unchanged
+* @ref[fanInMerge] drains all its upstreams at the same time and emits their elements to downstream in the order that they arrive
+* @ref[fanInRoundRobin] emits the 1st element from the 1st upstream, then the 1st element from the 2nd upstream, ... then the 2nd element from the 1st upstream, then the 2nd element from the 2nd upstream and so on...
+* @ref[fanInSorted] emits a sorted stream of elements to downstream, according to some order, provided each upstream itself produces its elements according to the same order 
+* @ref[fanInToTuple] iteratively buffers one element from each upstream and emits them to downstream as a tuple
+* @ref[fanInToHList] iteratively buffers one element from each upstream and emits them to downstream as an HList instance
+* @ref[fanInToCoproduct] like @ref[fanInMerge], but with an element type that is the shapeless `Coproduct` of all upstream types
+* @ref[fanInToProduct] iteratively buffers one element from each upstream and emits them to downstream as an instance of some product type (e.g. a case class)
+* @ref[fanInToSum] like @ref[fanInMerge], but with a (given) element type that is the sum type (ADT) of all upstream types
 
-Additionally these fan-in shortcut transformations are defined:
+Additionally these fan-in shortcut transformations are defined for pairs:
 
 * @ref[concat]
 * @ref[interleave]
