@@ -26,5 +26,3 @@ swave
 .. image:: https://img.shields.io/badge/uses-badges-ff69b4.svg
    :target: http://shields.io/
    :alt: uses badges
-
-Please see http://swave.cc for all documentation.
